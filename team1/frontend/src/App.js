@@ -1,6 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
 import Main from "./Main";
+import AdminFAQ from "./AdminFAQ";
+import SignUpForm from "./SignUp";
+import AdminQ from "./AdminQ";
 
 function App() {
   return (
@@ -19,7 +22,10 @@ function App() {
       {/*    Learn React*/}
       {/*  </a>*/}
       {/*</header>*/}
-      <Main/>
+      {/*<Main/>*/}
+      {/*  <AdminFAQ/>*/}
+      {/*<SignUpForm/>*/}
+        <AdminQ/>
     </div>
   );
 }
