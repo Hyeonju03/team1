@@ -1,6 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
 import Main from "./Main";
+import SignList from "./SignList";
+import SignRequest from "./SignRequest";
+import {Router} from "react-router-dom";
 
 function App() {
   return (
@@ -19,7 +22,10 @@ function App() {
       {/*    Learn React*/}
       {/*  </a>*/}
       {/*</header>*/}
-      <Main/>
+      {/*  /////////////////////*/}
+      {/*<Main/>*/}
+        <SignList/>
+      {/*  <SignRequest/>*/}
     </div>
   );
 }
