@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search, Mail} from 'lucide-react';
+import {useNavigate} from "react-router-dom";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -15,17 +16,31 @@ const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
 };
 
-export default function EmailSend() {
+export default function DocumentRegister() {
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // 모든 문서에 공통으로 사용할 카테고리 목록
+    const categories = ["카테고리 1", "카테고리 2", "카테고리 3", "카테고리 4"];
 
-    const emailData = {
-        sender: 'sender@example.com',
-        recipient: 'recipient@example.com',
-        subject: '회의 일정 안내',
-        attachments: ['회의안건.pdf', '참석자명단.xlsx'],
-        content: '안녕하세요,\n\n내일 오후 2시에 회의가 예정되어 있습니다. 첨부된 파일을 확인해 주시기 바랍니다.\n\n감사합니다.',
-    };
+    const documents = [
+        {
+            id: 1,
+            title: "문서 제목 1",
+            date: "2024-10-10 12:00",
+            attachments: ['문서 양식.xlsx'],
+            content: "문서 설명1"
+        },
+        {
+            id: 2,
+            title: "문서 제목 2",
+            date: "2024-10-12 12:00",
+            attachments: ['문서 양식2.xlsx'],
+            content: "문서 설명2"
+        },
+
+        // 추가 문서 ...
+    ];
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -34,15 +49,7 @@ export default function EmailSend() {
             </header>
             <div className="flex-1 flex">
                 <aside className="w-64 bg-gray-100 p-4 space-y-2">
-                    <div className="flex space-x-2">
-                        <Button variant="outline" className="flex-1">메일쓰기</Button>
-                        <Button variant="outline" className="flex-1">내게쓰기</Button>
-                    </div>
 
-                    <Button variant="ghost" className="w-full">첨부파일메일함</Button>
-                    <Button variant="ghost" className="w-full">받은메일함</Button>
-                    <Button variant="ghost" className="w-full">보낸메일함</Button>
-                    <Button variant="ghost" className="w-full">내게쓴메일함</Button>
                     <div>
                         <Button
                             variant="ghost"
@@ -51,51 +58,48 @@ export default function EmailSend() {
                         >
                             {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
                                 <ChevronRight className="mr-2 h-4 w-4"/>}
-                            <Mail className="mr-2 h-4 w-4"/>
-                            내 메일함
+                            문서함
                         </Button>
                         {isExpanded && (
-                            <div className="ml-8 space-y-2 mt-2">
+                            <div className="ml-8 shandleDelete pace-y-2 mt-2">
                                 <Button variant="ghost" className="w-full">카테고리 1</Button>
                                 <Button variant="ghost" className="w-full">카테고리 2</Button>
+                                <Button variant="ghost" className="w-full">카테고리 3</Button>
+                                <Button variant="ghost" className="w-full">카테고리 4</Button>
                             </div>
                         )}
                     </div>
-                    <Button variant="ghost" className="w-full">휴지통</Button>
+
                 </aside>
                 <main className="flex-1 p-4">
                     <div className="flex items-center space-x-2 mb-4">
                         <div className="relative flex flex-1 max-w-xl">
-                            <Input type="text" placeholder="메일 검색 칸" className="pl-10 pr-4 py-2 w-full"/>
+                            <Input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"/>
                             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
                         </div>
                         <Button variant="outline">검색</Button>
                     </div>
-                    <div className="border rounded-lg p-4">
-                        <div className="mb-4">
-                            <div className="flex justify-between mb-4">
-                                <div className="relative flex-1 max-w-xl">
-                                    <input
-                                        type="text"
 
-                                        className="w-full p-2 border rounded mb-2"
-                                        placeholder="받는사람을 입력하세요."
-                                    />
-                                </div>
-                                <div className="flex space-x-2">
-                                    <Button>주소록</Button>
-                                </div>
-                            </div>
-                            <input
-                                type="text"
-                                className="w-full p-2 border rounded mb-2"
-                                placeholder="참조를 입력하세요."
-                            />
-                            <input
-                                type="text"
-                                className="w-full p-2 border rounded"
-                                placeholder="제목을 입력하세요."
-                            />
+                    <h1 className="text-2xl font-bold mb-4">문서함</h1>
+                    <div key={document.id} className="border rounded-lg p-4">
+                        <div className="flex items-center space-x-4 mb-4">
+                            <form>
+                                <fieldset>
+                                    {/*<legend>카테고리</legend>*/}
+                                    <div>
+                                        <select name="cate">
+                                            <option value="">문서함</option>
+                                            {categories.map((cate, index) => ( // 공통 카테고리 배열 사용
+                                                <option key={index} value={cate}>
+                                                    {cate}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </fieldset>
+                            </form>
+                            <input type="text" className="w-full p-2 border rounded mb-2"
+                                   placeholder="제목을 입력하세요"/>
                         </div>
                         <div className="flex justify-between mb-4 w-full p-2 border rounded">
                             <div className="flex items-center">
@@ -106,16 +110,16 @@ export default function EmailSend() {
                             <div>0KB/10MB</div>
                         </div>
                         <textarea
+
                             className="w-full h-64 p-2 border rounded"
-                            placeholder="내용을 입력하세요."
+                            placeholder="설명을 입력하세요"
                         />
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline">보내기</Button>
+                        <Button variant="outline">등록</Button>
                     </div>
                 </main>
             </div>
         </div>
     );
 }
-
