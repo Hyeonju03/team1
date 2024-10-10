@@ -24,8 +24,8 @@ function App() {
       {/*  </a>*/}
       {/*</header>*/}
       {/*<Main/>*/}
-      {/*<ApplyForBusiness/>*/}
-      <Notice/>
+      <ApplyForBusiness/>
+      {/*<Notice/>*/}
 
     </div>
   );
