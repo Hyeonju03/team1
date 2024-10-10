@@ -72,21 +72,24 @@ export default function FAQPage() {
                 {/* Main content */}
                 <div className="flex-1 p-6 mt-16">
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-bold mb-6">문의작성</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-left" style={{marginLeft: "50px"}}>문의작성</h2>
+                        <hr className="border-gray-300 my-4 w-full"/>
                         <form className="space-y-4">
-                            <div>
-                                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                            <div className="flex space-x-8" style={{marginLeft: "50px"}}>
+                                <label htmlFor="title" className="block text-xl font-medium text-gray-700 mb-1">
                                     제목
                                 </label>
-                                <Input id="title" placeholder="제목을 입력해주세요." />
+                                <Input id="title" placeholder="제목을 입력해주세요."
+                                       style={{width: '80%', height: '30px', fontSize: '1.25rem'}}/>
                             </div>
-                            <div>
-                                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+                            <div className="flex space-x-8" style={{marginLeft: "50px"}}>
+                                <label htmlFor="content" className=" block text-xl font-medium text-gray-700 mb-1">
                                     내용
                                 </label>
-                                <Input id="title" placeholder="제목을 입력해주세요." />
+                                <Input id="title" placeholder="내용을 입력해주세요."
+                                       style={{width: '80%', height: '500px', fontSize: '1.25rem'}}/>
                             </div>
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end space-x-4 text-center" style={{justifyContent: "center"}}>
                                 <Button variant="outline">취소</Button>
                                 <Button>접수</Button>
                             </div>

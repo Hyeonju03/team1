@@ -1,9 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
 import Main from "./Main";
-import AdminFAQ from "./AdminFAQ";
+import AdminQ from "./AdminQ"
 import SignUpForm from "./SignUp";
-import AdminQ from "./AdminQ";
+import AdminFAQ from "./AdminFAQ"
+import AdminQDetail from "./AdminQDetail"
+import Log from "./Log"
 
 function App() {
   return (
@@ -23,9 +25,10 @@ function App() {
       {/*  </a>*/}
       {/*</header>*/}
       {/*<Main/>*/}
-      {/*  <AdminFAQ/>*/}
-      {/*<SignUpForm/>*/}
-        <AdminQ/>
+      {/*  <SignUpForm/>*/}
+      {/*  <AdminQ/>*/}
+      {/*  <AdminQDetail/>*/}
+        <Log/>
     </div>
   );
 }
