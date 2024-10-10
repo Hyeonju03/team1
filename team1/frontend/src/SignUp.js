@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import {useNavigate} from "react-router-dom";
 
 export default function SignUpForm() {
     const [formData, setFormData] = useState({
         companyCode: '',
+        name:'',
         id: '',
         password: '',
         confirmPassword: '',
@@ -20,6 +22,7 @@ export default function SignUpForm() {
     const [companyConfirm,setCompanyConfirm] = useState(false)
     const [errors, setErrors] = useState({});
     const [generatedCode, setGeneratedCode] = useState(null);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,6 +33,7 @@ export default function SignUpForm() {
     const validateForm = () => {
         const newErrors = {};
         if (!formData.companyCode) newErrors.companyCode = "회사코드를 입력해주세요";
+        if(!formData.name) newErrors.name = "이름을 입력해주세요"
         if (!formData.id) newErrors.id = "아이디를 입력해주세요";
         if (!formData.password) newErrors.password = "비밀번호를 입력해주세요";
         if (!formData.confirmPassword) newErrors.confirmPassword = "비밀번호 확인을 입력해주세요";
@@ -134,11 +138,11 @@ export default function SignUpForm() {
         }
 
         if(formData.residentNumber1.length != 6){
-            alert("주민등록번호 앞자리 다시확인해주삼")
+            alert("주민등록번호 앞자리 다시 확인해주삼")
             return;
         }
         if(formData.residentNumber2.length != 7){
-            alert("주민등록번호 뒷자리 다시확인해주삼")
+            alert("주민등록번호 뒷자리 다시 확인해주삼")
             return;
         }
 
@@ -146,6 +150,7 @@ export default function SignUpForm() {
             alert("주민등록번호 확인하삼")
         }
         console.log('Form submitted:', formData);
+        // navigate("로그인페이지?");
     };
 
 
@@ -168,6 +173,19 @@ export default function SignUpForm() {
                         disabled={companyConfirm ? true : false}
                     />
                     <button onClick={companyCodeCheck} type="button" className="ml-2 border p-2">확인</button>
+                </div>
+
+                {/* 이름 */}
+                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                    <label htmlFor="name" className="flex-none w-32 text-left">ID</label>
+                    <input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className={`border p-2 flex-grow ${errors.name ? 'border-red-500' : ''}`}
+                        placeholder={errors.name || '이름 입력'}
+                    />
                 </div>
 
                 {/* ID */}
@@ -333,7 +351,7 @@ export default function SignUpForm() {
                     </div>
                 </div>
 
-                <button type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
+                <button  type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
             </form>
         </div>
     );
