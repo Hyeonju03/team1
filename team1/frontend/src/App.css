@@ -40,3 +40,29 @@
 .border{
   border: solid 1px black;
 }
+
+@keyframes moveRightToLeft {
+  0% {
+    transform: translateX(calc(100vw));
+  }
+  100% {
+    transform: translateX(calc(100vw - 256px));
+  }
+}
+
+@keyframes moveLeftToRight {
+  0% {
+    transform: translateX(calc(100vw - 256px));
+  }
+  100% {
+    transform: translateX(calc(100vw));
+  }
+}
+.move-Right {
+  position: absolute;
+  animation: moveLeftToRight 3s forwards;
+}
+.move-Left {
+  position: absolute;
+  animation: moveRightToLeft 3s forwards;
+}
