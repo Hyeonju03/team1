@@ -21,7 +21,7 @@ export default function MainLayout() {
 
 
     useEffect(() => {
-        axios.get('/api/mainTest')
+        axios.get('/test')
             .then(response => console.log(response.data))
             .catch(error => console.log(error))
 
