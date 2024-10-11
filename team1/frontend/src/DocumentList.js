@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search, Mail} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -27,20 +28,34 @@ export default function DocumentList() {
     //     // 추가 문서 ...
     // ];
 
+    // useEffect(() => {
+    //     fetch('/api/document')
+    //         .then(response => response.json())
+    //         .then(data => setDocuments(data))
+    //         .catch(error => console.error('Error fetching documents:', error));
+    // }, []);
+
     useEffect(() => {
-        fetch('/api/document')
-            .then(response => response.json())
-            .then(data => setDocuments(data))
-            .catch(error => console.error('Error fetching documents:', error));
+        axios.get('/api/document')
+            .then(response => {
+                console.log(response.data);
+                setDocuments(response.data);
+            })
+            .catch(error => console.log(error))
+
     }, []);
 
     const handleDocumentClick = (id) => {
         navigate(`/document/detail/${id}`)
     }
 
+    // const formatDate = (dateString) => {
+    //     const date = new Date(dateString); // 날짜 문자열을 Date 객체로 변환
+    //     return date.toISOString().slice(0, 16).replace("T", " "); // 형식화된 문자열 반환
+    // };
+
     const formatDate = (dateString) => {
-        const date = new Date(dateString); // 날짜 문자열을 Date 객체로 변환
-        return date.toISOString().slice(0, 16).replace("T", " "); // 형식화된 문자열 반환
+        return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
     };
 
 

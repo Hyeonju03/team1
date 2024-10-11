@@ -5,22 +5,37 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/document")
+@RequestMapping
 public class DocumentController {
 
     private List<DocumentDTO> documents = new ArrayList<>();
     private int currentId = 1;
 
 
-    @GetMapping
+//    @GetMapping
+//    public List<DocumentDTO> getDocuments() {
+////        documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1", "2024-10-10 12:00"));
+////        documents.add(new DocumentDTO(2, "문서 제목 테스트 2", "카테고리 테스트 2", "2024-10-09 13:13"));
+//
+//        // Document 엔티티를 DocumentDTO로 변환
+//        List<DocumentDTO> documentDTOs = documents.stream()
+//                .map(document -> new DocumentDTO(document.getId(), document.getTitle(), document.getCategory(), document.getDate(), document.getContent()))
+//                .collect(Collectors.toList());
+//
+//        return documentDTOs;
+//    }
+
+    @GetMapping("/api/document")
     public List<DocumentDTO> getDocuments() {
-//        documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1", "2024-10-10 12:00"));
-//        documents.add(new DocumentDTO(2, "문서 제목 테스트 2", "카테고리 테스트 2", "2024-10-09 13:13"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1",  LocalDateTime.parse("2024-10-10 12:00", formatter), "문서 내용 테스트1"));
+        documents.add(new DocumentDTO(2, "문서 제목 테스트 2", "카테고리 테스트 2",  LocalDateTime.parse("2024-10-09 13:13", formatter), "문서 내용 테스트2"));
 
         // Document 엔티티를 DocumentDTO로 변환
         List<DocumentDTO> documentDTOs = documents.stream()
@@ -31,7 +46,7 @@ public class DocumentController {
     }
 
     // 문서함 등록
-    @PostMapping
+    @PostMapping("/api/document")
     public ResponseEntity<String> createDocument(
             @RequestParam String title,
             @RequestParam String category,
@@ -43,7 +58,7 @@ public class DocumentController {
         documentDTO.setTitle(title);
         documentDTO.setCategory(category);
         documentDTO.setContent(content);
-        documentDTO.setDate(LocalDateTime.now());
+        documentDTO.setDate(LocalDateTime.now().plusHours(9));
 
         // 파일 처리 예시
         if (attachment != null && !attachment.isEmpty()) {
