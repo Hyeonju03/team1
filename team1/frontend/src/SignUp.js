@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 export default function SignUpForm() {
     const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ export default function SignUpForm() {
     const [errors, setErrors] = useState({});
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
+    const [signUpResponse,setSignUpResponse] = useState("")
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -109,7 +111,7 @@ export default function SignUpForm() {
         //상관검색누르면 상관리스트나와서 하는기능
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
@@ -150,7 +152,17 @@ export default function SignUpForm() {
             alert("주민등록번호 확인하삼")
         }
         console.log('Form submitted:', formData);
-        // navigate("로그인페이지?");
+
+
+        try{
+            const response = await axios.post('http://localhost:8080/api/SignUp',formData);
+            alert("회원가입 완료" + response.data.message)
+            // navigate("로그인페이지?");
+            // setSignUpResponse(response.data)
+        }catch (error){
+            console.log("회원가입오류",error)
+            alert("회원가입 실 패 임")
+        }
     };
 
 

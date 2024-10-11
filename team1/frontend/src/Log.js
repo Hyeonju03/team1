@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // useNavigate 임포트 추가
 
 function Button({ children, className, size, variant, onClick }) {
     const baseStyle = "rounded"; // padding 제거
@@ -53,6 +54,7 @@ function TableCell({ children, colSpan, className }) {
 }
 
 export default function Component() {
+    const navigate = useNavigate();
     const results = [
         { companyName: "회사A", ceo: "홍길동", employeeCount: 50, registrationDate: "2024-01-01", paymentStatus: "완료", logInfo: "로그1", industry: "IT", companyCode: "001" },
         { companyName: "회사B", ceo: "이순신", employeeCount: 100, registrationDate: "2024-02-01", paymentStatus: "대기", logInfo: "로그2", industry: "제조", companyCode: "002" },
@@ -90,8 +92,13 @@ export default function Component() {
         setSearchResults(results); // 예시로 모든 결과를 보여줌
     };
 
+    const handleLogClick = (companyName) => {
+        navigate("/LogList", { state: { companyName } });
+    };
+
     return (
-        <div className="container mx-auto p-4 max-w-3xl shadow-md" style={{ height: "900px" }}>
+        // <div className="container mx-auto p-4 max-w-3xl shadow-md" style={{ height: "900px" }}>
+        <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
 
             <div className="mb-6">
@@ -104,8 +111,10 @@ export default function Component() {
                                     'paymentStatus';
                         return (
                             <div className="flex items-center" key={placeholder}>
-                                <Input onChange={(e) => categoryOnchangeHandler(e, field)} placeholder={placeholder} className="mr-2" />
-                                <Button onClick={categorysearchButton} size="icon" variant="outline" className="flex justify-center items-center">
+                                <Input onChange={(e) => categoryOnchangeHandler(e, field)} placeholder={placeholder}
+                                       className="mr-2"/>
+                                <Button onClick={categorysearchButton} size="icon" variant="outline"
+                                        className="flex justify-center items-center">
                                     검색
                                 </Button>
                             </div>
@@ -137,7 +146,15 @@ export default function Component() {
                                     <TableCell>{item.employeeCount}</TableCell>
                                     <TableCell>{item.registrationDate}</TableCell>
                                     <TableCell>{item.paymentStatus}</TableCell>
-                                    <TableCell>{item.logInfo}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            onClick={() => handleLogClick(item.companyName)} // 로그 정보를 클릭했을 때의 처리 함수
+                                            className="text-blue-500 border-2 border-gray-300  p-3"
+                                            variant="outline"
+                                        >
+                                            {item.logInfo}
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (

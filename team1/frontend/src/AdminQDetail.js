@@ -102,7 +102,7 @@ export default function Component() {
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
-                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer" style={{marginLeft: "-40px"}}>
+                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer" style={{marginLeft: "-40px" ,marginTop:"-200px"}}>
                         <span   className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                               style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
@@ -118,7 +118,7 @@ export default function Component() {
                             </ul>
                         </li>
                     </ul>
-                    <hr className="border-gray-300 my-2 w-full"/>
+                    <hr className="border-gray-300 my-2 w-full" style={{marginTop:"250px"}}/>
                     <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
                     <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
                     <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
