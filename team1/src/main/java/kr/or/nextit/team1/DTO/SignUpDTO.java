@@ -4,6 +4,11 @@ public class SignUpDTO {
     private String companyCode;
     private String name;
     private String id;
+    private String password;
+    private String phone;
+    private String email;
+    private String department;
+
 
     public String getCompanyCode() {
         return companyCode;

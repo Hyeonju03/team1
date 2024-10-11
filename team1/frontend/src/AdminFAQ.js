@@ -56,16 +56,16 @@ export default function FAQPage() {
     ];
 
     const faqs = [
-        { q: '배송은 얼마나 걸리나요?', a: '일반적으로 주문 후 2-3일 내에 배송이 완료됩니다.' },
-        { q: '반품 정책은 어떻게 되나요?', a: '구매 후 14일 이내에 제품에 이상이 없는 경우 반품이 가능합니다.' },
-        { q: '제품 보증 기간은 얼마인가요?', a: '대부분의 제품은 1년 보증이 제공됩니다. 자세한 내용은 제품 설명을 참조해 주세요.' },
-        { q: '해외 배송도 가능한가요?', a: '네, 일부 국가에 한해 해외 배송이 가능합니다. 배송 가능 국가는 주문 시 확인하실 수 있습니다.' },
-        { q: '결제 방법은 어떤 것들이 있나요?', a: '신용카드, 체크카드, 계좌이체, 무통장입금 등 다양한 결제 방법을 제공하고 있습니다.' },
-        { q: '멤버십 혜택은 무엇인가요?', a: '멤버십 회원은 포인트 적립, 특별 할인, 신제품 우선 구매 등의 혜택을 받으실 수 있습니다.' },
-        { q: '교환은 어떻게 신청하나요?', a: '마이페이지에서 교환 신청을 하실 수 있으며, 교환 사유에 따라 처리됩니다.' },
-        { q: '품절된 상품은 언제 입고되나요?', a: '품절 상품의 재입고 일정은 상품마다 다르며, 알림 신청을 통해 재입고 소식을 받아보실 수 있습니다.' },
-        { q: '쿠폰은 어떻게 사용하나요?', a: '주문 결제 페이지에서 보유하신 쿠폰을 선택하여 적용하실 수 있습니다.' },
-        { q: '상품 리뷰는 어떻게 작성하나요?', a: '구매하신 상품의 상세 페이지나 마이페이지의 주문 내역에서 리뷰를 작성하실 수 있습니다.' },
+        { q: '시스템에 어떻게 로그인하나요?', a: '로그인 페이지에서 사용자 ID와 비밀번호를 입력한 후 \'로그인\' 버튼을 클릭하세요.' },
+        { q: '비밀번호를 잊어버렸습니다. 어떻게 하나요?', a: ' 로그인 페이지에서 \'비밀번호 찾기\' 링크를 클릭하여 이메일 인증을 통해 비밀번호를 재설정할 수 있습니다.' },
+        { q: '사용자가 추가되거나 수정되려면 어떻게 해야 하나요?', a: '관리자 권한을 가진 사용자만 사용자 관리 메뉴에서 추가 및 수정할 수 있습니다.' },
+        { q: '어떤 브라우저에서 이 시스템을 사용할 수 있나요?', a: 'Chrome, Firefox, Edge 등 주요 웹 브라우저에서 사용 가능합니다. 최신 버전을 권장합니다.' },
+        { q: '시스템에서 제공하는 주요 기능은 무엇인가요?', a: '사용자 관리, 문서 관리, 업무 프로세스 관리, 통계 보고서 생성 등 다양한 기능을 제공합니다.' },
+        { q: '시스템 사용 중 문제가 발생했습니다. 어떻게 지원받나요?', a: '기술 지원팀에 문의하거나, 시스템 내의 \'도움말\' 섹션에서 자주 묻는 질문을 확인하세요.' },
+        { q: '데이터 백업은 어떻게 하나요?', a: '관리자 메뉴에서 \'데이터 백업\' 옵션을 통해 정기적으로 데이터를 백업할 수 있습니다.' },
+        { q: '모바일에서도 사용할 수 있나요?', a: 'A: 현재는 웹 기반으로 제공되며, 모바일 최적화는 진행 중입니다.' },
+        { q: '개인 정보 보호 정책은 어떻게 되나요?', a: '개인정보 보호 정책은 시스템 내의 \'이용 약관\'에서 확인할 수 있습니다.' },
+        { q: '시스템 사용에 대한 교육은 어떻게 받나요?', a: '정기적인 교육 세션이 있으며, 필요한 경우 개별 교육을 요청할 수 있습니다.' },
     ];
 
     const [expandedIndex, setExpandedIndex] = useState(null);
@@ -73,9 +73,14 @@ export default function FAQPage() {
     const [question, setQuestion] = useState("");
     const navigate = useNavigate();
     const[searchResult,setSearchResult] = useState([])
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     const toggleAnswer = (index) => {
         setExpandedIndex(expandedIndex === index ? null : index);
+    };
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
     };
 
     const questionOnChangeHandler = (e) => {
@@ -230,6 +235,42 @@ export default function FAQPage() {
                             )}
                         </div>
                     </div>
+                </div>
+            </div>
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    <h2 className="text-xl font-bold mb-4">로그인</h2>
+                    <input
+                        type="text"
+                        placeholder="아이디"
+                        className="w-full p-2 mb-2 border rounded"
+                    />
+                    <input
+                        type="password"
+                        placeholder="비밀번호"
+                        className="w-full p-2 mb-4 border rounded"
+                    />
+                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                        로그인
+                    </button>
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
         </div>

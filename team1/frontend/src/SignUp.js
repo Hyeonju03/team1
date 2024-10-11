@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
 export default function SignUpForm() {
+
     const [formData, setFormData] = useState({
         companyCode: '',
         name:'',
@@ -34,6 +35,7 @@ export default function SignUpForm() {
 
     const validateForm = () => {
         const newErrors = {};
+
         if (!formData.companyCode) newErrors.companyCode = "회사코드를 입력해주세요";
         if(!formData.name) newErrors.name = "이름을 입력해주세요"
         if (!formData.id) newErrors.id = "아이디를 입력해주세요";
@@ -153,17 +155,22 @@ export default function SignUpForm() {
         }
         console.log('Form submitted:', formData);
 
+        const send = {
+            "companyCode" : "123",
+            "name" : "234",
+            "id" : "235424"
+        };
 
-        try{
-            const response = await axios.post('http://localhost:8080/api/SignUp',formData);
-            alert("회원가입 완료" + response.data.message)
-            // navigate("로그인페이지?");
-            // setSignUpResponse(response.data)
-        }catch (error){
-            console.log("회원가입오류",error)
-            alert("회원가입 실 패 임")
-        }
+        const config = {
+            headers: { "Content-Type": `application/json`}
+        };
+
+        const reuslt = await axios.post('/api/SignUp' ,  send, config);
+        console.log(reuslt);
+
+
     };
+
 
 
 
@@ -189,7 +196,7 @@ export default function SignUpForm() {
 
                 {/* 이름 */}
                 <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
-                    <label htmlFor="name" className="flex-none w-32 text-left">ID</label>
+                    <label htmlFor="name" className="flex-none w-32 text-left">이름</label>
                     <input
                         id="name"
                         name="name"
