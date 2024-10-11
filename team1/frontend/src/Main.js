@@ -1,12 +1,14 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
+import axios from "axios";
 
 export default function MainLayout() {
 
     const [btnCtl, setBtnCtl] = useState(0)
     const [moveslid, setMoveslid] = useState("move-Right")
     const [isRClick, setIsRClick] = useState(false)
-    const [newWindowPosY,setNewWindowPosY] = useState(500)
+    const [newWindowPosY, setNewWindowPosY] = useState(500)
+
     const windowRClick = async (e) => {
         e.preventDefault()
         await setNewWindowPosY(e.target.getBoundingClientRect().x + 24)
@@ -16,6 +18,15 @@ export default function MainLayout() {
         e.target.className === "worker" ?
             setIsRClick(true) : setIsRClick(false)
     }
+
+
+    useEffect(() => {
+        axios.get('/api/mainTest')
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error))
+
+    }, []);
+
     return (
         <div className="min-h-screen flex flex-col overflow-hidden" onContextMenu={windowRClick}>
             {/* Header with centered logo */}
