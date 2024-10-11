@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search, Mail} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 
@@ -18,17 +18,30 @@ const Input = ({className, ...props}) => {
 
 export default function DocumentList() {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [documents, setDocuments] = useState([]);
     const navigate = useNavigate(); // navigate 함수 사용
 
-    const documents = [
-        {id: 1, title: "문서 제목 1", category: "카테고리 1", date: "2024-10-10 12:00"},
-        {id: 2, title: "문서 제목 2", category: "카테고리 2", date: "2024-10-09 13:13"},
-        // 추가 문서 ...
-    ];
+    // const documents = [
+    //     {id: 1, title: "문서 제목 1", category: "카테고리 1", date: "2024-10-10 12:00"},
+    //     {id: 2, title: "문서 제목 2", category: "카테고리 2", date: "2024-10-09 13:13"},
+    //     // 추가 문서 ...
+    // ];
+
+    useEffect(() => {
+        fetch('/api/document')
+            .then(response => response.json())
+            .then(data => setDocuments(data))
+            .catch(error => console.error('Error fetching documents:', error));
+    }, []);
 
     const handleDocumentClick = (id) => {
         navigate(`/document/detail/${id}`)
     }
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString); // 날짜 문자열을 Date 객체로 변환
+        return date.toISOString().slice(0, 16).replace("T", " "); // 형식화된 문자열 반환
+    };
 
 
     return (
@@ -90,10 +103,10 @@ export default function DocumentList() {
                                 />
                                 <Paperclip className="h-4 w-4 text-gray-400"/>
                                 <div className="flex-1">
-                                    <div className="font-semibold text-left">{document.category}</div>
-                                    <div className="text-sm text-gray-600 text-left">{document.title}</div>
+                                    <div className="font-semibold text-left">{document.title}</div>
+                                    <div className="text-sm text-gray-600 text-left">{document.category}</div>
                                 </div>
-                                <div className="text-sm text-gray-500">{document.date}</div>
+                                <div className="text-sm text-gray-500">{formatDate(document.date)}</div>
                             </div>
                         ))}
                     </div>
