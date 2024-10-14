@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class DocumentController {
 
     private List<DocumentDTO> documents = new ArrayList<>();
@@ -31,7 +31,7 @@ public class DocumentController {
 //        return documentDTOs;
 //    }
 
-    @GetMapping("/api/document")
+    @GetMapping("/document")
     public List<DocumentDTO> getDocuments() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1",  LocalDateTime.parse("2024-10-10 12:00", formatter), "문서 내용 테스트1"));
@@ -46,7 +46,7 @@ public class DocumentController {
     }
 
     // 문서함 등록
-    @PostMapping("/api/document")
+    @PostMapping("/document")
     public ResponseEntity<String> createDocument(
             @RequestParam String title,
             @RequestParam String category,
