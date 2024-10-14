@@ -8,11 +8,8 @@
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
-<<<<<<< HEAD
     "http-proxy-middleware": "^3.0.3",
     "lucide-react": "^0.447.0",
-=======
->>>>>>> origin/cyw
     "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -27,9 +24,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-
+  
   "proxy": "http://localhost:8080",
-
+  
   "eslintConfig": {
     "extends": [
       "react-app",

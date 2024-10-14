@@ -1,8 +1,9 @@
+import './App.css';
 import Main from "./Main";
-<<<<<<< HEAD
 import AdminQ from "./AdminQ";
 import AdminFAQ from "./AdminFAQ";
 import AdminQDetail from "./AdminQDetail";
+import Notice from "./Notice";
 import Log from "./Log";
 import LogList from "./LogList"
 import axios from 'axios';
@@ -11,6 +12,7 @@ import SignUpForm from './SignUp';
 import DocumentList from "./DocumentList";
 import DocumentDetail from "./DocumentDetail";
 import DocumentRegister from "./DocumentRegister";
+import ApplyForBusiness from "./ApplyForBusiness";
 
 function App() {
     return (
@@ -18,6 +20,7 @@ function App() {
             <div className="App">
 
                 <Routes>
+                    <Route path="/main" element={<Main/>}></Route>
                     <Route path="/SignUp" element={<SignUpForm/>}/>
                     <Route path="/" element={<Main/>}/>
                     <Route path="/AdminQ" element={<AdminQ/>}/>
@@ -34,36 +37,6 @@ function App() {
             </div>
         </Router>
     );
-=======
-import Notice from "./Notice";
-import ApplyForBusiness from "./ApplyForBusiness";
-
-
-function App() {
-  return (
-    <div className="App">
-
-      {/*<header className="App-header">*/}
-      {/*  <img src={logo} className="App-logo" alt="logo" />*/}
-      {/*  <p>*/}
-      {/*    Edit <code>src/App.js</code> and save to reload.*/}
-      {/*  </p>*/}
-      {/*  <a*/}
-      {/*    className="App-link"*/}
-      {/*    href="https://reactjs.org"*/}
-      {/*    target="_blank"*/}
-      {/*    rel="noopener noreferrer"*/}
-      {/*  >*/}
-      {/*    Learn React*/}
-      {/*  </a>*/}
-      {/*</header>*/}
-      {/*<Main/>*/}
-      <ApplyForBusiness/>
-      {/*<Notice/>*/}
-
-    </div>
-  );
->>>>>>> origin/cyw
 }
 
 export default App;
