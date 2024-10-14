@@ -1,4 +1,4 @@
-package kr.or.nextit.team1.Controllers;
+package kr.or.nextit.team1;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +18,7 @@ public class RestTestController {
 
         StringBuffer result = new StringBuffer();
         try {
-            String urlstr = "https://api.odcloud.kr/api/15129616/v1/uddi:2372b1a7-9b52-411e-aed5-f86ab34363c6?page=1&perPage=10&serviceKey=y29JGF6xdsStSGbJOKc8NkPI%2FSWLuF8KO%2B50dOMeXtLSrMpKaLilLhNk8ujpX7A7IHzP8DP7DJLt5PpGsJgsNg%3D%3D";
+            String urlstr = "https://api.odcloud.kr/api/15028076/v1/uddi:c6703050-fc81-4328-a3c7-a9de5e2344b7?page=1&perPage=10&serviceKey=y29JGF6xdsStSGbJOKc8NkPI%2FSWLuF8KO%2B50dOMeXtLSrMpKaLilLhNk8ujpX7A7IHzP8DP7DJLt5PpGsJgsNg%3D%3D";
             URL url = new URL(urlstr);
             HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -42,16 +42,20 @@ public class RestTestController {
             JsonNode dataArray = root.get("data"); // "data" 배열 가져오기
 
             // 사업자등록번호와 회사명을 저장할 2차원 배열 생성
-            String[][] businessData = new String[dataArray.size()][2];
+            String[][] businessData = new String[dataArray.size()][4];
 
             for (int i = 0; i < dataArray.size(); i++) {
                 JsonNode dataObject = dataArray.get(i);
 
+                String ceoName = dataObject.get("대표자이름").asText("Unknown"); // "대표자이름" 필드 추출
                 String companyName = dataObject.get("회사명").asText("Unknown"); // "회사명" 필드 추출
                 String businessNumber = dataObject.get("사업자등록번호").asText("Unknown"); // "사업자등록번호" 필드 추출
+                String contectPhone  = dataObject.get("전화번호").asText("Unknown"); // "전화번호" 필드 추출
 
-                businessData[i][0] = companyName;
-                businessData[i][1] = businessNumber;
+                businessData[i][0] = ceoName;
+                businessData[i][1] = companyName;
+                businessData[i][2] = businessNumber;
+                businessData[i][3] = contectPhone;
             }
 
             return businessData;

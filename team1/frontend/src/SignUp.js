@@ -59,15 +59,17 @@ export default function SignUpForm() {
     };
 
 
-    const companyCodeCheck = () => {
-        const companyCode = formData.companyCode;
-        if (companyCode === "123") {
+    const companyCodeCheck = async () => {
+        const response = await axios.get('/apitest');
+        const companyFound = response.data.some(company => company[2] === formData.companyCode);  // 입력한 회사코드가 있는지 확인
+
+        if (companyFound) {
             alert("인증완료");
             setCompanyConfirm(true)
         } else {
             alert("없는 회사코드임");
         }
-    };
+    }
 
     const idCheck = () => {
         const id = formData.id;

@@ -35,6 +35,8 @@ function App() {
 
                     <Route path="/notices" element={<Notice />} />
                     <Route path="/apply" element={<ApplyForBusiness />} />
+
+                    <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
                 </Routes>
             </div>
         </Router>
