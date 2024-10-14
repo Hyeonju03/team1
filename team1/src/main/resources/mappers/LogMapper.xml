@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.LogMapper">
+    <select id="selectLog" resultType="LogDTO">
+        select * from test_log
+    </select>
+    <insert id="logInsert" parameterType="LogDTO">
+        insert into test_log
+        (COM_CODE, LOG, TIME)
+        values
+        (#{comCode},#{log},#{time})
+    </insert>
+</mapper>
