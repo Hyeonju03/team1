@@ -1,297 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const initialNotices = [
-    { id: 1, title: '제목 1', content: '공지사항 1의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 2, title: '제목 2', content: '공지사항 2의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 3, title: '제목 3', content: '공지사항 3의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 4, title: '제목 4', content: '공지사항 4의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 5, title: '제목 5', content: '공지사항 5의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 6, title: '제목 6', content: '공지사항 6의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 7, title: '제목 7', content: '공지사항 7의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 8, title: '제목 8', content: '공지사항 8의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 9, title: '제목 9', content: '공지사항 9의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-    { id: 10, title: '제목 10', content: '공지사항 10의 내용입니다.', createdAt: new Date(), updatedAt: new Date() },
-];
+const API_URL = "http://localhost:8080/api/notices";
+const USE_API = false; // Set this to true when you want to use the backend API
 
-const PAGE_SIZE = 5;
+
+const useNotices = () => {
+    const [notices, setNotices] = useState(() => {
+        const savedNotices = localStorage.getItem("notices");
+        return savedNotices
+            ? JSON.parse(savedNotices)
+            : [
+                {
+                    id: 1,
+                    title: "첫 번째 공지사항",
+                    content: "첫 번째 공지사항 내용입니다.",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                },
+                {
+                    id: 2,
+                    title: "두 번째 공지사항",
+                    content: "두 번째 공지사항 내용입니다.",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                },
+            ];
+    });
+
+    useEffect(() => {
+        if (USE_API) {
+            fetchNotices();
+        } else {
+            localStorage.setItem("notices", JSON.stringify(notices));
+        }
+    }, [notices]);
+
+    const fetchNotices = async () => {
+        try {
+            const response = await axios.get(API_URL);
+            setNotices(response.data);
+        } catch (error) {
+            console.error("Error fetching notices:", error);
+        }
+    };
+
+
+    const addNotice = async (notice) => {
+        if (USE_API) {
+            try {
+                const response = await axios.post(API_URL, notice);
+                setNotices((prevNotices) => [response.data, ...prevNotices]);
+            } catch (error) {
+                console.error("Error adding notice:", error);
+            }
+        } else {
+            const newNotice = {
+                ...notice,
+                id: Date.now(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+            setNotices((prevNotices) => [newNotice, ...prevNotices]);
+        }
+    };
+
+    const updateNotice = async (id, updatedNotice) => {
+        if (USE_API) {
+            try {
+                const response = await axios.put(`${API_URL}/${id}`, updatedNotice);
+                setNotices((prevNotices) =>
+                    prevNotices.map((notice) =>
+                        notice.id === id ? response.data : notice
+                    )
+                );
+            } catch (error) {
+                console.error("Error updating notice:", error);
+            }
+        } else {
+            setNotices((prevNotices) =>
+                prevNotices.map((notice) =>
+                    notice.id === id
+                        ? {
+                            ...notice,
+                            ...updatedNotice,
+                            updatedAt: new Date().toISOString(),
+                        }
+                        : notice
+                )
+            );
+        }
+    };
+
+    const deleteNotice = async (id) => {
+        if (USE_API) {
+            try {
+                await axios.delete(`${API_URL}/${id}`);
+                setNotices((prevNotices) =>
+                    prevNotices.filter((notice) => notice.id !== id)
+                );
+            } catch (error) {
+                console.error("Error deleting notice:", error);
+            }
+        } else {
+            setNotices((prevNotices) =>
+                prevNotices.filter((notice) => notice.id !== id)
+            );
+        }
+    };
+
+    return { notices, addNotice, updateNotice, deleteNotice };
+};
 
 export default function Notice() {
-    const [notices, setNotices] = useState(initialNotices);
+    const { notices, addNotice, updateNotice, deleteNotice } = useNotices();
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedNotice, setSelectedNotice] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedNotice, setEditedNotice] = useState({ title: '', content: '' });
-    const [newNotice, setNewNotice] = useState({ title: '', content: '' });
+    const [formData, setFormData] = useState({ title: "", content: "" });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const PAGE_SIZE = 5;
     const totalPages = Math.ceil(notices.length / PAGE_SIZE);
-
-    const startIdx = (currentPage - 1) * PAGE_SIZE;
-    const currentNotices = notices.slice(startIdx, startIdx + PAGE_SIZE);
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    const handleNoticeClick = (notice) => {
-        setSelectedNotice(notice);
-        setIsCreating(false);
-        setIsEditing(false);
-    };
-
-    const handleBackToList = () => {
-        setSelectedNotice(null);
-        setIsCreating(false);
-        setIsEditing(false);
-    };
-
-    const handleCreateClick = () => {
-        setIsCreating(true);
-        setSelectedNotice(null);
-        setIsEditing(false);
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        if (isEditing) {
-            setEditedNotice(prev => ({ ...prev, [name]: value }));
-        } else {
-            setNewNotice(prev => ({ ...prev, [name]: value }));
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isEditing) {
-            setNotices(prev => prev.map(notice =>
-                notice.id === selectedNotice.id ? {
-                    ...notice,
-                    ...editedNotice,
-                    updatedAt: new Date() // Update modified date only
-                } : notice
-            ));
-            setSelectedNotice({ ...selectedNotice, ...editedNotice, updatedAt: new Date() });
-            setIsEditing(false);
-        } else {
-            const newId = notices.length > 0 ? Math.max(...notices.map(n => n.id)) + 1 : 1;
-            const createdNotice = {
-                id: newId,
-                ...newNotice,
-                createdAt: new Date(), // Set created date
-                updatedAt: new Date() // Set updated date
-            };
-            setNotices(prev => [createdNotice, ...prev]);
-            setNewNotice({ title: '', content: '' });
+        if (isCreating) {
+            addNotice(formData);
             setIsCreating(false);
+        } else if (isEditing) {
+            updateNotice(selectedNotice.id, formData);
+            setIsEditing(false);
+            setSelectedNotice(null);
         }
+        setFormData({ title: "", content: "" });
     };
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-        setEditedNotice({ title: selectedNotice.title, content: selectedNotice.content });
-    };
-
-    const handleDeleteClick = () => {
+    const handleDelete = () => {
         setShowDeleteConfirm(true);
     };
 
-    const handleDeleteConfirm = () => {
-        setNotices(prev => prev.filter(notice => notice.id !== selectedNotice.id));
+    const confirmDelete = () => {
+        deleteNotice(selectedNotice.id);
         setSelectedNotice(null);
         setShowDeleteConfirm(false);
     };
 
-    const renderNoticeList = () => (
-        <>
-            <h1 className="text-2xl font-bold text-center mb-6 bg-gray-400 text-white py-2 rounded">공지사항</h1>
-            <ul className="space-y-4">
-                {currentNotices.map((notice) => (
-                    <li key={notice.id} className="flex items-center justify-between border p-3 rounded">
-                        <button
-                            onClick={() => handleNoticeClick(notice)}
-                            className="font-medium text-blue-600 hover:underline text-left"
-                        >
-                            [{notice.title}]
-                        </button>
-                        <span className="px-3 py-1 rounded text-sm">
-                            {`등록일: ${new Date(notice.createdAt).toLocaleString()}`}
-                        </span>
-                    </li>
-                ))}
-            </ul>
-            <div className="flex justify-center mt-4">
-                {[...Array(totalPages)].map((_, index) => (
-                    <button
-                        key={index + 1}
-                        onClick={() => handlePageChange(index + 1)}
-                        className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-gray-400 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-            </div>
-            <button
-                onClick={handleCreateClick}
-                className="w-1/5 bg-orange-400 hover:bg-orange-600 text-white font-bold py-2 rounded mt-6"
-            >
-                등록
-            </button>
-        </>
-    );
+    const cancelDelete = () => {
+        setShowDeleteConfirm(false);
+    };
+    useEffect(() => {
+        axios.get('/test')
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error))
 
-    const renderNoticePage = () => (
-        <>
-            <h1 className="text-2xl font-bold text-center mb-6 bg-gray-400 text-white py-2 rounded">{selectedNotice.title}</h1>
-            <div className="mb-4">
-                <p>{selectedNotice.content}</p>
-                <p className="text-sm text-gray-500">{`수정일: ${new Date(selectedNotice.updatedAt).toLocaleString()}`}</p>
-            </div>
-            <div className="flex justify-between">
-                <button
-                    onClick={handleBackToList}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    목록으로 돌아가기
-                </button>
-                <div>
-                    <button
-                        onClick={handleEditClick}
-                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                    >
-                        수정
-                    </button>
-                    <button
-                        onClick={handleDeleteClick}
-                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        삭제
-                    </button>
-                </div>
-            </div>
-        </>
-    );
-
-    const renderEditPage = () => (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl font-bold text-center mb-6 bg-gray-400 text-white py-2 rounded">공지사항 수정</h1>
-            <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">제목</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={editedNotice.title}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-            </div>
-            <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700">내용</label>
-                <textarea
-                    id="content"
-                    name="content"
-                    value={editedNotice.content}
-                    onChange={handleInputChange}
-                    required
-                    rows={5}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-            </div>
-            <div className="flex justify-between">
-                <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    수정 완료
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-                >
-                    취소
-                </button>
-            </div>
-        </form>
-    );
-
-    const renderCreatePage = () => (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl font-bold text-center mb-6 bg-gray-400 text-white py-2 rounded">새 공지사항 작성</h1>
-            <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">제목</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={newNotice.title}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-            </div>
-            <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700">내용</label>
-                <textarea
-                    id="content"
-                    name="content"
-                    value={newNotice.content}
-                    onChange={handleInputChange}
-                    required
-                    rows={5}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-            </div>
-            <div className="flex justify-between">
-                <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    저장
-                </button>
-                <button
-                    type="button"
-                    onClick={handleBackToList}
-                    className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-                >
-                    취소
-                </button>
-            </div>
-        </form>
-    );
-
-    const renderDeleteConfirm = () => (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div className="mt-3 text-center">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">삭제 확인</h3>
-                    <div className="mt-2 px-7 py-3">
-                        <p className="text-sm text-gray-500">
-                            정말 삭제하시겠습니까?
-                        </p>
-                    </div>
-                    <div className="items-center px-4 py-3">
-                        <button
-                            id="ok-btn"
-                            className="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
-                            onClick={handleDeleteConfirm}
-                        >
-                            확인
-                        </button>
-                        <button
-                            id="cancel-btn"
-                            className="px-4 py-2 bg-gray-300 text-black text-base font-medium rounded-md w-24 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                            onClick={() => setShowDeleteConfirm(false)}
-                        >
-                            취소
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
+    }, []);
     return (
         <div className="min-h-screen flex flex-col">
             <header className="bg-gray-200 p-2">
@@ -304,25 +173,171 @@ export default function Notice() {
 
             <div className="flex-grow flex">
                 <main className="w-full mx-auto mt-2 p-6 bg-white rounded-lg shadow-md">
-                    {isCreating ? renderCreatePage() :
-                        isEditing ? renderEditPage() :
-                            selectedNotice ? renderNoticePage() :
-                                renderNoticeList()}
+                    {isCreating || isEditing ? (
+                        <form onSubmit={handleSubmit} className="mb-6">
+                            <h2 className="text-xl font-bold mb-4">
+                                {isCreating ? "공지사항 등록" : "공지사항 수정"}
+                            </h2>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 mb-2" htmlFor="title">
+                                    제목
+                                </label>
+                                <input
+                                    type="text"
+                                    id="title"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="border rounded p-2 w-full"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 mb-2" htmlFor="content">
+                                    내용
+                                </label>
+                                <textarea
+                                    id="content"
+                                    name="content"
+                                    value={formData.content}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="border rounded p-2 w-full h-32"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className={`${
+                                    isCreating ? "bg-green-500" : "bg-blue-500"
+                                } text-white font-bold py-2 px-4 rounded`}
+                            >
+                                {isCreating ? "등록하기" : "수정하기"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsCreating(false);
+                                    setIsEditing(false);
+                                    setFormData({ title: "", content: "" });
+                                }}
+                                className="ml-2 bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+                            >
+                                취소
+                            </button>
+                        </form>
+                    ) : selectedNotice ? (
+                        <div>
+                            <h2 className="text-2xl font-bold mb-4">
+                                {selectedNotice.title}
+                            </h2>
+                            <p className="mb-4">{selectedNotice.content}</p>
+                            <p className="text-sm text-gray-500 mb-4">
+                                작성일: {new Date(selectedNotice.createdAt).toLocaleString()}
+                                {selectedNotice.updatedAt !== selectedNotice.createdAt &&
+                                    ` (수정일: ${new Date(
+                                        selectedNotice.updatedAt
+                                    ).toLocaleString()})`}
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setIsEditing(true);
+                                    setFormData({
+                                        title: selectedNotice.title,
+                                        content: selectedNotice.content,
+                                    });
+                                }}
+                                className="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-2"
+                            >
+                                수정
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="bg-red-500 text-white font-bold py-2 px-4 rounded mr-2"
+                            >
+                                삭제
+                            </button>
+                            <button
+                                onClick={() => setSelectedNotice(null)}
+                                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+                            >
+                                목록으로
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <h1 className="text-2xl font-bold text-center mb-6">공지사항</h1>
+                            <ul className="space-y-4">
+                                {notices
+                                    .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+                                    .map((notice) => (
+                                        <li key={notice.id} className="border p-4 rounded shadow">
+                                            <h3
+                                                className="text-lg font-semibold text-blue-600 cursor-pointer"
+                                                onClick={() => setSelectedNotice(notice)}
+                                            >
+                                                {notice.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">
+                                                작성일: {new Date(notice.createdAt).toLocaleString()}
+                                            </p>
+                                        </li>
+                                    ))}
+                            </ul>
+                            <div className="flex justify-center mt-4">
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentPage(index + 1)}
+                                        className={`mx-1 px-3 py-1 rounded ${
+                                            currentPage === index + 1
+                                                ? "bg-blue-500 text-white"
+                                                : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setIsCreating(true)}
+                                className="mt-4 bg-green-500 text-white font-bold py-2 px-4 rounded"
+                            >
+                                새 공지사항 작성
+                            </button>
+                        </>
+                    )}
                 </main>
 
                 <aside className="w-64 p-4 border-l">
                     <div className="mb-4">
-                        <input type="text" placeholder="아이디" className="w-full p-2 border mb-2"/>
-                        <input type="password" placeholder="비밀번호" className="w-full p-2 border mb-2"/>
-                        <button className="w-full bg-blue-500 text-white p-2 mb-2">로그인</button>
+                        <input
+                            type="text"
+                            placeholder="아이디"
+                            className="w-full p-2 border mb-2"
+                        />
+                        <input
+                            type="password"
+                            placeholder="비밀번호"
+                            className="w-full p-2 border mb-2"
+                        />
+                        <button className="w-full bg-blue-500 text-white p-2 mb-2">
+                            로그인
+                        </button>
                         <div className="text-sm text-center">
-                            <button onClick={handleBackToList} className="text-blue-600 hover:underline">공지사항</button>
+                            <button
+                                onClick={() => setSelectedNotice(null)}
+                                className="text-blue-600 hover:underline"
+                            >
+                                공지사항
+                            </button>
                             <span className="mx-1">|</span>
-                            <button className="text-blue-600 hover:underline">문의사항</button>
+                            <button className="text-blue-600 hover:underline">
+                                문의사항
+                            </button>
                         </div>
                     </div>
                     <div className="mb-4">
-                        <h3  className="font-semibold mb-2">공지사항</h3>
+                        <h3 className="font-semibold mb-2">공지사항</h3>
                         <ul className="list-disc list-inside">
                             <li>첫 번째 공지사항</li>
                             <li>두 번째 공지사항</li>
@@ -334,7 +349,28 @@ export default function Notice() {
                     </div>
                 </aside>
             </div>
-            {showDeleteConfirm && renderDeleteConfirm()}
+
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+                    <div className="bg-white p-5 rounded-lg shadow-xl">
+                        <h3 className="text-lg font-bold mb-4">정말 삭제하시겠습니까?</h3>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={confirmDelete}
+                                className="bg-red-500 text-white font-bold py-2 px-4 rounded mr-2"
+                            >
+                                확인
+                            </button>
+                            <button
+                                onClick={cancelDelete}
+                                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
