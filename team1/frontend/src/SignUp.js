@@ -156,20 +156,27 @@ export default function SignUpForm() {
         console.log('Form submitted:', formData);
 
         const send = {
-            "companyCode" : "123",
-            "name" : "234",
-            "id" : "235424"
+            empCode: formData.id,  // 아이디
+            empName: formData.name, // 이름
+            empPass: formData.password, // 비밀번호
+            depCode: formData.department, // 부서
+            phoneNum: formData.phone, // 전화번호
+            empMail: formData.email, // 이메일
+            empRrn: `${formData.residentNumber1}-${formData.residentNumber2}` // 주민등록번호
         };
 
         const config = {
             headers: { "Content-Type": `application/json`}
         };
 
-        const reuslt = await axios.post('/api/SignUp' ,  send, config);
+        const reuslt = await axios.post('/signUp' ,  send, config);
+        //여기url주소가 contro;ller url이랑 똑같아야함.
+
         console.log(reuslt);
 
 
     };
+
 
 
 

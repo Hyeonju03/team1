@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Input = ({ className, placeholder, ...props }) => (
     <input
@@ -114,6 +115,13 @@ export default function FAQPage() {
         setSelectedCategoryIndex(selectedCategoryIndex === index ? null : index);
         setExpandedIndex(null); // 모든 답변 닫기
     };
+
+    useEffect(()=>{
+        axios.get('/test')
+            .then(response=>{
+                console.log(response.data)
+            },[])
+    })
 
     return (
         <div className="container mx-auto p-4">
