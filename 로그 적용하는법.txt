@@ -1,0 +1,12 @@
+const logData = {
+            comCode: "TEST_1",
+            log: "메인 페이지 새로고침 테스트임",
+            time: "TEST_TIME"
+        };
+
+        axios.post('/logInsert', logData)
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error));
+
+로그를 넣어줘야 하는부분에 해당 코드를 복붙 후 logData의 value에 변수를 넣어준다.
+ex) comCode: 여기에 사원코드 변수 넣기
