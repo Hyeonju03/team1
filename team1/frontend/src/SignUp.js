@@ -158,7 +158,7 @@ export default function SignUpForm() {
         console.log('Form submitted:', formData);
 
         const send = {
-            empCode: formData.id,  // 아이디
+            empCode: `${formData.companyCode}-${formData.id}`,  // 아이디
             empName: formData.name, // 이름
             empPass: formData.password, // 비밀번호
             depCode: formData.department, // 부서
