@@ -45,6 +45,13 @@ export default function DocumentList() {
 
     }, []);
 
+    useEffect(() => {
+        axios.get('/test')
+            .then(response=>{
+                console.log(response.data);
+            })
+    }, []);
+
     const handleDocumentClick = (id) => {
         navigate(`/document/detail/${id}`)
     }
