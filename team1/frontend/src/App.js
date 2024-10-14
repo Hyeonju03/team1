@@ -6,7 +6,6 @@ import AdminQDetail from "./AdminQDetail";
 import Notice from "./Notice";
 import Log from "./Log";
 import LogList from "./LogList"
-import axios from 'axios';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import SignUpForm from './SignUp';
 import DocumentList from "./DocumentList";
@@ -33,6 +32,9 @@ function App() {
                     <Route path="/document" element={<DocumentList/>}/>
                     <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
+
+                    <Route path="/notices" element={<Notice />} />
+                    <Route path="/apply" element={<ApplyForBusiness />} />
                 </Routes>
             </div>
         </Router>

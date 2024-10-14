@@ -1,18 +1,5 @@
-import React, { useState } from 'react';
-
-// 모의 데이터베이스
-const mockDatabase = {
-    '1234567890': {
-        companyName: '테스트 기업',
-        representativeName: '홍길동',
-        representativeContact: '010-1234-5678'
-    },
-    '9876543210': {
-        companyName: '샘플 회사',
-        representativeName: '김철수',
-        representativeContact: '010-8765-4321'
-    }
-};
+import React, {useEffect, useState} from 'react';
+import axios from "axios";
 
 export default function ApplyForBusiness() {
     const [businessNumber, setBusinessNumber] = useState('');
@@ -23,32 +10,77 @@ export default function ApplyForBusiness() {
     const [employeeCount, setEmployeeCount] = useState('');
     const [email, setEmail] = useState('');
     const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [returnObj, setReturnObj] = useState([]);
 
-    const handleBusinessNumberCheck = () => {
-        // 실제 구현에서는 이 부분을 DB 쿼리로 대체
-        const info = mockDatabase[businessNumber];
+    const handleBusinessNumberCheck = async () => {
+                const DTO= {
+                    businessNumber:"1234567890" ,
+                    companyName:"" ,
+                    representativeName: "" ,
+                    representativeContact: "",
+                    managerContact: "011-2324-3434" ,
+                    employeeCount: 11,
+                    email:"cuwoe@naver.com"
+                }
+                const params = new URLSearchParams(DTO).toString();
+        axios.get(`/verify?${params}`)
+                    .then(response => {setReturnObj(response.data)})
+                    .catch(error => console.log(error))
 
-        if (!businessNumber) {
-            alert('사업자 번호를 입력해주세요.');
+        setCompanyName(returnObj.companyName)
+        setRepresentativeName(returnObj.representativeName)
+        setRepresentativeContact(returnObj.representativeContact)
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!businessNumber || !companyName || !representativeName || !representativeContact || !managerContact || !employeeCount || !email) {
+            setAlertMessage('모든 필드를 입력해주세요.');
+            setShowAlert(true);
             return;
         }
-        if (info) {
-            setCompanyName(info.companyName);
-            setRepresentativeName(info.representativeName);
-            setRepresentativeContact(info.representativeContact);
-        } else {
-            alert('해당 사업자 번호로 정보를 찾을 수 없습니다.');
+
+        const businessData = {
+            businessNumber,
+            companyName,
+            representativeName,
+            representativeContact,
+            managerContact,
+            employeeCount: parseInt(employeeCount),
+            email,
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/business/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(businessData),
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(errorData || '신청에 실패했습니다.');
+            }
+
+            const registeredBusiness = await response.json();
+            console.log('등록된 사업:', registeredBusiness);
+            setAlertMessage('정상적으로 신청이 완료되었습니다.');
+            setShowAlert(true);
+        } catch (error) {
+            console.error('Error:', error);
+            setAlertMessage(error.message);
+            setShowAlert(true);
         }
     };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // 여기에 실제 제출 로직을 구현해야 함
-        setShowAlert(true);
-    };
+
 
     return (
         <div className="min-h-screen flex flex-col">
-            {/* Header with centered logo */}
             <header className="bg-gray-200 p-4">
                 <div className="container mx-auto flex justify-center items-center h-24">
                     <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
@@ -57,13 +89,10 @@ export default function ApplyForBusiness() {
                 </div>
             </header>
 
-            {/* Main content area */}
             <div className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative">
-                {/* Form Section */}
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록 신청</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Form Fields */}
                         <div className="flex items-center space-x-2">
                             <label className="w-1/2">사업자 등록번호</label>
                             <div className="flex-1 flex items-center">
@@ -133,6 +162,7 @@ export default function ApplyForBusiness() {
                         <button
                             type="submit"
                             className="w-2/3 bg-orange-400 hover:bg-orange-600 text-white mt-6 py-2 rounded"
+
                         >
                             신청하기
                         </button>
@@ -140,7 +170,6 @@ export default function ApplyForBusiness() {
                 </div>
             </div>
 
-            {/* Sidebar */}
             <aside className="w-64 p-4 border-l bg-white h-full fixed right-0 top-32">
                 <div className="mb-4">
                     <input type="text" placeholder="아이디" className="w-full p-2 border mb-2"/>
@@ -165,11 +194,10 @@ export default function ApplyForBusiness() {
                 </div>
             </aside>
 
-            {/* Alert Modal */}
             {showAlert && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg">
-                        <p className="text-lg mb-4">정상적으로 신청이 등록되었습니다.</p>
+                        <p className="text-lg mb-4">{alertMessage}</p>
                         <button
                             onClick={() => setShowAlert(false)}
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
