@@ -9,7 +9,8 @@ import java.util.List;
 
 @Service
 public class AdminFAQService {
-    private List<AdminFAQDTO> faqs = new ArrayList<>();
+
+    private final List<AdminFAQDTO> faqs = new ArrayList<>();
 
     public List<AdminFAQDTO> getAllFAQs() {
         return faqs; // 현재는 메모리 내의 리스트를 반환
