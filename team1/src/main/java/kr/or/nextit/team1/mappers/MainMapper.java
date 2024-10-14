@@ -1,4 +1,4 @@
-package kr.or.nextit.team1.mapper;
+package kr.or.nextit.team1.mappers;
 
 import org.apache.ibatis.annotations.Mapper;
 

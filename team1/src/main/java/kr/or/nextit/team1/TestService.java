@@ -1,6 +1,6 @@
 package kr.or.nextit.team1;
 
-import kr.or.nextit.team1.mapper.MainMapper;
+import kr.or.nextit.team1.mappers.MainMapper;
 import org.springframework.stereotype.Service;
 
 @Service
