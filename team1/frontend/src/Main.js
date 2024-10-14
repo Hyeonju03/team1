@@ -21,10 +21,22 @@ export default function MainLayout() {
 
 
     useEffect(() => {
-        axios.get('/test')
+        axios.get('/selectLog')
             .then(response => console.log(response.data))
             .catch(error => console.log(error))
 
+    }, []);
+
+    useEffect(() => {
+        const logData = {
+            comCode: "TEST_1",
+            log: "메인 페이지 새로고침 테스트임",
+            time: "TEST_TIME"
+        };
+
+        axios.post('/logInsert', logData)
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error));
     }, []);
 
     return (
