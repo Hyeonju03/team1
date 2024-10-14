@@ -1,3 +1,5 @@
+1.package.json 수정
+
 {
   "name": "frontend",
   "version": "0.1.0",
@@ -6,27 +8,21 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
     "http-proxy-middleware": "^3.0.3",
-    "lucide-react": "^0.447.0",
-    "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-
   "proxy": "http://localhost:8080",
-
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -46,6 +42,30 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.13"
+    "tailwindcss": "^3.4.10"
   }
 }
+
+2.백 설정
+
+package kr.or.nextit.team1;
+
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class MainTest {
+
+    @GetMapping("/api/mainTest")
+    public String test() {
+        System.out.println("test");
+        return "sdgsdgsdgg";
+    }
+}
+
+3. 프론트에 설정
+useEffect(() => {
+        axios.get('/api/mainTest')
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error))
+
+    }, []);

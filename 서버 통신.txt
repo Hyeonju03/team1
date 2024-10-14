@@ -1,0 +1,67 @@
+주의 사항 - mapper.xml, mapper interpace 이름을 같게 해야함
+--------------------------------------------------------------------------------------
+java kr.or.nextit.team1 경로에 mappers 패키지를 만들고 인터페이스 생성
+
+package kr.or.nextit.team1.mappers;
+
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface MainMapper {
+    String selectTest();
+}
+----------------------------------------------------------------------------------------
+resources 경로에 mappers 폴더 생성
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.nextit.team1.mappers.MainMapper">
+    <select id="selectTest" resultType="String">
+        select *from test where text like 'h'
+    </select>
+</mapper>
+
+------------------------------------------------------------------------------------------
+service 파일
+
+package kr.or.nextit.team1;
+
+import kr.or.nextit.team1.mappers.MainMapper;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TestService {
+    private final MainMapper mainMapper;
+
+    public TestService(MainMapper mainMapper) {
+        this.mainMapper = mainMapper;
+    }
+
+    public String test() {
+        return mainMapper.selectTest();
+    }
+}
+-------------------------------------------------------------------------------------------
+servlet 파일
+
+package kr.or.nextit.team1;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+public class MainTest {
+
+    private final TestService testService;
+
+    public MainTest(TestService testService) {
+        this.testService = testService;
+    }
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok(testService.test());
+    }
+}
