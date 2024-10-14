@@ -35,7 +35,7 @@ export default function MainLayout() {
                         <input type="password" placeholder="비밀번호" className="w-full p-2 border mb-2" />
                         <button className="w-full bg-blue-500 text-white p-2 mb-2">로그인</button>
                         <div className="text-sm text-center">
-                            <a href="/notice" className="text-blue-600 hover:underline">
+                            <a href="/frontend/src/ApplyForBusiness" className="text-blue-600 hover:underline">
                                 공지사항
                             </a>
                             <span className="mx-1">|</span>

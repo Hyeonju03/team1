@@ -1,4 +1,5 @@
 import Main from "./Main";
+<<<<<<< HEAD
 import AdminQ from "./AdminQ";
 import AdminFAQ from "./AdminFAQ";
 import AdminQDetail from "./AdminQDetail";
@@ -33,6 +34,36 @@ function App() {
             </div>
         </Router>
     );
+=======
+import Notice from "./Notice";
+import ApplyForBusiness from "./ApplyForBusiness";
+
+
+function App() {
+  return (
+    <div className="App">
+
+      {/*<header className="App-header">*/}
+      {/*  <img src={logo} className="App-logo" alt="logo" />*/}
+      {/*  <p>*/}
+      {/*    Edit <code>src/App.js</code> and save to reload.*/}
+      {/*  </p>*/}
+      {/*  <a*/}
+      {/*    className="App-link"*/}
+      {/*    href="https://reactjs.org"*/}
+      {/*    target="_blank"*/}
+      {/*    rel="noopener noreferrer"*/}
+      {/*  >*/}
+      {/*    Learn React*/}
+      {/*  </a>*/}
+      {/*</header>*/}
+      {/*<Main/>*/}
+      <ApplyForBusiness/>
+      {/*<Notice/>*/}
+
+    </div>
+  );
+>>>>>>> origin/cyw
 }
 
 export default App;
