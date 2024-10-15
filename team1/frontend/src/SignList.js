@@ -1,9 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import axios from "axios";
 
 export default function SignList() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
+
+    useEffect(() => {
+        const res = axios.get('/schedule')
+            .then(response => {
+                console.log(response.data);
+                setSchedules(response.data); // 서버에서 받은 데이터를 상태에 설정
+            })
+        console.log(res)
+    }, []);
 
     const setDoc = useCallback(() => {
         // doc리스트 가져오기

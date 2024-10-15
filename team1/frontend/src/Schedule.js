@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
+import axios from "axios";
 
 const typeColors = {
     '개인': 'bg-blue-200',
@@ -21,6 +22,15 @@ export default function Schedule() {
         endDate: new Date(),
         type: '개인',
     });
+
+    useEffect(() => {
+        const res = axios.get('/schedule')
+            .then(response => {
+                console.log(response.data);
+                setSchedules(response.data); // 서버에서 받은 데이터를 상태에 설정
+            })
+        console.log(res)
+    }, []);
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
