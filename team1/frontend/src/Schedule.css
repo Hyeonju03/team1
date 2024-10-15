@@ -1,0 +1,8 @@
+.react-calendar {
+    width: 100% !important;  /* 너비 설정 */
+    height: 600px !important; /* 높이 설정 */
+}
+
+.react-calendar__tile {
+    height: 80px
+}
