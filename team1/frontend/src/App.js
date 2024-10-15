@@ -12,6 +12,10 @@ import DocumentList from "./DocumentList";
 import DocumentDetail from "./DocumentDetail";
 import DocumentRegister from "./DocumentRegister";
 import ApplyForBusiness from "./ApplyForBusiness";
+import Schedule from "@/Schedule";
+import SignList from "@/SignList";
+import SignRequest from "@/SignRequest";
+import UserInfo from "@/UserInfo";
 
 function App() {
     return (
@@ -35,6 +39,12 @@ function App() {
 
                     <Route path="/notices" element={<Notice />} />
                     <Route path="/apply" element={<ApplyForBusiness />} />
+
+                    <Route path="/schedule" element={<Schedule />} />
+
+                    <Route path="/sign" element={<SignList />} />
+                    <Route path="/sign/register" element={<SignRequest />} />
+                    <Route path="/userInfo" element={<UserInfo/>} />
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
                 </Routes>

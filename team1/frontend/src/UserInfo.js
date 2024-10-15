@@ -132,7 +132,7 @@ import React, { useState } from 'react'
 //     )
 // }
 
-export default function PersonnelManagement() {
+export default function UserInfo() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     const togglePanel = () => {
