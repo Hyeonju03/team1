@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
+import ListLibrary from "./HtmlFunctions/ListLibrary";
 
 export default function SignRequest() {
     const [btnCtl, setBtnCtl] = useState(0)
@@ -246,7 +247,7 @@ export default function SignRequest() {
                     </div>
                     <div className="h-[600px]">
                         <h3 className="font-semibold mb-2 h-[25px]">메신저</h3>
-                        <div className="h-[95px]">
+                        <div className="h-[138px]">
                             <div className="flex">
                                 <div className="w-1/3 border">
                                     <img src="/logo192.png"/>
@@ -264,43 +265,11 @@ export default function SignRequest() {
                                 <button className="border w-2/5 text-sm" onClick={() => setBtnCtl(3)}>공지사항</button>
                             </div>
                         </div>
-                        <div className="border text-left h-[480px]">
+                        <div className="border text-left h-[435px]">
                             {
                                 btnCtl === 0 ?
-                                    <div className="h-[100%] overflow-y-auto">
-                                        <ul className="list-disc pl-5">
-                                            <li>최상위 부서
-                                                <ul className="list-disc pl-5">
-                                                    <li>하위부서
-                                                        <ul className="list-disc pl-5">
-                                                            <li className="worker" value="1234567">직원1</li>
-                                                            <li>직원2</li>
-                                                            <li>직원3</li>
-                                                            <li>직원5</li>
-                                                            <li>직원6</li>
-                                                            <li>직원7</li>
-                                                            <li>직원8</li>
-                                                            <li>직원9</li>
-                                                            <li>직원10</li>
-                                                        </ul>
-                                                    </li>
-                                                    <li>하위부서
-                                                        <ul className="list-disc pl-5">
-                                                            <li>직원1</li>
-                                                            <li>직원2</li>
-                                                            <li>직원3</li>
-                                                            <li>직원5</li>
-                                                            <li>직원6</li>
-                                                            <li>직원7</li>
-                                                            <li>직원8</li>
-                                                            <li>직원9</li>
-                                                            <li>직원10</li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div> :
+                                    ListLibrary.WorkerList()
+                                    :
                                     btnCtl === 1 ?
                                         <>
                                             <div className="h-[100%] overflow-y-auto">
