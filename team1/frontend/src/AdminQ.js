@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // useNavigate 임포트 추가
+import React, {useEffect, useState} from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from "axios"; // useNavigate 임포트 추가
 
 const Input = ({ className, placeholder, ...props }) => (
     <input
@@ -25,6 +26,13 @@ export default function FAQPage() {
     const navigate = useNavigate(); // useNavigate 훅 사용
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+    useEffect(() => {
+        const fetchData = async ()=>{
+            try{
+                const response = await axios.get()
+            }
+        }
+    }, []);
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -35,10 +43,11 @@ export default function FAQPage() {
     }
 
     const qComplete = (e) => {
+        alert("문의작성완료")
         console.log(title, content);
         e.preventDefault(); // 기본 폼 제출 방지
-        navigate("/AdminQDetail");
-        window.location.reload();
+        // navigate("/AdminQDetail");
+        // window.location.reload();
     }
 
     const qCancel = (e) => {

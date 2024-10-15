@@ -4,6 +4,8 @@ import axios from "axios";
 
 export default function SignUpForm() {
 
+
+    const [departments,setDepartments] = useState([])
     const [formData, setFormData] = useState({
         companyCode: '',
         name:'',
@@ -66,6 +68,21 @@ export default function SignUpForm() {
         if (companyFound) {
             alert("인증완료");
             setCompanyConfirm(true)
+                //부서검색누르면 부서리스트나와서하는기능
+                //3148200040
+                try {
+                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                    const list = response.data
+
+                    const newDepartments = list.map(v => v.depCode);
+                    newDepartments.map((v,i)=>{
+                        setDepartments(newDepartments);
+                    })
+
+
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
         } else {
             alert("없는 회사코드임");
         }
@@ -107,13 +124,13 @@ export default function SignUpForm() {
         }
     };
 
-    const departmentSearch =()=>{
-        //부서검색누르면 부서리스트나와서하는기능
-    }
-    
-    const firmSearch =()=>{
-        //상관검색누르면 상관리스트나와서 하는기능
-    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault(); // 기본 동작 방지
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -196,6 +213,7 @@ export default function SignUpForm() {
                         name="companyCode"
                         value={formData.companyCode}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
                         placeholder={errors.companyCode || '회사코드 입력'}
                         disabled={companyConfirm ? true : false}
@@ -211,6 +229,7 @@ export default function SignUpForm() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.name ? 'border-red-500' : ''}`}
                         placeholder={errors.name || '이름 입력'}
                     />
@@ -224,6 +243,7 @@ export default function SignUpForm() {
                         name="id"
                         value={formData.id}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.id ? 'border-red-500' : ''}`}
                         placeholder={errors.id || '아이디 입력'}
                         disabled={idConfirm ? true : false}
@@ -240,6 +260,7 @@ export default function SignUpForm() {
                         type="password"
                         value={formData.password}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.password ? 'border-red-500' : ''}`}
                         placeholder={errors.password || '비밀번호 입력'}
                     />
@@ -255,6 +276,7 @@ export default function SignUpForm() {
                         type="password"
                         value={formData.confirmPassword}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.confirmPassword ? 'border-red-500' : ''}`}
                         placeholder={errors.confirmPassword || '비밀번호 확인 입력'}
                     />
@@ -270,6 +292,7 @@ export default function SignUpForm() {
                         id="phone"
                         name="phone"
                         value={formData.phone}
+                        onKeyDown={handleKeyDown}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                             setFormData(prev => ({...prev, phone: value}));
@@ -289,6 +312,7 @@ export default function SignUpForm() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.email ? 'border-red-500' : ''}`}
                             placeholder={errors.email || '이메일 입력'}
                         />
@@ -306,6 +330,7 @@ export default function SignUpForm() {
                         name="verificationCode"
                         value={formData.verificationCode}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.verificationCode ? 'border-red-500' : ''}`}
                         placeholder={errors.verificationCode || '인증번호 입력'}
                     />
@@ -319,15 +344,22 @@ export default function SignUpForm() {
                 <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
                     <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
                     <div className="flex-grow relative flex">
-                        <input
+                        <select
                             id="department"
                             name="department"
                             value={formData.department}
                             onChange={handleChange}
                             className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
-                            placeholder={errors.department || '부서 입력'}
-                        />
-                        <button onClick={departmentSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>
+                        >
+                            <option value="">부서 선택</option>
+                            {/* 기본 선택 옵션 */}
+                            {departments.map((dep, index) => (
+                                <option key={index} value={dep}>
+                                    {dep}
+                                </option>
+                            ))}
+                        </select>
+
                     </div>
                 </div>
 
@@ -340,10 +372,11 @@ export default function SignUpForm() {
                             name="supervisorCode"
                             value={formData.supervisorCode}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
                             placeholder={errors.supervisorCode || '상관 코드 입력'}
                         />
-                        <button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>
+                        {/*<button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>*/}
                     </div>
                 </div>
 
@@ -355,6 +388,7 @@ export default function SignUpForm() {
                             id="residentNumber1"
                             name="residentNumber1"
                             value={formData.residentNumber1}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                                 setFormData(prev => ({...prev, residentNumber1: value}));
@@ -368,6 +402,7 @@ export default function SignUpForm() {
                             id="residentNumber2"
                             name="residentNumber2"
                             value={formData.residentNumber2}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                                 setFormData(prev => ({...prev, residentNumber2: value}));

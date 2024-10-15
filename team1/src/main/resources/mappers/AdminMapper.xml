@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.AdminFAQMapper">
+    <select id="selectFAQ" parameterType="kr.or.nextit.team1.DTOs.AdminFAQDTO">
+        select * from adminfaq
+    </select>
+    <insert id="insertQ" parameterType="kr.or.nextit.team1.DTOs.AdminQDTO">
+        INSERT INTO adminqtest
+        (EMP_CODE, TITLE, CONTENT, START_DATE, ANS_TITLE, ANS_CONTENT, Q_STATUS)
+        VALUES(#{empCode},#{title}, #{content}, current_timestamp(), NULL, NULL, 0);
+    </insert>
+</mapper>
