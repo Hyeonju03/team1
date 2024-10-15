@@ -12,10 +12,10 @@ import DocumentList from "./DocumentList";
 import DocumentDetail from "./DocumentDetail";
 import DocumentRegister from "./DocumentRegister";
 import ApplyForBusiness from "./ApplyForBusiness";
-import Schedule from "@/Schedule";
-import SignList from "@/SignList";
-import SignRequest from "@/SignRequest";
-import UserInfo from "@/UserInfo";
+import Schedule from "./Schedule";
+import SignList from "./SignList";
+import SignRequest from "./SignRequest";
+import UserInfo from "./UserInfo";
 
 function App() {
     return (
