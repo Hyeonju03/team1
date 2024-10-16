@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Button({ children, size, variant, onClick }) {
     const baseStyle = "px-4 py-2 rounded";
     const sizeStyle = size === "sm" ? "text-sm" : "text-base";
     const variantStyle = variant === "outline" ? "border border-gray-300 bg-white" : "bg-blue-500 text-white";
+
 
     return (
         <button className={`${baseStyle} ${sizeStyle} ${variantStyle}`} onClick={onClick}>
@@ -50,23 +52,72 @@ function TableCell({ children }) {
 export default function Component() {
     const navigate = useNavigate();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [data, setData] = useState([
-        { id: 1, title: "우에에엥", date: "2024.10.02", status: "답변대기", checked: false },
-        { id: 2, title: "하기싫어요", date: "2024.10.03", status: "답변완료", checked: false },
-    ]);
+
+    const [Qlist,setQList] = useState([])
     const [qSearch,setQSearch] = useState("")
+    const [filterQlist,setFilterQlist] = useState([])
 
     const handleCheckboxChange = (id) => {
-        setData(prevData =>
+        setQList(prevData =>
             prevData.map(item =>
-                item.id === id ? { ...item, checked: !item.checked } : item
+                item.qNum === id ? { ...item, checked: !item.checked } : item
+            )
+        );
+
+        // filterQlist는 원본 Qlist의 상태를 기반으로 동적으로 업데이트
+        setFilterQlist(prevFilterQlist =>
+            prevFilterQlist.map(item =>
+                item.qNum === id ? { ...item, checked: !item.checked } : item
             )
         );
     };
 
-    const handleDelete = () => {
-        setData(prevData => prevData.filter(item => !item.checked));
+
+    useEffect(() => {
+        const fetchData = async ()=>{
+            try{
+                const response = await axios.get("/QDetailList");
+                const list = response.data;
+
+                // startDate 변환
+                const updatedList = list.map(v => {
+                    const date = new Date(v.startDate);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+
+                    return {
+                        ...v, // 기존 데이터 유지
+                        startDate: `${year}-${month}-${day}`, // 변환된 날짜
+                        checked: false
+                    };
+                });
+
+                setQList(updatedList);
+                setFilterQlist(updatedList)
+            }catch (error) {
+                console.error(error);
+            }
+        }
+        fetchData();
+    }, []);
+
+    const handleDelete = async () => {
         //db데이터 삭제하는 기능 구현해야됨
+        const idsToDelete = Qlist.filter(item => item.checked).map(item => item.qNum);
+        console.log(idsToDelete)
+        if (idsToDelete.length > 0) {
+            try {
+                await axios.delete("/deleteAdminQDetail",  { data: idsToDelete });
+                // 체크된 항목 삭제 후 상태 업데이트
+                setQList(prevQList => prevQList.filter(item => !item.checked));
+                setFilterQlist(prevFilterQList => prevFilterQList.filter(item => !item.checked));
+            } catch (error) {
+                console.error("Error deleting items:", error);
+            }
+        } else {
+            alert("삭제할 항목이 선택되지 않았습니다.");
+        }
     };
 
     const qRegister = () => {
@@ -80,8 +131,15 @@ export default function Component() {
     }
 
     const search =(e)=>{
-        console.log("클릭됨");
-        //클릭하면 db에서 qSearch 값조회
+        console.log("클릭");
+        if (qSearch.trim() === "") {
+            setFilterQlist(Qlist); // 검색어가 없으면 모든 리스트를 보여줍니다.
+        } else {
+            const filtered = Qlist.filter(item =>
+                item.title.includes(qSearch)
+            );
+            setFilterQlist(filtered);
+        }
     }
 
     const goQDetail =()=>{
@@ -108,7 +166,7 @@ export default function Component() {
                      style={{height: "900px"}}>
                     <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer" style={{marginLeft: "-40px" ,marginTop:"-200px"}}>
                         <span   className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                              style={{marginRight: "15px"}}/>FAQ</h2>
+                                style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
@@ -141,22 +199,28 @@ export default function Component() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {data.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="text-left">{item.id}.</TableCell>
-                                    <TableCell className="text-left">{item.title}</TableCell>
-                                    <TableCell className="text-left">{item.date}</TableCell>
-                                    <TableCell className="text-left flex items-center">
-                                        <Button size="sm" variant="outline">{item.status}</Button>
-                                        <input
-                                            type="checkbox"
-                                            className="ml-2"
-                                            checked={item.checked}
-                                            onChange={() => handleCheckboxChange(item.id)}
-                                        />
-                                    </TableCell>
+                            {filterQlist.length > 0 ? (
+                                filterQlist.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="text-left">{item.qNum}</TableCell>
+                                        <TableCell className="text-left">{item.title}</TableCell>
+                                        <TableCell className="text-left">{item.startDate}</TableCell>
+                                        <TableCell className="text-left flex items-center">
+                                            <Button size="sm" variant="outline">{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
+                                            <input
+                                                type="checkbox"
+                                                className="ml-2"
+                                                checked={item.checked || false}
+                                                onChange={() => handleCheckboxChange(item.qNum)}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">결과가 없습니다.</TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
 

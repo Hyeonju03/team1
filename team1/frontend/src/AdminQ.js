@@ -25,14 +25,34 @@ export default function FAQPage() {
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [empCode,setEmpCode] = useState("")
+
+    //로그인시 empcode를 일단 가져오는코드
+    useEffect(() => {
+        // 로그인 후 empCode를 설정하는 로직
+        const fetchEmpCode = async () => {
+            // 여기에서 실제 empCode를 설정
+            const loggedInEmpCode = "2048209555-dffdsfd"; // 로그인 후 받아온 empCode
+            setEmpCode(loggedInEmpCode);
+        };
+        fetchEmpCode();
+    }, []);
+
+
 
     useEffect(() => {
-        const fetchData = async ()=>{
-            try{
-                const response = await axios.get()
+        const fetchData = async ()=> {
+            if (empCode) { // empCode가 설정된 경우에만 호출
+                try {
+                    const response = await axios.get(`/selectEmpCode?empCode=${empCode.trim()}`); // 공백 제거
+                    console.log(response.data);
+                } catch (error) {
+                    console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
+                }
             }
         }
-    }, []);
+        fetchData();
+    }, [empCode]);
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -42,12 +62,19 @@ export default function FAQPage() {
         setContent(e.target.value);
     }
 
-    const qComplete = (e) => {
+    const qComplete = async (e) => {
         alert("문의작성완료")
+        const send ={empCode:empCode,title:title, content: content}
+        const config = {
+            headers: { "Content-Type": `application/json`}
+        };
+
+
+        const result = await axios.post('insertQ',send,config)
         console.log(title, content);
         e.preventDefault(); // 기본 폼 제출 방지
-        // navigate("/AdminQDetail");
-        // window.location.reload();
+        navigate("/AdminQDetail");
+        window.location.reload();
     }
 
     const qCancel = (e) => {
