@@ -10,6 +10,7 @@ export default function SignRequest() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
+    const [openTarget, setOpenTarget] = useState(false);
 
     const windowRClick = async (e) => {
         e.preventDefault()
@@ -21,7 +22,6 @@ export default function SignRequest() {
         e.target.className === "worker" ?
             setIsRClick(true) : setIsRClick(false)
     }
-
 
     const setDoc = useCallback(() => {
         // doc리스트 가져오기
@@ -209,7 +209,22 @@ export default function SignRequest() {
                                placeholder="대표이사   ○ ○ ○"/>
                     </div>
                 </div>
-                <div>
+                <div className="max-w-sm">
+                    <form>
+                        <label className="block">
+                            <span className="sr-only">Choose profile photo</span>
+                            <input type="file" className="block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                            file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none dark:text-neutral-500 dark:file:bg-blue-500
+                            dark:hover:file:bg-blue-400" multiple/>
+                        </label>
+                    </form>
+                </div>
+                <div className="mt-4">
+                    <button className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]" onClick={()=>{setOpenTarget(true)}}>
+                        결재선 정하기
+                    </button>
+                </div>
+                <div className="mt-4">
                     <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
                         문서 만들기
                     </button>
@@ -218,7 +233,8 @@ export default function SignRequest() {
                     </button>
                 </div>
             </main>
-
+            
+            {/*결재선 관련*/}
 
             {/* Slide-out panel with toggle button */}
             <div

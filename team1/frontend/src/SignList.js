@@ -7,10 +7,9 @@ export default function SignList() {
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
 
     useEffect(() => {
-        const res = axios.get('/schedule')
+        const res = axios.get('/signlist')
             .then(response => {
                 console.log(response.data);
-                setSchedules(response.data); // 서버에서 받은 데이터를 상태에 설정
             })
         console.log(res)
     }, []);
