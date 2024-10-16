@@ -45,6 +45,7 @@ export default function ApplyForBusiness() {
         }
     };
 
+    // 유효성체크
     const validateForm = () => {
         if (!comCode) {
             alert("사업자 등록번호를 입력해주세요.");

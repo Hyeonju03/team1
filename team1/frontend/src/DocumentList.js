@@ -18,48 +18,39 @@ const Input = ({className, ...props}) => {
 };
 
 export default function DocumentList() {
+
     const [isExpanded, setIsExpanded] = useState(false);
     const [documents, setDocuments] = useState([]);
+    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const navigate = useNavigate(); // navigate 함수 사용
 
-    // const documents = [
-    //     {id: 1, title: "문서 제목 1", category: "카테고리 1", date: "2024-10-10 12:00"},
-    //     {id: 2, title: "문서 제목 2", category: "카테고리 2", date: "2024-10-09 13:13"},
-    //     // 추가 문서 ...
-    // ];
 
-    // useEffect(() => {
-    //     fetch('/api/document')
-    //         .then(response => response.json())
-    //         .then(data => setDocuments(data))
-    //         .catch(error => console.error('Error fetching documents:', error));
-    // }, []);
 
     useEffect(() => {
-        axios.get('/api/document')
+        const comCode = 3118115625; // 회사코드
+        // documenttest 테이블에서 문서 가져오기
+        axios.get(`/company/${comCode}`)
             .then(response => {
-                console.log(response.data);
+                // console.log(response.data);
                 setDocuments(response.data);
             })
-            .catch(error => console.log(error))
+            .catch(error => console.log(error));
 
-    }, []);
-
-    useEffect(() => {
-        axios.get('/test')
-            .then(response=>{
-                console.log(response.data);
+        // code 테이블에서 카테고리 가져오기
+        axios.get(`/code`) // API 엔드포인트를 조정하세요
+            .then(response => {
+                // console.log(response.data);
+                // 응답이 카테고리 배열이라고 가정할 때
+                const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
+                setCategories(uniqueCategories); // 카테고리 상태에 저장
             })
+            .catch(error => console.log(error));
     }, []);
+
 
     const handleDocumentClick = (id) => {
         navigate(`/document/detail/${id}`)
     }
-
-    // const formatDate = (dateString) => {
-    //     const date = new Date(dateString); // 날짜 문자열을 Date 객체로 변환
-    //     return date.toISOString().slice(0, 16).replace("T", " "); // 형식화된 문자열 반환
-    // };
 
     const formatDate = (dateString) => {
         return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
@@ -86,11 +77,15 @@ export default function DocumentList() {
                             문서함
                         </Button>
                         {isExpanded && (
-                            <div className="ml-8 shandleDelete pace-y-2 mt-2">
-                                <Button variant="ghost" className="w-full">카테고리 1</Button>
-                                <Button variant="ghost" className="w-full">카테고리 2</Button>
-                                <Button variant="ghost" className="w-full">카테고리 3</Button>
-                                <Button variant="ghost" className="w-full">카테고리 4</Button>
+                            <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                {categories.map((category, index) => (
+                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
+                                    category.split(',').map((item, subIndex) => (
+                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}>
+                                            {item}
+                                        </Button>
+                                    ))
+                                ))}
                             </div>
                         )}
                     </div>
@@ -113,22 +108,23 @@ export default function DocumentList() {
                     <div className="space-y-2">
                         {documents.map((document) => (
                             <div
-                                key={document.id}
+                                key={document.docNum}
                                 className="flex items-center space-x-4 p-2 border rounded cursor-pointer"
-                                onClick={() => handleDocumentClick(document.id)} // 제목 클릭 시 페이지 이동
+                                onClick={() => handleDocumentClick(document.docNum)} // 제목 클릭 시 페이지 이동
 
                             >
                                 <input
                                     type="checkbox"
                                     className="h-4 w-4"
+                                    onClick={(e) => e.stopPropagation()} // 클릭 이벤트 전파 방지
 
                                 />
                                 <Paperclip className="h-4 w-4 text-gray-400"/>
                                 <div className="flex-1">
                                     <div className="font-semibold text-left">{document.title}</div>
-                                    <div className="text-sm text-gray-600 text-left">{document.category}</div>
+                                    <div className="text-sm text-gray-600 text-left">{document.docCateCode}</div>
                                 </div>
-                                <div className="text-sm text-gray-500">{formatDate(document.date)}</div>
+                                <div className="text-sm text-gray-500">{formatDate(document.startDate)}</div>
                             </div>
                         ))}
                     </div>
