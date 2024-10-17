@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.ListLibraryMapper">
+    <select id="chartSelect" resultType="ListLibraryDTO" parameterType="String">
+        select SUBSTRING_INDEX(e.EMP_CODE,'-',1) AS "EMP_CODE",e.EMP_NAME , e.DEP_CODE AS "EMP_DEP_CODE",c.DEP_CODE ,c.UPDEP_CODE
+        from employeetest e, code c
+        where SUBSTRING_INDEX(e.EMP_CODE,'-',1) like "3118115625"
+        and SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
+    </select>
+</mapper>
