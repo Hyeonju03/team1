@@ -4,7 +4,7 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.AdminQDetailMapper">
     <select id="selectAdminQDetail" parameterType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
-        select qNum, EMP_CODE,TITLE,CONTENT,START_DATE,Q_STATUS FROM adminqtest
+        select qNum, EMP_CODE,TITLE,CONTENT,START_DATE,Q_STATUS,ANS_TITLE,ANS_CONTENT FROM adminqtest
     </select>
     <delete id="deleteAdminQDetail">
         DELETE FROM adminqtest WHERE qNum = #{qNum}

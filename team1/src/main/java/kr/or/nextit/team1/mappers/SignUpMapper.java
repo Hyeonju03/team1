@@ -13,4 +13,6 @@ public interface SignUpMapper {
 
     List<CodeDTO> findAllCodes(String comCode);
 
+    List<SignUpDTO> findAllempCode(String comCode);
+
 }

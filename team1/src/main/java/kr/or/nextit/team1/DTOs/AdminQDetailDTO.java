@@ -10,18 +10,22 @@ public class AdminQDetailDTO {
     private LocalDateTime startDate;
     private Boolean QStatus;
     private int qNum;
+    private String ansTitle;
+    private String ansContent;
 
     public AdminQDetailDTO() {
 
     }
 
-    public AdminQDetailDTO(String empCode, String title, String content, LocalDateTime startDate, Boolean QStatus, int qNum) {
+    public AdminQDetailDTO(String empCode, String title, String content, LocalDateTime startDate, Boolean QStatus, int qNum, String ansTitle, String ansContent) {
         this.empCode = empCode;
         this.title = title;
         this.content = content;
         this.startDate = startDate;
         this.QStatus = QStatus;
         this.qNum = qNum;
+        this.ansTitle = ansTitle;
+        this.ansContent = ansContent;
     }
 
     public String getEmpCode() {
@@ -72,6 +76,22 @@ public class AdminQDetailDTO {
         this.qNum = qNum;
     }
 
+    public String getAnsTitle() {
+        return ansTitle;
+    }
+
+    public void setAnsTitle(String ansTitle) {
+        this.ansTitle = ansTitle;
+    }
+
+    public String getAnsContent() {
+        return ansContent;
+    }
+
+    public void setAnsContent(String ansContent) {
+        this.ansContent = ansContent;
+    }
+
     @Override
     public String toString() {
         return "AdminQDetailDTO{" +
@@ -81,6 +101,8 @@ public class AdminQDetailDTO {
                 ", startDate=" + startDate +
                 ", QStatus=" + QStatus +
                 ", qNum=" + qNum +
+                ", ansTitle='" + ansTitle + '\'' +
+                ", ansContent='" + ansContent + '\'' +
                 '}';
     }
 }

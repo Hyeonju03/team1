@@ -24,6 +24,7 @@ export default function SignUpForm() {
     const [idConfirm,setIdConfirm] = useState(false)
     const [pwConfirm,setPwConfirm] = useState(false)
     const [companyConfirm,setCompanyConfirm] = useState(false)
+    const [inputidCheck,setInputIdCheck] = useState("")
     const [errors, setErrors] = useState({});
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function SignUpForm() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setInputIdCheck(e.target)
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
     };
@@ -88,14 +90,36 @@ export default function SignUpForm() {
         }
     }
 
-    const idCheck = () => {
+    const idCheck = async() => {
+        const companyCode = formData.companyCode;
         const id = formData.id;
-        if (id === "123") {
-            alert("이미 있는 아이디임");
-        } else {
-            alert("사용 가능함");
-            setIdConfirm(true)
+        if (!id) {
+            console.error("ID is empty");
+            return; // ID가 비어있으면 함수 종료
         }
+        try {
+            const response = await axios.get('/findAllempCode', {params: { comCode: companyCode }});
+            const empCodes = response.data.map(item => item.empCode);
+
+            const resultEmpCode = empCodes.map(code => code.split('-')[1]);
+            console.log(resultEmpCode)
+            for (let i = 0; i <= resultEmpCode.length; i++) {
+                if(id == resultEmpCode[i] ){
+                    alert("이미 있는 아이디입니다");
+                    break;
+                }else{
+                    alert("가능");
+                    setIdConfirm(true)
+                }
+            }
+
+
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+
+
     };
 
     const pwCheck =(e)=>{
@@ -110,14 +134,29 @@ export default function SignUpForm() {
         }
     }
 
-    const sendVerificationCode = () => {
-        const code = Math.floor(100000 + Math.random() * 900000); // 6자리 랜덤 숫자 생성
-        setGeneratedCode(code);
-        alert(`인증번호가 발송되었습니다: ${code}`); // 실제로는 이메일 발송 로직이 필요합니다.
-    };
+    const sendVerificationCode = async () => {
+        const email = formData.email;
+        if (!email) {
+            alert("이메일 입력해")
+            return
+        }
+        try {
+            const response = await axios.post('/randomCode', { email });
+            const code = response.data.code; // 서버에서 받은 인증 코드를 저장
+            console.log(code)
+            setGeneratedCode(code); // 인증 코드를 상태에 저장
+
+            alert(`인증번호가 발송되었습니다: ${code}`); // 확인 메시지 (실제 이메일 발송 후 삭제 가능)
+        } catch (error) {
+            console.error('Error sending verification code:', error);
+            alert("인증번호 전송에 실패했습니다.");
+        }
+    }
 
     const verifyCode = () => {
-        if (parseInt(formData.verificationCode) === generatedCode) {
+
+        console.log(generatedCode)
+        if (parseInt(formData.verificationCode) == generatedCode) {
             alert("인증번호가 일치합니다.");
         } else {
             alert("인증번호가 일치하지 않습니다.");

@@ -44,8 +44,10 @@ export default function FAQPage() {
         const fetchData = async ()=> {
             if (empCode) { // empCode가 설정된 경우에만 호출
                 try {
-                    const response = await axios.get(`/selectEmpCode?empCode=${empCode.trim()}`); // 공백 제거
+                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
                     console.log(response.data);
+
+
                 } catch (error) {
                     console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
                 }
@@ -63,40 +65,39 @@ export default function FAQPage() {
     }
 
     const qComplete = async (e) => {
-        alert("문의작성완료")
+        e.preventDefault(); // 기본 폼 제출 방지
         const send ={empCode:empCode,title:title, content: content}
         const config = {
             headers: { "Content-Type": `application/json`}
         };
 
+       try{
+           const result = await axios.post('/insertQ',send,config)
+           console.log(result)
+           navigate("/AdminQDetail");
+           alert("문의작성완료")
+       } catch (error) {
+           console.log(error)
+       }
 
-        const result = await axios.post('insertQ',send,config)
-        console.log(title, content);
-        e.preventDefault(); // 기본 폼 제출 방지
-        navigate("/AdminQDetail");
-        window.location.reload();
     }
 
     const qCancel = (e) => {
         e.preventDefault(); // 기본 링크 동작 방지
         navigate("/AdminQDetail"); // 이동할 페이지로 네비게이트
-        window.location.reload();
     }
 
     const goQDetail =()=>{
         navigate("/AdminQDetail");
-        window.location.reload();
     }
 
     const qRegister = () => {
         navigate("/AdminQ");
-        window.location.reload();
     }
 
 
     const goFAQ =()=>{
         navigate("/AdminFAQ");
-        window.location.reload();
     }
 
     const togglePanel = () => {

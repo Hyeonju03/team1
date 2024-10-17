@@ -15,4 +15,10 @@
         SELECT DEP_CODE FROM codetest
         WHERE COM_CODE = #{comCode}
     </select>
+
+    <select id="findAllempCode" resultType="kr.or.nextit.team1.DTOs.SignUpDTO">
+        SELECT EMP_CODE
+        FROM employeetest
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+    </select>
 </mapper>

@@ -45,8 +45,8 @@ function TableHead({ children }) {
     return <th className="p-2 text-center">{children}</th>;
 }
 
-function TableCell({ children }) {
-    return <td className="p-2 text-center">{children}</td>;
+function TableCell({ children , onClick }) {
+    return <td className="p-2 text-center" onClick={onClick}>{children}</td>;
 }
 
 export default function Component() {
@@ -142,6 +142,13 @@ export default function Component() {
         }
     }
 
+    const goDetail=(item)=>{
+        // const {qNum} = item
+        console.log(item)
+        navigate("/AdminOneToOneDetail",{ state : {item} });
+
+    }
+
     const goQDetail =()=>{
         navigate("/AdminQDetail");
         window.location.reload();
@@ -203,7 +210,8 @@ export default function Component() {
                                 filterQlist.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="text-left">{item.qNum}</TableCell>
-                                        <TableCell className="text-left">{item.title}</TableCell>
+                                        <TableCell onClick={()=>goDetail(item)} className="text-left cursor-pointer">
+                                            <span className="cursor-pointer">{item.title}</span></TableCell>
                                         <TableCell className="text-left">{item.startDate}</TableCell>
                                         <TableCell className="text-left flex items-center">
                                             <Button size="sm" variant="outline">{item.qstatus === false ? "답변대기" : "답변완료"}</Button>

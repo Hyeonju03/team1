@@ -16,6 +16,7 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
+import AdminOneToOneDetail from "./AdminOneToOneDetail"
 
 function App() {
     return (
@@ -30,6 +31,7 @@ function App() {
 
                     <Route path="/AdminFAQ" element={<AdminFAQ/>}/>
                     <Route path="/AdminQDetail" element={<AdminQDetail/>}/>
+                    <Route path="/AdminOneToOneDetail" element={<AdminOneToOneDetail/>}/>
                     <Route path="/Log" element={<Log/>}/>
                     <Route path="/LogList" element={<LogList/>}/>
                       
