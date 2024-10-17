@@ -1,12 +1,15 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
+import SignTarget from "./SignTarget";
 
 export default function SignRequest() {
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
+    const [list, setList] = useState([{ number: "", empCode: "" }]);
 
+    const [isToggled, setIsToggled] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
@@ -60,6 +63,10 @@ export default function SignRequest() {
         setOpenDocumentId(openDocumentId === docId ? null : docId);
     };
 
+    const handleToggle = () => {
+        setIsToggled(prevState => !prevState);
+    };
+
     const addNewDocument = () => {
         const newDoc = {
             id: `00${documents.length + 1}`,
@@ -73,9 +80,22 @@ export default function SignRequest() {
         setDocuments([...documents, newDoc]);
     };
 
+    const goTargetClose = (param) => {
+        setOpenTarget(false);
+        if(param) {
+            setList([
+                ...list,
+                {
+                    number: param.number,
+                    empCode: param.empCode,
+                }
+            ])
+        }
+    }
+
     return (
-        <div className="min-h-screen flex flex-col bg-gray-100"  onContextMenu={windowRClick}>
-            {/* Header with logo */}
+    <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
+        {/* Header with logo */}
             <header className="bg-white shadow-md p-4">
                 <div className="container mx-auto">
                     <div className="w-32 h-8 bg-gray-300 flex items-center justify-center">
@@ -85,158 +105,189 @@ export default function SignRequest() {
             </header>
 
             {/* Main content */}
-            <main
-                className="flex-grow flex flex-col items-center container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
-                <h1 className="text-2xl font-bold mb-6">문서작성</h1>
+        <main
+            className="flex-grow flex flex-col items-center container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
+            <h1 className="text-2xl font-bold mb-6">문서작성</h1>
 
-                <div
-                    className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
-                    {/* 내용 추가 가능 */}
-                    {/*  회사명, 결재라인  */}
-                    <table className="h-[178px]">
-                        <tr>
-                            <td className="w-[500px] text-2xl">
-                                <input type="text" placeholder="기업명"
-                                       className="text-center h-[100px] w-[450px] text-2xl"/>
-                            </td>
-                            <td className="w-[500px] flex flex-row justify-center mt-5">
-                                <div className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                    <div className="h-[30px] bg-gray-200">
-                                        결 재
-                                    </div>
-                                    <div className="h-[100px] border-t-2 border-black">그렇게됬다</div>
+            <div className="flex justify-between w-[350px] mb-4">
+                <div className={`${isToggled ? '' : 'font-bold'}`}>파일만 첨부하기 </div>
+                <p className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${isToggled ? 'on bg-blue-300' : 'off'}`} onClick={handleToggle}>
+                    <div className={`w-[25px] h-[25px] rounded-full bg-blue-600 absolute top-[2px] ${isToggled ? 'right-[3px]': 'left-[3px] border-blue-600'}`}></div>
+                </p>
+                <div className={`${isToggled ? 'font-bold' : ''}`}>제공된 양식 사용하기</div>
+            </div>
+
+            {openTarget ? <SignTarget onTargetClose={goTargetClose}/> : null}
+
+            {isToggled ?
+            <div
+                className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
+                {/* 내용 추가 가능 */}
+                {/*  회사명, 결재라인  */}
+                <table className="h-[178px]">
+                    <tr>
+                        <td className="w-[500px] text-2xl">
+                            <input type="text" placeholder="기업명"
+                                   className="text-center h-[100px] w-[450px] text-2xl"/>
+                        </td>
+                        <td className="w-[500px] flex flex-row justify-center mt-5">
+                            <div className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                <div className="h-[30px] bg-gray-200">
+                                    결 재
                                 </div>
-                            </td>
-                        </tr>
-                    </table>
-                    {/*    */}
-                    <div className="mt-[20px]">
-                        <input type="text" placeholder="주소" className="text-center h-[50px] w-[900px] text-lg"/>
-                    </div>
-                    {/*    */}
-                    <table className="mb-[40px] border-t-2 border-b-4 border-black">
-                        <tr>
-                            <td className="w-[500px] border-r-2 border-black">
-                                <input type="tel" placeholder="TEL: (000)0000-0000"
-                                       className="text-center h-[50px] w-[400px] text-lg"/>
-                            </td>
-                            <td className="w-[500px] border-l-2 border-black">
-                                <input type="tel" placeholder="FAX: (000)0000-0000"
-                                       className="text-center h-[50px] w-[400px] text-lg"/>
-                            </td>
-                        </tr>
-                    </table>
-                    {/*    */}
-                    <table className="border-t-4 border-b-4 border-black mb-[20px]">
-                        <tr className="border-b-2 border-black">
-                            <td className="w-[200px] border-r-2 border-black">
-                                <div>문 서 번 호</div>
-                            </td>
-                            <td className="w-[800px]">
-                                <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                            </td>
-                        </tr>
-                        <tr className="border-b-2 border-black">
-                            <td className="w-[200px] border-r-2 border-black">
-                                <div>수 신</div>
-                            </td>
-                            <td className="w-[800px]">
-                                <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                            </td>
-                        </tr>
-                        <tr className="border-b-2 border-black">
-                            <td className="w-[200px] border-r-2 border-black">
-                                <div>참 조</div>
-                            </td>
-                            <td className="w-[800px]">
-                                <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="w-[200px] border-r-2 border-black">
-                                <div>제 목</div>
-                            </td>
-                            <td className="w-[800px]">
-                                <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                            </td>
-                        </tr>
-                    </table>
-                    {/*    */}
-                    <div>
-                        <textarea className="w-[950px] h-[300px]" placeholder="문서의 개요를 작성하세요."/>
-                    </div>
-                    {/*    */}
-                    <table>
-                        <tr>
-                            <td className="h-[50px]">
-                                <div>- 아 래 -</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="">
-                                <div>
-                                    <textarea className="w-[950px] h-[400px]" placeholder="문서의 내용을 작성하세요."/>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    {/*    */}
-                    <table className="w-[950px]">
-                        <tr>
-                            <td rowSpan="3">
-                                <div>※ 붙임</div>
-                            </td>
-                            <td>
-                                1. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                2. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                3. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                            </td>
-                        </tr>
-                    </table>
-                    <div>
-                        <input className="text-center h-[50px] w-[200px]" placeholder="20oo년  oo월  oo일"/>
-                    </div>
-                    <div>
-                        <input type='textbox' className="text-center h-[100px] w-[300px] text-2xl"
-                               placeholder="대표이사   ○ ○ ○"/>
-                    </div>
+                                <div className="h-[100px] border-t-2 border-black">그렇게됬다</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                {/*    */}
+                <div className="mt-[20px]">
+                    <input type="text" placeholder="주소" className="text-center h-[50px] w-[900px] text-lg"/>
                 </div>
-                <div className="max-w-sm">
-                    <form>
-                        <label className="block">
-                            <span className="sr-only">Choose profile photo</span>
-                            <input type="file" className="block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                {/*    */}
+                <table className="mb-[40px] border-t-2 border-b-4 border-black">
+                    <tr>
+                        <td className="w-[500px] border-r-2 border-black">
+                            <input type="tel" placeholder="TEL: (000)0000-0000"
+                                   className="text-center h-[50px] w-[400px] text-lg"/>
+                        </td>
+                        <td className="w-[500px] border-l-2 border-black">
+                            <input type="tel" placeholder="FAX: (000)0000-0000"
+                                   className="text-center h-[50px] w-[400px] text-lg"/>
+                        </td>
+                    </tr>
+                </table>
+                {/*    */}
+                <table className="border-t-4 border-b-4 border-black mb-[20px]">
+                    <tr className="border-b-2 border-black">
+                        <td className="w-[200px] border-r-2 border-black">
+                            <div>문 서 번 호</div>
+                        </td>
+                        <td className="w-[800px]">
+                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
+                        </td>
+                    </tr>
+                    <tr className="border-b-2 border-black">
+                        <td className="w-[200px] border-r-2 border-black">
+                            <div>수 신</div>
+                        </td>
+                        <td className="w-[800px]">
+                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
+                        </td>
+                    </tr>
+                    <tr className="border-b-2 border-black">
+                        <td className="w-[200px] border-r-2 border-black">
+                            <div>참 조</div>
+                        </td>
+                        <td className="w-[800px]">
+                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td className="w-[200px] border-r-2 border-black">
+                            <div>제 목</div>
+                        </td>
+                        <td className="w-[800px]">
+                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
+                        </td>
+                    </tr>
+                </table>
+                {/*    */}
+                <div>
+                    <textarea className="w-[950px] h-[300px]" placeholder="문서의 개요를 작성하세요."/>
+                </div>
+                {/*    */}
+                <table>
+                    <tr>
+                        <td className="h-[50px]">
+                            <div>- 아 래 -</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div>
+                                <textarea className="w-[950px] h-[400px]" placeholder="문서의 내용을 작성하세요."/>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                {/*    */}
+                <table className="w-[950px]">
+                    <tr>
+                        <td rowSpan="3">
+                            <div>※ 붙임</div>
+                        </td>
+                        <td>
+                            1. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            3. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
+                        </td>
+                    </tr>
+                </table>
+                <div>
+                    <input className="text-center h-[50px] w-[200px]" placeholder="20oo년  oo월  oo일"/>
+                </div>
+                <div>
+                    <input type='textbox' className="text-center h-[100px] w-[300px] text-2xl"
+                           placeholder="대표이사   ○ ○ ○"/>
+                </div>
+            </div> :
+                <div>
+                    <textarea className="w-[950px] h-[400px] border-2" placeholder="파일과 함께 보낼 내용을 작성해주세요."/>
+                </div>}
+            <div className="max-w-sm">
+                <form>
+                    <label className="block">
+                        <span className="sr-only">Choose profile photo</span>
+                        <input type="file" className="block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
                             file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none dark:text-neutral-500 dark:file:bg-blue-500
                             dark:hover:file:bg-blue-400" multiple/>
-                        </label>
-                    </form>
-                </div>
-                <div className="mt-4">
-                    <button className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]" onClick={()=>{setOpenTarget(true)}}>
-                        결재선 정하기
-                    </button>
-                </div>
-                <div className="mt-4">
-                    <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
-                        문서 만들기
-                    </button>
-                    <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]">
-                        취소
-                    </button>
-                </div>
-            </main>
-            
-            {/*결재선 관련*/}
+                    </label>
+                </form>
+            </div>
+            <div className="mt-4">
+                <button className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]"
+                        onClick={() => {
+                            setOpenTarget(true)
+                        }}>
+                    결재선 정하기
+                </button>
+                <table className="table-auto">
+                    <tr>
+                        <td>순서</td>
+                        <td>성명</td>
+                        <td>부서</td>
+                        <td>직급</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>ㅇㅇㅇ</td>
+                        <td>경리부</td>
+                        <td>대리</td>
+                    </tr>
+                </table>
+            </div>
+            <div className="mt-4">
+                <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
+                    문서 만들기
+                </button>
+                <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]">
+                    취소
+                </button>
+            </div>
+        </main>
 
-            {/* Slide-out panel with toggle button */}
+        {/*결재선 관련*/}
+
+        {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >

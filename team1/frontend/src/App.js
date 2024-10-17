@@ -33,7 +33,7 @@ function App() {
                     <Route path="/Log" element={<Log/>}/>
                     <Route path="/LogList" element={<LogList/>}/>
                       
-                    <Route path="/document" element={<DocumentList/>}/>
+                    <Route path="/documents" element={<DocumentList/>}/>
                     <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
 
