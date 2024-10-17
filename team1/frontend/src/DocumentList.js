@@ -31,7 +31,7 @@ export default function DocumentList() {
         // documenttest 테이블에서 문서 가져오기
         axios.get(`/company/${comCode}`)
             .then(response => {
-                // console.log(response.data);
+                console.log(response.data);
                 setDocuments(response.data);
             })
             .catch(error => console.log(error));
@@ -48,8 +48,8 @@ export default function DocumentList() {
     }, []);
 
 
-    const handleDocumentClick = (id) => {
-        navigate(`/document/detail/${id}`)
+    const handleDocumentClick = (docNum) => {
+        navigate(`/documents/${docNum}`)
     }
 
     const formatDate = (dateString) => {

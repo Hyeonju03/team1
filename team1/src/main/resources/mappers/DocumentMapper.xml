@@ -8,11 +8,26 @@
     -->
     <select id="documentSelect" resultType="DocumentDTO">
         SELECT *
-        FROM employeetest e, documenttest d
-        WHERE SUBSTRING_INDEX(e.EMP_CODE ,'-', 1) = d.EMP_CODE
+        FROM documenttest
     </select>
     <insert id="documentInsert" parameterType="DocumentDTO">
-        INSERT INTO DOCUMENTTEST (EMP_CODE, DOC_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE, FILE_PATH)
-        VALUES (#{empCode}, #{docCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginName}, #{fileSize}, #{filePath})
+        INSERT INTO DOCUMENTTEST (EMP_CODE, DOC_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE,
+        FILE_PATH)
+        VALUES (#{empCode}, #{docCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginName}, #{fileSize},
+        #{filePath})
     </insert>
+
+    <select id="documentDetail" parameterType="int" resultType="DocumentDTO">
+        SELECT DOC_NUM,
+               DOC_CATE_CODE,
+               TITLE,
+               CONTENT,
+               FILE_NAME,
+               FILE_ORIGIN_NAME,
+               FILE_SIZE,
+               FILE_PATH,
+               START_DATE
+        FROM documenttest
+        where DOC_NUM = #{docNum}
+    </select>
 </mapper>

@@ -53,11 +53,11 @@ export default function DocumentRegister() {
             formData.append('attachment', attachment);
         }
 
-        axios.post('/api/document', formData)
+        axios.post('/documents', formData)
             .then(response => {
                 console.log(response.data);
                 // 성공시 문서 리스트로 이동
-                nevigate('/document');
+                nevigate('/documents');
             })
             .catch(error => {
                 console.error('Error fetching documents:', error);

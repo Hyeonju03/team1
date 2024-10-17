@@ -11,4 +11,5 @@ import java.util.List;
 public interface DocumentMapper {
     List<DocumentDTO> documentSelect(@Param("comCode") String comCode);
     void documentInsert(DocumentDTO documentDTO);
+    DocumentDTO documentDetail(int id);
 }

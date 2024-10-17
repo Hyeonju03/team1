@@ -70,4 +70,12 @@ public class DocumentService {
         Files.copy(file.getInputStream(), path);
         return path.toString();
     }
+
+    public DocumentService(DocumentMapper documentMapper) {
+        this.documentMapper = documentMapper;
+    }
+
+    public DocumentDTO documentDetail(int id){
+        return documentMapper.documentDetail(id);
+    }
 }
