@@ -1,11 +1,12 @@
-import React, {createElement} from "react";
+import React from "react";
 
 class ListLibrary {
-    static testData1 = ["배럭", "테란", "마린", "팩토리", "탱크", "벌처", "매딕", "파벳", "고스트", "스타포트", "레이스", "드랍쉽"];
-    static testData2 = ["테란", "", "배럭", "테란", "팩토리", "팩토리", "배럭", "배럭", "배럭", "테란", "스타포트", "스타포트"];
+    static testData1 = ["배럭", "테란", "마린", "팩토리", "탱크", "벌처", "매딕", "파벳", "고스트", "스타포트", "레이스", "드랍쉽", "프로토스", "스타"];
+    static testData2 = ["테란", "스타", "배럭", "테란", "팩토리", "팩토리", "배럭", "배럭", "배럭", "테란", "스타포트", "스타포트","스타",""];
     static testData3 = {};
-    static tagList = {};
-    static comName = "스타";
+    static testData4 = ["1234-1234","1234-1234","1234-1234","1234-1234","1234-1234","1234-1234"]
+    static testData5 = ["홍길동","아무개","사람인","잡코리아","넥스트","아이티"]
+    static testData6 = ["마린","마린","마린","탱크","매딕","탱크"]
     static list1 = "";
     static list2 = "";
     static top = ""
@@ -23,15 +24,17 @@ class ListLibrary {
         //         }
         //     });
         // }
-        // 정대 지우지 마시오.
+        // 절대 지우지 마시오.
 
         const reversePath = () => {
             let htmlList = {};
             this.top = ""
             this.testData1.forEach((v1, i1) => {
                 const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.testData2[i1]}>${v1}<ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
-                const id = htmlTag.id
-                htmlList[id] = htmlTag;
+                htmlList[htmlTag.id] = htmlTag;
+            })
+            this.testData6.forEach((v1,i1)=>{
+                htmlList[v1].children[0].appendChild(new DOMParser().parseFromString(`<li class=${this.testData6[i1]} value=${this.testData4[i1]}>${this.testData5[i1]}</li>`, 'text/html').body.firstChild)
             })
             this.testData1.forEach((v1, i1) => {
                 this.testData1.forEach((v2, i2) => {
@@ -45,6 +48,9 @@ class ListLibrary {
                     this.top = v1
                 }
             })
+
+            console.log()
+
             return htmlList[this.top]
         }
 
@@ -72,9 +78,7 @@ class ListLibrary {
         return (
             <div className="h-[100%] overflow-y-auto">
                 <ul className="list-disc pl-5">
-                    <li>{this.comName}
                         {listCheck()}
-                    </li>
                 </ul>
             </div>
         );
