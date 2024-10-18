@@ -15,4 +15,8 @@ public class ListLibraryService {
     public List<ListLibraryDTO> chartSelect(String code){
         return listLibraryMapper.chartSelect(code);
     }
+
+    public ListLibraryDTO RClickWindowSelect(String code){
+        return listLibraryMapper.RClickWindowSelect(code);
+    }
 }

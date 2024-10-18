@@ -7,6 +7,7 @@ export default function SignRequest() {
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
+    const [newWindowData, setNewWindowData] = useState([])
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -14,13 +15,14 @@ export default function SignRequest() {
 
     const windowRClick = async (e) => {
         e.preventDefault()
-        await setNewWindowPosY(e.target.getBoundingClientRect().y + 24)
-        await setNewWindowPosX(50)
-        console.log(e.target.getBoundingClientRect())
-        console.log(e.target.value)
-        console.log(e.target.className)
-        e.target.className === "worker" ?
-            setIsRClick(true) : setIsRClick(false)
+        if (e.target.className.includes("worker"))
+        {
+            await setNewWindowPosY(e.target.getBoundingClientRect().y + 24);
+            await setNewWindowPosX(50);
+            setIsRClick(true);
+            ListLibrary.RClickWindow(newWindowPosX,newWindowPosY,e.target.getAttribute("data-value")).then(data=> setNewWindowData([data[0],data[1]]))
+        }
+
     }
 
 
@@ -277,161 +279,11 @@ export default function SignRequest() {
                                                     <button>대화방</button>
                                                     <button>나가기</button>
                                                 </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
-                                                <div className="border flex justify-between">
-                                                    <button>대화방</button>
-                                                    <button>나가기</button>
-                                                </div>
                                             </div>
                                         </> :
                                         btnCtl === 2 ?
                                             <>
-                                                <div className="h-[400px] overflow-y-auto">
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
+                                                <div className="h-[355px] overflow-y-auto">
                                                     <div className="text-xs border break-words">
                                                         <p>부서:</p>
                                                         <p>이름:</p>
@@ -459,80 +311,7 @@ export default function SignRequest() {
                                             </>
                                             :
                                             btnCtl === 3 ?
-                                                <>
-                                                    <div className="h-[435px] overflow-y-auto">
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                        <div className="text-xs border break-words">
-                                                            <p>제목</p>
-                                                            <p>시작기간~종료기간</p>
-                                                            <p>확인여부</p>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <button className="text-center border w-full h-[45px]"
-                                                                onClick={() => setBtnCtl(6)}>공지사항 추가하기
-                                                        </button>
-                                                    </div>
-                                                </>
+                                                ListLibrary.noticeList("3118115625",setBtnCtl)
                                                 :
                                                 btnCtl === 4 ?
                                                     <>
@@ -582,43 +361,30 @@ export default function SignRequest() {
                                                         </>
                                                         :
                                                         btnCtl === 6 ?
-                                                            <>
-                                                                <div className="border h-[235px]">
-                                                                    <input className="border w-[100%] h-[25px]"
-                                                                           placeholder="제목입력"/>
-                                                                    <input type="date"
-                                                                           className="border w-[100%] h-[25px]"/>
-                                                                    <textarea className="border w-[100%] h-[185px]"
-                                                                              placeholder="내용입력"/>
-                                                                </div>
-                                                                <div className="border h-[200px]">
-                                                                    조직도 들어갈 부분
-                                                                </div>
-                                                                <button
-                                                                    className="text-center border w-full h-[45px]"
-                                                                    onClick={() => setBtnCtl(3)}>공지사항
-                                                                    등록
-                                                                </button>
-                                                            </>
+                                                            ListLibrary.noticeListCreate("3118115625",setBtnCtl)
                                                             : <></>
 
                             }
                         </div>
                     </div>
                     {isRClick === true ?
-                        <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right:`${newWindowPosX}px`}}>
-                            <div className="w-1/3 border">
-                                <img src="/logo192.png"/>
+                        (
+                            <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                                <div className="w-1/3 border">
+                                    <img src="/logo192.png"/>
+                                </div>
+                                <div className="w-2/3 text-left border">
+                                    <p>사내 이메일:{newWindowData[0]}</p>
+                                    <p>전화번호:{newWindowData[1]}</p>
+                                    <p>상태:</p>
+                                    <button onClick={() => {
+                                        setIsRClick(false)
+                                        setNewWindowData([])
+                                    }}>닫기
+                                    </button>
+                                </div>
                             </div>
-                            <div className="w-2/3 text-left border">
-                                <p>사내 이메일:</p>
-                                <p>전화번호:</p>
-                                <p>상태:</p>
-                                <button onClick={()=> {
-
-                                }}>닫기</button>
-                            </div>
-                        </div>
+                        )
                         : <></>
                     }
                 </div>

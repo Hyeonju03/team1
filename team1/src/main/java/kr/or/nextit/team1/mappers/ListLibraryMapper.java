@@ -7,5 +7,5 @@ import java.util.List;
 @Mapper
 public interface ListLibraryMapper {
     List<ListLibraryDTO> chartSelect(String code);
-
+    ListLibraryDTO RClickWindowSelect(String code);
 }

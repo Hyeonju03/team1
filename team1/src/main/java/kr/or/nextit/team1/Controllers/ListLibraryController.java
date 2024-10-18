@@ -37,4 +37,12 @@ public class ListLibraryController {
         }
         return ResponseEntity.ok(list);
     }
+    @GetMapping("/RClickWindowSelect")
+    public ResponseEntity<String[]> RClickWindowSelect(String code) {
+        ListLibraryDTO data = listLibraryService.RClickWindowSelect(code);
+        String[] splitData = new String[2];
+        splitData[0] = data.getMail();
+        splitData[1] = data.getPH();
+        return ResponseEntity.ok(splitData);
+    }
 }

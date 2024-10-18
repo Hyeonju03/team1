@@ -6,6 +6,9 @@ public class ListLibraryDTO {
     private String empCode;
     private String empName;
     private String empDepCode;
+    private String  mail;
+    private String  PH;
+    private String  state;
 
     public String getDepCode() {
         return depCode;
@@ -45,5 +48,29 @@ public class ListLibraryDTO {
 
     public void setEmpDepCode(String empDepCode) {
         this.empDepCode = empDepCode;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getPH() {
+        return PH;
+    }
+
+    public void setPH(String PH) {
+        this.PH = PH;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
