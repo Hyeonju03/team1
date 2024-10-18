@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight, Paperclip, Search, Mail} from 'lucide-react';
+import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
@@ -98,14 +98,6 @@ export default function DocumentRegister() {
 
                 </aside>
                 <main className="flex-1 p-4">
-                    <div className="flex items-center space-x-2 mb-4">
-                        <div className="relative flex flex-1 max-w-xl">
-                            <Input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"/>
-                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
-                        </div>
-                        <Button variant="outline">검색</Button>
-                    </div>
-
                     <h1 className="text-2xl font-bold mb-4">문서 등록</h1>
                     <form onSubmit={handleSubmit}>
                         <div key={document.id} className="border rounded-lg p-4">

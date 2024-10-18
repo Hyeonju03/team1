@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.Document;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,9 +54,9 @@ public class DocumentService {
         }
     }
 
-    private String saveFile(MultipartFile file) throws IOException {
-        // 바탕화면 경로를 가져오기
-        String filePath = System.getProperty("user.home") + "/Desktop";
+    public String saveFile(MultipartFile file) throws IOException {
+        // 파일 경로를 가져오기
+        String filePath = System.getProperty("user.home") + "/upload";
 
         // 파일 이름 설정 (원본 이름 + 현재 시간)
         String originalFileName = file.getOriginalFilename();
@@ -77,5 +76,15 @@ public class DocumentService {
 
     public DocumentDTO documentDetail(int id){
         return documentMapper.documentDetail(id);
+    }
+
+    @Transactional
+    public DocumentDTO documentUpdate(int id, DocumentDTO documentDTO) {
+        documentMapper.documentUpdate(documentDTO);
+        return documentDTO;
+    }
+
+    public void documentDelete(int id) {
+        documentMapper.documentDelete(id);
     }
 }

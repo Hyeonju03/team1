@@ -3,31 +3,54 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.DocumentMapper">
-    <!-- document 테이블, code 테이블 조인
-    where문: document 테이블의 emp_code가 주어진 comCode로 시작하는지 확인
-    -->
     <select id="documentSelect" resultType="DocumentDTO">
-        SELECT *
-        FROM documenttest
+        SELECT
+            *
+        FROM
+            DOCUMENTTEST
     </select>
     <insert id="documentInsert" parameterType="DocumentDTO">
-        INSERT INTO DOCUMENTTEST (EMP_CODE, DOC_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE,
-        FILE_PATH)
-        VALUES (#{empCode}, #{docCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginName}, #{fileSize},
-        #{filePath})
+        INSERT INTO
+            DOCUMENTTEST (EMP_CODE, DOC_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE, FILE_PATH)
+        VALUES
+            (#{empCode}, #{docCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginName}, #{fileSize}, #{filePath})
     </insert>
 
     <select id="documentDetail" parameterType="int" resultType="DocumentDTO">
-        SELECT DOC_NUM,
-               DOC_CATE_CODE,
-               TITLE,
-               CONTENT,
-               FILE_NAME,
-               FILE_ORIGIN_NAME,
-               FILE_SIZE,
-               FILE_PATH,
-               START_DATE
-        FROM documenttest
-        where DOC_NUM = #{docNum}
+        SELECT
+            DOC_NUM,
+            DOC_CATE_CODE,
+            TITLE,
+            CONTENT,
+            FILE_NAME,
+            FILE_ORIGIN_NAME,
+            FILE_SIZE,
+            FILE_PATH,
+            START_DATE
+        FROM
+            DOCUMENTTEST
+        WHERE
+            DOC_NUM = #{docNum}
     </select>
+
+    <update id="documentUpdate" parameterType="DocumentDTO">
+        UPDATE
+            DOCUMENTTEST
+        SET
+            DOC_CATE_CODE = #{docCateCode},
+            TITLE = #{title},
+            CONTENT = #{content},
+            FILE_NAME = #{fileName},
+            FILE_ORIGIN_NAME = #{fileOriginName},
+            FILE_SIZE = #{fileSize},
+            FILE_PATH = #{filePath}
+        WHERE
+            DOC_NUM = #{docNum}
+    </update>
+    <delete id="documentDelete">
+        DELETE FROM
+            DOCUMENTTEST
+        WHERE
+            DOC_NUM = #{id}
+    </delete>
 </mapper>

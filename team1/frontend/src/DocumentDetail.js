@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight, Paperclip, Search, Mail} from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 
@@ -20,13 +20,14 @@ const Input = ({className, ...props}) => {
 export default function DocumentDetail() {
     const [isExpanded, setIsExpanded] = useState(false);
     const {id} = useParams(); // 여기서 id는 docNum을 의미
-    const [document, setDocument] = useState(null);
+    const [doc, setDoc] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
             .then(response => {
-                setDocument(response.data);
+                setDoc(response.data);
             })
             .catch(error => console.log(error));
 
@@ -42,23 +43,67 @@ export default function DocumentDetail() {
 
     }, [id]);
 
-    if (!document) {
-        return <div>문서를 찾을 수 없습니다.</div>; // 문서를 찾을 수 없는 경우의 처리
-
-    }
-
     const formatDate = (dateString) => {
         return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
     };
 
-    const handleDocumentDownload = async (document) => {
-        axios.get(`/documents/download/${document.docNum}`) // API 엔드포인트를 조정하세요
-            .then(response => {
-                console.log(response);
-            })
-            .catch(error => console.log(error));
+    const fileDownload = (blobData, fileName) => {
+        const url = window.URL.createObjectURL(blobData);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.fileOriginName;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
     }
 
+    const handleDocumentDownload = async (doc) => {
+        try {
+            const response = await axios({
+                method: "get",
+                url: `/documents/download/${doc.docNum}`,
+                responseType: "blob"
+            });
+            fileDownload(response.data, doc.fileOriginName);
+        } catch (e) {
+            console.error(e);
+        }
+        // 2번째 방법
+        // axios.get(`/documents/download/${document.docNum}`) // API 엔드포인트를 조정하세요
+        //     .then(response => {
+        //         console.log(response);
+        //     })
+        //     .catch(error => console.log(error));
+    }
+
+    // 수정
+    const handleUpdateClick = () => {
+        navigate(`/documents/update/${id}`);  // 수정 버튼 클릭 시 수정 페이지로 이동
+    };
+
+    // 삭제
+    const handleDeleteClick = async () => {
+        try {
+            await axios.delete(`/documents/${id}`)
+            navigate(`/documents/`); // 삭제 후 문서 리스트로 이동
+            alert("성공적으로 삭제되었습니다.")
+
+        } catch (e) {
+            console.error(e);
+            alert("삭제에 실패했습니다.");
+        }
+    }
+
+    // 목록 버튼 클릭 시 리스트 페이지로 이동
+    const handleHome = () => {
+        navigate(`/documents/`);
+    };
+
+    if (!doc) {
+        return <div>문서를 찾을 수 없습니다.</div>; // 문서를 찾을 수 없는 경우의 처리
+
+    }
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -95,64 +140,42 @@ export default function DocumentDetail() {
 
                 </aside>
                 <main className="flex-1 p-4">
-                    <div className="flex items-center space-x-2 mb-4">
-                        <div className="relative flex flex-1 max-w-xl">
-                            <Input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"/>
-                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
-                        </div>
-                        <Button variant="outline">검색</Button>
+                    <div className="flex justify-start space-x-2 mb-4">
+                        <Button variant="outline" onClick={handleHome}>목록</Button>
                     </div>
-
                     <h1 className="text-2xl font-bold mb-4">문서 상세</h1>
 
                     <div className="border rounded-lg p-4">
                         <div className="flex items-center space-x-4 mb-4">
-                            {/*<form>*/}
-                            {/*    <fieldset>*/}
-                            {/*        /!*<legend>카테고리</legend>*!/*/}
-                            {/*        <div>*/}
-                            {/*            <select name="cate">*/}
-                            {/*                <option value="">문서함</option>*/}
-                            {/*                {categories.map((cate, index) => ( // 공통 카테고리 배열 사용*/}
-                            {/*                    <option key={index} value={cate}>*/}
-                            {/*                        {cate}*/}
-                            {/*                    </option>*/}
-                            {/*                ))}*/}
-                            {/*            </select>*/}
-                            {/*        </div>*/}
-                            {/*    </fieldset>*/}
-                            {/*</form>*/}
-                            <div className="text-sm font-bold text-gray-600 text-left">{document.docCateCode}</div>
-                            <h2 className="text-2xl font-bold mb-4 text-left">{document.title}</h2>
+
+                            <div className="text-sm font-bold text-gray-600 text-left">{doc.docCateCode}</div>
+                            <h2 className="text-2xl font-bold mb-4 text-left">{doc.title}</h2>
                         </div>
-                        {/*<div className="gap-2 text-sm mb-4">*/}
-                        {/*<div className="text-left"><span className="font-semibold">등록일 : </span>{formatDate(document.startDate)}*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
+
                         <div className="mb-4">
                             <h3 className="font-semibold mb-2"></h3>
                             <p className="whitespace-pre-wrap text-left"><span
-                                className="font-semibold">등록일 : </span>{formatDate(document.startDate)}
+                                className="font-semibold">등록일 : </span>{formatDate(doc.startDate)}
                             </p>
                         </div>
                         <div className="mb-4">
                             <h3 className="font-semibold mb-2"></h3>
                             <p className="whitespace-pre-wrap text-left"><span
                                 className="font-semibold">첨부파일명 : </span>
-                                <span onClick={() => handleDocumentDownload(document)} className={'cursor-pointer text-indigo-700 hover:text-indigo-500'}>{document.fileOriginName}</span>
-                                {/*{document.fileOriginName}*/}
+                                <span onClick={() => handleDocumentDownload(doc)}
+                                      className={'cursor-pointer text-indigo-600 hover:text-indigo-500 hover:underline hover:underline-offset-1'}>{doc.fileOriginName}</span>
                             </p>
                         </div>
                         <div>
                             <h3 className="font-semibold mb-2"></h3>
                             <p className="whitespace-pre-wrap text-left"><span
-                                className="font-semibold">설명 : </span>{document.content}
+                                className="font-semibold">설명 : </span>{doc.content}
                             </p>
                         </div>
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline">수정</Button>
-                        <Button variant="outline">삭제</Button>
+                        <Button variant="outline" onClick={handleUpdateClick}>수정</Button>
+                        <Button variant="outline" onClick={handleDeleteClick}>삭제</Button>
                     </div>
                 </main>
             </div>
