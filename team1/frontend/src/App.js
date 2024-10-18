@@ -17,6 +17,8 @@ import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
+import MailList from "./MailList";
+import MailSend from "./MailSend";
 
 function App() {
     return (
@@ -49,6 +51,9 @@ function App() {
                     <Route path="/userInfo" element={<UserInfo/>} />
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
+
+                    <Route path="/MailList" element={<MailList/>}/>
+                    <Route path="/MailSend" element={<MailSend/>}/>
                 </Routes>
             </div>
         </Router>
