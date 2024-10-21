@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 
 const Button = ({variant, className, children, ...props}) => {
@@ -18,13 +18,14 @@ const Input = ({className, ...props}) => {
 };
 
 export default function DocumentRegister() {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState(location.state?.selectedCategory || ''); // location.state : 이전페이지에서 전달된 상태 객체
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
-    const nevigate = useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         // code 테이블에서 카테고리 가져오기
@@ -42,8 +43,33 @@ export default function DocumentRegister() {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
     }
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    // 유효성체크
+    const validateForm = () => {
+        if (!category) {
+            alert("카테고리를 선택해주세요.");
+            return false;
+        }
+        if (!title) {
+            alert("제목을 입력해주세요.");
+            return false;
+        }
+        if (!attachment) {
+            alert("첨부파일을 선택해주세요.");
+            return false;
+        }
+        if (!content) {
+            alert("설명을 입력해주세요.");
+            return false;
+        }
+        return true;
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if(!validateForm()){
+            return;
+        }
 
         const formData = new FormData();
         formData.append('title', title);
@@ -57,12 +83,18 @@ export default function DocumentRegister() {
             .then(response => {
                 console.log(response.data);
                 // 성공시 문서 리스트로 이동
-                nevigate('/documents');
+                navigate('/documents');
             })
             .catch(error => {
                 console.error('Error fetching documents:', error);
             });
     };
+
+    // 목록 버튼 클릭 시 리스트 페이지로 이동
+    const handleHome = () => {
+        navigate(`/documents/`);
+    };
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -87,7 +119,8 @@ export default function DocumentRegister() {
                                 {categories.map((category, index) => (
                                     // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
                                     category.split(',').map((item, subIndex) => (
-                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}>
+                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}
+                                                onClick={() => setCategory(item)}>
                                             {item}
                                         </Button>
                                     ))
@@ -98,6 +131,9 @@ export default function DocumentRegister() {
 
                 </aside>
                 <main className="flex-1 p-4">
+                    <div className="flex justify-start space-x-2 mb-4">
+                        <Button variant="outline" onClick={handleHome}>목록</Button>
+                    </div>
                     <h1 className="text-2xl font-bold mb-4">문서 등록</h1>
                     <form onSubmit={handleSubmit}>
                         <div key={document.id} className="border rounded-lg p-4">
@@ -144,6 +180,7 @@ export default function DocumentRegister() {
                             />
                         </div>
                         <div className="flex justify-end space-x-2 mt-4">
+                            <Button variant="outline" onClick={handleHome}>취소</Button>
                             <Button variant="outline" type="submit">등록</Button>
                         </div>
                     </form>

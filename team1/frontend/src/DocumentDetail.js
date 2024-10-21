@@ -18,18 +18,24 @@ const Input = ({className, ...props}) => {
 };
 
 export default function DocumentDetail() {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
     const {id} = useParams(); // 여기서 id는 docNum을 의미
     const [doc, setDoc] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
-            .then(response => {
+        const documentDetail = async () => {
+            try {
+                const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
                 setDoc(response.data);
-            })
-            .catch(error => console.log(error));
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false); // 로딩이 끝남
+            }
+        };
 
         // code 테이블에서 카테고리 가져오기
         axios.get(`/code`) // API 엔드포인트를 조정하세요
@@ -41,7 +47,18 @@ export default function DocumentDetail() {
             })
             .catch(error => console.log(error));
 
+        documentDetail();
     }, [id]);
+
+    // 문서가 로딩 중일 때는 아무것도 표시하지 않음
+    if (loading) {
+        return null;
+    }
+
+    // 문서를 찾을 수 없는 경우의 처리
+    if (!doc) {
+        return null; // 문서가 없을 경우도 아무것도 표시하지 않음
+    }
 
     const formatDate = (dateString) => {
         return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
@@ -99,11 +116,6 @@ export default function DocumentDetail() {
     const handleHome = () => {
         navigate(`/documents/`);
     };
-
-    if (!doc) {
-        return <div>문서를 찾을 수 없습니다.</div>; // 문서를 찾을 수 없는 경우의 처리
-
-    }
 
     return (
         <div className="min-h-screen flex flex-col">

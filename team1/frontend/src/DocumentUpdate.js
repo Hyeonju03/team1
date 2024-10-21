@@ -28,10 +28,10 @@ export default function DocumentUpdate() {
         filepath: ''
     });
     const {id} = useParams(); // 여기서 id는 docNum을 의미
-    const navigate = useNavigate();
+    const [isExpanded, setIsExpanded] = useState(true);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
-    const [isExpanded, setIsExpanded] = useState(false);
     const [attachment, setAttachment] = useState(null); // 새로운 첨부파일 상태 추가
+    const navigate = useNavigate();
 
 
     // 문서 정보 및 카테고리 가져오기
@@ -77,17 +77,17 @@ export default function DocumentUpdate() {
             formData.append("attachment", attachment); // 새로운 파일 추가
         }
 
-        // doc 객체의 내용을 출력하여 확인
-        console.log("Document to update:", {
-            title: doc.title,
-            category: doc.docCateCode,
-            content: doc.content,
-            attachment: attachment ? attachment.name : "No attachment" // 첨부파일 이름 또는 "No attachment" 출력
-        });
+        // // doc 객체의 내용을 출력하여 확인
+        // console.log("Document to update:", {
+        //     title: doc.title,
+        //     category: doc.docCateCode,
+        //     content: doc.content,
+        //     attachment: attachment ? attachment.name : "No attachment" // 첨부파일 이름 또는 "No attachment" 출력
+        // });
 
         axios.put(`/documents/${id}`, formData, {headers: {"Content-Type": "multipart/form-data"}})
             .then((response) => {
-                console.log("response 콘솔 찍은거: ", response)
+                // console.log("response 콘솔 찍은거: ", response)
                 alert("성공적으로 수정되었습니다.");
                 navigate(`/documents/${id}`); // 수정 후 상세 페이지로 이동
             })
@@ -98,7 +98,6 @@ export default function DocumentUpdate() {
     const handleCancel = () => {
         navigate(`/documents/${id}`); // 상세 페이지로 이동
     };
-
 
     return (
         <div className="min-h-screen flex flex-col">

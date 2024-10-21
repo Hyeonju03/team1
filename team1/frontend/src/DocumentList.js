@@ -19,15 +19,16 @@ const Input = ({className, ...props}) => {
 
 export default function DocumentList() {
 
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
     const [documents, setDocuments] = useState([]);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
+    const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
+
 
     const navigate = useNavigate(); // navigate 함수 사용
-
 
     useEffect(() => {
         const comCode = 3118115625; // 회사코드
@@ -51,7 +52,6 @@ export default function DocumentList() {
             .catch(error => console.log(error));
     }, []);
 
-
     // 문서 제목 클릭 시 상세 페이지로 이동
     const handleDocumentClick = (docNum) => {
         navigate(`/documents/${docNum}`)
@@ -62,24 +62,40 @@ export default function DocumentList() {
         return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
     };
 
-    // 검색 버튼 클릭 시 호출되는 함수
+    // 검색 버튼 클릭 시
     const handleSearch = () => {
         // 검색어가 포함된 문서를 필터링
         const filtered = documents.filter((doc) =>
             doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || // 제목 검색
-            doc.content?.toLowerCase().includes(searchQuery.toLowerCase()) || // 내용 검색 (문서 설명)
+            doc.content?.toLowerCase().includes(searchQuery.toLowerCase()) || // 내용(문서 설명) 검색
             doc.docCateCode?.toLowerCase().includes(searchQuery.toLowerCase()) // 카테고리 검색
         );
         setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+
+        // 검색된 결과가 없을 경우
+        if (filtered.length === 0) {
+            alert("검색된 문서가 없습니다.");
+        }
     };
 
-    // 엔터키로 검색
+    // 엔터키로 문서 검색 가능
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             handleSearch();
         }
     }
 
+    // 왼쪽 메뉴 카테고리 선택 시 해당 카테고리와 일치하는 문서들만 필터링
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category); // 별도의 선택 상태
+        const filtered = documents.filter((doc) => doc.docCateCode === category);
+        setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+        if (filtered.length === 0) {
+            alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
+        }
+    }
+
+    // 체크박스 상태 변화
     const handleCheckboxChange = (docNum) => {
         setSelectedDocuments(prevState => {
             if (prevState.includes(docNum)) {
@@ -109,7 +125,6 @@ export default function DocumentList() {
             .catch(error => console.log(error));
     };
 
-
     return (
         <div className="min-h-screen flex flex-col">
             <header className="bg-gray-200 p-4">
@@ -126,7 +141,6 @@ export default function DocumentList() {
                         >
                             {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
                                 <ChevronRight className="mr-2 h-4 w-4"/>}
-                            {/*<Mail className="mr-2 h-4 w-4"/>*/}
                             문서함
                         </Button>
                         {isExpanded && (
@@ -134,7 +148,8 @@ export default function DocumentList() {
                                 {categories.map((category, index) => (
                                     // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
                                     category.split(',').map((item, subIndex) => (
-                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}>
+                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}
+                                                onClick={() => handleCategorySelect(item)}>
                                             {item}
                                         </Button>
                                     ))
@@ -157,7 +172,11 @@ export default function DocumentList() {
                         <Button variant="outline" onClick={handleSearch}>검색</Button>
                     </div>
                     <div className="flex justify-end space-x-2 mb-4">
-                        <Button variant="outline" onClick={() => navigate('/document/register')}>등록</Button>
+                        <Button variant="outline"
+                                onClick={() => {
+                                    // 등록 페이지로 이동할 때 선택된 카테고리를 전달
+                                    navigate('/document/register', {state: {selectedCategory: selectedCategory}});
+                                }}>등록</Button>
                         <Button variant="outline" onClick={handleDelete}>삭제</Button>
                     </div>
                     <h1 className="text-2xl font-bold mb-4">문서함</h1>
@@ -165,8 +184,8 @@ export default function DocumentList() {
                         {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document) => (
                             <div
                                 key={document.docNum}
-                                className="flex items-center space-x-4 p-2 border rounded cursor-pointer"
-                                onClick={() => handleDocumentClick(document.docNum)} // 제목 클릭 시 페이지 이동
+                                className="flex items-center space-x-4 p-2 border rounded"
+                                // onClick={() => handleDocumentClick(document.docNum)} // 제목 클릭 시 페이지 이동
 
                             >
                                 <input
@@ -179,34 +198,12 @@ export default function DocumentList() {
                                 />
                                 <Paperclip className="h-4 w-4 text-gray-400"/>
                                 <div className="flex-1">
-                                    <div className="font-semibold text-left">{document.title}</div>
+                                    {/* 제목 클릭시 페이지 이동*/}
+                                    <div className="font-semibold text-left cursor-pointer hover:text-indigo-500 hover:underline hover:underline-offset-1" onClick={() => handleDocumentClick(document.docNum)}>{document.title}</div>
                                     <div className="text-sm text-gray-600 text-left">{document.docCateCode}</div>
                                 </div>
                                 <div className="text-sm text-gray-500">{formatDate(document.startDate)}</div>
                             </div>))}
-
-
-                        {/*{documents.map((document) => (*/}
-                        {/*    <div*/}
-                        {/*        key={document.docNum}*/}
-                        {/*        className="flex items-center space-x-4 p-2 border rounded cursor-pointer"*/}
-                        {/*        onClick={() => handleDocumentClick(document.docNum)} // 제목 클릭 시 페이지 이동*/}
-
-                        {/*    >*/}
-                        {/*        <input*/}
-                        {/*            type="checkbox"*/}
-                        {/*            className="h-4 w-4"*/}
-                        {/*            onClick={(e) => e.stopPropagation()} // 클릭 이벤트 전파 방지*/}
-
-                        {/*        />*/}
-                        {/*        <Paperclip className="h-4 w-4 text-gray-400"/>*/}
-                        {/*        <div className="flex-1">*/}
-                        {/*            <div className="font-semibold text-left">{document.title}</div>*/}
-                        {/*            <div className="text-sm text-gray-600 text-left">{document.docCateCode}</div>*/}
-                        {/*        </div>*/}
-                        {/*        <div className="text-sm text-gray-500">{formatDate(document.startDate)}</div>*/}
-                        {/*    </div>*/}
-                        {/*))}*/}
                     </div>
                 </main>
             </div>
