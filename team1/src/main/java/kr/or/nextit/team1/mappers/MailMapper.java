@@ -9,4 +9,6 @@ import java.util.List;
 public interface MailMapper {
     int insertMail(MailDTO mailDTO);
 
+    List<MailDTO> selectSendMail(String empCode);
+
 }

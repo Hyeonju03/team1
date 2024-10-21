@@ -19,6 +19,7 @@ import UserInfo from "./UserInfo";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
 import MailList from "./MailList";
 import MailSend from "./MailSend";
+import MailSendList from "./MailSendList";
 
 function App() {
     return (
@@ -54,6 +55,7 @@ function App() {
 
                     <Route path="/MailList" element={<MailList/>}/>
                     <Route path="/MailSend" element={<MailSend/>}/>
+                    <Route path="/MailSendList" element={<MailSendList/>}/>
                 </Routes>
             </div>
         </Router>

@@ -70,7 +70,6 @@ export default function Component() {
             <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">{companyName} 로그정보</h2>
             </div>
-
             <div className="border bg-gray-200 " style={{height:"300px"}}>
                 {(searchResults.map((item, index) => (
                                 <div key={index}>

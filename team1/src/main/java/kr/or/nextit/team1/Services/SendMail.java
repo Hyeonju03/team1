@@ -64,25 +64,44 @@ public class SendMail {
 	 * @param content
 	 */
 
-	public void goMail(Session session, String title, String content, String TO, String[] cc) {
+	public void goMail(Session session, String title, String content, String[] TO, String[] cc , String path) {
 
 		Message msg = new MimeMessage(session);
 
 		try {
 			msg.setFrom(new InternetAddress("kimdajin@naver.com", "관리자", ENCODING));
-			msg.addRecipient(Message.RecipientType.TO, new InternetAddress(TO));
 
-			for (String ref : cc)
-			{
-				msg.addRecipient(Message.RecipientType.TO, new InternetAddress(ref));
+			if(cc.length > 0){
+				for (String to : TO)
+				{
+					msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+				}
+
+			}
+
+
+			if(cc.length > 0 && !cc[0].equals("null")){
+				for (String ref : cc)
+				{
+					msg.addRecipient(Message.RecipientType.TO, new InternetAddress(ref));
+				}
+
 			}
 			msg.setSubject(title);
-			msg.setContent(content, "text/html; charset=utf-8");
-//
-//			MimeBodyPart attachmentPart = new MimeBodyPart();
-//			attachmentPart.attachFile(filePath);
-//			Multipart multipart = new MimeMultipart();
-//			multipart.addBodyPart(attachmentPart);
+			MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setContent(content, "text/html; charset=utf-8");
+			MimeBodyPart attachmentPart = new MimeBodyPart();
+			if (path != null) {
+				attachmentPart.attachFile(path);
+
+			}
+			Multipart multipart = new MimeMultipart();
+			if (path != null) {
+				multipart.addBodyPart(attachmentPart);
+
+			}
+			multipart.addBodyPart(textPart);
+			msg.setContent(multipart);
 			Transport.send(msg);
 
 			System.out.println("메일 보내기 성공");

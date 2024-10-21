@@ -39,9 +39,14 @@ public class MailSendService {
 
         SendMail sendMail = new SendMail();
 
-        String[] ccc = {mailDTO.getMailRef()};
-        //지민쌤이 이거 잘못짬 이거 고쳐야함!
-        sendMail.goMail(sendMail.setting(new Properties(), user_name, password), title, content, mailDTO.getMailTarget(),ccc );
+//      쪼개기
+        String[] ccc = mailDTO.getMailRef().split(",");
+
+        String[] toto = mailDTO.getMailTarget().split(",");
+
+        String path = mailDTO.getFilePath();
+
+        sendMail.goMail(sendMail.setting(new Properties(), user_name, password), title, content, toto ,ccc ,path);
 
     }
 

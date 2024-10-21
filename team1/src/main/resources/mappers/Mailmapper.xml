@@ -9,4 +9,10 @@
         values(#{empCode}, NULL,#{title},#{content},#{mailTarget}, #{mailRef},#{fileName},#{fileOriginalName},#{fileSize},#{filePath}, current_timestamp());
     </insert>
 
+    <select id="selectSendMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
+<!--        select EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE-->
+        select EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE,START_DATE
+        from mailtest
+        where EMP_CODE like concat(#{empCode},'%')
+    </select>
 </mapper>
