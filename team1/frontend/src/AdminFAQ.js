@@ -39,41 +39,13 @@ const ChevronUpIcon = () => (
 );
 
 export default function FAQPage() {
-    const faqCategories = [
-        {
-            category: '배송 관련',
-            faqs: [
-                { q: '배송은 얼마나 걸리나요?', a: '일반적으로 주문 후 2-3일 내에 배송이 완료됩니다.' },
-                { q: '해외 배송도 가능한가요?', a: '네, 일부 국가에 한해 해외 배송이 가능합니다.' },
-            ],
-        },
-        {
-            category: '반품 및 교환',
-            faqs: [
-                { q: '반품 정책은 어떻게 되나요?', a: '구매 후 14일 이내에 제품에 이상이 없는 경우 반품이 가능합니다.' },
-                { q: '교환은 어떻게 신청하나요?', a: '마이페이지에서 교환 신청을 하실 수 있습니다.' },
-            ],
-        },
-    ];
-
-    const faqs = [
-        { q: '시스템에 어떻게 로그인하나요?', a: '로그인 페이지에서 사용자 ID와 비밀번호를 입력한 후 \'로그인\' 버튼을 클릭하세요.' },
-        { q: '비밀번호를 잊어버렸습니다. 어떻게 하나요?', a: ' 로그인 페이지에서 \'비밀번호 찾기\' 링크를 클릭하여 이메일 인증을 통해 비밀번호를 재설정할 수 있습니다.' },
-        { q: '사용자가 추가되거나 수정되려면 어떻게 해야 하나요?', a: '관리자 권한을 가진 사용자만 사용자 관리 메뉴에서 추가 및 수정할 수 있습니다.' },
-        { q: '어떤 브라우저에서 이 시스템을 사용할 수 있나요?', a: 'Chrome, Firefox, Edge 등 주요 웹 브라우저에서 사용 가능합니다. 최신 버전을 권장합니다.' },
-        { q: '시스템에서 제공하는 주요 기능은 무엇인가요?', a: '사용자 관리, 문서 관리, 업무 프로세스 관리, 통계 보고서 생성 등 다양한 기능을 제공합니다.' },
-        { q: '시스템 사용 중 문제가 발생했습니다. 어떻게 지원받나요?', a: '기술 지원팀에 문의하거나, 시스템 내의 \'도움말\' 섹션에서 자주 묻는 질문을 확인하세요.' },
-        { q: '데이터 백업은 어떻게 하나요?', a: '관리자 메뉴에서 \'데이터 백업\' 옵션을 통해 정기적으로 데이터를 백업할 수 있습니다.' },
-        { q: '모바일에서도 사용할 수 있나요?', a: 'A: 현재는 웹 기반으로 제공되며, 모바일 최적화는 진행 중입니다.' },
-        { q: '개인 정보 보호 정책은 어떻게 되나요?', a: '개인정보 보호 정책은 시스템 내의 \'이용 약관\'에서 확인할 수 있습니다.' },
-        { q: '시스템 사용에 대한 교육은 어떻게 받나요?', a: '정기적인 교육 세션이 있으며, 필요한 경우 개별 교육을 요청할 수 있습니다.' },
-    ];
 
     const [expandedIndex, setExpandedIndex] = useState(null);
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [question, setQuestion] = useState("");
     const navigate = useNavigate();
     const[searchResult,setSearchResult] = useState([])
+    const[categoryResult,setCategoryResult] = useState([])
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     const toggleAnswer = (index) => {
@@ -90,10 +62,11 @@ export default function FAQPage() {
 
     const questionSearch = () => {
         // 클릭 시 question 입력받은 거 조회하는 기능
-        const filteredFAQ = faqs.filter(item=>{
-          return   item.q.includes(question)
-        })
+        const filteredFAQ = categoryResult.filter(item =>
+            item.title.includes(question) || item.content.includes(question)
+        );
         setSearchResult(filteredFAQ);
+        setSelectedCategoryIndex(null);
     };
 
     const goQDetail = () => {
@@ -112,16 +85,53 @@ export default function FAQPage() {
     };
 
     const handleCategoryClick = (index) => {
-        setSelectedCategoryIndex(selectedCategoryIndex === index ? null : index);
+        setSelectedCategoryIndex(index === selectedCategoryIndex ? null : index);
         setExpandedIndex(null); // 모든 답변 닫기
+        if (index !== null) {
+            const filtered = categoryResult.filter((faq) => faq.category === uniqueResults[index].category);
+            setSearchResult(filtered);
+        } else {
+            setSearchResult([]); // 카테고리가 선택되지 않았을 때 검색 결과 초기화
+        }
     };
 
-    useEffect(()=>{
-        axios.get('/test')
-            .then(response=>{
+
+    const getRandomItems = (items, count) => {
+        const shuffled = [...items].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    };
+
+    const uniqueResults = categoryResult.filter((faq, index, self) =>
+        index === self.findIndex((t) => t.category === faq.category)
+    );
+
+    const onKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            questionSearch();
+        }
+    };
+
+    const filteredQuestions = selectedCategoryIndex !== null
+        ? categoryResult.filter((faq) => faq.category === uniqueResults[selectedCategoryIndex].category)
+        : searchResult;
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("/FAQList");
+                const randomList = getRandomItems(response.data, 10);
+                setSearchResult(randomList);
+                setCategoryResult(response.data)
                 console.log(response.data)
-            },[])
-    })
+                // console.log(randomList);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchData(); // 비동기 함수 호출
+    }, []);
 
     return (
         <div className="container mx-auto p-4">
@@ -159,6 +169,7 @@ export default function FAQPage() {
                                 className="flex-grow mr-2"
                                 placeholder="궁금한 내용을 입력해주세요"
                                 onChange={questionOnChangeHandler}
+                                onKeyDown={onKeyDown}
                             />
                             <Button onClick={questionSearch} variant="outline">
                                 <SearchIcon />
@@ -166,80 +177,36 @@ export default function FAQPage() {
                         </div>
 
                         <div className="flex justify-center space-x-2 mb-6 overflow-x-auto">
-                            {faqCategories.map((category, index) => (
-                                <Button onClick={() => handleCategoryClick(index)} key={index} variant="outline" className="bg-black text-white whitespace-nowrap">
-                                    {category.category}
+                            {uniqueResults.map((faq, index) => (
+                                <Button
+                                    onClick={() => handleCategoryClick(index)}
+                                    key={index}
+                                    variant="outline"
+                                    className="bg-black text-white whitespace-nowrap"
+                                >
+                                    {faq.category}
                                 </Button>
                             ))}
                         </div>
 
                         <div className="border rounded-lg p-4">
-                            {selectedCategoryIndex === null ? (
-                                <>
-                                    <h2 className="text-xl font-semibold mb-2">자주 묻는 질문</h2>
-                                    {searchResult.length > 0 ? searchResult.map((faq, index) => (
-                                        <div key={index} className="border-b last:border-b-0">
-                                            <div
-                                                className="flex justify-between items-center py-3 cursor-pointer"
-                                                onClick={() => toggleAnswer(index)}
-                                            >
-                                                <span className="font-medium">{faq.q}</span>
-                                                {expandedIndex === index ? (
-                                                    <ChevronUpIcon />
-                                                ) : (
-                                                    <ChevronDownIcon />
-                                                )}
-                                            </div>
-                                            {expandedIndex === index && (
-                                                <div className="pb-3 text-gray-600">
-                                                    {faq.a}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )) : (
-                                        faqs.slice(0, 10).map((faq, index) => (
-                                            <div key={index} className="border-b last:border-b-0">
-                                                <div
-                                                    className="flex justify-between items-center py-3 cursor-pointer"
-                                                    onClick={() => toggleAnswer(index)}
-                                                >
-                                                    <span className="font-medium">{faq.q}</span>
-                                                    {expandedIndex === index ? (
-                                                        <ChevronUpIcon />
-                                                    ) : (
-                                                        <ChevronDownIcon />
-                                                    )}
-                                                </div>
-                                                {expandedIndex === index && (
-                                                    <div className="pb-3 text-gray-600">
-                                                        {faq.a}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                    )}
-                                </>
-                            ) : (
-                                faqCategories[selectedCategoryIndex].faqs.map((faq, index) => (
+                            {filteredQuestions.length > 0 ? (
+                                filteredQuestions.map((faq, index) => (
                                     <div key={index} className="border-b last:border-b-0">
                                         <div
                                             className="flex justify-between items-center py-3 cursor-pointer"
                                             onClick={() => toggleAnswer(index)}
                                         >
-                                            <span className="font-medium">{faq.q}</span>
-                                            {expandedIndex === index ? (
-                                                <ChevronUpIcon />
-                                            ) : (
-                                                <ChevronDownIcon />
-                                            )}
+                                            <span className="font-medium">{faq.title}</span>
+                                            {expandedIndex === index ? <ChevronUpIcon /> : <ChevronDownIcon />}
                                         </div>
                                         {expandedIndex === index && (
-                                            <div className="pb-3 text-gray-600">
-                                                {faq.a}
-                                            </div>
+                                            <div className="pb-3 text-gray-600">{faq.content}</div>
                                         )}
                                     </div>
                                 ))
+                            ) : (
+                                <p>검색 결과가 없습니다.</p>
                             )}
                         </div>
                     </div>

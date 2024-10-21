@@ -9,6 +9,13 @@ public class SignUpDTO {
     private String empMail;
     private String empRrn;
 
+    public SignUpDTO() {
+    }
+
+    public SignUpDTO(String empCode) {
+        this.empCode = empCode;
+    }
+
     public SignUpDTO(String empCode, String empName, String empPass, String depCode, String phoneNum, String empMail, String empRrn) {
 
         this.empCode = empCode;

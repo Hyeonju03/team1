@@ -46,4 +46,14 @@ public class AdminFAQDTO {
     public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
+
+    @Override
+    public String toString() {
+        return "AdminFAQDTO{" +
+                "category='" + category + '\'' +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", startDate=" + startDate +
+                '}';
+    }
 }
