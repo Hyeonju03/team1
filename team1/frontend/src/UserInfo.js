@@ -1,16 +1,17 @@
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
+import axios from "axios";
 
 export default function UserInfo() {
-    const [empName, setEmpName] = useState("홍길동");
-    const [department, setDepartment] = useState("개발팀");
-    const [position, setPosition] = useState("대리");
-    const [empRrn, setEmpRrn] = useState("010101-0101010");
-    const [empCode, setEmpCode] = useState("12345678-123456");
-    const [empPass, setEmpPass] = useState("123456");
-    const [phoneNum, setPhoneNum] = useState("010-0101-0101");
-    const [extNum, setExtNum] = useState("123456-1234");
-    const [empMail, setEmpMail] = useState("123456@naver.com");
-    const [corCode, setCorCode] = useState("12345678-456789");
+    const [empName, setEmpName] = useState(""); // 이름
+    const [department, setDepartment] = useState(""); // 부서코드
+    const [position, setPosition] = useState(""); // 직급코드
+    const [empRrn, setEmpRrn] = useState(""); // 주민등록번호
+    const [empCode, setEmpCode] = useState(""); // 사원코드
+    const [empPass, setEmpPass] = useState(""); // 비밀번호
+    const [phoneNum, setPhoneNum] = useState(""); // 전화번호
+    const [extNum, setExtNum] = useState(""); // 내선번호
+    const [empMail, setEmpMail] = useState(""); // 메일
+    const [corCode, setCorCode] = useState(""); // 상관코드
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
     const togglePanel = () => {
@@ -19,35 +20,80 @@ export default function UserInfo() {
 
     const empNameOnChangeHandler = useCallback((e) => {
         setEmpName(e.target.value);
-    },[]);
+    }, []);
     const departmentOnChangeHandler = useCallback((e) => {
         setDepartment(e.target.value);
-    },[]);
+    }, []);
     const positionOnChangeHandler = useCallback((e) => {
         setPosition(e.target.value);
-    },[]);
+    }, []);
     const empRrnOnChangeHandler = useCallback((e) => {
         setEmpRrn(e.target.value);
-    },[]);
+    }, []);
     const empPassOnChangeHandler = useCallback((e) => {
         setEmpPass(e.target.value);
-    },[]);
+    }, []);
     const phoneNumOnChangeHandler = useCallback((e) => {
         setPhoneNum(e.target.value);
-    },[]);
+    }, []);
     const extNumOnChangeHandler = useCallback((e) => {
         setExtNum(e.target.value);
-    },[]);
+    }, []);
     const empMailOnChangeHandler = useCallback((e) => {
         setEmpMail(e.target.value);
-    },[]);
+    }, []);
     const corCodeOnChangeHandler = useCallback((e) => {
         setCorCode(e.target.value);
-    },[]);
+    }, []);
+
+    const [userInfo, setUserInfo] = useState(null);
+
+    useEffect(() => {
+        const empCode = 1111; // 가져올 empCode
+        axios.get(`/${empCode}`)
+            .then(response => {
+                console.log(response.data);
+                setUserInfo(response.data);
+                // 상태 초기화
+                setEmpName(response.data.empName);
+                setDepartment(response.data.depCode);
+                setPosition(response.data.posCode);
+                setEmpRrn(response.data.empRrn);
+                setEmpCode(response.data.empCode);
+                setEmpPass(response.data.empPass);
+                setPhoneNum(response.data.phoneNum);
+                setExtNum(response.data.extNum);
+                setEmpMail(response.data.empMail);
+                setCorCode(response.data.corCode);
+            })
+            .catch(e => {
+                console.error("에러: " + e);
+
+            });
+    }, []);
+
 
     const goInfoRequest = () => {
-    //     현재 값들 가져와서 db에 요청
-    }
+        //     현재 값들 가져와서 db에 요청
+        const updateUserInfo = {
+            empName,
+            department,
+            position,
+            empPass,
+            phoneNum,
+            extNum,
+            empMail,
+            corCode,
+        };
+
+        axios.post(`/userInfoUpdate`, updateUserInfo)
+            .then(response => {
+                console.log("수정 요청 성공: ", response.data);
+            })
+            .catch(error => {
+                console.error("수정 요청 실패: ", error)
+            });
+    };
 
     // 유효성 검사 확인.
     // 스페이스바 다 무시.
@@ -63,81 +109,87 @@ export default function UserInfo() {
                 인사관리
             </h1>
             <div className="bg-white border border-gray-200 rounded-md p-5">
-                <h2 className="text-xl mb-4">
-                    {empName}님 정보 관리
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">이름</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={empNameOnChangeHandler}
-                               value={empName}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">부서</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={departmentOnChangeHandler}
-                               value={department}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">직급</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={positionOnChangeHandler}
-                               value={position}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">주민등록번호</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={empRrnOnChangeHandler}
-                               value={empRrn}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">회원코드</label>
-                        <input type="text"
-                               readOnly
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               value={empCode}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">비밀번호</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={empPassOnChangeHandler}
-                               value={empPass}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">전화번호</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={phoneNumOnChangeHandler}
-                               value={phoneNum}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">내선번호</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={extNumOnChangeHandler}
-                               value={extNum}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">메일</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={empMailOnChangeHandler}
-                               value={empMail}/>
-                    </div>
-                    <div className="mb-2">
-                        <label className="block mb-1 text-sm text-gray-600">상관코드</label>
-                        <input type="text"
-                               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={corCodeOnChangeHandler}
-                               value={corCode}/>
-                    </div>
-                </div>
+                {/* userInfo가 있을때만 렌더링 */}
+                {userInfo ? (
+                    <>
+                        <h2 className="text-xl mb-4">
+                            {userInfo.empName}님 정보 관리
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">이름</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={empNameOnChangeHandler}
+                                       value={empName}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">부서</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={departmentOnChangeHandler}
+                                       value={department}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">직급</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={positionOnChangeHandler}
+                                       value={position}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">주민등록번호</label>
+                                <input type="text"
+                                       readOnly
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={empRrnOnChangeHandler}
+                                       value={empRrn}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">회원코드</label>
+                                <input type="text"
+                                       readOnly
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       value={empCode}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">비밀번호</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={empPassOnChangeHandler}
+                                       value={empPass}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">전화번호</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={phoneNumOnChangeHandler}
+                                       value={phoneNum}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">내선번호</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={extNumOnChangeHandler}
+                                       value={extNum}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">메일</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={empMailOnChangeHandler}
+                                       value={empMail}/>
+                            </div>
+                            <div className="mb-2">
+                                <label className="block mb-1 text-sm text-gray-600">상관코드</label>
+                                <input type="text"
+                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+                                       onChange={corCodeOnChangeHandler}
+                                       value={corCode}/>
+                            </div>
+                        </div>
+                    </>
+                ) : (<p>로딩중...</p>)}
             </div>
             <div className="mt-2">
                 <button
