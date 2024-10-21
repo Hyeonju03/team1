@@ -104,12 +104,13 @@ class ListLibrary {
             let htmlList = {};
             const htmlTags = new DOMParser().parseFromString(`
                     <div class="border h-[210px]">
-                        <input class="border w-[100%] h-[25px]" placeholder="제목입력" onchange=""/>
-                        <input type="date" class="border w-[100%] h-[25px]"/>
-                        <textarea class="border w-[100%] h-[160px] resize-none" placeholder="내용입력"></textarea>
+                        <input class="border w-[100%] h-[25px]" placeholder="제목입력" onchange="ListLibrary.data[0] = this.value"/>
+                        <input type="date" class="border w-[100%] h-[25px]" onchange="ListLibrary.data[1] = this.value"/>
+                        <textarea class="border w-[100%] h-[160px] resize-none" placeholder="내용입력" onchange="ListLibrary.data[2] = this.value"></textarea>
                     </div>
                     <div class="border h-[180px] here overflow-y-auto"><ul class="list-disc pl-5" id="topUL"></ul></div>
             `, 'text/html').body;
+
 
             let topParent = ""
             this.upDepCode.map((v1,i1) => {
@@ -232,5 +233,5 @@ class ListLibrary {
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
 }
-
+window.ListLibrary = ListLibrary;
 export default ListLibrary;
