@@ -361,8 +361,10 @@ export default function SignRequest() {
                                                         </>
                                                         :
                                                         btnCtl === 6 ?
-                                                            ListLibrary.noticeListCreate("3118115625",setBtnCtl)
-                                                            : <></>
+                                                            <>
+                                                            {ListLibrary.noticeListCreate("3118115625",setBtnCtl)}
+                                                            <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(3)}>공지사항 등록</button>
+                                                            </>: <></>
 
                             }
                         </div>

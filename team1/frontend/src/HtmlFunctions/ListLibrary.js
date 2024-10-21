@@ -14,6 +14,7 @@ class ListLibrary {
     static mail = "";
     static PH = "";
     static state = "";
+    static data = [];
 
     //static testData3 = {};
 
@@ -96,46 +97,67 @@ class ListLibrary {
             </div>
         );
     }
-    static WorkerList2(code,setBtnCtl) {
+
+    static WorkerList2(code, setBtnCtl) {
         const depLayout = () => {
 
             let htmlList = {};
             const htmlTags = new DOMParser().parseFromString(`
-                    <div class="border h-[235px]">
-                        <input class="border w-[100%] h-[25px]" placeholder="제목입력"/>
+                    <div class="border h-[210px]">
+                        <input class="border w-[100%] h-[25px]" placeholder="제목입력" onchange=""/>
                         <input type="date" class="border w-[100%] h-[25px]"/>
-                        <textarea class="border w-[100%] h-[185px]" placeholder="내용입력"></textarea>
+                        <textarea class="border w-[100%] h-[160px] resize-none" placeholder="내용입력"></textarea>
                     </div>
-                    <div class="border h-[200px] here"></div>
-                    <button class="text-center border w-full h-[45px]">
-                        공지사항 등록
-                    </button>
+                    <div class="border h-[180px] here overflow-y-auto"><ul class="list-disc pl-5" id="topUL"></ul></div>
             `, 'text/html').body;
 
-            const button = htmlTags.querySelector('button');
-            button.addEventListener('click', () => {
-                console.log("등록 누름")
-                setBtnCtl(3);
-            });
-
-            return htmlTags;
-
-            
-            const textarea = htmlTags.querySelector('textarea');
-            textarea.addEventListener('input', (e) => {
-                // textarea 값이 변경되면 value가 업데이트
-                const newValue = e.target.value;
-                console.log('textarea updated:', newValue);
-            });
-
+            let topParent = ""
+            this.upDepCode.map((v1,i1) => {
+                if(v1 === "") topParent = this.depCode[i1]
+            })
 
             this.depCode.forEach((v1, i1) => {
-                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input type="checkbox" id="${v1}Btn"><ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange="
+                    let getParentId = document.getElementById('${v1}');
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0,0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                         console.log('위',isTrueCount[0] === getChilds.length)
+                    }
+                    
+                    
+                    "><ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
                 htmlList[htmlTag.id] = htmlTag;
             })
 
             this.empDepCode.forEach((v1, i1) => {
-                htmlList[v1].children[1].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[50px]" data-value=${this.empCode[i1]}>${this.empName[i1]}</li>`, 'text/html').body.firstChild)
+                htmlList[v1].children[1].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[65px]" data-value=${this.empCode[i1]}>${this.empName[i1]}<input type="checkbox" onchange="
+                    let getParentId = document.getElementById('${v1}')
+                    const getChilds = Array.from(getParentId.getElementsByClassName('${v1}'));
+                    let isTrueCount = [0,0];
+                    getChilds.forEach(child => {
+                          if (child.children[0].checked) isTrueCount[0]++;
+                    });
+                    if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true
+                    else getParentId.children[0].checked = false
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0,0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                    }
+                        
+                    "></li>`, 'text/html').body.firstChild)
             })
             this.depCode.forEach((v1, i1) => {
                 this.depCode.forEach((v2, i2) => {
@@ -149,7 +171,7 @@ class ListLibrary {
                     this.top = v1
                 }
             })
-            //htmlTags.children[1].appendChild(htmlList[this.top])
+            htmlTags.children[1].children[0].appendChild(htmlList[this.top])
             return htmlTags
         }
 
@@ -168,21 +190,9 @@ class ListLibrary {
 
         }
         listCheck();
-        return (
-            <>
-                <div className="border h-[235px]">
-                    <input className="border w-[100%] h-[25px]"
-                           placeholder="제목입력"/>
-                    <input type="date"
-                           className="border w-[100%] h-[25px]"/>
-                    <textarea className="border w-[100%] h-[185px]"
-                              placeholder="내용입력"/>
-                </div>
-                <div className="border h-[200px] here">여기임</div>
-                <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(3)}>공지사항 등록</button>
-            </>
-        );
+        return this.returnList2
     }
+
     static async RClickWindow(newWindowPosX, newWindowPosY, target) {
         const RClickWindowSelect = async () => {
             const params = {code: target}
@@ -216,8 +226,9 @@ class ListLibrary {
     }
 
     static noticeListCreate(code, setBtnCtl) {
-        this.WorkerList2(code,setBtnCtl)
+        this.WorkerList2(code, setBtnCtl)
         console.log(this.returnList2)
+        if (!this.returnList2) return setBtnCtl(3)
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
 }
