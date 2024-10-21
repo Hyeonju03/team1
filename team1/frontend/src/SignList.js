@@ -1,44 +1,38 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import {ChevronDown, ChevronRight, Paperclip, Search} from "lucide-react";
 
 
 export default function SignList() {
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [documents, setDocuments] = useState([]);
-    const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
     const navigate = useNavigate();
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [signList, setSignList] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [documents, setDocuments] = useState([]);
+    const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
+    const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
+    const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
+    const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
 
-    useEffect(() => {
-        const res = axios.get('/signlist')
-            .then(response => {
-                console.log(response.data);
-            })
-        console.log(res)
-    }, []);
 
     const setDoc = useCallback(() => {
         // doc리스트 가져오기
-        setDocuments([
-            {
-                id: '001',
-                classification: '일반',
-                title: '2023년 4분기 보고서',
-                submissionDate: '2023-12-01',
-                completionDate: '2023-12-05',
-                approvalStatus: '승인 > 미승인 > 미승인',
-                content: '2023년 4분기 보고서에 대한 상세 내용입니다.',
-            },
-            {
-                id: '002',
-                classification: '긴급',
-                title: '신규 프로젝트 계획서',
-                submissionDate: '2023-12-10',
-                completionDate: '-',
-                approvalStatus: '승인 > 승인 > 미승인',
-                content: '신규 프로젝트 계획서에 대한 상세 내용입니다.',
-            },
-        ]);
+        const comCode = 3118115625
+        axios.get(`/sign/${comCode}`)
+            .then(response => {
+                console.log(response.data);
+                setDocuments(response.data);
+                setFilteredDocuments(response.data); // 초기값은 전체 문서
+            })
+            .catch(error => console.log(error));
+
+        axios.get(`/code`)
+            .then(response => {
+                const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))];
+                setCategories(uniqueCategories);
+            })
     }, []);
 
     useEffect(() => {
@@ -49,123 +43,215 @@ export default function SignList() {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const toggleDocument = (docId) => {
-        // 클릭한 문서 ID가 열려 있는 문서 ID와 같으면 닫고, 다르면 그 문서 ID로 변경
-        setOpenDocumentId(openDocumentId === docId ? null : docId);
-    };
-
-    const addNewDocument = () => {
-
-        // const newDoc = {
-        //     id: `00${documents.length + 1}`,
-        //     classification: '신규',
-        //     title: `새 문서 ${documents.length + 1}`,
-        //     submissionDate: new Date().toISOString().split('T')[0],
-        //     completionDate: '-',
-        //     approvalStatus: '미승인 > 미승인 > 미승인',
-        //     content: '새 문서에 대한 상세 내용입니다.',
-        // };
-        // setDocuments([...documents, newDoc]);
-    };
-
     const goSignRequest = () => {
         navigate("/sign/register");
     }
 
+    // 문서 제목 클릭 시 상세 페이지로 이동
+    const handleDocumentClick = (signNum) => {
+        navigate(`/sign/${signNum}`)
+    }
+
+    // 날짜 형식 변환
+    const formatDate = (dateString) => {
+        return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
+    };
+
+    // 검색 버튼 클릭 시
+    const handleSearch = () => {
+        // 검색어가 포함된 문서를 필터링
+        const filtered = documents.filter((doc) =>
+            doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || // 제목 검색
+            doc.content?.toLowerCase().includes(searchQuery.toLowerCase()) || // 내용(문서 설명) 검색
+            doc.docCateCode?.toLowerCase().includes(searchQuery.toLowerCase()) // 카테고리 검색
+        );
+        setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+
+        // 검색된 결과가 없을 경우
+        if (filtered.length === 0) {
+            alert("검색된 문서가 없습니다.");
+        }
+    };
+
+    // 엔터키로 문서 검색 가능
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            handleSearch();
+        }
+    }
+
+    // 왼쪽 메뉴 카테고리 선택 시 해당 카테고리와 일치하는 문서들만 필터링
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category); // 별도의 선택 상태
+        const filtered = documents.filter((doc) => doc.signCateCode === category);
+        setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+        if (filtered.length === 0) {
+            alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
+        }
+    }
+
+    // 체크박스 상태 변화
+    const handleCheckboxChange = (signNum) => {
+        setSelectedDocuments(prevState => {
+            if (prevState.includes(signNum)) {
+                return prevState.filter(num => num !== signNum); // 이미 선택된 문서는 해제
+            } else {
+                return [...prevState, signNum]; // 새로운 문서 선택
+            }
+        });
+    };
+
+    const handleDelete = () => {
+        const deletePromises = selectedDocuments.map(signNum =>
+            axios.delete(`/sign/${signNum}`) // 실제 삭제 API 호출
+        );
+
+        Promise.all(deletePromises)
+            .then(() => {
+                // 삭제 후 상태 업데이트
+                setDocuments(prevDocuments =>
+                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                );
+                setFilteredDocuments(prevDocuments =>
+                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                );
+                setSelectedDocuments([]); // 선택된 문서 초기화
+            })
+            .catch(error => console.log(error));
+    };
+
     return (
-        <div className="min-h-screen flex flex-col bg-gray-100">
+        <div className="min-h-screen flex flex-col">
             {/* Header with logo */}
-            <header className="bg-white shadow-md p-4">
-                <div className="container mx-auto">
-                    <div className="w-32 h-8 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
-                </div>
+            <header className="bg-gray-200 p-4">
+                <h1 className="text-2xl font-bold text-center">로고</h1>
             </header>
+            <div className="flex-1 flex">
+                <aside className="w-64 bg-gray-100 p-4 space-y-2">
 
-            {/* Main content */}
-            <main className="flex-grow container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
-                <h1 className="text-2xl font-bold mb-6">문서결재</h1>
-
-                {/* Document table */}
-                <table className="w-full mb-6">
-                    <thead>
-                    <tr className="bg-gray-200">
-                        <th className="p-2 text-center">문서번호</th>
-                        <th className="p-2 text-center">분류</th>
-                        <th className="p-2 text-center">제목</th>
-                        <th className="p-2 text-center">기안일</th>
-                        <th className="p-2 text-center">완료일</th>
-                        <th className="p-2 text-center">승인현황</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {documents.map((doc) => (
-                        <React.Fragment key={doc.id}>
-                            <tr onClick={() => toggleDocument(doc.id)} className="cursor-pointer hover:bg-gray-100">
-                                <td className="p-2">{doc.id}</td>
-                                <td className="p-2">{doc.classification}</td>
-                                <td className="p-2">{doc.title}</td>
-                                <td className="p-2">{doc.submissionDate}</td>
-                                <td className="p-2">{doc.completionDate}</td>
-                                <td className="p-2">{doc.approvalStatus}</td>
-                            </tr>
-                            {openDocumentId === doc.id && ( // 현재 문서가 열려 있다면 내용 표시
-                                <tr className="bg-gray-50">
-                                    <td colSpan="6" className="p-2">
-                                        <h2 className="text-lg font-semibold">문서 내용</h2>
-                                        <p>{doc.content}</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </React.Fragment>
-                    ))}
-                    </tbody>
-                </table>
-
-                {/* Create document button */}
-                <button
-                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-                    onClick={goSignRequest}
-                >
-                    문서 만들기
-                </button>
-            </main>
-
-            {/* Slide-out panel with toggle button */}
-            <div
-                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-            >
-                {/* Panel toggle button */}
-                <button
-                    onClick={togglePanel}
-                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                >
-                    {isPanelOpen ? '>' : '<'}
-                </button>
-
-                <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
-                    <div className="text-sm text-center mb-4">
-                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    <div>
+                        <button
+                            className="w-full flex items-center"
+                            onClick={() => setIsExpanded(!isExpanded)}
+                        >
+                            {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                <ChevronRight className="mr-2 h-4 w-4"/>}
+                            결재함
+                        </button>
+                        {isExpanded && (
+                            <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                {categories.map((category, index) => (
+                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
+                                    category.split(',').map((item, subIndex) => (
+                                        <button className="w-full" key={`${index}-${subIndex}`}
+                                                onClick={() => handleCategorySelect(item)}>
+                                            {item}
+                                        </button>
+                                    ))
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <h2 className="text-xl font-bold mb-2">메신저</h2>
-                    <p>메신저 기능은 준비 중입니다.</p>
+
+                </aside>
+
+                {/* Main content */}
+                <main className="flex-1 p-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                        <div className="relative flex flex-1 max-w-xl">
+                            <input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"
+                                   value={searchQuery} // 검색 입력값 상태와 연결
+                                   onChange={(e) => setSearchQuery(e.target.value)} // 입력값이 변경될 때 상태 업데이트
+                                   onKeyDown={handleKeyDown}
+                            />
+                            <search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
+                        </div>
+                        <button onClick={handleSearch}>검색</button>
+                    </div>
+                    <div className="flex justify-end space-x-2 mb-4">
+                        <button onClick={() => {
+                            // 등록 페이지로 이동할 때 선택된 카테고리를 전달
+                            navigate('/sign/register', {state: {selectedCategory: selectedCategory}});
+                        }}>등록
+                        </button>
+                        <button onClick={handleDelete}>삭제</button>
+                    </div>
+                    <h1 className="text-2xl font-bold mb-4">문서결재</h1>
+                    <div className="space-y-2">
+                        {/* Document table */}
+                        <table className="w-full mb-6">
+                            <thead>
+                            <tr className="bg-gray-200">
+                                <th className="p-2 text-center">문서번호</th>
+                                <th className="p-2 text-center">분류</th>
+                                <th className="p-2 text-center">제목</th>
+                                <th className="p-2 text-center">기안일</th>
+                                <th className="p-2 text-center">완료일</th>
+                                <th className="p-2 text-center">승인현황</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {signList.map((doc) => (
+                                <div key={doc.id}>
+                                    <tr className="cursor-pointer hover:bg-gray-100">
+                                        <td className="p-2">{doc.id}</td>
+                                        <td className="p-2">{doc.classification}</td>
+                                        <td className="p-2">{doc.title}</td>
+                                        <td className="p-2">{doc.submissionDate}</td>
+                                        <td className="p-2">{doc.completionDate}</td>
+                                        <td className="p-2">{doc.approvalStatus}</td>
+                                    </tr>
+                                </div>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    {/* Create document button */}
+                    <button
+                        className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                        onClick={goSignRequest}
+                    >
+                        문서 만들기
+                    </button>
+                </main>
+
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        <h2 className="text-xl font-bold mb-4">로그인</h2>
+                        <input
+                            type="text"
+                            placeholder="아이디"
+                            className="w-full p-2 mb-2 border rounded"
+                        />
+                        <input
+                            type="password"
+                            placeholder="비밀번호"
+                            className="w-full p-2 mb-4 border rounded"
+                        />
+                        <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                            로그인
+                        </button>
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
                 </div>
             </div>
         </div>

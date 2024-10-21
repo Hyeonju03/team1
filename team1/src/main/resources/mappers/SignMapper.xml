@@ -2,23 +2,18 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="kr.or.nextit.team1.mappers.ScheduleMapper">
-    <resultMap id="signMap" type="signDTO">
-        <result column="emp_code" property="empCode"/>
-        <result column="sign_num" property="signNum"/>
-        <result column="sign_cate_code" property="signCateCode"/>
-        <result column="title" property="title"/>
-        <result column="content" property="content"/>
-        <result column="file_name" property="fileName"/>
-        <result column="file_original_name" property="fileOriginalName"/>
-        <result column="file_size" property="fileSize"/>
-        <result column="file_path" property="filePath"/>
-        <result column="target" property="target"/>
-        <result column="start_date" property="startDate"/>
-        <result column="end_date" property="endDate"/>
-    </resultMap>
+<mapper namespace="kr.or.nextit.team1.mappers.SignMapper">
 
-    <select id="selectSigns" resultType="signDTO">
+    <select id="signSelect" resultType="signDTO">
+        SELECT
+            *
+        FROM
+            SIGN_TEST
+        WHERE
+            EMP_CODE
+    </select>
+
+    <select id="signDetail" parameterType="int" resultType="SignDTO">
         SELECT
             SIGN_NUM,
             SIGN_CATE_CODE,
@@ -32,51 +27,32 @@
             START_DATE,
             END_DATE
         FROM
-            SIGN
+            SIGN_TEST
         WHERE
-            EMP_CODE = #{empCode}
+            SIGN_NUM = #{signNum}
     </select>
 
-<!--    <select id="selectSign" parameterType="int" resultMap="signMap">-->
-<!--        SELECT-->
-<!--            SIGN_NUM,-->
-<!--            SIGN_CATE_CODE,-->
-<!--            TITLE,-->
-<!--            CONTENT,-->
-<!--            FILE_NAME-->
-<!--            FILE_ORIGINAL_NAME-->
-<!--            FILE_SIZE-->
-<!--            FILE_PATH-->
-<!--            TARGET-->
-<!--            START_DATE-->
-<!--            END_DATE-->
-<!--        FROM-->
-<!--            SIGN-->
-<!--        WHERE-->
-<!--            SIGN_NUM = #{signNum}-->
-<!--    </select>-->
+    <insert id="signInsert" parameterType="signDTO">
+        INSERT INTO
+            SIGN_TEST
+            (EMP_CODE, SIGN_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGINAL_NAME, FILE_SIZE, FILE_PATH, TARGET)
+        VALUES
+            (#{empCode}}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
+    </insert>
 
-<!--    <insert id="registerSign" parameterType="signDTO">-->
-<!--        INSERT INTO-->
-<!--            SIGN-->
-<!--            (EMP_CODE, SIGN_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGINAL_NAME, FILE_SIZE, FILE_PATH, TARGET)-->
-<!--        VALUES-->
-<!--            (#{empCode}}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})-->
-<!--    </insert>-->
+    <update id="signUpdate" parameterType="signDTO">
+        UPDATE
+            SIGN_TEST
+        SET
+            TARGET = #{target},
+		WHERE
+			SIGN_NUM = #{signNum}
+    </update>
 
-<!--    <update id="modifySign" parameterType="signDTO">-->
-<!--        UPDATE-->
-<!--            SIGN-->
-<!--        SET-->
-<!--            TARGET = #{target},-->
-<!--		WHERE-->
-<!--			SIGN_NUM = #{signNum}-->
-<!--    </update>-->
-
-<!--    <delete id="removeSign" parameterType="int">-->
-<!--        DELETE FROM-->
-<!--            SIGN-->
-<!--        WHERE-->
-<!--            SIGN_NUM = #{signNum}-->
-<!--    </delete>-->
+    <delete id="signDelete">
+        DELETE FROM
+            SIGN_TEST
+        WHERE
+            SIGN_NUM = #{signNum}
+    </delete>
 </mapper>
