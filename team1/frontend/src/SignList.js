@@ -91,12 +91,12 @@ export default function SignList() {
                 <table className="w-full mb-6">
                     <thead>
                     <tr className="bg-gray-200">
-                        <th className="p-2 text-left">문서번호</th>
-                        <th className="p-2 text-left">분류</th>
-                        <th className="p-2 text-left">제목</th>
-                        <th className="p-2 text-left">기안일</th>
-                        <th className="p-2 text-left">완료일</th>
-                        <th className="p-2 text-left">승인현황</th>
+                        <th className="p-2 text-center">문서번호</th>
+                        <th className="p-2 text-center">분류</th>
+                        <th className="p-2 text-center">제목</th>
+                        <th className="p-2 text-center">기안일</th>
+                        <th className="p-2 text-center">완료일</th>
+                        <th className="p-2 text-center">승인현황</th>
                     </tr>
                     </thead>
                     <tbody>

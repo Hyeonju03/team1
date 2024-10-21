@@ -1,6 +1,6 @@
-import {useCallback, useState} from "react";
+import React, {useCallback, useState} from "react";
 
-export default function SignTarget() {
+export default function SignTarget({ onClose }) {
     const [title, setTitle] = useState("");
     const [contents, setContents] = useState("");
 
@@ -12,16 +12,14 @@ export default function SignTarget() {
     });
 
     const goSave = () => {
-        onclose({ title: title, contents: contents });
+        onClose({ title: title, contents: contents });
     };
 
     return (
         <div className="py-12 transition duration-150 ease-in-out z-10 absolute top-0 right-0 bottom-0 left-0" id="modal">
-            <div className="container ml-[400px] md:w-2/3 max-w-lg bg-white">
-                <div className="relativepy-8 px-5 md:px-10 shadow-md rounded border border-gray-400 bg-white w-[1000px] h-[700px]">
-                    <h1 className="text-gray-800 font-lg font-bold tracking-normal leading-tight mb-4">
-                        결재선
-                    </h1>
+            <div className="container ml-[570px] mt-[100px] md:w-2/3 max-w-lg bg-white">
+                <div className="relativepy-8 px-5 md:px-10 shadow-md rounded border-2 bg-white w-[1000px] h-[700px]">
+                    <h1 className="text-2xl font-bold mt-3 mb-6">결재선</h1>
                     <div className="flex justify-between">
                         <div>
                             <div
@@ -33,19 +31,17 @@ export default function SignTarget() {
                                 Select 문으로 사람 조회하기
                             </div>
                         </div>
-                        <div className="flex center items-center justify-center">
-                            <div className="flex-col items-center justify-start w-full">
+                        <div className="flex flex-col items-center flex-wrap justify-center">
+                            <div>
                                 <button
                                     className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm"
-                                    onClick={goSave}
                                 >
-                                    등록
+                                    추가
                                 </button>
-                                <button
-                                    className="focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 ml-3 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm"
-                                    onClick={() => onclose()}
-                                >
-                                    취소
+                            </div>
+                            <div>
+                                <button className="mt-1 focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm">
+                                    빼기
                                 </button>
                             </div>
                         </div>
@@ -63,7 +59,7 @@ export default function SignTarget() {
                                     <div>직급</div>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-start w-full">
+                            <div className="flex items-center justify-end w-full mt-1">
                                 <button
                                     className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm"
                                     onClick={goSave}
@@ -72,7 +68,7 @@ export default function SignTarget() {
                                 </button>
                                 <button
                                     className="focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 ml-3 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm"
-                                    onClick={() => onclose()}
+                                    onClick={() => onClose()}
                                 >
                                     취소
                                 </button>

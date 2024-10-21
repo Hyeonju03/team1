@@ -45,7 +45,12 @@ export default function UserInfo() {
         setCorCode(e.target.value);
     },[]);
 
+    const goInfoRequest = () => {
+    //     현재 값들 가져와서 db에 요청
+    }
 
+    // 유효성 검사 확인.
+    // 스페이스바 다 무시.
 
     return (
         <div className="max-w-6xl mx-auto p-5 font-sans">
@@ -122,18 +127,27 @@ export default function UserInfo() {
                         <label className="block mb-1 text-sm text-gray-600">메일</label>
                         <input type="text"
                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={departmentOnChangeHandler}
+                               onChange={empMailOnChangeHandler}
                                value={empMail}/>
                     </div>
                     <div className="mb-2">
                         <label className="block mb-1 text-sm text-gray-600">상관코드</label>
                         <input type="text"
                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                               onChange={departmentOnChangeHandler}
+                               onChange={corCodeOnChangeHandler}
                                value={corCode}/>
                     </div>
                 </div>
             </div>
+            <div className="mt-2">
+                <button
+                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                    onClick={goInfoRequest}
+                >
+                    수정 요청하기
+                </button>
+            </div>
+
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -148,8 +162,8 @@ export default function UserInfo() {
 
                 <div className="p-4">
                     <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input type="text" placeholder="아이디" className="w-full p-2 mb-2 border rounded" />
-                    <input type="password" placeholder="비밀번호" className="w-full p-2 mb-4 border rounded" />
+                    <input type="text" placeholder="아이디" className="w-full p-2 mb-2 border rounded"/>
+                    <input type="password" placeholder="비밀번호" className="w-full p-2 mb-4 border rounded"/>
                     <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
                         로그인
                     </button>
@@ -166,18 +180,18 @@ export default function UserInfo() {
     )
 }
 
-function InputField({ label, value, type = 'text' }) {
-    return (
-        <div className="mb-2">
-            <label className="block mb-1 text-sm text-gray-600">
-                {label}
-            </label>
-            <input
-                type={type}
-                value={value}
-                readOnly
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-            />
-        </div>
-    )
-}
+// function InputField({ label, value, type = 'text' }) {
+//     return (
+//         <div className="mb-2">
+//             <label className="block mb-1 text-sm text-gray-600">
+//                 {label}
+//             </label>
+//             <input
+//                 type={type}
+//                 value={value}
+//                 readOnly
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
+//             />
+//         </div>
+//     )
+// }

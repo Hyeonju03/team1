@@ -1,8 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
 import SignTarget from "./SignTarget";
+import axios from "axios";
+import {Paperclip} from "lucide-react";
+import {useNavigate} from "react-router-dom";
 
 export default function SignRequest() {
+    const nevigate = useNavigate();
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
@@ -14,6 +18,13 @@ export default function SignRequest() {
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
     const [openTarget, setOpenTarget] = useState(false);
+
+    const [title, setTitle] = useState("");
+    const [category, setCategory] = useState('');
+    const [attachment, setAttachment] = useState(null);
+
+    const categories = ["카테고리 1", "카테고리 2", "카테고리 3", "카테고리 4"];
+
 
     const windowRClick = async (e) => {
         e.preventDefault()
@@ -54,6 +65,10 @@ export default function SignRequest() {
         setDoc();
     }, [setDoc]);
 
+    const handleFileChange = (event) => {
+        setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
+    }
+
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
@@ -80,18 +95,21 @@ export default function SignRequest() {
         setDocuments([...documents, newDoc]);
     };
 
-    const goTargetClose = (param) => {
+    const goClose = (param) => {
         setOpenTarget(false);
         if(param) {
-            setList([
-                ...list,
-                {
-                    number: param.number,
-                    empCode: param.empCode,
-                }
-            ])
+            console.log(param)
+            // setList([
+            //     ...list,
+            //     {
+            //         number: param.number,
+            //         empCode: param.empCode,
+            //     }
+            // ])
         }
     }
+
+
 
     return (
     <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
@@ -105,8 +123,7 @@ export default function SignRequest() {
             </header>
 
             {/* Main content */}
-        <main
-            className="flex-grow flex flex-col items-center container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
+        <main className="flex-grow flex flex-col items-center container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
             <h1 className="text-2xl font-bold mb-6">문서작성</h1>
 
             <div className="flex justify-between w-[350px] mb-4">
@@ -117,31 +134,52 @@ export default function SignRequest() {
                 <div className={`${isToggled ? 'font-bold' : ''}`}>제공된 양식 사용하기</div>
             </div>
 
-            {openTarget ? <SignTarget onTargetClose={goTargetClose}/> : null}
+            <div className="flex items-center space-x-4 mb-4">
+                <fieldset>
+                    {/*<legend>카테고리</legend>*/}
+                    <div>
+                        <select name="category" value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                                className="border rounded p-2">
+                            <option value="">카테고리</option>
+                            {categories.map((cate, index) => ( // 공통 카테고리 배열 사용
+                                <option key={index} value={cate}>
+                                    {cate}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </fieldset>
+
+                <input type="text" className="w-[810px] p-2 border rounded mb-2"
+                       placeholder="제목을 입력하세요" value={title}
+                       onChange={(e) => setTitle(e.target.value)}/>
+            </div>
+            {openTarget ? <SignTarget onClose={goClose}/> : null}
 
             {isToggled ?
-            <div
-                className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
-                {/* 내용 추가 가능 */}
-                {/*  회사명, 결재라인  */}
-                <table className="h-[178px]">
-                    <tr>
-                        <td className="w-[500px] text-2xl">
-                            <input type="text" placeholder="기업명"
-                                   className="text-center h-[100px] w-[450px] text-2xl"/>
-                        </td>
-                        <td className="w-[500px] flex flex-row justify-center mt-5">
-                            <div className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                <div className="h-[30px] bg-gray-200">
-                                    결 재
+                <div
+                    className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
+                    {/* 내용 추가 가능 */}
+                    {/*  회사명, 결재라인  */}
+                    <table className="h-[178px]">
+                        <tr>
+                            <td className="w-[500px] text-2xl">
+                                <input type="text" placeholder="기업명"
+                                       className="text-center h-[100px] w-[450px] text-2xl"/>
+                            </td>
+                            <td className="w-[500px] flex flex-row justify-center mt-5">
+                                <div className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                    <div className="h-[30px] bg-gray-200">
+                                        결 재
+                                    </div>
+                                    <div className="h-[100px] border-t-2 border-black">그렇게됬다</div>
                                 </div>
-                                <div className="h-[100px] border-t-2 border-black">그렇게됬다</div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-                {/*    */}
-                <div className="mt-[20px]">
+                            </td>
+                        </tr>
+                    </table>
+                    {/*    */}
+                    <div className="mt-[20px]">
                     <input type="text" placeholder="주소" className="text-center h-[50px] w-[900px] text-lg"/>
                 </div>
                 {/*    */}
@@ -241,17 +279,19 @@ export default function SignRequest() {
                 </div>
             </div> :
                 <div>
-                    <textarea className="w-[950px] h-[400px] border-2" placeholder="파일과 함께 보낼 내용을 작성해주세요."/>
+                    <textarea className="p-1 w-[950px] h-[400px] border-2 border-black rounded" placeholder="파일과 함께 보낼 내용을 작성해주세요."/>
                 </div>}
-            <div className="max-w-sm">
-                <form>
-                    <label className="block">
-                        <span className="sr-only">Choose profile photo</span>
-                        <input type="file" className="block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                            file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none dark:text-neutral-500 dark:file:bg-blue-500
-                            dark:hover:file:bg-blue-400" multiple/>
-                    </label>
-                </form>
+            <div>
+                <div className="flex justify-between mb-4 w-[950px] p-2 border rounded">
+                    <div className="flex items-center">
+                        <Paperclip className="h-5 w-5 mr-2"/>
+                        <span className="whitespace-nowrap">첨부파일</span>
+                        <input type="file" className="m-1" onChange={handleFileChange}/>
+                    </div>
+                    <div> {attachment ?
+                        `${(attachment.size / 1024).toFixed(2)} KB / 10 MB` :
+                        '0 KB / 10 MB'}</div>
+                </div>
             </div>
             <div className="mt-4">
                 <button className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]"
@@ -279,7 +319,8 @@ export default function SignRequest() {
                 <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
                     문서 만들기
                 </button>
-                <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]">
+                <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]"
+                onClick={()=>{nevigate('/sign')}}>
                     취소
                 </button>
             </div>
