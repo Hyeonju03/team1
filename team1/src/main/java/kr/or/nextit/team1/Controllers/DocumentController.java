@@ -1,75 +1,156 @@
 package kr.or.nextit.team1.Controllers;
 
 import kr.or.nextit.team1.DTOs.DocumentDTO;
+import kr.or.nextit.team1.Services.DocumentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 public class DocumentController {
 
-    private List<DocumentDTO> documents = new ArrayList<>();
-    private int currentId = 1;
+    @Autowired
+    private DocumentService documentService;
 
-
-//    @GetMapping
-//    public List<DocumentDTO> getDocuments() {
-////        documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1", "2024-10-10 12:00"));
-////        documents.add(new DocumentDTO(2, "문서 제목 테스트 2", "카테고리 테스트 2", "2024-10-09 13:13"));
-//
-//        // Document 엔티티를 DocumentDTO로 변환
-//        List<DocumentDTO> documentDTOs = documents.stream()
-//                .map(document -> new DocumentDTO(document.getId(), document.getTitle(), document.getCategory(), document.getDate(), document.getContent()))
-//                .collect(Collectors.toList());
-//
-//        return documentDTOs;
-//    }
-
-    @GetMapping("/document")
-    public List<DocumentDTO> getDocuments() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        documents.add(new DocumentDTO(1, "문서 제목 테스트 1", "카테고리 테스트 1",  LocalDateTime.parse("2024-10-10 12:00", formatter), "문서 내용 테스트1"));
-        documents.add(new DocumentDTO(2, "문서 제목 테스트 2", "카테고리 테스트 2",  LocalDateTime.parse("2024-10-09 13:13", formatter), "문서 내용 테스트2"));
-
-        // Document 엔티티를 DocumentDTO로 변환
-        List<DocumentDTO> documentDTOs = documents.stream()
-                .map(document -> new DocumentDTO(document.getId(), document.getTitle(), document.getCategory(), document.getDate(), document.getContent()))
-                .collect(Collectors.toList());
-
-        return documentDTOs;
+    // 문서함 리스트
+    @GetMapping("/company/{comCode}")
+    public ResponseEntity<List<DocumentDTO>> documentSelect(@PathVariable String comCode) {
+        List<DocumentDTO> documents = documentService.documentSelect(comCode);
+        return ResponseEntity.ok(documents);
     }
 
     // 문서함 등록
-    @PostMapping("/document")
-    public ResponseEntity<String> createDocument(
+    @PostMapping("/documents")
+    public ResponseEntity<String> documentInsert(
             @RequestParam String title,
             @RequestParam String category,
             @RequestParam String content,
             @RequestParam(required = false) MultipartFile attachment) {
+        documentService.documentInsert(title, category, content, attachment);
+        return ResponseEntity.ok("Document saved successfully");
+    }
 
-        DocumentDTO documentDTO = new DocumentDTO();
-        documentDTO.setId(currentId++);
-        documentDTO.setTitle(title);
-        documentDTO.setCategory(category);
-        documentDTO.setContent(content);
-        documentDTO.setDate(LocalDateTime.now().plusHours(9));
+    // 문서함 상세
+    @GetMapping("/documents/{id}")
+    public ResponseEntity<DocumentDTO> documentDetail(@PathVariable("id") int id) {
+        DocumentDTO document = documentService.documentDetail(id);
+        if (document != null) {
+            return new ResponseEntity<>(document, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
-        // 파일 처리 예시
-        if (attachment != null && !attachment.isEmpty()) {
-            // 첨부파일 처리 로직 추가
+    // 첨부파일 다운
+    @GetMapping("/documents/download/{id}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable("id") int id) throws IOException {
+        DocumentDTO documentDTO = documentService.documentDetail(id);
+
+        Path filePath = Paths.get(documentDTO.getFilePath()).toAbsolutePath().normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        documents.add(documentDTO); // 문서 저장
-        return ResponseEntity.ok("문서가 성공적으로 등록되었습니다. ID: " + documentDTO.getId());
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) {
+            contentType = "application/octet-stream"; // 기본 바이너리 타입
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", resource.getFilename()))
+                .body(resource);
+    }
+
+    // 문서함 수정
+    @PutMapping("/documents/{id}")
+    public ResponseEntity<DocumentDTO> documentUpdate(@PathVariable int id, @RequestParam Map<String, Object> params,
+                                                      @RequestParam(required = false) MultipartFile attachment) {
+
+        // 유효성 검사
+        if (params.get("title") == null || params.get("category") == null || params.get("content") == null) {
+            return ResponseEntity.badRequest().body(null); // 잘못된 요청 처리
+        }
+
+        DocumentDTO documentDTO = new DocumentDTO();
+        documentDTO.setDocNum(id);
+        Object empCodeObject = params.get("empCode");
+        String empCode = empCodeObject != null ? empCodeObject.toString() : null;
+        documentDTO.setEmpCode(empCode);
+        documentDTO.setDocCateCode((String) params.get("category"));
+        documentDTO.setTitle((String) params.get("title"));
+        documentDTO.setContent((String) params.get("content"));
+
+
+        // 기존 문서 정보 가져오기
+        DocumentDTO existingDocument = documentService.documentDetail(id);
+        if (existingDocument == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 문서가 없는 경우
+        }
+
+        String existingFilePath = existingDocument.getFilePath(); // 기존 파일 경로
+        try {
+            // 새로운 파일이 있을 경우
+            if (attachment != null && !attachment.isEmpty()) {
+                // 기존 파일 삭제
+                Path path = Paths.get(existingFilePath);
+                Files.deleteIfExists(path); // 파일 삭제
+
+                // 새로운 파일 저장
+                String filePath = documentService.saveFile(attachment); // 파일 저장 로직 재사용
+                documentDTO.setFilePath(filePath); // 새로운 파일 경로 설정
+                documentDTO.setFileOriginName(attachment.getOriginalFilename()); // 원본 파일 이름 설정
+                documentDTO.setFileSize(attachment.getSize()); // 파일 크기 설정
+
+
+
+                String generatedFileName = UUID.randomUUID().toString();
+                documentDTO.setFileName(generatedFileName);
+
+
+
+            } else {
+                // 기존 파일 유지
+                documentDTO.setFilePath(existingFilePath); // 기존 파일 경로 설정
+                documentDTO.setFileOriginName(existingDocument.getFileOriginName()); // 기존 파일 이름 유지
+                documentDTO.setFileSize(existingDocument.getFileSize()); // 기존 파일 크기 유지
+            }
+
+            // 로그 추가
+            System.out.println("Updating document with ID: " + id);
+            System.out.println("DocumentDTO: " + documentDTO);
+
+
+            // 문서 업데이트
+            documentService.documentUpdate(id, documentDTO); // 서비스에서 문서 업데이트 호출
+            return ResponseEntity.ok(documentDTO); // 업데이트된 문서 반환
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 오류 발생 시 500 반환
+        }
+    }
+
+    // 문서함 삭제
+    @DeleteMapping("/documents/{id}")
+    public ResponseEntity<Void> documentDelete(@PathVariable int id){
+        documentService.documentDelete(id);
+        return ResponseEntity.noContent().build(); // 삭제 성공시 204 No Content 반환
     }
 }
 

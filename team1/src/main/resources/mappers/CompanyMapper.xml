@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.CompanyMapper">
+   <insert id="insertCompany" parameterType="CompanyDTO">
+       INSERT INTO company
+       (COM_CODE, COM_NAME, CEO_NAME, CEO_PHONE, CONTECT_PHONE, EMP_NUM, COM_EMAIL, REGISTER_DATE, DELETE_DATE, PAY_STATUS)
+       VALUES(#{comCode}, #{comName}, #{ceoName}, #{ceoPhone}, #{contectPhone}, #{empNum}, #{comEmail}, current_timestamp(), #{deleteDate}, #{payStatus});
+
+   </insert>
+</mapper>

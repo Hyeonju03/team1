@@ -4,6 +4,8 @@ import axios from "axios";
 
 export default function SignUpForm() {
 
+
+    const [departments,setDepartments] = useState([])
     const [formData, setFormData] = useState({
         companyCode: '',
         name:'',
@@ -22,6 +24,7 @@ export default function SignUpForm() {
     const [idConfirm,setIdConfirm] = useState(false)
     const [pwConfirm,setPwConfirm] = useState(false)
     const [companyConfirm,setCompanyConfirm] = useState(false)
+    const [inputidCheck,setInputIdCheck] = useState("")
     const [errors, setErrors] = useState({});
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
@@ -29,6 +32,7 @@ export default function SignUpForm() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setInputIdCheck(e.target)
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
     };
@@ -66,19 +70,56 @@ export default function SignUpForm() {
         if (companyFound) {
             alert("인증완료");
             setCompanyConfirm(true)
+                //부서검색누르면 부서리스트나와서하는기능
+                //3148200040
+                try {
+                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                    const list = response.data
+
+                    const newDepartments = list.map(v => v.depCode);
+                    newDepartments.map((v,i)=>{
+                        setDepartments(newDepartments);
+                    })
+
+
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
         } else {
             alert("없는 회사코드임");
         }
     }
 
-    const idCheck = () => {
+    const idCheck = async() => {
+        const companyCode = formData.companyCode;
         const id = formData.id;
-        if (id === "123") {
-            alert("이미 있는 아이디임");
-        } else {
-            alert("사용 가능함");
-            setIdConfirm(true)
+        if (!id) {
+            console.error("ID is empty");
+            return; // ID가 비어있으면 함수 종료
         }
+        try {
+            const response = await axios.get('/findAllempCode', {params: { comCode: companyCode }});
+            const empCodes = response.data.map(item => item.empCode);
+
+            const resultEmpCode = empCodes.map(code => code.split('-')[1]);
+            console.log(resultEmpCode)
+            for (let i = 0; i <= resultEmpCode.length; i++) {
+                if(id == resultEmpCode[i] ){
+                    alert("이미 있는 아이디입니다");
+                    break;
+                }else{
+                    alert("가능");
+                    setIdConfirm(true)
+                }
+            }
+
+
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+
+
     };
 
     const pwCheck =(e)=>{
@@ -93,27 +134,42 @@ export default function SignUpForm() {
         }
     }
 
-    const sendVerificationCode = () => {
-        const code = Math.floor(100000 + Math.random() * 900000); // 6자리 랜덤 숫자 생성
-        setGeneratedCode(code);
-        alert(`인증번호가 발송되었습니다: ${code}`); // 실제로는 이메일 발송 로직이 필요합니다.
-    };
+    const sendVerificationCode = async () => {
+        const email = formData.email;
+        if (!email) {
+            alert("이메일 입력해")
+            return
+        }
+        try {
+            const response = await axios.post('/randomCode', { email });
+            const code = response.data.code; // 서버에서 받은 인증 코드를 저장
+            console.log(code)
+            setGeneratedCode(code); // 인증 코드를 상태에 저장
+
+            alert(`인증번호가 발송되었습니다: ${code}`); // 확인 메시지 (실제 이메일 발송 후 삭제 가능)
+        } catch (error) {
+            console.error('Error sending verification code:', error);
+            alert("인증번호 전송에 실패했습니다.");
+        }
+    }
 
     const verifyCode = () => {
-        if (parseInt(formData.verificationCode) === generatedCode) {
+
+        console.log(generatedCode)
+        if (parseInt(formData.verificationCode) == generatedCode) {
             alert("인증번호가 일치합니다.");
         } else {
             alert("인증번호가 일치하지 않습니다.");
         }
     };
 
-    const departmentSearch =()=>{
-        //부서검색누르면 부서리스트나와서하는기능
-    }
-    
-    const firmSearch =()=>{
-        //상관검색누르면 상관리스트나와서 하는기능
-    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault(); // 기본 동작 방지
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -196,6 +252,7 @@ export default function SignUpForm() {
                         name="companyCode"
                         value={formData.companyCode}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
                         placeholder={errors.companyCode || '회사코드 입력'}
                         disabled={companyConfirm ? true : false}
@@ -211,6 +268,7 @@ export default function SignUpForm() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.name ? 'border-red-500' : ''}`}
                         placeholder={errors.name || '이름 입력'}
                     />
@@ -224,6 +282,7 @@ export default function SignUpForm() {
                         name="id"
                         value={formData.id}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.id ? 'border-red-500' : ''}`}
                         placeholder={errors.id || '아이디 입력'}
                         disabled={idConfirm ? true : false}
@@ -240,6 +299,7 @@ export default function SignUpForm() {
                         type="password"
                         value={formData.password}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.password ? 'border-red-500' : ''}`}
                         placeholder={errors.password || '비밀번호 입력'}
                     />
@@ -255,6 +315,7 @@ export default function SignUpForm() {
                         type="password"
                         value={formData.confirmPassword}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.confirmPassword ? 'border-red-500' : ''}`}
                         placeholder={errors.confirmPassword || '비밀번호 확인 입력'}
                     />
@@ -270,6 +331,7 @@ export default function SignUpForm() {
                         id="phone"
                         name="phone"
                         value={formData.phone}
+                        onKeyDown={handleKeyDown}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                             setFormData(prev => ({...prev, phone: value}));
@@ -289,6 +351,7 @@ export default function SignUpForm() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.email ? 'border-red-500' : ''}`}
                             placeholder={errors.email || '이메일 입력'}
                         />
@@ -306,6 +369,7 @@ export default function SignUpForm() {
                         name="verificationCode"
                         value={formData.verificationCode}
                         onChange={handleChange}
+                        onKeyDown={handleKeyDown}
                         className={`border p-2 flex-grow ${errors.verificationCode ? 'border-red-500' : ''}`}
                         placeholder={errors.verificationCode || '인증번호 입력'}
                     />
@@ -319,15 +383,22 @@ export default function SignUpForm() {
                 <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
                     <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
                     <div className="flex-grow relative flex">
-                        <input
+                        <select
                             id="department"
                             name="department"
                             value={formData.department}
                             onChange={handleChange}
                             className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
-                            placeholder={errors.department || '부서 입력'}
-                        />
-                        <button onClick={departmentSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>
+                        >
+                            <option value="">부서 선택</option>
+                            {/* 기본 선택 옵션 */}
+                            {departments.map((dep, index) => (
+                                <option key={index} value={dep}>
+                                    {dep}
+                                </option>
+                            ))}
+                        </select>
+
                     </div>
                 </div>
 
@@ -340,10 +411,11 @@ export default function SignUpForm() {
                             name="supervisorCode"
                             value={formData.supervisorCode}
                             onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
                             placeholder={errors.supervisorCode || '상관 코드 입력'}
                         />
-                        <button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>
+                        {/*<button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>*/}
                     </div>
                 </div>
 
@@ -355,6 +427,7 @@ export default function SignUpForm() {
                             id="residentNumber1"
                             name="residentNumber1"
                             value={formData.residentNumber1}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                                 setFormData(prev => ({...prev, residentNumber1: value}));
@@ -368,6 +441,7 @@ export default function SignUpForm() {
                             id="residentNumber2"
                             name="residentNumber2"
                             value={formData.residentNumber2}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
                                 setFormData(prev => ({...prev, residentNumber2: value}));

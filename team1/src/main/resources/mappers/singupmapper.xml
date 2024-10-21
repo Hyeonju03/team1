@@ -10,4 +10,15 @@
         (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN)
         VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn});
     </insert>
+
+    <select id="findAllCodes" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
+        SELECT DEP_CODE FROM codetest
+        WHERE COM_CODE = #{comCode}
+    </select>
+
+    <select id="findAllempCode" resultType="kr.or.nextit.team1.DTOs.SignUpDTO">
+        SELECT EMP_CODE
+        FROM employeetest
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+    </select>
 </mapper>
