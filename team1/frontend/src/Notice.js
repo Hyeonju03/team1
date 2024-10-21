@@ -17,7 +17,7 @@ const useNotices = () => {
                     content: "첫 번째 공지사항 내용입니다.",
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
-                },
+                },  
                 {
                     id: 2,
                     title: "두 번째 공지사항",

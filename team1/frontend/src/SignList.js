@@ -1,9 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+
 
 export default function SignList() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const res = axios.get('/signlist')
+            .then(response => {
+                console.log(response.data);
+            })
+        console.log(res)
+    }, []);
 
     const setDoc = useCallback(() => {
         // doc리스트 가져오기
@@ -56,6 +68,10 @@ export default function SignList() {
         // setDocuments([...documents, newDoc]);
     };
 
+    const goSignRequest = () => {
+        navigate("/sign/register");
+    }
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
             {/* Header with logo */}
@@ -75,12 +91,12 @@ export default function SignList() {
                 <table className="w-full mb-6">
                     <thead>
                     <tr className="bg-gray-200">
-                        <th className="p-2 text-left">문서번호</th>
-                        <th className="p-2 text-left">분류</th>
-                        <th className="p-2 text-left">제목</th>
-                        <th className="p-2 text-left">기안일</th>
-                        <th className="p-2 text-left">완료일</th>
-                        <th className="p-2 text-left">승인현황</th>
+                        <th className="p-2 text-center">문서번호</th>
+                        <th className="p-2 text-center">분류</th>
+                        <th className="p-2 text-center">제목</th>
+                        <th className="p-2 text-center">기안일</th>
+                        <th className="p-2 text-center">완료일</th>
+                        <th className="p-2 text-center">승인현황</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -110,7 +126,7 @@ export default function SignList() {
                 {/* Create document button */}
                 <button
                     className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-                    onClick={addNewDocument}
+                    onClick={goSignRequest}
                 >
                     문서 만들기
                 </button>
