@@ -6,7 +6,7 @@ import AdminQDetail from "./AdminQDetail";
 import Notice from "./Notice";
 import Log from "./Log";
 import LogList from "./LogList"
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import SignUpForm from './SignUp';
 import DocumentList from "./DocumentList";
 import DocumentDetail from "./DocumentDetail";
@@ -16,6 +16,7 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
+import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
 
 function App() {
@@ -35,9 +36,10 @@ function App() {
                     <Route path="/Log" element={<Log/>}/>
                     <Route path="/LogList" element={<LogList/>}/>
                       
-                    <Route path="/document" element={<DocumentList/>}/>
-                    <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
+                    <Route path="/documents" element={<DocumentList/>}/>
+                    <Route path="/documents/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
+                    <Route path="/documents/update/:id" element={<DocumentUpdate />} />
 
                     <Route path="/notices" element={<Notice />} />
                     <Route path="/apply" element={<ApplyForBusiness />} />
