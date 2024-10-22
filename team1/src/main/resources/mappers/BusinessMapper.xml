@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.nextit.team1.mappers.BusinessMapper">
+
+    <!-- 사업자 등록번호로 회사 정보 조회 -->
+    <select id="getBusinessByComCode" parameterType="string" resultType="kr.or.nextit.team1.DTOs.BusinessDTO">
+        SELECT com_code, com_name, ceo_name, ceo_phone
+        FROM company
+        WHERE com_code = #{comCode}
+    </select>
+
+    <!-- 신규 회사 정보 등록 -->
+    <insert id="createBusiness" parameterType="kr.or.nextit.team1.DTOs.BusinessDTO">
+        INSERT INTO business (com_code, com_name, ceo_name, ceo_phone, contect_phone, emp_num, com_email)
+        VALUES (#{comCode}, #{comName}, #{ceoName}, #{ceoPhone}, #{contectPhone}, #{empNum}, #{comEmail})
+    </insert>
+</mapper>

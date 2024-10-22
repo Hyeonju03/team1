@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC  "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.nextit.team1.mappers.NoticeMapper">
+    <select id="getAllNotices" resultType="kr.or.nextit.team1.notice.NoticeDTO">
+        SELECT *
+        FROM NOTICE
+        ORDER BY start_date DESC
+    </select>
+
+<!--    <select id="getNoticeById" parameterType="int" resultType="kr.or.nextit.team1.notice.NoticeDTO">-->
+<!--        SELECT *-->
+<!--        FROM notice-->
+<!--        WHERE notice_num = #{noticeNum}-->
+<!--    </select>-->
+
+    <insert id="createNotice" parameterType="kr.or.nextit.team1.notice.NoticeDTO" useGeneratedKeys="true" keyProperty="noticeNum">
+        INSERT INTO notice (emp_code, title, content, target, end_date, start_date)
+        VALUES (#{empCode}, #{title}, #{content}, #{target}, #{endDate}, now())
+        <selectKey keyProperty="noticeNum" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <update id="updateNotice" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
+        UPDATE notice
+        SET title = #{title}, content = #{content}, target = #{target}, end_date = #{endDate}
+        WHERE notice_num = #{noticeNum}
+    </update>
+
+    <delete id="deleteNotice" parameterType="int">
+        DELETE FROM notice
+        WHERE notice_num = #{noticeNum}
+    </delete>
+</mapper>
