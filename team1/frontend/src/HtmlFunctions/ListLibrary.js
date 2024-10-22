@@ -97,10 +97,20 @@ class ListLibrary {
             </div>
         );
     }
-
-    static WorkerList2(code, setBtnCtl) {
+    static findChildren(getChildList,isCheck){
+        getChildList = getChildList.children[1].children
+        for(let i = 0; i < getChildList.length; i++) {
+            const getChilds =  Array.from(getChildList);
+            getChilds[i].children[0].checked = isCheck
+            if (getChilds[i].children[1].children.length > 0){
+                console.log(getChilds[i].children[1].children)
+                //this.findChildren(getChilds[i].children[1].children,isCheck)
+            }
+        }
+    }
+    static WorkerList2(code) {
         const depLayout = () => {
-
+            this.data = ["", "", "", ""];
             let htmlList = {};
             const htmlTags = new DOMParser().parseFromString(`
                     <div class="border h-[210px]">
@@ -113,13 +123,16 @@ class ListLibrary {
 
 
             let topParent = ""
-            this.upDepCode.map((v1,i1) => {
-                if(v1 === "") topParent = this.depCode[i1]
+            this.upDepCode.map((v1, i1) => {
+                if (v1 === "") topParent = this.depCode[i1]
             })
 
             this.depCode.forEach((v1, i1) => {
                 const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange="
                     let getParentId = document.getElementById('${v1}');
+                    let getChildList = document.getElementById('${v1}');
+                    ListLibrary.findChildren(getChildList,getParentId.children[0].checked);
+                    
                     while (!!getParentId.parentNode.parentNode.id){
                         getParentId = getParentId.parentNode.parentNode
                         const getChilds =  Array.from(getParentId.children[1].children);
@@ -129,7 +142,6 @@ class ListLibrary {
                         });
                         if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
                         else getParentId.children[0].checked = false
-                         console.log('위',isTrueCount[0] === getChilds.length)
                     }
                     
                     
@@ -226,12 +238,56 @@ class ListLibrary {
         );
     }
 
-    static noticeListCreate(code, setBtnCtl) {
-        this.WorkerList2(code, setBtnCtl)
+    static noticeWritePage(code, setBtnCtl) {
+        this.WorkerList2(code)
         console.log(this.returnList2)
         if (!this.returnList2) return setBtnCtl(3)
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
+
+    static noticeInsert() {
+        let isNotNull = 0
+        console.log("들어옴")
+        if (this.data.length === 0) {
+            alert("공지사항을 입력해주세요");
+        } else {
+            for (let i = 0; i < this.data.length; i++) {
+                if (this.data[i] === "") {
+                    switch (i) {
+                        case 0:
+                            alert("제목을 입력해주세요");
+                            isNotNull++
+                            break;
+                        case 1:
+                            alert("종료일을 입력해주세요");
+                            isNotNull++
+                            break;
+                        case 2:
+                            alert("내용을 입력해주세요");
+                            isNotNull++
+                            break;
+                    }
+                    break;
+                }
+            }
+            if (isNotNull === 0) {
+                const topParent = document.getElementById('topUL');
+                let targets = "";
+
+                console.log(topParent.children)
+
+                //if (child.children[0].checked) targets += child.children[0].value + ":0,"
+
+
+            }
+        }
+        // axios.post("/noticeInsert", this.data)
+        //     .then(response => {
+        //         console.log(response.data)
+        //     })
+        //     .catch(error => console.log(error));
+    }
 }
+
 window.ListLibrary = ListLibrary;
 export default ListLibrary;

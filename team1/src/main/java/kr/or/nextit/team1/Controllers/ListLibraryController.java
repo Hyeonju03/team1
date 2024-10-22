@@ -4,6 +4,8 @@ import kr.or.nextit.team1.DTOs.ListLibraryDTO;
 import kr.or.nextit.team1.Services.ListLibraryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -44,5 +46,10 @@ public class ListLibraryController {
         splitData[0] = data.getMail();
         splitData[1] = data.getPH();
         return ResponseEntity.ok(splitData);
+    }
+
+    @PostMapping("/noticeInsert")
+    public ResponseEntity<ListLibraryDTO> noticeInsert(@RequestBody ListLibraryDTO dto) {
+        return ResponseEntity.ok(listLibraryService.noticeInsert(dto));
     }
 }

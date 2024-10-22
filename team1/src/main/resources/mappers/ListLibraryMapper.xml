@@ -14,4 +14,8 @@
         from employeetest e
         where e.EMP_CODE = #{code}
     </select>
+    <insert id="noticeInsert" parameterType="ListLibraryDTO">
+        insert into notice (EMP_CODE,TITLE,CONTENT,TARGET,END_DATE)
+        values ('empCode','title','content','targets','endTime')
+    </insert>
 </mapper>

@@ -19,4 +19,8 @@ public class ListLibraryService {
     public ListLibraryDTO RClickWindowSelect(String code){
         return listLibraryMapper.RClickWindowSelect(code);
     }
+
+    public ListLibraryDTO noticeInsert(ListLibraryDTO dto){
+        return listLibraryMapper.noticeInsert(dto);
+    }
 }
