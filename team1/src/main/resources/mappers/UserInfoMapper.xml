@@ -11,6 +11,7 @@
         WHERE
             EMP_CODE = #{empCode}
     </select>
+
     <update id="userInfoUpdate" parameterType="UserInfoDTO">
         UPDATE
             EMPLOYEE
@@ -26,4 +27,32 @@
         WHERE
             EMP_CODE = #{empCode}
     </update>
+
+    <!-- 상관에게 수정 요청 전송 -->
+      <update id="modifyReqUpdate" parameterType="UserInfoDTO">
+        UPDATE
+            EMPLOYEE
+        SET
+            MODIFY_REQ = #{modifyReq}
+        WHERE
+            EMP_CODE = #{corCode}
+    </update>
+
+    <select id="getModifyReq" parameterType="String" resultType="String">
+        SELECT
+            MODIFY_REQ
+        FROM
+            EMPLOYEE
+        WHERE
+            EMP_CODE = #{corCode}
+    </select>
+
+    <select id="getPosCode" resultType="String">
+        SELECT DISTINCT
+            c.POS_CODE
+        FROM
+            EMPLOYEE e, CODE c
+        WHERE
+            SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
+    </select>
 </mapper>

@@ -5,14 +5,22 @@ export default function UserInfo() {
     const [empName, setEmpName] = useState(""); // 이름
     const [department, setDepartment] = useState(""); // 부서코드
     const [position, setPosition] = useState(""); // 직급코드
-    const [empRrn, setEmpRrn] = useState(""); // 주민등록번호
-    const [empCode, setEmpCode] = useState(""); // 사원코드
+    const [empRrn, setEmpRrn] = useState(""); // 주민등록번호 (변경불가)
+    const [empCode, setEmpCode] = useState(""); // 사원코드 (변경불가)
     const [empPass, setEmpPass] = useState(""); // 비밀번호
     const [phoneNum, setPhoneNum] = useState(""); // 전화번호
     const [extNum, setExtNum] = useState(""); // 내선번호
     const [empMail, setEmpMail] = useState(""); // 메일
-    const [corCode, setCorCode] = useState(""); // 상관코드
+    const [corCode, setCorCode] = useState(""); // 상관코드 (필수아님)
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [posCodeCategories, setPosCodeCategories] = useState([]); // 카테고리 상태 추가
+
+    // 모든 칸에 스페이스바 입력 금지
+    const preventSpaceBar = (e) => {
+        if (e.key === ' ') {
+            e.preventDefault();
+        }
+    };
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -46,57 +54,139 @@ export default function UserInfo() {
         setCorCode(e.target.value);
     }, []);
 
-    const [userInfo, setUserInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState({
+        empName:'',
+        department:'',
+        position:'',
+        empRrn:'',
+        empCode:'',
+        empPass:'',
+        phoneNum:'',
+        extNum:'',
+        empMail:'',
+        corCode:''
+    });
 
     useEffect(() => {
-        const empCode = 1111; // 가져올 empCode
+        const empCode = "3118115625-jys1902"; // 가져올 empCode
         axios.get(`/${empCode}`)
             .then(response => {
                 console.log(response.data);
                 setUserInfo(response.data);
-                // 상태 초기화
-                setEmpName(response.data.empName);
-                setDepartment(response.data.depCode);
-                setPosition(response.data.posCode);
-                setEmpRrn(response.data.empRrn);
-                setEmpCode(response.data.empCode);
-                setEmpPass(response.data.empPass);
-                setPhoneNum(response.data.phoneNum);
-                setExtNum(response.data.extNum);
-                setEmpMail(response.data.empMail);
-                setCorCode(response.data.corCode);
+
+                if (response.data) {
+                    // 상태 초기화
+                    setEmpName(response.data.empName || "");
+                    setDepartment(response.data.depCode || "");
+                    setPosition(response.data.posCode || "");
+                    setEmpRrn(response.data.empRrn || "");
+                    setEmpCode(response.data.empCode || "");
+                    setEmpPass(response.data.empPass || "");
+                    setPhoneNum(response.data.phoneNum || "");
+                    setExtNum(response.data.extNum || "");
+                    setEmpMail(response.data.empMail || "");
+                    setCorCode(response.data.corCode || "");
+                }
             })
             .catch(e => {
                 console.error("에러: " + e);
-
             });
-    }, []);
+        // code 테이블에서 직급 카테고리 가져오기
+        axios.get(`/code`)
+            .then(response => {
+               const uniqueCategories = [...new Set(response.data.map(category => category.position))]; // 중복 제거
+                setPosCodeCategories(uniqueCategories); // 카테고리 상태에 저장
+            })
+            .catch(error => console.log(error));
+        }, []);
+
+    // 유효성체크
+    const validateForm = () => {
+        if (!empName) {
+            alert("이름를 입력해주세요.");
+            return false;
+        }
+        if (!department) {
+            alert("부서를 입력해주세요.");
+            return false;
+        }
+        if (!position) {
+            alert("직급을 입력해주세요.");
+            return false;
+
+        }
+        if (!empPass) {
+            alert("비밀번호를 입력해주세요.");
+            return false;
+        }
+        const phoneNumCheck = /^\d{3}-\d{4}-\d{4}$/;
+        if (!phoneNum) {
+            alert("전화번호를 입력해주세요.");
+            return false;
+        } else if (!phoneNumCheck.test(phoneNum)) {
+            alert("전화번호는 000-0000-0000 형식이어야 합니다.");
+            return false;
+        }
+        const extNumCheck = /^\d{3}-\d{3}-\d{4}$/;
+        if (!extNum) {
+            alert("내선번호를 입력해주세요.");
+            return false;
+        } else if (!extNumCheck.test(extNum)) {
+            alert("내선번호는 000-000-0000 형식이어야 합니다.");
+            return false;
+        }
+        const empMailCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!empMail) {
+            alert("이메일을 입력해주세요.");
+            return false;
+        } else if (!empMailCheck.test(empMail)) {
+            alert("유효한 이메일 주소를 입력해주세요");
+            return false;
+        }
+        // 상관코드는 필수 아님
+        return true;
+    }
+
+    // 입력된 값 변경하는 것
+    const handleInputChange = (e) => {
+        const {name, value} = e.target;
+        setUserInfo({
+            ...userInfo, [name]: value // 입력된 값을 수정된 상태에 반영
+        });
+    };
 
 
+    // 수정 요청하기 버튼
     const goInfoRequest = () => {
-        //     현재 값들 가져와서 db에 요청
-        const updateUserInfo = {
-            empName,
-            department,
-            position,
-            empPass,
-            phoneNum,
-            extNum,
-            empMail,
+        // 현재 값들 가져와서 db에 요청
+
+        if (!validateForm()) {
+            return;
+        }
+
+        // 수정된 필드들을 하나의 modifyReq 문자열로 결합
+        const modifyReq = `${empCode}: ${empName || '이름 없음'}_${department || '부서 없음'}_${position || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
+
+        console.log(modifyReq)
+
+        const userInfoUpdate = {
+            empCode, // 사원코드도 포함해서 전송
             corCode,
+            modifyReq // 수정 요청 정보
         };
 
-        axios.post(`/userInfoUpdate`, updateUserInfo)
+
+        axios.post(`/modifyRequest`, userInfoUpdate)
             .then(response => {
                 console.log("수정 요청 성공: ", response.data);
+                alert("수정 요청이 완료되었습니다.");
             })
             .catch(error => {
                 console.error("수정 요청 실패: ", error)
+                alert("수정 요청이 실패되었습니다.");
             });
     };
 
-    // 유효성 검사 확인.
-    // 스페이스바 다 무시.
 
     return (
         <div className="max-w-6xl mx-auto p-5 font-sans">
@@ -121,21 +211,44 @@ export default function UserInfo() {
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={empNameOnChangeHandler}
-                                       value={empName}/>
+                                       value={empName}
+                                       onKeyDown={preventSpaceBar}
+                                />
+
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">부서</label>
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={departmentOnChangeHandler}
-                                       value={department}/>
+                                       value={department}
+                                       onKeyDown={preventSpaceBar}
+                                />
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">직급</label>
-                                <input type="text"
-                                       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-                                       onChange={positionOnChangeHandler}
-                                       value={position}/>
+                                {/*<input type="text"*/}
+                                {/*       className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"*/}
+                                {/*       onChange={positionOnChangeHandler}*/}
+                                {/*       value={position}*/}
+                                {/*       onKeyDown={preventSpaceBar}*/}
+                                {/*/>*/}
+                                <select
+                                    name="userInfoPosCode"
+                                    value={userInfo.position}
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2"
+                                >
+                                    {/*<option value="">카테고리를 선택하세요</option>*/}
+                                    {posCodeCategories.map((cate, index) => (
+                                        // 카테고리가 ','로 구분된 경우 이를 개별적으로 렌더링
+                                        cate.split(',').map((item, subIndex) => (
+                                            <option key={`${index}-${subIndex}`} value={item}>
+                                                {item}
+                                            </option>
+                                        ))
+                                    ))}
+                                </select>
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">주민등록번호</label>
@@ -146,7 +259,7 @@ export default function UserInfo() {
                                        value={empRrn}/>
                             </div>
                             <div className="mb-2">
-                                <label className="block mb-1 text-sm text-gray-600">회원코드</label>
+                                <label className="block mb-1 text-sm text-gray-600">사원코드</label>
                                 <input type="text"
                                        readOnly
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
@@ -157,35 +270,47 @@ export default function UserInfo() {
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={empPassOnChangeHandler}
-                                       value={empPass}/>
+                                       value={empPass}
+                                       onKeyDown={preventSpaceBar}/>
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">전화번호</label>
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={phoneNumOnChangeHandler}
-                                       value={phoneNum}/>
+                                       value={phoneNum}
+                                       onKeyDown={preventSpaceBar}
+                                       placeholder={"000-0000-0000"}
+                                />
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">내선번호</label>
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={extNumOnChangeHandler}
-                                       value={extNum}/>
+                                       value={extNum}
+                                       onKeyDown={preventSpaceBar}
+                                       placeholder={"000-000-0000"}
+                                />
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">메일</label>
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={empMailOnChangeHandler}
-                                       value={empMail}/>
+                                       value={empMail}
+                                       onKeyDown={preventSpaceBar}
+                                       placeholder={"xxxx@xxxx.xxx"}
+                                />
                             </div>
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">상관코드</label>
                                 <input type="text"
                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                        onChange={corCodeOnChangeHandler}
-                                       value={corCode}/>
+                                       value={corCode}
+                                       onKeyDown={preventSpaceBar}
+                                />
                             </div>
                         </div>
                     </>

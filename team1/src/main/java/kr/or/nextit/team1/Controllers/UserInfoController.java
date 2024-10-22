@@ -17,6 +17,7 @@ public class UserInfoController {
     @GetMapping("/{empCode}")
     public ResponseEntity<UserInfoDTO> userInfoSelect(@PathVariable String empCode) {
         UserInfoDTO userInfoDTO = userInfoService.userInfoSelect(empCode);
+//        System.out.println("userInfoDTO 값 확인: " + userInfoDTO);
 
         if (userInfoDTO == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
@@ -26,16 +27,36 @@ public class UserInfoController {
     }
 
     // 수정
-    @PutMapping("/userInfoUpdate")
-    public ResponseEntity<Void> userInfoUpdate(@PathVariable String empCode, @RequestBody UserInfoDTO userInfoDTO) {
-        userInfoDTO.setEmpCode(empCode); // empCode를 DTO에 설정
-        boolean updated = userInfoService.userInfoUpdate(userInfoDTO);
+    @PostMapping("/userInfo/update")
+    public ResponseEntity<String> userInfoUpdate(@RequestBody UserInfoDTO userInfoDTO) {
+        try {
+            userInfoService.userInfoUpdate(userInfoDTO);
+//            System.out.println("userInfoDTO 값 확인: " + userInfoDTO);
+            return ResponseEntity.ok("정보가 수정 되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
 
-        if (updated) {
-            return ResponseEntity.status(HttpStatus.OK).build(); // 200 OK
         }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
     }
 
+    // 상관에게 수정 요청
+    @PostMapping("/modifyRequest")
+    public ResponseEntity<String> userInfoModifyRequest(@RequestBody UserInfoDTO userInfoDTO) {
+        try {
+//            System.out.println("userInfoDTO.getModifyReq 값 확인: " + userInfoDTO.getModifyReq());
+//            System.out.println("userInfoDTO.getCorCode 값 확인: " + userInfoDTO.getCorCode());
+
+            userInfoService.updateRequest(userInfoDTO);
+            return ResponseEntity.ok("수정 요청이 완료되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();  // 예외 로그를 출력
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 요청 실패: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/posCode/{empCode}")
+    public ResponseEntity<String> getPosCode(@PathVariable String empCode) {
+        String posCode = userInfoService.getPosCode(empCode);
+        return ResponseEntity.ok(posCode);
+    }
 }

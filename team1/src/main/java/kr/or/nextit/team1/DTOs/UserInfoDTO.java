@@ -24,5 +24,4 @@ public class UserInfoDTO {
     private int schedule; // 전체일정 권한
     private String modifyReq; // 수정요청
     private String chatNum; // 대화방번호
-
 }
