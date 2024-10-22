@@ -11,11 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NoticeDTO {
 
-    private String empCode;
     private int noticeNum;
     private String title;
     private String content;
-    private String target;
     private LocalDateTime startDate;
-    private LocalDateTime endDate;
 }

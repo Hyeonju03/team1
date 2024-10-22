@@ -2,9 +2,11 @@ package kr.or.nextit.team1.notice;
 
 import kr.or.nextit.team1.mappers.NoticeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -13,8 +15,13 @@ public class NoticeService {
     @Autowired
     private NoticeMapper noticeMapper;
 
+
     public List<NoticeDTO> getAllNotices() {  // 모든 공지사항 리스트로 보여줌
         return noticeMapper.getAllNotices();
+    }
+
+    public NoticeDTO getNotice(int noticeNum) {
+        return noticeMapper.getNoticeById(noticeNum);
     }
 
 //    public NoticeDTO getNoticeById(int noticeNum) { // noticeNum으로 조회
@@ -35,4 +42,5 @@ public class NoticeService {
         return noticeMapper.deleteNotice(noticeNum) > 0;
         // 삭제가 되면 1이 되므로 true, 안되면 0 false
     }
+
 }

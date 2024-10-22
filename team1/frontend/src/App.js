@@ -3,7 +3,7 @@ import Main from "./Main";
 import AdminQ from "./AdminQ";
 import AdminFAQ from "./AdminFAQ";
 import AdminQDetail from "./AdminQDetail";
-import Notice from "./Notice";
+
 import Log from "./Log";
 import LogList from "./LogList"
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
@@ -16,6 +16,10 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
+import NoticeDetail from "./NoticeDetail";
+import NoticeRegister from "./NoticeRegister";
+import NoticeList from "./NoticeList";
+
 
 function App() {
     return (
@@ -37,8 +41,9 @@ function App() {
                     <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
 
-                    <Route path="/notices" element={<Notice />} />
-                    <Route path="/apply" element={<ApplyForBusiness />} />
+                    <Route path="/notice/list" exact element={<NoticeList/>} />
+                    <Route path="/notice/register" element={<NoticeRegister/>} />
+                    <Route path="/notice/detail/:noticeNum" element={<NoticeDetail/>} />
 
                     <Route path="/schedule" element={<Schedule />} />
 
