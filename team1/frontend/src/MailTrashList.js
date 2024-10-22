@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search, Mail ,Archive ,Send,FileText,Trash, RefreshCw} from 'lucide-react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import DeletePopup from './DeletePopup';
 
 const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
@@ -28,6 +29,8 @@ export default function EmailSend() {
     const indexOfLastMail = currentPage * itemsPerPage;
     const indexOfFirstMail = indexOfLastMail - itemsPerPage;
     const currentMails = sendList.slice(indexOfFirstMail, indexOfLastMail);
+
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     //날짜변환
     const formatDate = (dateString) => {
@@ -79,7 +82,8 @@ export default function EmailSend() {
 
     useEffect(() => {
         const mailList = async()=>{
-            const response = await axios.get('/selectSendMail', {
+            //  여기 가 수정되어야함
+            const response = await axios.get('/selectDeleteList', {
                 params: {
                     empCode: empCode // 필요한 파라미터
                 }
@@ -119,11 +123,6 @@ export default function EmailSend() {
     }
 
     const refresh =(e)=>{
-        navigate("/MailSendList");
-        window.location.reload();
-    }
-
-    const goMailTrashList =()=>{
         navigate("/MailTrashList");
         window.location.reload();
     }
@@ -141,7 +140,7 @@ export default function EmailSend() {
         console.log("메일 삭제 요청할 ID:", mailNumsToDelete);
 
         try {
-            await axios.put('/updateMail', mailNumsToDelete);
+            await axios.delete('/deleteMail', { data: mailNumsToDelete});
             // 삭제 성공 후, UI를 업데이트
             setSendList(sendList.filter((_, index) => !selectedCheckboxes[index]));
             setSelectedCheckboxes(new Array(sendList.length).fill(false)); // 체크박스 초기화
@@ -175,6 +174,15 @@ export default function EmailSend() {
         window.location.reload();
     }
 
+    const goMailTrashList =()=>{
+        navigate("/MailTrashList");
+        window.location.reload();
+    }
+
+    const goRealDelete =(e)=>{
+        console.log("진짜?")
+        setIsPopupOpen(true)
+    }
 
     return (
         <div className="container mx-auto p-4">
@@ -213,18 +221,24 @@ export default function EmailSend() {
                         <Send className="mr-2 h-4 w-4"/>
                         보낸메일함 </button>
 
+                    <div className="flex">
                     <button onClick={goMailTrashList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            style={{marginBottom: "30px"}}>
                         <Trash className="mr-2 h-4 w-4"/>휴지통
-                        <button style={{marginLeft:"10px"}} className="text-xs border rounded-md px-1 py-1">휴지통 비우기</button>
                     </button>
-
+                    <button onClick={goRealDelete} style={{width:"80px" , height:"30px"}}  className="text-xs border rounded-md px-2 py-2">비우기</button>
+                    </div>
                     {/*<Settings className="h-4 w-4" />*/}
+                    <DeletePopup
+                        isOpen={isPopupOpen}
+                        onClose={() => setIsPopupOpen(false)}
+                        // onConfirm={handleConfirmDelete}
+                    />
                 </div>
 
                 {/* Main content */}
                 <main className="flex-1">
-                    <h1 className="text-xl font-bold mb-4 text-left">보낸메일함</h1>
+                    <h1 className="text-xl font-bold mb-4 text-left">휴지통</h1>
                     <div className="flex items-center mb-6 justify-end"
                          style={{marginRight: "10px", justifyContent: "flex-end"}}>
                         <Input

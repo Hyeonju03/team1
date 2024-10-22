@@ -1,10 +1,13 @@
 package kr.or.nextit.team1.Controllers;
-
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 import kr.or.nextit.team1.DTOs.MailDTO;
 import kr.or.nextit.team1.Services.EmailService;
 import kr.or.nextit.team1.Services.MailSendService;
 import kr.or.nextit.team1.mappers.MailMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.PathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -43,9 +50,51 @@ public class MailController {
 
     @GetMapping("/selectSendMail")
     public ResponseEntity<List<MailDTO>> selectSendMail(@RequestParam String empCode) {
-        System.out.println("Executing SQL: SELECT ... WHERE EMP_CODE LIKE CONCAT('" + empCode + "', '%')");
         try {
             List<MailDTO> mails = mailMapper.selectSendMail(empCode);
+            return ResponseEntity.ok(mails);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+
+    @DeleteMapping("/deleteMail")
+    public ResponseEntity<Void> deleteMail(@RequestBody List<Long> mailNums) {
+        MailSendService.deleteMail(mailNums);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/download/{mailNum}")
+    public ResponseEntity<Resource> downloadFiles(@PathVariable int mailNum) {
+        MailDTO mailDTO = mailSendService.selectFile(mailNum);
+        String filePath = mailDTO.getFilePath();
+        String fileName = mailDTO.getFileName();
+        String originalName = mailDTO.getFileOriginalName();
+
+        //Path path = Paths.get(filePath, fileName);
+
+        String encodedFilename = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replaceAll("\\+", " ");
+
+        Resource resource = new PathResource(filePath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + encodedFilename + "\"")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(mailDTO.getFileSize()))
+                .body(resource);
+    }
+
+    @PutMapping("/updateMail")
+    public ResponseEntity<Void> updateMail(@RequestBody List<Long> mailNums) {
+        mailSendService.updateMail(mailNums);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("selectDeleteList")
+    public ResponseEntity<List<MailDTO>> selectDeleteList(@RequestParam String empCode) {
+        try {
+            List<MailDTO> mails = mailMapper.selectDeleteMail(empCode);
             return ResponseEntity.ok(mails);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

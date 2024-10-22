@@ -13,6 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MailDTO implements Serializable {
+    private int mailNum;
     private String empCode;
     private String title;
     private String content;
@@ -24,13 +25,28 @@ public class MailDTO implements Serializable {
     private String filePath;
     private MultipartFile attachment;
     private LocalDateTime startDate;
+    private boolean deleteYn;
 
-    public MailDTO(String empCode, String title, String content, String mailTarget, String mailRef, String fileSize) {
+    public MailDTO(int mailNum, String empCode, String title, String content, String mailTarget, String mailRef, String fileSize, LocalDateTime startDate) {
+        this.mailNum = mailNum;
         this.empCode = empCode;
         this.title = title;
         this.content = content;
         this.mailTarget = mailTarget;
         this.mailRef = mailRef;
         this.fileSize = fileSize;
+        this.startDate = startDate;
+    }
+
+    public MailDTO(int mailNum, String empCode, String title, String content, String mailTarget, String mailRef, String fileSize, LocalDateTime startDate, boolean deleteYn) {
+        this.mailNum = mailNum;
+        this.empCode = empCode;
+        this.title = title;
+        this.content = content;
+        this.mailTarget = mailTarget;
+        this.mailRef = mailRef;
+        this.fileSize = fileSize;
+        this.startDate = startDate;
+        this.deleteYn = deleteYn;
     }
 }

@@ -11,4 +11,12 @@ public interface MailMapper {
 
     List<MailDTO> selectSendMail(String empCode);
 
+    void deleteMail(Long mailNum);
+
+    MailDTO selectFile(int mailNum);
+
+    void updateMail(Long mailNum);
+    
+    List<MailDTO> selectDeleteMail(String empCode);
+
 }

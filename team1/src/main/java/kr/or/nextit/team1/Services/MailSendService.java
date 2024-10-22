@@ -12,12 +12,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 @Service
 public class MailSendService {
 
-    private final MailMapper mailMapper;
+    private static MailMapper mailMapper;
 
     @Autowired
     public MailSendService(MailMapper mailMapper) {
@@ -67,4 +68,20 @@ public class MailSendService {
         return path.toString();
     }
 
+
+    public static void deleteMail(List<Long> mailNums) {
+        for (Long mailNum : mailNums) {
+            mailMapper.deleteMail(mailNum);
+        }
+    }
+
+    public MailDTO selectFile(int mailNum) {
+        return mailMapper.selectFile(mailNum);
+    }
+
+    public static void updateMail(List<Long> mailNums) {
+        for (Long mailNum : mailNums) {
+            mailMapper.updateMail(mailNum);
+        }
+    }
 }

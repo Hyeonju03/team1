@@ -10,9 +10,36 @@
     </insert>
 
     <select id="selectSendMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
-<!--        select EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE-->
-        select EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE,START_DATE
+<!--        select MAIL_NUM, EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE,START_DATE-->
+        select *
         from mailtest
         where EMP_CODE like concat(#{empCode},'%')
+        and DELETE_YN =0
+        order by MAIL_NUM  desc
+    </select>
+
+    <delete id="deleteMail">
+        DELETE from mailtest
+        where mail_num = #{mailNum}
+    </delete>
+
+    <select id="selectFile" parameterType="int" resultType="MailDTO">
+        SELECT  FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE, FILE_PATH
+        from mailtest
+        where mail_num = #{mailNum}
+    </select>
+
+    <update id="updateMail">
+        UPDATE mailtest
+        SET DELETE_YN=1
+        WHERE MAIL_NUM= #{mailNum};
+    </update>
+
+    <select id="selectDeleteMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
+        select *
+        from mailtest
+        where EMP_CODE like concat(#{empCode},'%')
+        and DELETE_YN =1
+        order by MAIL_NUM  desc
     </select>
 </mapper>

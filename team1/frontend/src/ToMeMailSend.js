@@ -16,7 +16,7 @@ export default function EmailSend() {
     const [showConfirmation, setShowConfirmation] = useState(false);
 
     const [formData, setFormData] = useState({
-        to: '',
+        to: 'kimdajin132@gmail.com',
         cc: null,
         title: '',
         file: null,
@@ -112,9 +112,8 @@ export default function EmailSend() {
         setShowConfirmation(false);
     }
 
-
     const goToMeMailSend =(e)=>{
-        console.log("클릭")
+        console.log("클릭됨")
         navigate("/ToMeMailSend");
         window.location.reload();
     }
@@ -125,11 +124,10 @@ export default function EmailSend() {
     }
 
 
-
     return (
         <div className="container mx-auto p-4">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{ height: "900px" }}>
                     <div className="flex" style={{ marginTop: "-350px", marginBottom: "30px" }}>
@@ -159,7 +157,7 @@ export default function EmailSend() {
                         보낸메일함
                     </button>
 
-                    <button onClick={goMailTrashList} className="w-full flex items-center text-lg" style={{ marginBottom: "30px", marginLeft: "50px" }}>
+                    <button onClick={goMailTrashList}  className="w-full flex items-center text-lg" style={{ marginBottom: "30px", marginLeft: "50px" }}>
                         <Trash className="mr-2 h-4 w-4"/>휴지통
                         <button style={{marginLeft:"10px"}} className="text-xs border rounded-md px-1 py-1">휴지통 비우기</button>
                     </button>
@@ -167,30 +165,12 @@ export default function EmailSend() {
 
                 {/* Main content */}
                 <div className="flex flex-1 items-center justify-center">
-                    <form onSubmit={handleSubmit} className="space-y-4" style={{ justifyContent: 'center' }}>
+                    <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
                         {!showConfirmation && (
                             <div>
                                 <div style={{display: showConfirmation ? "none" : "block"}}>
-                                    <h1 className="text-xl font-bold mb-4 text-left">메일쓰기</h1>
+                                    <h1 className="text-xl font-bold mb-10 text-left">내게쓰기</h1>
                                 </div>
-                                {/*받는사람*/}
-                                <div className="flex space-x-8" style={{marginTop: '20px', marginBottom: "20px"}}>
-                                    <label htmlFor="to"
-                                           className="block font-medium text-gray-700 mb-1">받는사람</label>
-                                    <Input onChange={handleChange} id="to" name="to" value={formData.to}
-                                           placeholder="받는사람을 입력해주세요."
-                                           style={{height: '40px', width: '800px'}}/>
-                                </div>
-
-                                {/*참조*/}
-                                <div className="flex space-x-8" style={{marginBottom: "20px"}}>
-                                    <label htmlFor="cc"
-                                           className="block font-medium text-gray-700 mb-1">참조</label>
-                                    <Input onChange={handleChange} id="cc" name="cc" value={formData.cc}
-                                           placeholder="참조를 입력해주세요."
-                                           style={{height: '40px', width: '800px', marginLeft: '63px'}}/>
-                                </div>
-
                                 {/*제목*/}
                                 <div className="flex space-x-8" style={{marginBottom: "20px"}}>
                                     <label htmlFor="title"
@@ -223,18 +203,20 @@ export default function EmailSend() {
                             </div>
                         )}
                         {showConfirmation && (
-                            <main style={{marginLeft:"-150PX"}}>
-                                <h1 style={{marginBottom: "50px", marginTop: "-370px" }}
+                            <main>
+                                <h1 style={{marginBottom: "50px", marginTop: "70px"}}
                                     className="text-xl font-bold text-left">메일을 보냈습니다.</h1>
-                                <div style={{ marginBottom: "80px" }}>
-                                    <p style={{ marginBottom: "20px" }}
+                                <div style={{marginBottom: "80px"}}>
+                                    <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
                                     <p className="text-left">받는사람: {formData.to}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
                                 <div>
                                     <button onClick={goSendMailList} className="border rounded-md px-4 py-2">확인</button>
-                                    <button onClick={backSend} className="border rounded-md px-4 py-2" style={{ marginLeft: "30px" }}>쓰던 페이지 가기</button>
+                                    <button onClick={backSend} className="border rounded-md px-4 py-2"
+                                            style={{marginLeft: "30px"}}>쓰던 페이지 가기
+                                    </button>
                                 </div>
                             </main>
                         )}
