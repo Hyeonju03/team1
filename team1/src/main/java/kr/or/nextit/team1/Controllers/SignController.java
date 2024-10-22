@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,15 +20,15 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class SignController {
     private final SignService service;
 
     // 문서함 리스트 띄우기
-    @GetMapping("/sign/{comCode}")
-    public ResponseEntity<List<SignDTO>> signSelect(@PathVariable String comCode) {
-        List<SignDTO> signs = service.signSelect(comCode);
+    @GetMapping("/sign/{empCode}")
+    public ResponseEntity<List<SignDTO>> signSelect(@PathVariable String empCode) {
+        List<SignDTO> signs = service.signSelect(empCode);
         return ResponseEntity.ok(signs);
     }
 
@@ -47,7 +46,7 @@ public class SignController {
     }
 
     // 결제 상세 내용
-    @GetMapping("/sign/{id}")
+    @GetMapping("/sign/detail/{id}")
     public ResponseEntity<SignDTO> signDetail(@PathVariable("id") int id) {
         SignDTO sign = service.signDetail(id);
         if(sign != null) {
@@ -81,13 +80,14 @@ public class SignController {
     }
 
     // 결재 수정 (target만 수정됨)
+    @PutMapping("/sign/update/{id}")
     public ResponseEntity<String> signUpdate(@PathVariable int id, @RequestParam String target) {
         String sign = service.signUpdate(id, target);
         return ResponseEntity.ok(sign);
     }
 
 
-    @DeleteMapping("/sign/{id}")
+    @DeleteMapping("/sign/delete/{id}")
     public ResponseEntity<Void> signDelete(@PathVariable int id) {
         service.signDelete(id);
         return ResponseEntity.noContent().build();

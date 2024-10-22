@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface SignMapper {
-    List<SignDTO> signSelect(@Param("comCode") String comCode);
+    List<SignDTO> signSelect(@Param("empCode") String empCode);
     void signInsert(SignDTO signDTO);
     SignDTO signDetail(int id);
     void signUpdate(String target);

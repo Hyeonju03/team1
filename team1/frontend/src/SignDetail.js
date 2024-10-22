@@ -4,7 +4,7 @@ import axios from "axios";
 import {ChevronDown, ChevronRight, Paperclip, Search} from "lucide-react";
 
 
-export default function SignList() {
+export default function SignDetail() {
     const navigate = useNavigate(); // 경로 navigate
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
@@ -15,19 +15,15 @@ export default function SignList() {
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
-    // const [doc, setDoc] = useState({
-    //     signCateCode: '',
-    //     target: ''
-    // })
-
+    const [doc, setDoc] = useState({
+        signCateCode: '',
+        target: ''
+    })
 
 
     useEffect(() => {
         // doc리스트 가져오기
         const empCode = 3118115625
-
-        const comCode = 3118115625
-
         axios.get(`/sign/${empCode}`)
             .then(response => {
                 console.log(response.data);
@@ -37,7 +33,7 @@ export default function SignList() {
             .catch(error => console.log(error));
 
         // code 가져오기
-        axios.get(`/code/${comCode} `)
+        axios.get(`/code`)
             .then(response => {
                 const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))];
                 setCategories(uniqueCategories);
@@ -55,7 +51,7 @@ export default function SignList() {
 
     // 제목 클릭 시 상세 페이지로 이동
     const handleDocumentClick = (signNum) => {
-        navigate(`/sign/detail/${signNum}`)
+        navigate(`/sign/${signNum}`)
     }
 
     // 날짜 형식 변환
@@ -165,15 +161,14 @@ export default function SignList() {
                 <main className="flex-1 p-4">
                     <div className="flex items-center space-x-2 mb-4">
                         <div className="relative flex flex-1 max-w-xl">
-                            <input type="text" placeholder="문서 검색" className="pl-10 pr-4 w-[300px] h-[40px] border border-gray-300 rounded"
+                            <input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"
                                    value={searchQuery} // 검색 입력값 상태와 연결
                                    onChange={(e) => setSearchQuery(e.target.value)} // 입력값이 변경될 때 상태 업데이트
                                    onKeyDown={handleKeyDown}
                             />
                             <search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
-                            <button className="ml-2 bg-gray-200 hover:bg-gray-400 rounded w-[50px]" onClick={handleSearch}>검색</button>
                         </div>
-
+                        <button onClick={handleSearch}>검색</button>
                     </div>
                     <div className="flex justify-end space-x-2 mb-4">
                         <button onClick={() => {
@@ -199,7 +194,7 @@ export default function SignList() {
                             </thead>
                             <tbody>
                             {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document) => (
-                                <tr key={document.signNum} className="cursor-pointer hover:bg-gray-100" onClick={handleDocumentClick}>
+                                <tr key={document.signNum} className="cursor-pointer hover:bg-gray-100">
                                     <td className="p-2">{document.signNum}</td>
                                     <td className="p-2">{document.signCateCode}</td>
                                     <td className="p-2">{document.title}</td>

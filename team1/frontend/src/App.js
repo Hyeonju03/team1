@@ -14,10 +14,11 @@ import DocumentRegister from "./DocumentRegister";
 import ApplyForBusiness from "./ApplyForBusiness";
 import Schedule from "./Schedule";
 import SignList from "./SignList";
-import SignRequest from "./SignRequest";
+import SignRegister from "./SignRegister";
 import UserInfo from "./UserInfo";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
+import SignDetail from "./SignDetail";
 
 function App() {
     return (
@@ -47,7 +48,9 @@ function App() {
                     <Route path="/schedule" element={<Schedule />} />
 
                     <Route path="/sign" element={<SignList />} />
-                    <Route path="/sign/register" element={<SignRequest />} />
+                    <Route path="/sign/register" element={<SignRegister />} />
+                    <Route path="/sign/detail/:id}" element={<SignDetail />} />
+
                     <Route path="/userInfo" element={<UserInfo/>} />
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>

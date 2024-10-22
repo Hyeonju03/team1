@@ -4,13 +4,13 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.SignMapper">
 
-    <select id="signSelect" resultType="signDTO">
+    <select id="signSelect" resultType="SignDTO">
         SELECT
             *
         FROM
             SIGN_TEST
         WHERE
-            EMP_CODE
+            EMP_CODE = #{empCode}
     </select>
 
     <select id="signDetail" parameterType="int" resultType="SignDTO">
@@ -32,19 +32,19 @@
             SIGN_NUM = #{signNum}
     </select>
 
-    <insert id="signInsert" parameterType="signDTO">
+    <insert id="signInsert" parameterType="SignDTO">
         INSERT INTO
             SIGN_TEST
             (EMP_CODE, SIGN_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGINAL_NAME, FILE_SIZE, FILE_PATH, TARGET)
         VALUES
-            (#{empCode}}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
+            (#{empCode}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
     </insert>
 
-    <update id="signUpdate" parameterType="signDTO">
+    <update id="signUpdate" parameterType="SignDTO">
         UPDATE
             SIGN_TEST
         SET
-            TARGET = #{target},
+            TARGET = #{target}
 		WHERE
 			SIGN_NUM = #{signNum}
     </update>

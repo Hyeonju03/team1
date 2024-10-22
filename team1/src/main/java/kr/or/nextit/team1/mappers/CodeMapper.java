@@ -7,6 +7,6 @@ import java.util.List;
 
 @Mapper
 public interface CodeMapper {
-   List<CodeDTO> selectCategories(); // 모든 카테고리 가져오기
+   List<CodeDTO> selectCategories(String comCode); // 모든 카테고리 가져오기
 
 }

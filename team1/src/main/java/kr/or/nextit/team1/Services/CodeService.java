@@ -14,8 +14,8 @@ public class CodeService {
     @Autowired
     private CodeMapper codeMapper;
 
-    public List<CodeDTO> selectCategories() {
-        return codeMapper.selectCategories();
+    public List<CodeDTO> selectCategories(String comCode) {
+        return codeMapper.selectCategories(comCode);
 
     }
 

@@ -3,6 +3,7 @@ package kr.or.nextit.team1.Services;
 import kr.or.nextit.team1.DTOs.SignDTO;
 import kr.or.nextit.team1.mappers.SignMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,16 +17,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class SignService {
-    private final SignMapper mapper;
+
+    @Autowired
+    private SignMapper mapper;
 
     public SignService(SignMapper mapper) {
         this.mapper = mapper;
     }
 
-    public List<SignDTO> signSelect(String comCode) {
-        return mapper.signSelect(comCode);
+    public List<SignDTO> signSelect(String empCode) {
+        return mapper.signSelect(empCode);
     }
 
     @Transactional
