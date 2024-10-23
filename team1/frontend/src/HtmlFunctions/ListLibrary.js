@@ -1,234 +1,207 @@
-import React from "react";
+import React, {createContext, useContext, useState} from "react";
 import axios from "axios";
 
-class ListLibrary {
-    static depCode = [];
-    static upDepCode = [];
-    static empCode = [];
-    static empName = [];
-    static empDepCode = [];
-    static returnList = "";
-    static returnList2 = "";
-    static top = ""
-    static RClick = false
-    static mail = "";
-    static PH = "";
-    static state = "";
-    static data = [];
+const ListLibraryContext = createContext();
 
-    //static testData3 = {};
+export const ListLibrary = ({children}) => {
+    const [depCode, setDepCode] = useState([]);
+    const [upDepCode, setUpDepCode] = useState([]);
+    const [empCode, setEmpCode] = useState([]);
+    const [empName, setEmpName] = useState([]);
+    const [empDepCode, setEmpDepCode] = useState([]);
+    const [returnList, setReturnList] = useState(null);
+    const [returnList2, setReturnList2] = useState(null);
+    const [top, setTop] = useState("");
+    const [RClick, setRClick] = useState(false);
+    const [mail, setMail] = useState("");
+    const [PH, setPH] = useState("");
+    const [state, setState] = useState("");
+    const [data, setData] = useState(["", "", "", ""]);
 
-
-    static WorkerList(code) {
-        // 절대 지우지 마시오.
-        // const navigation = (topData, parent) => {
-        //     this.upDepCode.forEach((v1, i1) => {
-        //         if (topData === v1) {
-        //             if (this.testData3[this.depCode[i1]] !== parent && parent !== "") {
-        //                 this.testData3[this.depCode[i1]] = parent + this.depCode[i1] + ",";
-        //             } else {
-        //                 this.testData3[this.depCode[i1]] += this.depCode[i1] + ",";
-        //             }
-        //             navigation(this.depCode[i1], this.testData3[this.depCode[i1]]);
-        //         }
-        //     });
-        // }
-        // 절대 지우지 마시오.
+    const WorkerList = (code) => {
         const depLayout = () => {
 
             let htmlList = {};
-            this.top = ""
+            setTop("");
 
-            this.depCode.forEach((v1, i1) => {
-                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+            depCode.forEach((v1, i1) => {
+                const htmlTag = new DOMParser().parseFromString(
+                    `<li id=${v1} class=${upDepCode[i1]} style="list-style-type: none">${v1}<ul class="list-disc pl-5"></ul></li>`,
+                    'text/html'
+                ).body.firstChild;
                 htmlList[htmlTag.id] = htmlTag;
-            })
+            });
 
-            this.empDepCode.forEach((v1, i1) => {
-                htmlList[v1].children[0].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[50px]" data-value=${this.empCode[i1]}>${this.empName[i1]}</li>`, 'text/html').body.firstChild)
-            })
-            this.depCode.forEach((v1, i1) => {
-                this.depCode.forEach((v2, i2) => {
+            empDepCode.forEach((v1, i1) => {
+                htmlList[v1].children[0].appendChild(
+                    new DOMParser().parseFromString(
+                        `<li class="${empDepCode[i1]} worker w-[50px]" data-value=${empCode[i1]}>${empName[i1]}</li>`,
+                        'text/html'
+                    ).body.firstChild
+                );
+            });
+
+            depCode.forEach((v1, i1) => {
+                depCode.forEach((v2, i2) => {
                     if (htmlList[v1].id !== htmlList[v2].id) {
                         if (htmlList[v1].id === htmlList[v2].className) {
-                            htmlList[v1].children[0].appendChild(htmlList[v2])
+                            htmlList[v1].children[0].appendChild(htmlList[v2]);
                         }
                     }
                 });
-                if (this.upDepCode[i1] === "") {
-                    this.top = v1
+                if (upDepCode[i1] === "") {
+                    setTop(v1);
                 }
-            })
+            });
 
-            return htmlList[this.top]
+            return htmlList[top];
         }
 
         const listCheck = async () => {
             await axios.get("/chartSelect", code)
                 .then(response => {
-                    this.depCode = response.data[0]
-                    this.upDepCode = response.data[1]
-                    this.empCode = response.data[2]
-                    this.empName = response.data[3]
-                    this.empDepCode = response.data[4]
+                    setDepCode(response.data[0]);
+                    setUpDepCode(response.data[1]);
+                    setEmpCode(response.data[2]);
+                    setEmpName(response.data[3]);
+                    setEmpDepCode(response.data[4]);
                 })
                 .catch(error => console.log(error));
-            this.returnList = "";
-            // 절대 지우지 마시오.
-            //this.testData3 = {};
-            // this.depCode.forEach((v1, i1) => {
-            //     if (!this.upDepCode[i1]) {
-            //         this.depCode.forEach((v2, i2) => {
-            //             this.testData3[v2] = v1 + ",";
-            //         });
-            //         this.testData3[v1] = "";
-            //         navigation(v1, this.testData3[v1]);
-            //     }
-            // });
-            // 절대 지우지 마시오.
-            this.returnList = depLayout()
+            setReturnList(depLayout())
         }
+
         listCheck();
+
         return (
             <div className="h-[100%] overflow-y-auto">
                 <ul className="list-disc pl-5">
-                    {<div dangerouslySetInnerHTML={{__html: this.returnList.outerHTML}}/>}
+                    {returnList && <div dangerouslySetInnerHTML={{__html: returnList.outerHTML}}/>}
                 </ul>
             </div>
         );
     }
-    static findChildren(getChildList,isCheck){
-        getChildList = getChildList.children[1].children
-        for(let i = 0; i < getChildList.length; i++) {
-            const getChilds =  Array.from(getChildList);
-            getChilds[i].children[0].checked = isCheck
-            getChilds[i].querySelectorAll("input").forEach((tag)=>{
-                tag.checked = isCheck
-            })
-        }
-    }
-    static WorkerList2(code) {
+
+    const findChildren = (getChildList, isCheck) => {
+        getChildList = getChildList.children[1].children;
+        Array.from(getChildList).forEach((child) => {
+            child.children[0].checked = isCheck;
+            child.querySelectorAll("input").forEach((tag) => {
+                tag.checked = isCheck;
+            });
+        });
+    };
+
+    const WorkerList2 = (code) => {
         const depLayout = () => {
-            this.data = ["", "", "", ""];
+            setData(["", "", "", ""]);
             let htmlList = {};
             const htmlTags = new DOMParser().parseFromString(`
                     <div class="border h-[210px]">
-                        <input class="border w-[100%] h-[25px]" placeholder="제목입력" onchange="ListLibrary.data[0] = this.value"/>
-                        <input type="date" class="border w-[100%] h-[25px]" onchange="ListLibrary.data[1] = this.value"/>
-                        <textarea class="border w-[100%] h-[160px] resize-none" placeholder="내용입력" onchange="ListLibrary.data[2] = this.value"></textarea>
+                        <input class="border w-[100%] h-[25px]" placeholder="제목입력" onchange="{setData(v => [this.value, v[1], v[2], v[3]])}"/>
+                        <input type="date" class="border w-[100%] h-[25px]" onchange="{setData(v => [v[0], this.value, v[2], v[3]])}"/>
+                        <textarea class="border w-[100%] h-[160px] resize-none" placeholder="내용입력" onchange="{setData(v => [v[0], v[1], this.value, v[3]])}"></textarea>
                     </div>
                     <div class="border h-[180px] here overflow-y-auto"><ul class="list-disc pl-5" id="topUL"></ul></div>
             `, 'text/html').body;
 
-
             let topParent = ""
-            this.upDepCode.map((v1, i1) => {
-                if (v1 === "") topParent = this.depCode[i1]
-            })
+            upDepCode.forEach((v1, i1) => {
+                if (v1 === "") topParent = depCode[i1];
+            });
 
-            this.depCode.forEach((v1, i1) => {
-                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange="
-                    let getParentId = document.getElementById('${v1}');
-                    let getChildList = document.getElementById('${v1}');
-                    ListLibrary.findChildren(getChildList,getParentId.children[0].checked);
-                    
-                    while (!!getParentId.parentNode.parentNode.id){
-                        getParentId = getParentId.parentNode.parentNode
-                        const getChilds =  Array.from(getParentId.children[1].children);
-                        let isTrueCount = [0,0];
-                        getChilds.forEach(child => {
-                              if (child.children[0].checked) isTrueCount[0]++;
-                        });
-                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
-                        else getParentId.children[0].checked = false
-                    }
-                    
-                    
-                    "><ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
-                htmlList[htmlTag.id] = htmlTag;
-            })
-
-            this.empDepCode.forEach((v1, i1) => {
-                htmlList[v1].children[1].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[65px]" data-value=${this.empCode[i1]}>${this.empName[i1]}<input type="checkbox" onchange="
-                    let getParentId = document.getElementById('${v1}')
-                    const getChilds = Array.from(getParentId.getElementsByClassName('${v1}'));
-                    let isTrueCount = [0,0];
-                    getChilds.forEach(child => {
-                          if (child.children[0].checked) isTrueCount[0]++;
-                    });
-                    if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true
-                    else getParentId.children[0].checked = false
-                    while (!!getParentId.parentNode.parentNode.id){
-                        getParentId = getParentId.parentNode.parentNode
-                        const getChilds =  Array.from(getParentId.children[1].children);
-                        let isTrueCount = [0,0];
-                        getChilds.forEach(child => {
-                              if (child.children[0].checked) isTrueCount[0]++;
-                        });
-                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
-                        else getParentId.children[0].checked = false
-                    }
+            depCode.forEach((v1, i1) => {
+                const htmlTag = new DOMParser().parseFromString(`
+                    <li id=${v1} class=${upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onChange="{(e) => {
+                        let getParentId = document.getElementById('${v1}');
+                        findChildren(getParentId, e.target.checked);
                         
-                    "></li>`, 'text/html').body.firstChild)
-            })
-            this.depCode.forEach((v1, i1) => {
-                this.depCode.forEach((v2, i2) => {
+                        while (!!getParentId.parentNode.parentNode.id) {
+                            getParentId = getParentId.parentNode.parentNode;
+                            const getChilds = Array.from(getParentId.children[1].children);
+                            const isTrueCount = getChilds.filter(child => child.children[0].checked).length;
+                            getParentId.children[0].checked = isTrueCount === getChilds.length;
+                        }
+                    }}"/>
+                    <ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+                htmlList[htmlTag.id] = htmlTag;
+            });
+
+            empDepCode.forEach((v1, i1) => {
+                htmlList[v1].children[1].appendChild(
+                    new DOMParser().parseFromString(`
+                    <li class="${empDepCode[i1]} worker w-[65px]" data-value=${empCode[i1]}>${empName[i1]}<input type="checkbox" onChange="{() => {
+                            let getParentId = document.getElementById('${v1}');
+                            const getChilds = Array.from(getParentId.getElementsByClassName('${v1}'));
+                            const isTrueCount = getChilds.filter(child => child.children[0].checked).length;
+                            getParentId.children[0].checked = isTrueCount === getChilds.length;
+                            
+                            while (!!getParentId.parentNode.parentNode.id) {
+                                getParentId = getParentId.parentNode.parentNode;
+                                const getChilds = Array.from(getParentId.children[1].children);
+                                const isTrueCount = getChilds.filter(child => child.children[0].checked).length;
+                                getParentId.children[0].checked = isTrueCount === getChilds.length;
+                            }
+                        }}"/>
+                    </li>`, 'text/html').body.firstChild
+                );
+            });
+
+            depCode.forEach((v1, i1) => {
+                depCode.forEach((v2, i2) => {
                     if (htmlList[v1].id !== htmlList[v2].id) {
                         if (htmlList[v1].id === htmlList[v2].className) {
-                            htmlList[v1].children[1].appendChild(htmlList[v2])
+                            htmlList[v1].children[1].appendChild(htmlList[v2]);
                         }
                     }
                 });
-                if (this.upDepCode[i1] === "") {
-                    this.top = v1
+                if (upDepCode[i1] === "") {
+                    setTop(v1);
                 }
-            })
-            htmlTags.children[1].children[0].appendChild(htmlList[this.top])
-            return htmlTags
-        }
+            });
+            htmlTags.children[1].children[0].appendChild(htmlList[top]);
+            return htmlTags;
+        };
 
         const listCheck = async () => {
             await axios.get("/chartSelect", code)
                 .then(response => {
-                    this.depCode = response.data[0]
-                    this.upDepCode = response.data[1]
-                    this.empCode = response.data[2]
-                    this.empName = response.data[3]
-                    this.empDepCode = response.data[4]
+                    setDepCode(response.data[0]);
+                    setUpDepCode(response.data[1]);
+                    setEmpCode(response.data[2]);
+                    setEmpName(response.data[3]);
+                    setEmpDepCode(response.data[4]);
                 })
                 .catch(error => console.log(error));
-            this.returnList2 = "";
-            this.returnList2 = depLayout()
-
+            setReturnList2(depLayout());
         }
         listCheck();
-        return this.returnList2
-    }
+        return returnList2;
+    };
 
-    static async RClickWindow(newWindowPosX, newWindowPosY, target) {
+    const RClickWindow = async (newWindowPosX, newWindowPosY, target) => {
         const RClickWindowSelect = async () => {
             const params = {code: target}
             await axios.get("/RClickWindowSelect", {params})
                 .then(response => {
-                    this.mail = response.data[0]
-                    this.PH = response.data[1]
+                    setMail(response.data[0]);
+                    setPH(response.data[1]);
                 })
                 .catch(error => console.log(error));
         }
         await RClickWindowSelect();
-        return [this.mail, this.PH]
+        return [mail, PH];
     }
 
-    static async noticeList(code, setBtnCtl) {
-        await axios.get("/noticeListSelect", code)
-            .then(response => {
-                this.depCode = response.data[0]
-                this.upDepCode = response.data[1]
-                this.empCode = response.data[2]
-                this.empName = response.data[3]
-                this.empDepCode = response.data[4]
-            })
-            .catch(error => console.log(error));
+    const noticeList = (code, setBtnCtl) => {
+        // await axios.get("/noticeListSelect", code)
+        //     .then(response => {
+        //         setDepCode(response.data[0]);
+        //         setUpDepCode(response.data[1]);
+        //         setEmpCode(response.data[2]);
+        //         setEmpName(response.data[3]);
+        //         setEmpDepCode(response.data[4]);
+        //     })
+        //     .catch(error => console.log(error));
 
         return (
             <>
@@ -247,20 +220,19 @@ class ListLibrary {
         );
     }
 
-    static noticeWritePage(code, setBtnCtl) {
-        this.WorkerList2(code)
-        //console.log(this.returnList2)
-        if (!this.returnList2) return setBtnCtl(3)
-        return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
+    const noticeWritePage = (code, setBtnCtl) => {
+        WorkerList2(code)
+        if (!returnList2) return setBtnCtl(3)
+        return <>{<div dangerouslySetInnerHTML={{__html: returnList2.outerHTML}}/>}</>
     }
 
-    static noticeInsert(code) {
-        let isNotNull = 0
-        if (this.data.length === 0) {
+    const noticeInsert = (code) => {
+        let isNotNull = 0;
+        if (data.length === 0) {
             alert("공지사항을 입력해주세요");
         } else {
-            for (let i = 0; i < this.data.length; i++) {
-                if (this.data[i] === "") {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] === "") {
                     switch (i) {
                         case 0:
                             alert("제목을 입력해주세요");
@@ -281,18 +253,18 @@ class ListLibrary {
             if (isNotNull === 0) {
                 const topParent = document.getElementById('topUL');
 
-                topParent.querySelectorAll("input").forEach((tag)=>{
-                    if (tag.checked && !!tag.parentNode.getAttribute('data-value')){
-                        this.data[3] += tag.parentNode.getAttribute('data-value') + ":0,"
+                topParent.querySelectorAll("input").forEach((tag) => {
+                    if (tag.checked && !!tag.parentNode.getAttribute('data-value')) {
+                        setData(v => [v[0], v[1], v[2], v[3] + tag.parentNode.getAttribute('data-value') + ":0,"]);
                     }
 
                 })
                 const jsonData = {
-                    empCode : code,
-                    title : this.data[0],
-                    content : this.data[2],
-                    targets : this.data[3],
-                    endTime : new Date(this.data[1]).toISOString()
+                    empCode: code,
+                    title: data[0],
+                    content: data[2],
+                    targets: data[3],
+                    endTime: new Date(data[1]).toISOString()
                 }
                 axios.post("/noticeInsert", jsonData)
                     .then(response => {
@@ -301,7 +273,48 @@ class ListLibrary {
             }
         }
     }
-}
 
-window.ListLibrary = ListLibrary;
-export default ListLibrary;
+    const value = {
+        depCode,
+        upDepCode,
+        empCode,
+        empName,
+        empDepCode,
+        returnList,
+        returnList2,
+        top,
+        RClick,
+        mail,
+        PH,
+        state,
+        data,
+        setDepCode,
+        setUpDepCode,
+        setEmpCode,
+        setEmpName,
+        setEmpDepCode,
+        setReturnList,
+        setReturnList2,
+        setTop,
+        setRClick,
+        setMail,
+        setPH,
+        setState,
+        setData,
+        WorkerList,
+        WorkerList2,
+        RClickWindow,
+        noticeList,
+        noticeWritePage,
+        noticeInsert,
+    };
+
+    return (
+        <ListLibraryContext.Provider value={value}>
+            {children}
+        </ListLibraryContext.Provider>
+    );
+}
+export const useListLibrary = () => {
+    return useContext(ListLibraryContext);
+};

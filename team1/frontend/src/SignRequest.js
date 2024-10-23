@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
-import ListLibrary from "./HtmlFunctions/ListLibrary";
+import {useListLibrary} from "./HtmlFunctions/ListLibrary";
 
 export default function SignRequest() {
     const [btnCtl, setBtnCtl] = useState(0)
@@ -9,18 +9,20 @@ export default function SignRequest() {
     const [newWindowPosX, setNewWindowPosX] = useState(500)
     const [newWindowData, setNewWindowData] = useState([])
 
+    const {RClickWindow, WorkerList, noticeList, noticeWritePage, noticeInsert} = useListLibrary();
+
+
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
 
     const windowRClick = async (e) => {
         e.preventDefault()
-        if (e.target.className.includes("worker"))
-        {
+        if (e.target.className.includes("worker")) {
             await setNewWindowPosY(e.target.getBoundingClientRect().y + 24);
             await setNewWindowPosX(50);
             setIsRClick(true);
-            ListLibrary.RClickWindow(newWindowPosX,newWindowPosY,e.target.getAttribute("data-value")).then(data=> setNewWindowData([data[0],data[1]]))
+            RClickWindow(newWindowPosX, newWindowPosY, e.target.getAttribute("data-value")).then(data => setNewWindowData([data[0], data[1]]))
         }
 
     }
@@ -77,7 +79,7 @@ export default function SignRequest() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-100"  onContextMenu={windowRClick}>
+        <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
             {/* Header with logo */}
             <header className="bg-white shadow-md p-4">
                 <div className="container mx-auto">
@@ -270,7 +272,7 @@ export default function SignRequest() {
                         <div className="border text-left h-[435px] blue">
                             {
                                 btnCtl === 0 ?
-                                    ListLibrary.WorkerList("3118115625")
+                                    WorkerList("3118115625")
                                     :
                                     btnCtl === 1 ?
                                         <>
@@ -311,7 +313,7 @@ export default function SignRequest() {
                                             </>
                                             :
                                             btnCtl === 3 ?
-                                                ListLibrary.noticeList("3118115625",setBtnCtl)
+                                                noticeList("3118115625", setBtnCtl)
                                                 :
                                                 btnCtl === 4 ?
                                                     <>
@@ -362,16 +364,22 @@ export default function SignRequest() {
                                                         :
                                                         btnCtl === 6 ?
                                                             <>
-                                                            {ListLibrary.noticeWritePage("3118115625",setBtnCtl)}
-                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);ListLibrary.noticeInsert("3118115625-kim")}}>공지사항 등록</button>
-                                                            </>: <></>
+                                                                {noticeWritePage("3118115625", setBtnCtl)}
+                                                                <button className="text-center border w-full h-[45px]"
+                                                                        onClick={() => {
+                                                                            setBtnCtl(3);
+                                                                            noticeInsert("3118115625-kim")
+                                                                        }}>공지사항 등록
+                                                                </button>
+                                                            </> : <></>
 
                             }
                         </div>
                     </div>
                     {isRClick === true ?
                         (
-                            <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            <div className={`flex absolute`}
+                                 style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
                                 <div className="w-1/3 border">
                                     <img src="/logo192.png"/>
                                 </div>
