@@ -20,7 +20,7 @@ public class ListLibraryService {
         return listLibraryMapper.RClickWindowSelect(code);
     }
 
-    public ListLibraryDTO noticeInsert(ListLibraryDTO dto){
-        return listLibraryMapper.noticeInsert(dto);
+    public void noticeInsert(ListLibraryDTO dto){
+        listLibraryMapper.noticeInsert(dto);
     }
 }

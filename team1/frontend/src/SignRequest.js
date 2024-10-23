@@ -363,7 +363,7 @@ export default function SignRequest() {
                                                         btnCtl === 6 ?
                                                             <>
                                                             {ListLibrary.noticeWritePage("3118115625",setBtnCtl)}
-                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);console.log(ListLibrary.data);ListLibrary.noticeInsert()}}>공지사항 등록</button>
+                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);ListLibrary.noticeInsert("3118115625-kim")}}>공지사항 등록</button>
                                                             </>: <></>
 
                             }

@@ -15,7 +15,12 @@
         where e.EMP_CODE = #{code}
     </select>
     <insert id="noticeInsert" parameterType="ListLibraryDTO">
-        insert into notice (EMP_CODE,TITLE,CONTENT,TARGET,END_DATE)
-        values ('empCode','title','content','targets','endTime')
+        insert into notice (EMP_CODE, TITLE, CONTENT, TARGET, END_DATE)
+        values (#{empCode}, #{title}, #{content}, #{targets}, #{endTime})
     </insert>
+    <select id="noticeListSelect" resultType="ListLibraryDTO" parameterType="String">
+        select
+        from
+        where
+    </select>
 </mapper>

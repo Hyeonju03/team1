@@ -49,7 +49,8 @@ public class ListLibraryController {
     }
 
     @PostMapping("/noticeInsert")
-    public ResponseEntity<ListLibraryDTO> noticeInsert(@RequestBody ListLibraryDTO dto) {
-        return ResponseEntity.ok(listLibraryService.noticeInsert(dto));
+    public ResponseEntity<Void> noticeInsert(@RequestBody ListLibraryDTO dto) {
+        listLibraryService.noticeInsert(dto);
+        return ResponseEntity.ok().build();
     }
 }

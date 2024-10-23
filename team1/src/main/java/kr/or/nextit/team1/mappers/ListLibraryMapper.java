@@ -8,5 +8,5 @@ import java.util.List;
 public interface ListLibraryMapper {
     List<ListLibraryDTO> chartSelect(String code);
     ListLibraryDTO RClickWindowSelect(String code);
-    ListLibraryDTO noticeInsert(ListLibraryDTO dto);
+    void noticeInsert(ListLibraryDTO dto);
 }

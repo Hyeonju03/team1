@@ -102,10 +102,9 @@ class ListLibrary {
         for(let i = 0; i < getChildList.length; i++) {
             const getChilds =  Array.from(getChildList);
             getChilds[i].children[0].checked = isCheck
-            if (getChilds[i].children[1].children.length > 0){
-                console.log(getChilds[i].children[1].children)
-                //this.findChildren(getChilds[i].children[1].children,isCheck)
-            }
+            getChilds[i].querySelectorAll("input").forEach((tag)=>{
+                tag.checked = isCheck
+            })
         }
     }
     static WorkerList2(code) {
@@ -220,7 +219,17 @@ class ListLibrary {
         return [this.mail, this.PH]
     }
 
-    static noticeList(code, setBtnCtl) {
+    static async noticeList(code, setBtnCtl) {
+        await axios.get("/noticeListSelect", code)
+            .then(response => {
+                this.depCode = response.data[0]
+                this.upDepCode = response.data[1]
+                this.empCode = response.data[2]
+                this.empName = response.data[3]
+                this.empDepCode = response.data[4]
+            })
+            .catch(error => console.log(error));
+
         return (
             <>
                 <div className="h-[390px] overflow-y-auto">
@@ -240,14 +249,13 @@ class ListLibrary {
 
     static noticeWritePage(code, setBtnCtl) {
         this.WorkerList2(code)
-        console.log(this.returnList2)
+        //console.log(this.returnList2)
         if (!this.returnList2) return setBtnCtl(3)
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
 
-    static noticeInsert() {
+    static noticeInsert(code) {
         let isNotNull = 0
-        console.log("들어옴")
         if (this.data.length === 0) {
             alert("공지사항을 입력해주세요");
         } else {
@@ -256,15 +264,15 @@ class ListLibrary {
                     switch (i) {
                         case 0:
                             alert("제목을 입력해주세요");
-                            isNotNull++
+                            isNotNull++;
                             break;
                         case 1:
                             alert("종료일을 입력해주세요");
-                            isNotNull++
+                            isNotNull++;
                             break;
                         case 2:
                             alert("내용을 입력해주세요");
-                            isNotNull++
+                            isNotNull++;
                             break;
                     }
                     break;
@@ -272,20 +280,26 @@ class ListLibrary {
             }
             if (isNotNull === 0) {
                 const topParent = document.getElementById('topUL');
-                let targets = "";
 
-                console.log(topParent.children)
+                topParent.querySelectorAll("input").forEach((tag)=>{
+                    if (tag.checked && !!tag.parentNode.getAttribute('data-value')){
+                        this.data[3] += tag.parentNode.getAttribute('data-value') + ":0,"
+                    }
 
-                //if (child.children[0].checked) targets += child.children[0].value + ":0,"
-
-
+                })
+                const jsonData = {
+                    empCode : code,
+                    title : this.data[0],
+                    content : this.data[2],
+                    targets : this.data[3],
+                    endTime : new Date(this.data[1]).toISOString()
+                }
+                axios.post("/noticeInsert", jsonData)
+                    .then(response => {
+                    })
+                    .catch(error => console.log(error));
             }
         }
-        // axios.post("/noticeInsert", this.data)
-        //     .then(response => {
-        //         console.log(response.data)
-        //     })
-        //     .catch(error => console.log(error));
     }
 }
 

@@ -15,8 +15,10 @@ public class ListLibraryDTO {
     private String mail;
     private String PH;
     private String state;
+    private int noticeNum;
     private String title;
     private String content;
-    private List<String> targets;
+    private String targets;
+    private LocalDateTime startDate;
     private LocalDateTime endTime;
 }
