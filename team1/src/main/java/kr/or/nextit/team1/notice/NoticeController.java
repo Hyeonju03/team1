@@ -14,8 +14,8 @@ public class NoticeController {
 
     //  공지사항을 리스트
     @GetMapping("/api/notice/list")
-    public ResponseEntity<List<NoticeDTO>> getAllNotices() {
-        List<NoticeDTO> notices = noticeService.getAllNotices();
+    public ResponseEntity<List<NoticeDTO>> noticeList() {
+        List<NoticeDTO> notices = noticeService.noticeList();
         return ResponseEntity.ok(notices);
     }
 
@@ -28,23 +28,23 @@ public class NoticeController {
 
     // 새로운 공지사항 생성
     @PostMapping("/api/notice/register")
-    public ResponseEntity<NoticeDTO> createNotice(@RequestBody NoticeDTO noticeDTO) {
-        NoticeDTO createdNotice = noticeService.createNotice(noticeDTO);
+    public ResponseEntity<NoticeDTO> noticeCreate(@RequestBody NoticeDTO noticeDTO) {
+        NoticeDTO createdNotice = noticeService.noticeCreate(noticeDTO);
         return ResponseEntity.ok(createdNotice);
     }
 
     // 특정 공지사항 업데이트 처리
     @PutMapping("/api/notice/detail/{noticeNum}")
-    public ResponseEntity<NoticeDTO> updateNotice(@PathVariable int noticeNum, @RequestBody NoticeDTO noticeDTO) {
+    public ResponseEntity<NoticeDTO> noticeUpdate(@PathVariable int noticeNum, @RequestBody NoticeDTO noticeDTO) {
         noticeDTO.setNoticeNum(noticeNum);
-        noticeService.updateNotice(noticeDTO);
+        noticeService.noticeUpdate(noticeDTO);
         return ResponseEntity.ok().build();
     }
 
     // 특정 공지사항 삭제처리
     @DeleteMapping("/api/notice/detail/{noticeNum}")
-    public ResponseEntity<Void> deleteNotice(@PathVariable int noticeNum) {
-        boolean deleted = noticeService.deleteNotice(noticeNum);
+    public ResponseEntity<Void> noticeDelete(@PathVariable int noticeNum) {
+        boolean deleted = noticeService.noticeDelete(noticeNum);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

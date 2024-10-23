@@ -19,10 +19,12 @@ import UserInfo from "./UserInfo";
 import NoticeDetail from "./NoticeDetail";
 import NoticeRegister from "./NoticeRegister";
 import NoticeList from "./NoticeList";
+import { AuthProvider } from './noticeAuth';
 
 
 function App() {
     return (
+        <AuthProvider>
         <Router>
             <div className="App">
 
@@ -41,9 +43,11 @@ function App() {
                     <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
 
-                    <Route path="/notice/list" exact element={<NoticeList/>} />
-                    <Route path="/notice/register" element={<NoticeRegister/>} />
-                    <Route path="/notice/detail/:noticeNum" element={<NoticeDetail/>} />
+
+                      <Route path="/notice/list" exact element={<NoticeList/>} />
+                      <Route path="/notice/register" element={<NoticeRegister/>} />
+                      <Route path="/notice/detail/:noticeNum" element={<NoticeDetail/>} />
+
 
                     <Route path="/schedule" element={<Schedule />} />
 
@@ -55,6 +59,7 @@ function App() {
                 </Routes>
             </div>
         </Router>
+        </AuthProvider>
     );
 }
 

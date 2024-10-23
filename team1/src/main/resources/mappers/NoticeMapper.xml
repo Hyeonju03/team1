@@ -3,19 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.or.nextit.team1.mappers.NoticeMapper">
-    <select id="getAllNotices" resultType="kr.or.nextit.team1.notice.NoticeDTO">
+
+    <!--  List  -->
+    <select id="noticeList" resultType="kr.or.nextit.team1.notice.NoticeDTO">
         SELECT *
         FROM adminnotice
         ORDER BY start_date DESC
     </select>
 
-    <select id="getNoticeById" parameterType="int" resultType="kr.or.nextit.team1.notice.NoticeDTO">
+    <!--  Detail  -->
+    <select id="noticeDetail" parameterType="int" resultType="kr.or.nextit.team1.notice.NoticeDTO">
         SELECT *
         FROM adminnotice
         WHERE notice_num = #{noticeNum}
     </select>
 
-    <insert id="createNotice" parameterType="kr.or.nextit.team1.notice.NoticeDTO" useGeneratedKeys="true" keyProperty="noticeNum">
+    <!-- Register  -->
+    <insert id="noticeCreate" parameterType="kr.or.nextit.team1.notice.NoticeDTO" useGeneratedKeys="true" keyProperty="noticeNum">
         INSERT INTO adminnotice (title, content, start_date)
         VALUES ( #{title}, #{content}, now())
         <selectKey keyProperty="noticeNum" resultType="int" order="AFTER">
@@ -23,13 +27,15 @@
         </selectKey>
     </insert>
 
-    <update id="updateNotice" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
+    <!--  Update  -->
+    <update id="noticeUpdate" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
         UPDATE adminnotice
         SET title = #{title}, content = #{content}
         WHERE notice_num = #{noticeNum}
     </update>
 
-    <delete id="deleteNotice" parameterType="int">
+    <!--  delete  -->
+    <delete id="noticeDelete" parameterType="int">
         DELETE FROM adminnotice
         WHERE notice_num = #{noticeNum}
     </delete>

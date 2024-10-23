@@ -9,9 +9,9 @@ import java.util.List;
 
 @Mapper
 public interface NoticeMapper {
-    List<NoticeDTO> getAllNotices();
-    NoticeDTO getNoticeById(int noticeNum);
-    void createNotice(NoticeDTO noticeDTO);
-    void updateNotice(NoticeDTO noticeDTO);
-    int deleteNotice(int noticeNum);
+    List<NoticeDTO> noticeList();
+    NoticeDTO noticeDetail(int noticeNum);
+    void noticeCreate(NoticeDTO noticeDTO);
+    void noticeUpdate(NoticeDTO noticeDTO);
+    int noticeDelete(int noticeNum);
 }
