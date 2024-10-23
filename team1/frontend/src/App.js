@@ -35,20 +35,20 @@ function App() {
                     <Route path="/AdminOneToOneDetail" element={<AdminOneToOneDetail/>}/>
                     <Route path="/Log" element={<Log/>}/>
                     <Route path="/LogList" element={<LogList/>}/>
-                      
+
                     <Route path="/documents" element={<DocumentList/>}/>
                     <Route path="/documents/:id" element={<DocumentDetail/>}/>
                     <Route path="/document/register" element={<DocumentRegister/>}/>
-                    <Route path="/documents/update/:id" element={<DocumentUpdate />} />
+                    <Route path="/documents/update/:id" element={<DocumentUpdate/>}/>
 
-                    <Route path="/notices" element={<Notice />} />
-                    <Route path="/apply" element={<ApplyForBusiness />} />
+                    <Route path="/notices" element={<Notice/>}/>
+                    <Route path="/apply" element={<ApplyForBusiness/>}/>
 
-                    <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/schedule" element={<Schedule/>}/>
 
-                    <Route path="/sign" element={<SignList />} />
-                    <Route path="/sign/register" element={<SignRequest />} />
-                    <Route path="/userInfo" element={<UserInfo/>} />
+                    <Route path="/sign" element={<SignList/>}/>
+                    <Route path="/sign/register" element={<SignRequest/>}/>
+                    <Route path="/userInfo" element={<UserInfo/>}/>
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
                 </Routes>

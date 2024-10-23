@@ -5,10 +5,10 @@
 <mapper namespace="kr.or.nextit.team1.mappers.CodeMapper">
     <select id="selectCategories" resultType="CodeDTO">
         SELECT
-            DOC_CATE_CODE
+            DEP_CODE, POS_CODE, DOC_CATE_CODE
         FROM
             CODE
         WHERE
-            COM_CODE = ${comCode}
+            COM_CODE = #{comCode}
     </select>
 </mapper>

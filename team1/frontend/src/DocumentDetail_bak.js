@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
-import useComCode from "hooks/useComCode";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -22,13 +21,12 @@ export default function DocumentDetail() {
     const [isExpanded, setIsExpanded] = useState(true);
     const {id} = useParams(); // 여기서 id는 docNum을 의미
     const [doc, setDoc] = useState(null);
-    // const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
-    const [codeCategory] = useComCode();
+    const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
 
     useEffect(() => {
-        async function documentDetail() {
+        const documentDetail = async () => {
             try {
                 const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
                 setDoc(response.data);
@@ -37,7 +35,14 @@ export default function DocumentDetail() {
             } finally {
                 setLoading(false); // 로딩이 끝남
             }
-        }
+        };
+
+        // code 테이블에서 카테고리 가져오기
+        axios.get(`/code/${process.env.REACT_APP_COM_CODE}`)
+            .then(response => {
+                setCodeCategory(response.data);
+            })
+            .catch(error => console.log(error));
 
         documentDetail();
     }, [id]);
@@ -108,6 +113,9 @@ export default function DocumentDetail() {
     const handleHome = () => {
         navigate(`/documents/`);
     };
+
+
+    console.log("codeCategory 값 : " + codeCategory)
 
     return (
         <div className="min-h-screen flex flex-col">
