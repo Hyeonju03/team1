@@ -9,14 +9,79 @@
         values(#{empCode}, NULL,#{title},#{content},#{mailTarget}, #{mailRef},#{fileName},#{fileOriginalName},#{fileSize},#{filePath}, current_timestamp());
     </insert>
 
+<!--    전체-->
     <select id="selectSendMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
-<!--        select MAIL_NUM, EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE,START_DATE-->
+<!--        select *-->
+<!--        from mailtest-->
+<!--        where EMP_CODE like concat(#{empCode},'%')-->
+<!--        and DELETE_YN =0-->
+<!--        order by MAIL_NUM  desc-->
+        select *
+        from mailtest
+        where (MAIL_TARGET like concat('%',#{mailTarget},'%')
+        or MAIL_REF like concat('%',#{mailRef},'%')
+        or  EMP_CODE like concat(#{empCode},'%'))
+        and DELETE_YN =0
+        order by MAIL_NUM  desc
+    </select>
+
+
+    <!--    보낸-->
+    <select id="sentMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
+        <!--        select MAIL_NUM, EMP_CODE,TITLE,CONTENT,MAIL_TARGET,MAIL_REF,FILE_SIZE,START_DATE-->
+        SELECT *
+        FROM mailtest
+        where EMP_CODE like concat(#{empCode},'%')
+        AND DELETE_YN = 0
+        AND MAIL_TARGET != CONCAT(SUBSTR(EMP_CODE, 1, INSTR(EMP_CODE, '-') - 1),
+        SUBSTR(EMP_CODE, INSTR(EMP_CODE, '-') + 1),
+        '@damail.com')
+        ORDER BY MAIL_NUM DESC
+    </select>
+
+
+    <!--    내게쓴-->
+    <select id="selectToMeSendMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
         select *
         from mailtest
         where EMP_CODE like concat(#{empCode},'%')
         and DELETE_YN =0
+        and MAIL_TARGET = #{mailTarget}
         order by MAIL_NUM  desc
     </select>
+
+    <!--    첨부파일-->
+    <select id="attachmentMailList"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
+        select *
+        from mailtest
+        where (MAIL_TARGET like concat('%',#{mailTarget},'%')
+        or MAIL_REF like concat('%',#{mailRef},'%'))
+        AND FILE_ORIGIN_NAME IS NOT NULL
+        and DELETE_YN =0
+        AND MAIL_TARGET != CONCAT(SUBSTR(EMP_CODE, 1, INSTR(EMP_CODE, '-') - 1),
+        SUBSTR(EMP_CODE, INSTR(EMP_CODE, '-') + 1),
+        '@damail.com')
+        order by MAIL_NUM  desc
+    </select>
+
+    <!--   받은-->
+    <select id="receivedMailList"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
+        select *
+        from mailtest
+        where (MAIL_TARGET like concat('%',#{mailTarget},'%')
+        or MAIL_REF like concat('%',#{mailRef},'%'))
+        and DELETE_YN =0
+        AND MAIL_TARGET != CONCAT(SUBSTR(EMP_CODE, 1, INSTR(EMP_CODE, '-') - 1),
+        SUBSTR(EMP_CODE, INSTR(EMP_CODE, '-') + 1),
+        '@damail.com')
+        order by MAIL_NUM  desc
+    </select>
+
+
+    <select id="selectMailReception" parameterType="kr.or.nextit.team1.DTOs.MailDTO">
+
+    </select>
+
 
     <delete id="deleteMail">
         DELETE from mailtest
@@ -36,10 +101,28 @@
     </update>
 
     <select id="selectDeleteMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
-        select *
-        from mailtest
-        where EMP_CODE like concat(#{empCode},'%')
-        and DELETE_YN =1
-        order by MAIL_NUM  desc
+<!--        select *-->
+<!--        from mailtest-->
+<!--        where EMP_CODE like concat(#{empCode},'%')-->
+<!--        and DELETE_YN =1-->
+<!--        order by MAIL_NUM  desc-->
+
+<!--        SELECT *-->
+<!--        FROM mailtest m-->
+<!--        WHERE (EMP_CODE =  #{empCode}-->
+<!--        OR MAIL_TARGET LIKE CONCAT('%', #{empCode}, '%'))-->
+<!--        AND DELETE_YN = 1-->
+
+        SELECT *
+        FROM mailtest m
+        WHERE (EMP_CODE = '3148200040-abcmart147'
+        OR MAIL_TARGET LIKE '%' || REPLACE('3148200040-abcmart147', '-', '') || '%')
+        AND DELETE_YN = 1
     </select>
+
+    <delete id="AlldeleteMail">
+        DELETE FROM mailtest
+        where delete_yn = 1
+    </delete>
+
 </mapper>

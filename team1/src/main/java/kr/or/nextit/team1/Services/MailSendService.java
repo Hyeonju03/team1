@@ -84,4 +84,8 @@ public class MailSendService {
             mailMapper.updateMail(mailNum);
         }
     }
+
+    public static void AlldeleteMail() {
+        mailMapper.AlldeleteMail();
+    }
 }

@@ -56,7 +56,7 @@ export default function EmailSend() {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "2048209555-dffdsfd"; // 로그인 후 받아온 empCode
+            const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -184,10 +184,24 @@ export default function EmailSend() {
         setIsPopupOpen(true)
     }
 
+    const handleConfirmDelete = async ()=>{
+        try {
+            await axios.delete('/AlldeleteMail');
+            alert("삭제완룡")
+            setIsPopupOpen(false);
+            setSelectedCheckboxes([]);
+            setSendList([]);
+        } catch (error) {
+            console.error(error);
+            alert("메일 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
     return (
         <div className="container mx-auto p-4">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex flex-col md:flex-row gap-6">
+
 
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
@@ -232,7 +246,7 @@ export default function EmailSend() {
                     <DeletePopup
                         isOpen={isPopupOpen}
                         onClose={() => setIsPopupOpen(false)}
-                        // onConfirm={handleConfirmDelete}
+                        onConfirm={handleConfirmDelete}
                     />
                 </div>
 
@@ -270,29 +284,33 @@ export default function EmailSend() {
                             className="h-4 w-4"/></button>
                     </div>
                     <div style={{marginBottom: "20px"}}>
-                        {(searchList ? serachResult : currentMails).map((v, i) => (
-                            <div className="flex" key={i} style={{ marginBottom: "10px", alignItems: "center" }}>
-                                <input type="checkbox" checked={selectedCheckboxes[i] || false} onChange={() => handleCheckboxChange(i)} />
-                                <button onClick={deleteSelectedMails} style={{ marginLeft: "40px" }}>
-                                    <Trash className="mr-2 h-4 w-4" />
-                                </button>
-                                <div className="flex" style={{ marginLeft: "20px", width: "100%", justifyContent: "space-between" }}>
-                                    <p style={{
-                                        width: "30%", textAlign: "left", overflow: "hidden",
-                                        whiteSpace: "nowrap", textOverflow: "ellipsis"
-                                    }}>{v.mailTarget}</p>
-                                    <div className="flex items-center" style={{ width: "30%", textAlign: "left", minWidth: "150px" }}> {/* minWidth 추가 */}
-                                        {v.fileName && (  // 파일이 있을 경우에만 아이콘 표시
-                                            <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨" />
-                                        )}
-                                        <p onClick={() => gogoDetail(v)} className="cursor-pointer" style={{ marginLeft: v.fileName ? '0' : '1.25rem' }}> {/* 여백 조정 */}
-                                            {v.title}
-                                        </p>
+                        {(searchList ? serachResult : currentMails).length > 0 ? (
+                            (searchList ? serachResult : currentMails).map((v, i) => (
+                                <div className="flex" key={i} style={{ marginBottom: "10px", alignItems: "center" }}>
+                                    <input type="checkbox" checked={selectedCheckboxes[i] || false} onChange={() => handleCheckboxChange(i)} />
+                                    <button onClick={deleteSelectedMails} style={{ marginLeft: "40px" }}>
+                                        <Trash className="mr-2 h-4 w-4" />
+                                    </button>
+                                    <div className="flex" style={{ marginLeft: "20px", width: "100%", justifyContent: "space-between" }}>
+                                        <p style={{
+                                            width: "30%", textAlign: "left", overflow: "hidden",
+                                            whiteSpace: "nowrap", textOverflow: "ellipsis"
+                                        }}>{v.mailTarget}</p>
+                                        <div className="flex items-center" style={{ width: "30%", textAlign: "left", minWidth: "150px" }}>
+                                            {v.fileName && (
+                                                <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨" />
+                                            )}
+                                            <p onClick={() => gogoDetail(v)} className="cursor-pointer" style={{ marginLeft: v.fileName ? '0' : '1.25rem' }}>
+                                                {v.title}
+                                            </p>
+                                        </div>
+                                        <p style={{ width: "30%", textAlign: "right" }}>{formatDate(v.startDate)}</p>
                                     </div>
-                                    <p style={{ width: "30%", textAlign: "right" }}>{formatDate(v.startDate)}</p>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p>메일이 없습니다.</p>
+                        )}
 
 
 

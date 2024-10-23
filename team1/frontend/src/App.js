@@ -24,6 +24,10 @@ import MailSendResult from "./MailSendResult";
 import MailDetail from "./MailDetail";
 import ToMeMailSend from "./ToMeMailSend";
 import MailTrashList from "./MailTrashList";
+import ToMeMailSendList from "./ToMeMailSendList";
+import AttachMentMailList from "./AttachMentMailList";
+import ToTalMailSendList from "./ToTalMailSendList";
+import ReceivedMailList from "./ReceivedMailList";
 
 function App() {
     return (
@@ -64,6 +68,10 @@ function App() {
                     <Route path="/MailDetail" element={<MailDetail/>}/>
                     <Route path="/ToMeMailSend" element={<ToMeMailSend/>}/>
                     <Route path="/MailTrashList" element={<MailTrashList/>}/>
+                    <Route path="/ToMeMailSendList" element={<ToMeMailSendList/>}/>
+                    <Route path="/AttachMentMailList" element={<AttachMentMailList/>}/>
+                    <Route path="/ToTalMAilSendList" element={<ToTalMailSendList/>}/>
+                    <Route path="/ReceivedMailList" element={<ReceivedMailList/>}/>
                 </Routes>
             </div>
         </Router>

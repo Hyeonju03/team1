@@ -9,7 +9,9 @@ import java.util.List;
 public interface MailMapper {
     int insertMail(MailDTO mailDTO);
 
-    List<MailDTO> selectSendMail(String empCode);
+    List<MailDTO> selectSendMail(String empCode , String mailTarget , String mailRef);
+
+    List<MailDTO> sentMail(String empCode);
 
     void deleteMail(Long mailNum);
 
@@ -18,5 +20,15 @@ public interface MailMapper {
     void updateMail(Long mailNum);
     
     List<MailDTO> selectDeleteMail(String empCode);
+
+    void AlldeleteMail();
+
+    List<MailDTO> selectToMeSendMail(String empCode , String mailTarget);
+
+    List<MailDTO> attachmentMailList(String mailTarget, String mailRef);
+
+    List<MailDTO> selectMailReception();
+
+    List<MailDTO> receivedMailList(String mailTarget, String mailRef);
 
 }

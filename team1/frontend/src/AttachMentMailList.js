@@ -23,6 +23,7 @@ export default function EmailSend() {
     const [serachResult,setSerachResult] = useState([])
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
+    const [mailEmpCode,setMailEmpCode] = useState("")
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage  = 20;
@@ -52,11 +53,17 @@ export default function EmailSend() {
     };
 
     //로그인시 empcode를 일단 가져오는코드
+    
+    //그리고 이메일내꺼 가져오는거 해야함
     useEffect(() => {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
             const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+           const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
+            console.log("->" , mailEmpCode)
+            // ->2048209555dffdsfd@damail.com
+            setMailEmpCode(mailEmpCode)
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -80,11 +87,12 @@ export default function EmailSend() {
         fetchData();
     }, [empCode]);
 
+    //여기가 메일가져오는곳임
     useEffect(() => {
         const mailList = async()=>{
-            const response = await axios.get('/sentMail', {
+            const response = await axios.get('/attachmentMailList', {
                 params: {
-                    empCode: empCode // 필요한 파라미터
+                    mailRef: mailEmpCode , mailTarget:mailEmpCode // 필요한 파라미터
                 }
             });
 
@@ -122,7 +130,7 @@ export default function EmailSend() {
     }
 
     const refresh =(e)=>{
-        navigate("/MailSendList");
+        navigate("/ToMeMailSendList");
         window.location.reload();
     }
 
@@ -196,6 +204,10 @@ export default function EmailSend() {
         }
     }
 
+    const goToMeMailList =()=>{
+        navigate("/ToMeMailSendList");
+        window.location.reload();
+    }
 
 
     return (
@@ -227,7 +239,7 @@ export default function EmailSend() {
                         <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToMeMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
                     </button>
@@ -257,7 +269,7 @@ export default function EmailSend() {
 
                 {/* Main content */}
                 <main className="flex-1">
-                    <h1 className="text-xl font-bold mb-4 text-left">보낸메일함</h1>
+                    <h1 className="text-xl font-bold mb-4 text-left">첨부파일메일함</h1>
                     <div className="flex items-center mb-6 justify-end"
                          style={{marginRight: "10px", justifyContent: "flex-end"}}>
                         <Input
@@ -301,7 +313,7 @@ export default function EmailSend() {
                                     <p style={{
                                         width: "30%", textAlign: "left", overflow: "hidden",
                                         whiteSpace: "nowrap", textOverflow: "ellipsis"
-                                    }}>{v.mailTarget}</p>
+                                    }}>{v.empCode}</p>
                                     <div className="flex items-center" style={{
                                         width: "30%",
                                         textAlign: "left",

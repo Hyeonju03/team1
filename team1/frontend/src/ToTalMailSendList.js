@@ -23,6 +23,7 @@ export default function EmailSend() {
     const [serachResult,setSerachResult] = useState([])
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
+    const [mailEmpCode,setMailEmpCode] = useState("")
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage  = 20;
@@ -57,6 +58,10 @@ export default function EmailSend() {
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
             const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+            const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
+            console.log("->" , mailEmpCode)
+            // ->2048209555dffdsfd@damail.com
+            setMailEmpCode(mailEmpCode)
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -82,9 +87,9 @@ export default function EmailSend() {
 
     useEffect(() => {
         const mailList = async()=>{
-            const response = await axios.get('/sentMail', {
+            const response = await axios.get('/selectSendMail', {
                 params: {
-                    empCode: empCode // 필요한 파라미터
+                    empCode: empCode ,mailRef: mailEmpCode , mailTarget:mailEmpCode// 필요한 파라미터
                 }
             });
 
@@ -257,7 +262,7 @@ export default function EmailSend() {
 
                 {/* Main content */}
                 <main className="flex-1">
-                    <h1 className="text-xl font-bold mb-4 text-left">보낸메일함</h1>
+                    <h1 className="text-xl font-bold mb-4 text-left">전체메일함</h1>
                     <div className="flex items-center mb-6 justify-end"
                          style={{marginRight: "10px", justifyContent: "flex-end"}}>
                         <Input
@@ -302,6 +307,10 @@ export default function EmailSend() {
                                         width: "30%", textAlign: "left", overflow: "hidden",
                                         whiteSpace: "nowrap", textOverflow: "ellipsis"
                                     }}>{v.mailTarget}</p>
+                                    <p className="border" style={{
+                                        width: "10%", textAlign: "center", overflow: "hidden",
+                                        whiteSpace: "nowrap", textOverflow: "ellipsis"
+                                    }}>{v.empCode}</p>
                                     <div className="flex items-center" style={{
                                         width: "30%",
                                         textAlign: "left",
