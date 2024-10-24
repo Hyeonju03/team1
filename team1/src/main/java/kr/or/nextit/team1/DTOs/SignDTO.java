@@ -1,22 +1,21 @@
 package kr.or.nextit.team1.DTOs;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-public class DocumentDTO {
+public class SignDTO {
     private String empCode;
-    private int docNum;
-    private String docCateCode;
+    private int signNum;
+    private String signCateCode;
     private String title;
     private String content;
     private String fileName;
-    private String fileOriginName;
-    private Long fileSize;
+    private String fileOriginalName;
+    private float fileSize;
     private String filePath;
+    private String target;
     private LocalDateTime startDate;
-
+    private LocalDateTime endDate;
 }

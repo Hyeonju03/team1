@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.ScheduleMapper">
+    <resultMap id="scheduleMap" type="scheduleDTO">
+        <result column="id" property="id"/>
+        <result column="emp_code" property="empCode"/>
+        <result column="content" property="content"/>
+        <result column="category" property="category"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+    </resultMap>
+
+    <select id="selectSchedules" resultType="scheduleDTO">
+        SELECT
+            ID,
+            START_DATE,
+            END_DATE,
+            CONTENT,
+            CATEGORY
+        FROM
+            SCHEDULE_TEST
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
+
+<!--    <select id="selectSchedule" parameterType="int" resultMap="scheduleMap">-->
+<!--        SELECT-->
+<!--            ID,-->
+<!--            START_DATE,-->
+<!--            END_DATE,-->
+<!--            CONTENT,-->
+<!--            CATEGORY-->
+<!--        FROM-->
+<!--            SCHEDULE-->
+<!--        WHERE-->
+<!--            ID = #{id}-->
+<!--    </select>-->
+
+<!--    <insert id="registerSchedule" parameterType="scheduleDTO">-->
+<!--        INSERT INTO-->
+<!--            SCHEDULE-->
+<!--            (EMP_CODE, START_DATE, END_DATE, CONTENT, CATEGORY)-->
+<!--        VALUES-->
+<!--            (#{empCode}}, #{startDate}, #{endDate}, #{content}, #{category})-->
+<!--    </insert>-->
+
+<!--    <update id="modifySchedule" parameterType="scheduleDTO">-->
+<!--        UPDATE-->
+<!--            SCHEDULE-->
+<!--        SET-->
+<!--            START_DATE = #{startDate},-->
+<!--            END_DATE = #{endDate},-->
+<!--            CONTENT = #{content),-->
+<!--            CATEGORY = #{category}-->
+<!--		WHERE-->
+<!--			ID = #{id}-->
+<!--    </update>-->
+
+<!--    <delete id="removeSchedule" parameterType="int">-->
+<!--        DELETE FROM-->
+<!--            SCHEDULE-->
+<!--        WHERE-->
+<!--            ID = #{id}-->
+<!--    </delete>-->
+</mapper>

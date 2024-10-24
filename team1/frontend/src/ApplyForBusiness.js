@@ -1,59 +1,108 @@
-import React, {useEffect, useState} from 'react';
-import axios from "axios";
+import React, {useState} from 'react';
 
 export default function ApplyForBusiness() {
-    const [businessNumber, setBusinessNumber] = useState('');
-    const [companyName, setCompanyName] = useState('');
-    const [representativeName, setRepresentativeName] = useState('');
-    const [representativeContact, setRepresentativeContact] = useState('');
-    const [managerContact, setManagerContact] = useState('');
-    const [employeeCount, setEmployeeCount] = useState('');
-    const [email, setEmail] = useState('');
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [returnObj, setReturnObj] = useState([]);
+    const [comCode, setComCode] = useState(''); // 사업자등록번호
+    const [isComCodeChecked, setIsComCodeChecked] = useState(false); // 사업자등록번호 확인 여부
+    const [comName, setComName] = useState(''); // 회사 이름
+    const [ceoName, setCeoName] = useState(''); // 대표 이름
+    const [ceoPhone, setCeoPhone] = useState(''); // 대표 연락처
+    const [contectPhone, setContectPhone] = useState(''); // 담당자 연락처
+    const [empNum, setEmpNum] = useState(''); // 직원수
+    const [comEmail, setComEmail] = useState(''); // 이메일
+    const [showAlert, setShowAlert] = useState(false); // 경고창 숨김 상태
+    const [alertMessage, setAlertMessage] = useState(''); // 경고창 안에
 
-    const handleBusinessNumberCheck = async () => {
-                const DTO= {
-                    businessNumber:"1234567890" ,
-                    companyName:"" ,
-                    representativeName: "" ,
-                    representativeContact: "",
-                    managerContact: "011-2324-3434" ,
-                    employeeCount: 11,
-                    email:"cuwoe@naver.com"
-                }
-                const params = new URLSearchParams(DTO).toString();
-        axios.get(`/verify?${params}`)
-                    .then(response => {setReturnObj(response.data)})
-                    .catch(error => console.log(error))
-
-        setCompanyName(returnObj.companyName)
-        setRepresentativeName(returnObj.representativeName)
-        setRepresentativeContact(returnObj.representativeContact)
+    // 모든 칸에 스페이스바 입력 금지
+    const preventSpaceBar = (e) => {
+        if (e.key === ' ') {
+            e.preventDefault();
+        }
     };
 
+    // 사업자등록번호 확인해서 자동기입 하기
+    const handleComCodeCheck = async () => {
+        try {
+            const response = await fetch('/apitest'); // API 호출
+            const data = await response.json(); // API 응답을 JSON으로 파싱
+
+            // 입력한 사업자번호와 매칭되는 데이터를 찾음
+            const companyFound = data.some(company => company[2] === comCode);
+
+            if (companyFound) {
+                const matchedCompany = data.find(company => company[2] === comCode);
+                setCeoName(matchedCompany[0]); // 대표자 이름 자동기입
+                setComName(matchedCompany[1]);  // 회사 이름 자동기입
+                setCeoPhone(matchedCompany[3]); // 대표 연락처 자동기입
+                setIsComCodeChecked(true); // 사업자등록번호 확인 완료
+
+            } else {
+                alert('해당 사업자 번호로 정보를 찾을 수 없습니다.');
+                setIsComCodeChecked(false); // 확인 실패
+            }
+        } catch (error) {
+            console.error('API 호출 중 오류 발생:', error);
+            alert('API 호출 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 유효성체크
+    const validateForm = () => {
+        if (!comCode) {
+            alert("사업자 등록번호를 입력해주세요.");
+            return false;
+        }
+        if (!isComCodeChecked) {
+            alert("사업자 등록번호를 확인하세요.");
+            return false;
+        }
+        const contectPhoneCheck = /^\d{3}-\d{4}-\d{4}$/;
+        if (!contectPhone) {
+            alert("담당자 연락처를 입력해주세요.");
+            return false;
+        } else if(!contectPhoneCheck.test(contectPhone)){
+            alert("담당자 연락처는 000-0000-0000 형식이어야 합니다.");
+            return false;
+        }
+        if (!empNum) {
+            alert("직원수를 입력해주세요.");
+            return false;
+        } else if (isNaN(empNum)) {
+            alert("직원수는 숫자여야 합니다");
+            return false;
+        }
+        const emailCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!comEmail) {
+            alert("이메일을 입력해주세요.");
+            return false;
+        } else if (!emailCheck.test(comEmail)) {
+            alert("유효한 이메일 주소를 입력해주세요");
+            return false;
+        }
+        return true;
+    }
+
+    // 신청하기
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!businessNumber || !companyName || !representativeName || !representativeContact || !managerContact || !employeeCount || !email) {
-            setAlertMessage('모든 필드를 입력해주세요.');
-            setShowAlert(true);
+        if(!validateForm()){
             return;
         }
 
         const businessData = {
-            businessNumber,
-            companyName,
-            representativeName,
-            representativeContact,
-            managerContact,
-            employeeCount: parseInt(employeeCount),
-            email,
+            comCode,
+            comName,
+            ceoName,
+            ceoPhone,
+            contectPhone,
+            empNum,
+            comEmail,
+            deleteDate: null,
+            payStatus: false
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/business/register', {
+            const response = await fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,7 +127,6 @@ export default function ApplyForBusiness() {
         }
     };
 
-
     return (
         <div className="min-h-screen flex flex-col">
             <header className="bg-gray-200 p-4">
@@ -91,20 +139,23 @@ export default function ApplyForBusiness() {
 
             <div className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative">
                 <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록 신청</h2>
+                    <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록
+                        신청</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="flex items-center space-x-2">
                             <label className="w-1/2">사업자 등록번호</label>
                             <div className="flex-1 flex items-center">
                                 <input
                                     className="w-3/5 border rounded px-2 py-1"
-                                    value={businessNumber}
-                                    onChange={(e) => setBusinessNumber(e.target.value)}
+                                    value={comCode}
+                                    onChange={(e) => setComCode(e.target.value)}
+                                    onKeyDown={preventSpaceBar}
+                                    placeholder={"숫자만 입력"}
                                 />
                                 <button
                                     type="button"
                                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded ml-3 mt-1"
-                                    onClick={handleBusinessNumberCheck}
+                                    onClick={handleComCodeCheck}
                                 >
                                     확인
                                 </button>
@@ -114,7 +165,7 @@ export default function ApplyForBusiness() {
                             <label className="w-1/2">회사 이름</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                value={companyName}
+                                value={comName}
                                 readOnly
                             />
                         </div>
@@ -122,7 +173,7 @@ export default function ApplyForBusiness() {
                             <label className="w-1/2">대표 이름</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                value={representativeName}
+                                value={ceoName}
                                 readOnly
                             />
                         </div>
@@ -130,7 +181,7 @@ export default function ApplyForBusiness() {
                             <label className="w-1/2">대표 연락처</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                value={representativeContact}
+                                value={ceoPhone}
                                 readOnly
                             />
                         </div>
@@ -138,25 +189,31 @@ export default function ApplyForBusiness() {
                             <label className="w-1/2">담당자 연락처</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                value={managerContact}
-                                onChange={(e) => setManagerContact(e.target.value)}
+                                value={contectPhone}
+                                onChange={(e) => setContectPhone(e.target.value)}
+                                onKeyDown={preventSpaceBar}
+                                placeholder={"000-000-0000"}
                             />
                         </div>
                         <div className="flex items-center space-x-2">
                             <label className="w-1/2">직원 수</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                value={employeeCount}
-                                onChange={(e) => setEmployeeCount(e.target.value)}
+                                value={empNum}
+                                onChange={(e) => setEmpNum(e.target.value)}
+                                onKeyDown={preventSpaceBar}
+                                placeholder={"숫자만 입력"}
                             />
                         </div>
                         <div className="flex items-center space-x-2">
                             <label className="w-1/2">이메일</label>
                             <input
                                 className="w-1/2 border rounded px-2 py-1"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                type="comEmail"
+                                value={comEmail}
+                                onChange={(e) => setComEmail(e.target.value)}
+                                onKeyDown={preventSpaceBar}
+                                placeholder={"xxxx@xxxx.xxx"}
                             />
                         </div>
                         <button

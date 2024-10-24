@@ -1,4 +1,4 @@
-package kr.or.nextit.team1;
+package kr.or.nextit.team1.Controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
