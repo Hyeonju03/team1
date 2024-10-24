@@ -12,21 +12,7 @@
             EMP_CODE = #{empCode}
     </select>
 
-    <update id="userInfoUpdate" parameterType="UserInfoDTO">
-        UPDATE
-            EMPLOYEE
-        SET
-            EMP_NAME = #{empName},
-            EMP_PASS = #{empPass},
-            DEP_CODE = #{depCode},
-            POS_CODE = #{posCode},
-            PHONE_NUM = #{phoneNum},
-            EXT_NUM = #{extNum},
-            EMP_MAIL = #{empMail},
-            COR_CODE = #{corCode}
-        WHERE
-            EMP_CODE = #{empCode}
-    </update>
+
 
     <!-- 상관에게 수정 요청 전송 -->
       <update id="modifyReqUpdate" parameterType="UserInfoDTO">
@@ -55,4 +41,46 @@
         WHERE
             SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
     </select>
+    <select id="corCodeCheck" resultType="UserInfoDTO">
+        SELECT
+            MODIFY_REQ
+        FROM
+            EMPLOYEE
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
+
+    <!-- 수정 -->
+    <update id="userInfoUpdate" parameterType="UserInfoDTO">
+        UPDATE
+            EMPLOYEE
+        SET
+            EMP_NAME = #{userInfo.empName},
+            EMP_PASS = #{userInfo.empPass},
+            DEP_CODE = #{userInfo.depCode},
+            POS_CODE = #{userInfo.posCode},
+            PHONE_NUM = #{userInfo.phoneNum},
+            EXT_NUM = #{userInfo.extNum},
+            EMP_MAIL = #{userInfo.empMail},
+            COR_CODE = #{userInfo.corCode}
+        WHERE
+            EMP_CODE = #{empCode}
+    </update>
+
+    <!-- 수정하면서 동시에 MODIFY_REQ 비우기 -->
+    <update id="modifyReqDelete" parameterType="String">
+        <include refid="modifyReqDelete" />
+    </update>
+
+    <sql id="modifyReqDelete">
+        UPDATE EMPLOYEE SET
+        MODIFY_REQ = NULL
+        WHERE EMP_CODE = #{corCode}
+    </sql>
+
+    <!-- 반려 -->
+    <update id="modifyReqClear">
+        <include refid="modifyReqDelete" />
+    </update>
+
 </mapper>

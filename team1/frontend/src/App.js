@@ -16,6 +16,7 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
+import UserInfoModifyRequest from "./UserInfoModifyRequest";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
 
@@ -48,7 +49,9 @@ function App() {
 
                     <Route path="/sign" element={<SignList/>}/>
                     <Route path="/sign/register" element={<SignRequest/>}/>
+
                     <Route path="/userInfo" element={<UserInfo/>}/>
+                    <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
                 </Routes>

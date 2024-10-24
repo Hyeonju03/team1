@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class UserInfoController {
 
@@ -26,18 +28,6 @@ public class UserInfoController {
         return ResponseEntity.ok(userInfoDTO);
     }
 
-    // 수정
-    @PostMapping("/userInfo/update")
-    public ResponseEntity<String> userInfoUpdate(@RequestBody UserInfoDTO userInfoDTO) {
-        try {
-            userInfoService.userInfoUpdate(userInfoDTO);
-//            System.out.println("userInfoDTO 값 확인: " + userInfoDTO);
-            return ResponseEntity.ok("정보가 수정 되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
-
-        }
-    }
 
     // 상관에게 수정 요청
     @PostMapping("/modifyRequest")
@@ -58,5 +48,36 @@ public class UserInfoController {
     public ResponseEntity<String> getPosCode(@PathVariable String empCode) {
         String posCode = userInfoService.getPosCode(empCode);
         return ResponseEntity.ok(posCode);
+    }
+
+
+    @GetMapping("/userInfo/{corCode}")
+    public ResponseEntity<List<UserInfoDTO>> corCodeCheck(@PathVariable String corCode) {
+        List<UserInfoDTO> userInfo = userInfoService.corCodeCheck(corCode);
+        return ResponseEntity.ok(userInfo);
+
+    }
+
+    // 수정(승인)
+    @PutMapping("/userInfo/{empCode}")
+    public ResponseEntity<String> userInfoUpdate(@PathVariable String empCode, @RequestBody UserInfoDTO userInfoDTO) {
+        try {
+            userInfoService.userInfoUpdate(empCode, userInfoDTO);
+            return ResponseEntity.ok("정보가 수정 되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
+
+        }
+    }
+
+    // 반려
+    @PutMapping("/userInfo/modifyDelete/{corCode}")
+    public ResponseEntity<String> modifyReqClear(@PathVariable String corCode) {
+        try {
+            userInfoService.modifyReqClear(corCode);
+            return ResponseEntity.ok("수정 요청이 반려되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("반려 실패: " + e.getMessage());
+        }
     }
 }

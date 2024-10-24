@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserInfoService {
 
@@ -17,10 +19,6 @@ public class UserInfoService {
         return userInfoMapper.userInfoSelect(empCode);
     }
 
-    // 수정
-    public void userInfoUpdate(UserInfoDTO userInfoDTO) {
-        userInfoMapper.userInfoUpdate(userInfoDTO);
-    }
 
     // 상관에게 수정 요청
     @Transactional
@@ -38,7 +36,27 @@ public class UserInfoService {
         userInfoMapper.modifyReqUpdate(userInfoDTO.getCorCode(), newModifyReq);
     }
 
-       public String getPosCode(String empCode) {
+    public String getPosCode(String empCode) {
         return userInfoMapper.getPosCode(empCode);
+    }
+
+    public List<UserInfoDTO> corCodeCheck(String corCode) {
+        return userInfoMapper.corCodeCheck(corCode);
+    }
+
+    // 수정
+    @Transactional
+    public void userInfoUpdate(String empCode, UserInfoDTO userInfoDTO) {
+        // 정보 변경
+        userInfoMapper.userInfoUpdate(empCode, userInfoDTO);
+
+        // MODIFY_REQ 비우기
+        userInfoMapper.modifyReqDelete(userInfoDTO.getCorCode());
+    }
+
+    // 반려
+    @Transactional
+    public void modifyReqClear(String corCode) {
+        userInfoMapper.modifyReqClear(corCode);
     }
 }

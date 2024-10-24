@@ -67,14 +67,6 @@ export default function UserInfo() {
                     // code 테이블에서 카테고리 가져오기
                     axios.get(`/code/${process.env.REACT_APP_EMP_CODE.split('-')[0]}`)
                         .then(response => {
-                            // {
-                            //     "comCode": null,
-                            //     "depCode": "관리부,경영부,기획부,인사부,회계부,유통부,생산부,총무부,공무부,구매자재부,재무부,예산부,경리부,물류부,국내영업부,해외영업부,개발부,품질부,디자인부",
-                            //     "updepCode": null,
-                            //     "posCode": "부장,차장,과장,대리,사원",
-                            //     "docCateCode": "휴가신청서,휴직신청서,구매신청서,퇴직신청서,교육신청서",
-                            //     "signCateCode": null
-                            // }
                             setCodeCategory(response.data);
                         })
                         .catch(error => console.log(error));
@@ -142,22 +134,24 @@ export default function UserInfo() {
             return;
         }
 
+        // 현재 값 문자열로 결합한 것
+        const currentValue = `${empCode}:${userInfo.empName || '이름 없음'}_${depCode || '부서 없음'}_${posCode || '직급 없음'}_${userInfo.empPass || '비밀번호 없음'}_${userInfo.phoneNum || '전화번호 없음'}_${userInfo.extNum || '내선번호 없음'}_${userInfo.empMail || '메일 없음'}_${userInfo.corCode || '상관코드 없음'}`;
+
         // 수정된 필드들을 하나의 modifyReq 문자열로 결합
-        const modifyReq = `${empCode}: ${empName || '이름 없음'}_${userInfo.depCode || '부서 없음'}_${userInfo.posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
+        const modifyReq = `${empCode}:${empName || '이름 없음'}_${userInfo.depCode || '부서 없음'}_${userInfo.posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
 
+        if (currentValue == modifyReq) {
+            alert("수정 전 내용과 동일하여 수정 요청 할 수 없습니다.");
+            return;
+        }
 
+        // currentValue와 modifyReq가 다를 때만 userInfoUpdate 실행
         const userInfoUpdate = {
             empName: userInfo.empName,
             empCode: userInfo.empCode, // 사원코드도 포함해서 전송
             corCode: userInfo.corCode,
             modifyReq // 수정 요청 정보
         };
-
-        console.log("최신 이름 값:  " + empName);
-        console.log("최신 직급 값:  " + userInfo.posCode);
-        console.log("최신 modifyReq  " + modifyReq);
-        console.log(modifyReq);
-
 
         axios.post(`/modifyRequest`, userInfoUpdate)
             .then(response => {
@@ -336,19 +330,3 @@ export default function UserInfo() {
         </div>
     )
 }
-
-// function InputField({ label, value, type = 'text' }) {
-//     return (
-//         <div className="mb-2">
-//             <label className="block mb-1 text-sm text-gray-600">
-//                 {label}
-//             </label>
-//             <input
-//                 type={type}
-//                 value={value}
-//                 readOnly
-//                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
-//             />
-//         </div>
-//     )
-// }
