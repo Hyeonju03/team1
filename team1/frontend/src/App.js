@@ -29,6 +29,7 @@ import ToMeMailSendList from "./ToMeMailSendList";
 import AttachMentMailList from "./AttachMentMailList";
 import ToTalMailSendList from "./ToTalMailSendList";
 import ReceivedMailList from "./ReceivedMailList";
+import Authority from "./Authority";
 
 function App() {
     return (
@@ -75,6 +76,8 @@ function App() {
                     <Route path="/AttachMentMailList" element={<AttachMentMailList/>}/>
                     <Route path="/ToTalMAilSendList" element={<ToTalMailSendList/>}/>
                     <Route path="/ReceivedMailList" element={<ReceivedMailList/>}/>
+
+                    <Route path="/Authority" element={<Authority/>}/>
                 </Routes>
             </div>
         </Router>
