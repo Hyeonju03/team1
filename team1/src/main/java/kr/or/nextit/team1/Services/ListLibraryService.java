@@ -23,4 +23,11 @@ public class ListLibraryService {
     public void noticeInsert(ListLibraryDTO dto){
         listLibraryMapper.noticeInsert(dto);
     }
+
+    public List<ListLibraryDTO> noticeListSelect1(String code){
+        return listLibraryMapper.noticeListSelect1(code);
+    }
+    public List<ListLibraryDTO> noticeListSelect2(String code){
+        return listLibraryMapper.noticeListSelect2(code);
+    }
 }

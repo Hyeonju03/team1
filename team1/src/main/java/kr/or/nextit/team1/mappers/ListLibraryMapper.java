@@ -9,4 +9,6 @@ public interface ListLibraryMapper {
     List<ListLibraryDTO> chartSelect(String code);
     ListLibraryDTO RClickWindowSelect(String code);
     void noticeInsert(ListLibraryDTO dto);
+    List<ListLibraryDTO> noticeListSelect1(String code);
+    List<ListLibraryDTO> noticeListSelect2(String code);
 }

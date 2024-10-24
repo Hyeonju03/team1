@@ -18,9 +18,14 @@
         insert into notice (EMP_CODE, TITLE, CONTENT, TARGET, END_DATE)
         values (#{empCode}, #{title}, #{content}, #{targets}, #{endTime})
     </insert>
-    <select id="noticeListSelect" resultType="ListLibraryDTO" parameterType="String">
-        select
-        from
-        where
+    <select id="noticeListSelect1" resultType="ListLibraryDTO" parameterType="String">
+        select n.NOTICE_NUM, n.TITLE, n.CONTENT, n.START_DATE ,SUBSTRING(n.TARGET , locate(CONCAT(#{code}, ':'),n.TARGET)+length(CONCAT(#{code}, ':')), 1) AS targetState, n.END_DATE
+        from notice n
+        where n.TARGET LIKE CONCAT('%', #{code}, '%');
+    </select>
+    <select id="noticeListSelect2" resultType="ListLibraryDTO" parameterType="String">
+        select n.TARGET as targets
+        from notice n
+        where n.TARGET LIKE CONCAT('%', #{code}, '%');
     </select>
 </mapper>

@@ -9,31 +9,23 @@ class ListLibrary {
     static empDepCode = [];
     static returnList = "";
     static returnList2 = "";
+    static returnList3 = "";
     static top = ""
     static RClick = false
     static mail = "";
     static PH = "";
     static state = "";
     static data = [];
-
-    //static testData3 = {};
-
+    static noticeNum = [];
+    static title = [];
+    static content = [];
+    static targets = [];
+    static startDate = [];
+    static endDate = [];
+    static targetState = [];
+    static isReturn = false;
 
     static WorkerList(code) {
-        // 절대 지우지 마시오.
-        // const navigation = (topData, parent) => {
-        //     this.upDepCode.forEach((v1, i1) => {
-        //         if (topData === v1) {
-        //             if (this.testData3[this.depCode[i1]] !== parent && parent !== "") {
-        //                 this.testData3[this.depCode[i1]] = parent + this.depCode[i1] + ",";
-        //             } else {
-        //                 this.testData3[this.depCode[i1]] += this.depCode[i1] + ",";
-        //             }
-        //             navigation(this.depCode[i1], this.testData3[this.depCode[i1]]);
-        //         }
-        //     });
-        // }
-        // 절대 지우지 마시오.
         const depLayout = () => {
 
             let htmlList = {};
@@ -74,18 +66,6 @@ class ListLibrary {
                 })
                 .catch(error => console.log(error));
             this.returnList = "";
-            // 절대 지우지 마시오.
-            //this.testData3 = {};
-            // this.depCode.forEach((v1, i1) => {
-            //     if (!this.upDepCode[i1]) {
-            //         this.depCode.forEach((v2, i2) => {
-            //             this.testData3[v2] = v1 + ",";
-            //         });
-            //         this.testData3[v1] = "";
-            //         navigation(v1, this.testData3[v1]);
-            //     }
-            // });
-            // 절대 지우지 마시오.
             this.returnList = depLayout()
         }
         listCheck();
@@ -219,25 +199,44 @@ class ListLibrary {
         return [this.mail, this.PH]
     }
 
-    static async noticeList(code, setBtnCtl) {
-        await axios.get("/noticeListSelect", code)
-            .then(response => {
-                this.depCode = response.data[0]
-                this.upDepCode = response.data[1]
-                this.empCode = response.data[2]
-                this.empName = response.data[3]
-                this.empDepCode = response.data[4]
-            })
-            .catch(error => console.log(error));
+    static noticeList(code, setBtnCtl) {
+        const dataSet = async() =>{
+            await axios.get("/noticeListSelect1",  { params: { code } })
+                .then(response => {
+                    this.noticeNum = response.data[0];
+                    this.title = response.data[1];
+                    this.content = response.data[2];
+                    this.startDate = response.data[3];
+                    this.targetState = response.data[4];
+                    this.endDate = response.data[5];
+                    //console.log(this.noticeNum,this.title,this.content,this.startDate,this.endDate,this.targetState)
+                })
+                .catch(error => console.log(error));
+
+            await axios.get("/noticeListSelect2",  { params: { code } })
+                .then(response => {
+                    this.targets = response.data;
+                    this.isReturn = true
+                })
+                .catch(error => console.log(error));
+        }
+        dataSet();
+
+        let htmlList = {};
+        this.noticeNum.forEach((v1, i1) => {
+            const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange=""><ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+            htmlList[htmlTag.id] = htmlTag;
+        });
 
         return (
             <>
                 <div className="h-[390px] overflow-y-auto">
                     <div className="text-xs border break-words" onClick={() => console.log("좌클릭")}>
-                        <p>제목</p>
-                        <p>시작기간~종료기간</p>
-                        <p>확인여부</p>
+                        <p>{this.title[0]}</p>
+                        <p>{this.startDate[0]}~{this.endDate[0]}</p>
+                        <p>{this.targetState[0] === 0 ? '확인안함' : '확인함'}</p>
                     </div>
+                    {<div dangerouslySetInnerHTML={{__html: this.returnList3.outerHTML}}/>}
                 </div>
                 <div>
                     <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(6)}> 공지사항 추가하기
@@ -249,7 +248,6 @@ class ListLibrary {
 
     static noticeWritePage(code, setBtnCtl) {
         this.WorkerList2(code)
-        //console.log(this.returnList2)
         if (!this.returnList2) return setBtnCtl(3)
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
@@ -272,6 +270,10 @@ class ListLibrary {
                             break;
                         case 2:
                             alert("내용을 입력해주세요");
+                            isNotNull++;
+                            break;
+                        case 3:
+                            alert("대상자가 없습니다")
                             isNotNull++;
                             break;
                     }

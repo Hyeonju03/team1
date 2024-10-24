@@ -53,4 +53,41 @@ public class ListLibraryController {
         listLibraryService.noticeInsert(dto);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/noticeListSelect1")
+    public ResponseEntity<List<String>[]> noticeListSelect1(String code) {
+        List<ListLibraryDTO> data = listLibraryService.noticeListSelect1(code);
+        List<String>[] list = new ArrayList[6];
+        System.out.println(data);
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < data.size(); i++) {
+            list[0].add(data.get(i).getNoticeNum());
+            list[1].add(data.get(i).getTitle());
+            list[2].add(data.get(i).getContent());
+            list[3].add(String.valueOf(data.get(i).getStartDate()));
+            list[4].add(data.get(i).getTargetState());
+            list[5].add(String.valueOf(data.get(i).getEndDate()));
+        }
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/noticeListSelect2")
+    public ResponseEntity<List<List<String>>> noticeListSelect2(String code) {
+        List<ListLibraryDTO> data = listLibraryService.noticeListSelect2(code);
+        List<List<String>> list = new ArrayList<>();
+
+        for (int i = 0; i < data.size(); i++) {
+            List<String> innerList = new ArrayList<>();
+            String[] splitData = data.get(i).getTargets().split(",");
+            for (String target : splitData) {
+                if (target != null && target.length() > 2) {
+                    innerList.add(target.substring(0, target.length() - 2));
+                }
+            }
+            list.add(innerList);  // 이 부분 수정
+        }
+        return ResponseEntity.ok(list);
+    }
 }
