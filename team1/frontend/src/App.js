@@ -16,42 +16,40 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
-import {ListLibrary} from "./HtmlFunctions/ListLibrary";
 
 function App() {
     return (
-        <ListLibrary>
-            <Router>
-                <div className="App">
-                    <Routes>
-                        <Route path="/main" element={<Main/>}></Route>
-                        <Route path="/SignUp" element={<SignUpForm/>}/>
-                        <Route path="/" element={<Main/>}/>
-                        <Route path="/AdminQ" element={<AdminQ/>}/>
+        <Router>
+            <div className="App">
 
-                        <Route path="/AdminFAQ" element={<AdminFAQ/>}/>
-                        <Route path="/AdminQDetail" element={<AdminQDetail/>}/>
-                        <Route path="/Log" element={<Log/>}/>
-                        <Route path="/LogList" element={<LogList/>}/>
+                <Routes>
+                    <Route path="/main" element={<Main/>}></Route>
+                    <Route path="/SignUp" element={<SignUpForm/>}/>
+                    <Route path="/" element={<Main/>}/>
+                    <Route path="/AdminQ" element={<AdminQ/>}/>
 
-                        <Route path="/document" element={<DocumentList/>}/>
-                        <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
-                        <Route path="/document/register" element={<DocumentRegister/>}/>
+                    <Route path="/AdminFAQ" element={<AdminFAQ/>}/>
+                    <Route path="/AdminQDetail" element={<AdminQDetail/>}/>
+                    <Route path="/Log" element={<Log/>}/>
+                    <Route path="/LogList" element={<LogList/>}/>
+                      
+                    <Route path="/document" element={<DocumentList/>}/>
+                    <Route path="/document/detail/:id" element={<DocumentDetail/>}/>
+                    <Route path="/document/register" element={<DocumentRegister/>}/>
 
-                        <Route path="/notices" element={<Notice/>}/>
-                        <Route path="/apply" element={<ApplyForBusiness/>}/>
+                    <Route path="/notices" element={<Notice />} />
+                    <Route path="/apply" element={<ApplyForBusiness />} />
 
-                        <Route path="/schedule" element={<Schedule/>}/>
+                    <Route path="/schedule" element={<Schedule />} />
 
-                        <Route path="/sign" element={<SignList/>}/>
-                        <Route path="/sign/register" element={<SignRequest/>}/>
-                        <Route path="/userInfo" element={<UserInfo/>}/>
+                    <Route path="/sign" element={<SignList />} />
+                    <Route path="/sign/register" element={<SignRequest />} />
+                    <Route path="/userInfo" element={<UserInfo/>} />
 
-                        <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
-                    </Routes>
-                </div>
-            </Router>
-        </ListLibrary>
+                    <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
+                </Routes>
+            </div>
+        </Router>
     );
 }
 
