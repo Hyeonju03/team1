@@ -10,13 +10,14 @@ const Input = ({ className, ...props }) => {
 
 export default function EmailSend() {
     const [empCode, setEmpCode] = useState("");
+    const [isExpanded, setIsExpanded] = useState(false);
     const [errors, setErrors] = useState({});
     const [attachment, setAttachment] = useState(null);
     const navigate = useNavigate();
     const [showConfirmation, setShowConfirmation] = useState(false);
-
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [mailEmpCode,setMailEmpCode] = useState("")
 
     const [formData, setFormData] = useState({
         to: '',
@@ -32,9 +33,11 @@ export default function EmailSend() {
     // 로그인 시 empCode를 가져오는 코드
     useEffect(() => {
         const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3148200040-jys1902"; // 로그인 후 받아온 empCode
-            //3148200040-jys1902
-            //3148200040-abcmart147
+            const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+            const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
+            console.log("->" , mailEmpCode)
+            // ->2048209555dffdsfd@damail.com
+            setMailEmpCode(mailEmpCode)
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -77,7 +80,7 @@ export default function EmailSend() {
 
         const dataToSubmit = new FormData();
         dataToSubmit.append('empCode', empCode);
-        dataToSubmit.append('mailTarget', formData.to);
+        dataToSubmit.append('mailTarget', mailEmpCode);
         dataToSubmit.append('mailRef', formData.cc);
         dataToSubmit.append('title', formData.title);
         dataToSubmit.append('content', formData.content);
@@ -86,7 +89,7 @@ export default function EmailSend() {
         if (formData.file) {
             dataToSubmit.append('fileOriginalName', formData.file.name);
             dataToSubmit.append('fileSize', formData.fileSize);
-            dataToSubmit.append('filePath', '');
+            dataToSubmit.append('filePath', '...');
             dataToSubmit.append('file', formData.file);
             dataToSubmit.append('attachment', attachment);
         } else {
@@ -117,9 +120,8 @@ export default function EmailSend() {
         setShowConfirmation(false);
     }
 
-
     const goToMeMailSend =(e)=>{
-        console.log("클릭")
+        console.log("클릭됨")
         navigate("/ToMeMailSend");
         window.location.reload();
     }
@@ -128,22 +130,10 @@ export default function EmailSend() {
         navigate("/MailTrashList");
         window.location.reload();
     }
+
     const goRealDelete =(e)=>{
         console.log("진짜?")
         setIsPopupOpen(true)
-    }
-
-    const handleConfirmDelete = async ()=>{
-        try {
-            await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
-            setIsPopupOpen(false);
-            setSelectedCheckboxes([]);
-
-        } catch (error) {
-            console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
-        }
     }
 
     const goToMeMailSendList =()=>{
@@ -170,10 +160,23 @@ export default function EmailSend() {
         window.location.reload();
     }
 
+    const handleConfirmDelete = async ()=>{
+        try {
+            await axios.delete('/AlldeleteMail');
+            alert("삭제완룡")
+            setIsPopupOpen(false);
+            setSelectedCheckboxes([]);
+        } catch (error) {
+            console.error(error);
+            alert("메일 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
+
     return (
         <div className="container mx-auto p-4">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex md:flex-row gap-6">
 
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
@@ -226,33 +229,14 @@ export default function EmailSend() {
                         onConfirm={handleConfirmDelete}
                     />
                 </div>
-
                 {/* Main content */}
                 <div className="flex flex-1 items-center justify-center">
                     <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
                         {!showConfirmation && (
                             <div>
                                 <div style={{display: showConfirmation ? "none" : "block"}}>
-                                    <h1 className="text-xl font-bold mb-4 text-left">메일쓰기</h1>
+                                    <h1 className="text-xl font-bold mb-10 text-left">내게쓰기</h1>
                                 </div>
-                                {/*받는사람*/}
-                                <div className="flex space-x-8" style={{marginTop: '20px', marginBottom: "20px"}}>
-                                    <label htmlFor="to"
-                                           className="block font-medium text-gray-700 mb-1">받는사람</label>
-                                    <Input onChange={handleChange} id="to" name="to" value={formData.to}
-                                           placeholder="받는사람을 입력해주세요."
-                                           style={{height: '40px', width: '800px'}}/>
-                                </div>
-
-                                {/*참조*/}
-                                <div className="flex space-x-8" style={{marginBottom: "20px"}}>
-                                    <label htmlFor="cc"
-                                           className="block font-medium text-gray-700 mb-1">참조</label>
-                                    <Input onChange={handleChange} id="cc" name="cc" value={formData.cc}
-                                           placeholder="참조를 입력해주세요."
-                                           style={{height: '40px', width: '800px', marginLeft: '63px'}}/>
-                                </div>
-
                                 {/*제목*/}
                                 <div className="flex space-x-8" style={{marginBottom: "20px"}}>
                                     <label htmlFor="title"
@@ -291,7 +275,7 @@ export default function EmailSend() {
                                 <div style={{marginBottom: "80px"}}>
                                     <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
-                                    <p className="text-left">받는사람: {formData.to}</p>
+                                    <p className="text-left">받는사람: {mailEmpCode}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
                                 <div>
