@@ -14,8 +14,8 @@ export default function SignRegister() {
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
-    const [list, setList] = useState([{number: "", empCode: ""}]);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+
 
     // 카테고리
     const [category, setCategory] = useState(location.state?.selectCategory || '');
@@ -28,6 +28,8 @@ export default function SignRegister() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
+    const [userInfo, setUserInfo] = useState([]);
+    const empCode = "3118115625-jys1902";
 
 
     // 오른쪽 슬라이드 관련
@@ -47,6 +49,7 @@ export default function SignRegister() {
         // 나중에 지금 로그인 한 사원의 코드를 받아와서 split해줘야함 <<<<<<<<<<<<<<<<<<<
         const comCode = 3118115625;
 
+
         axios.get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
             .then(response => {
                 console.log(response.data);
@@ -55,7 +58,16 @@ export default function SignRegister() {
                 setCategories(uniqueCategories); // 카테고리 상태에 저장
             })
             .catch(error => console.log(error));
+
+        axios.get(`/${empCode}`)
+            .then(response => {
+                console.log(response.data);
+                const user = response.data
+                setUserInfo([{empCode:user.empCode, name:user.empName, dep:user.depCode, pos:user.posCode, sign:"기안"}])
+            })
     }, []);
+
+
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
@@ -66,18 +78,12 @@ export default function SignRegister() {
         setOpenTarget(false);
         if (param) {
             console.log(param)
-            // setList([
-            //     ...list,
-            //     {
-            //         number: param.number,
-            //         empCode: param.empCode,
-            //     }
-            // ])
+            setUserInfo([...userInfo,...param])
         }
     }
 
-    const validateForm = () => {
-        if (!category) {
+    const validationCheck = () => {
+        if (category=="") {
             alert("카테고리 입력은 필수입니다.")
             return false;
         }
@@ -100,30 +106,55 @@ export default function SignRegister() {
         return true;
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
 
-        if (!validateForm()) {
-            return;
+    // 문서 작성 버튼 클릭 시
+    const handleSubmit = async () => {
+        const formData = new FormData();
+
+        // 결재선 길이에 따라 처리
+        if (userInfo.length == 1) {
+            alert("결재선을 추가해야 합니다."); // 길이가 1인 경우 알림
+            return; // DB와 연결하지 않음
         }
 
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('category', category);
-        formData.append('content', content);
+        // 결재선 구성
+        let target = "";
+        for (let i = 1; i < userInfo.length; i++) {
+            target += `${userInfo[i].empCode}:미확인_미승인`; // 첫 번째 인덱스 제외
+            if (i < userInfo.length - 1) {
+                target += ","; // 마지막 인덱스가 아니면 쉼표 추가
+            }
+        }
+
+        if(!validationCheck) {
+            return false;
+        }
+
+        formData.append('empCode', empCode); // 사용자 코드
+        formData.append('title', title); // 제목
+        formData.append('category', category); // 카테고리
+        formData.append('content', content); // 내용
+        formData.append('target', target); // 결재선
+
+
+        // 첨부파일이 있는 경우 추가
         if (attachment) {
             formData.append('attachment', attachment);
         }
 
-        axios.post('/sign', formData)
-            .then(response => {
-                console.log(response.data);
-                // 성공시 문서 리스트로 이동
-                navigate('/sign');
-            })
-            .catch(error => {
-                console.error('Error fetching documents:', error);
+        try {
+            const response = await axios.post('/sign/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
+            console.log(response.data); // 성공 메시지
+            // 성공 시 문서 리스트로 이동
+            navigate('/sign');
+        } catch (error) {
+            console.error('Error creating sign:', error);
+            // 오류 처리: 사용자에게 알림 추가 가능
+        }
     };
 
     // 목록 버튼 클릭 시 리스트 페이지로 이동
@@ -137,6 +168,9 @@ export default function SignRegister() {
 
     const handleToggle = () => {
         setIsToggled(prevState => !prevState);
+
+        console.log(isToggled)
+
     };
 
     return (
@@ -160,7 +194,7 @@ export default function SignRegister() {
                             결재함
                         </button>
                         {isExpanded && (
-                            <div className="ml-8 shandleDelete pace-y-2 mt-2">
+                            <div className="ml-8 space-y-2 pace-y-2 mt-2">
                                 {categories.map((category, index) => (
                                     // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
                                     category.split(',').map((item, subIndex) => (
@@ -204,7 +238,8 @@ export default function SignRegister() {
                                         <div>
                                             <select name="category" value={category}
                                                     onChange={(e) => setCategory(e.target.value)}
-                                                    className="border rounded p-2">
+                                                    className="border rounded p-2"
+                                            >
                                                 <option value="">카테고리</option>
                                                 {categories.map((category, index) => (
                                                     category.split(',').map((item, subIndex) => (
@@ -222,48 +257,59 @@ export default function SignRegister() {
                                            placeholder="제목을 입력하세요" value={title}
                                            onChange={(e) => setTitle(e.target.value)}/>
                                 </div>
-                                {openTarget ? <SignTarget onClose={goClose}/> : null}
+                                {openTarget ? <SignTarget onClose={goClose} empCode={empCode}/> : null}
 
 
                                 {isToggled ?
+                                    <form>
                                     <div
                                         className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
                                         {/* 내용 추가 가능 */}
                                         {/*  회사명, 결재라인  */}
                                         <table className="h-[178px]">
-                                            <tr>
-                                                <td className="w-[500px] text-2xl">
-                                                    <input name="companyName" type="text" placeholder="기업명"
-                                                           className="text-center h-[100px] w-[450px] text-2xl"/>
-                                                </td>
-                                                <td className="w-[500px] flex flex-row justify-center mt-5">
-                                                    <div
-                                                        className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                                        <div className="h-[30px] bg-gray-200">
-                                                            기 안
-                                                        </div>
-                                                        <div className="h-[90px] border-t-2 border-black">그렇게됬다
-                                                        </div>
-                                                        {/*  결재자 있으면 추가 작성되게 하기  */}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        {/*    */}
-                                        <div className="mt-[20px]">
-                                            <input name="companyAddress" type="text" placeholder="주소"
-                                                   className="text-center h-[50px] w-[900px] text-lg"/>
-                                        </div>
-                                        {/*    */}
-                                        <table className="mb-[40px] border-t-2 border-b-4 border-black">
-                                            <tr>
+
+                                                    <tr>
+                                                        <td className="w-[500px] text-2xl">
+                                                            <input name="companyName" type="text" placeholder="기업명"
+                                                                   className="text-center h-[100px] w-[450px] text-2xl"/>
+                                                        </td>
+                                                        <td className="w-[500px] flex flex-row justify-center mt-5">
+                                                            {userInfo.map((user, index) => {
+                                                                return (
+                                                            <div
+                                                                className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                                                <div className="h-[30px] bg-gray-200">
+                                                                    {user.sign == "미승인" ? "승인" : user.sign}
+                                                                </div>
+                                                                <div
+                                                                    className="h-[90px] border-t-2 border-black p-2">{user.name}
+                                                                    <br/>
+                                                                    <br/>
+                                                                    {user.sign}
+                                                                </div>
+                                                                {/*  결재자 있으면 추가 작성되게 하기  */}
+                                                            </div>
+                                                                )
+                                                            })}
+                                                        </td>
+                                                    </tr>
+
+                                                < /table>
+                                            {/*    */}
+                                                <div className="mt-[20px]">
+                                                <input name="companyAddress" type="text" placeholder="주소"
+                                                className="text-center h-[50px] w-[900px] text-lg"/>
+                                                </div>
+                                            {/*    */}
+                                                <table className="mb-[40px] border-t-2 border-b-4 border-black">
+                                                <tr>
                                                 <td className="w-[500px] border-r-2 border-black">
-                                                    <input name="companyTel" type="tel"
-                                                           placeholder="TEL: (000)0000-0000"
-                                                           className="text-center h-[50px] w-[400px] text-lg"/>
+                                                <input name="companyTel" type="tel"
+                                                placeholder="TEL: (000)0000-0000"
+                                                className="text-center h-[50px] w-[400px] text-lg"/>
                                                 </td>
                                                 <td className="w-[500px] border-l-2 border-black">
-                                                    <input name="companyFax" type="tel"
+                                                <input name="companyFax" type="tel"
                                                            placeholder="FAX: (000)0000-0000"
                                                            className="text-center h-[50px] w-[400px] text-lg"/>
                                                 </td>
@@ -365,10 +411,12 @@ export default function SignRegister() {
                                                    className="text-center h-[100px] w-[300px] text-2xl"
                                                    placeholder="대표이사   ○ ○ ○"/>
                                         </div>
-                                    </div> :
+                                    </div>
+                                    </form>:
                                     <div className="flex mb-2">
                     <textarea className="p-1 w-[1200px] h-[400px] border border-black rounded"
-                              placeholder="파일과 함께 보낼 내용을 작성해주세요."/>
+                              placeholder="파일과 함께 보낼 내용을 작성해주세요."
+                              onChange={(e) => setContent(e.target.value)}/>
                                     </div>}
                                 <div>
                                     <div className="flex justify-between mb-4 w-[1200px] p-2 border rounded">
@@ -403,30 +451,24 @@ export default function SignRegister() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {/* 팝업 할때 []변수 주고 target.length[no: ,name: ,dep: ,pos: ] 0번은 부조건 본인 들어가게 하기 */}
-                                    {/*{(signTarget.map((document) => (*/}
-                                    {/*    <tr key={target.no} className="cursor-pointer">*/}
-                                    {/*        <td className="p-2">{target.no}</td>*/}
-                                    {/*        <td className="p-2">{target.name}</td>*/}
-                                    {/*        <td className="p-2">{target.dep}</td>*/}
-                                    {/*        <td className="p-2">{target.pos}</td>*/}
-                                    {/*        <td className="p-2">{target.sign}</td>*/}
-                                    {/*    </tr>*/}
-                                    {/*))}*/}
-                                    <tr>
-                                        <td>1</td>
-                                        <td>ㅇㅇㅇ</td>
-                                        <td>경리부</td>
-                                        <td>대리</td>
-                                        <td>미승인</td>
-                                    </tr>
+                                    {userInfo.map((user, index) => {
+                                        return (<tr key={index}>
+                                            <td>{index+1}</td>
+                                            <td>{user.name}</td>
+                                            <td>{user.dep}</td>
+                                            <td>{user.pos}</td>
+                                            <td>{user.sign}</td>
+                                        </tr>
+                                        )
+                                    })}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                     <div className="mt-4">
-                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
+                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]"
+                                onClick={handleSubmit}>
                             문서 만들기
                         </button>
                         <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]"
