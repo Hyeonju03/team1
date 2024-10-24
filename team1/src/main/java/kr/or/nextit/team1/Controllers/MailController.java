@@ -164,6 +164,12 @@ public class MailController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/updateTrashMail")
+    public ResponseEntity<Void> updateTrashMail(@RequestBody List<Long> mailNums) {
+        mailSendService.updateTrashMail(mailNums);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("selectDeleteList")
     public ResponseEntity<List<MailDTO>> selectDeleteList(@RequestParam String empCode) {
         try {

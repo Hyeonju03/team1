@@ -18,7 +18,9 @@ public interface MailMapper {
     MailDTO selectFile(int mailNum);
 
     void updateMail(Long mailNum);
-    
+
+    void updateTrashMail(Long mailNum);
+
     List<MailDTO> selectDeleteMail(String empCode);
 
     void AlldeleteMail();

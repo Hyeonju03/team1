@@ -136,6 +136,30 @@ export default function EmailSend() {
         setIsPopupOpen(true)
     }
 
+    const goToMeMailSendList =()=>{
+        //내게
+        navigate("/ToMeMailSendList");
+        window.location.reload();
+    }
+
+    const goAttachMentMailList =()=>{
+        //첨부
+        navigate("/AttachMentMailList");
+        window.location.reload();
+    }
+
+    const goToTalMailSendList =()=>{
+        //전부
+        navigate("/ToTalMailSendList");
+        window.location.reload();
+    }
+
+    const goReceivedMailList =()=>{
+        //받은
+        navigate("/ReceivedMailList");
+        window.location.reload();
+    }
+
     const handleConfirmDelete = async ()=>{
         try {
             await axios.delete('/AlldeleteMail');
@@ -163,22 +187,22 @@ export default function EmailSend() {
                         </button>
                     </div>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToTalMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>전체메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goReceivedMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>받은메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goAttachMentMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToMeMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
                     </button>
@@ -251,7 +275,7 @@ export default function EmailSend() {
                                 <div style={{marginBottom: "80px"}}>
                                     <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
-                                    <p className="text-left">받는사람: {formData.to}</p>
+                                    <p className="text-left">받는사람: {mailEmpCode}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
                                 <div>

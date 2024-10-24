@@ -151,6 +151,33 @@ export default function EmailSend() {
         }
     };
 
+    //복구
+    const againMails = async() => {
+        const mailNumsToDelete = sendList
+            .filter((_, index) => selectedCheckboxes[index]) // 선택된 메일의 인덱스를 가져옴
+            .map(v => v.mailNum); // 선택된 메일의 mailNum 배열 생성
+
+        if (mailNumsToDelete.length === 0) {
+            alert("복구할 메일을 선택하세요.");
+            return;
+        }
+
+        console.log("메일 복구 요청할 ID:", mailNumsToDelete);
+
+        try {
+            await axios.put('/updateTrashMail', mailNumsToDelete);
+            // 삭제 성공 후, UI를 업데이트
+            alert("복구완룡")
+            setSendList(sendList.filter((_, index) => !selectedCheckboxes[index]));
+            setSelectedCheckboxes(new Array(sendList.length).fill(false)); // 체크박스 초기화
+            setSelectAll(false); // 전체 선택 체크 해제
+            
+        } catch (error) {
+            console.error(error);
+            alert("메일 복구중 오류가 발생했습니다.");
+        }
+    };
+
 
     const mailOnChangeHandler=(e)=>{
         setSearchList(e.target.value)
@@ -184,6 +211,31 @@ export default function EmailSend() {
         setIsPopupOpen(true)
     }
 
+
+    const goToMeMailSendList =()=>{
+        //내게
+        navigate("/ToMeMailSendList");
+        window.location.reload();
+    }
+
+    const goAttachMentMailList =()=>{
+        //첨부
+        navigate("/AttachMentMailList");
+        window.location.reload();
+    }
+
+    const goToTalMailSendList =()=>{
+        //전부
+        navigate("/ToTalMailSendList");
+        window.location.reload();
+    }
+
+    const goReceivedMailList =()=>{
+        //받은
+        navigate("/ReceivedMailList");
+        window.location.reload();
+    }
+
     const handleConfirmDelete = async ()=>{
         try {
             await axios.delete('/AlldeleteMail');
@@ -202,30 +254,31 @@ export default function EmailSend() {
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex flex-col md:flex-row gap-6">
 
-
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
                     <div className="flex" style={{marginTop: "-350px", marginBottom: "30px"}}>
                         <button onClick={goSendMail} className="border rounded-md px-4 py-2">메일쓰기</button>
-                        <button onClick={goToMeMailSend} className="border rounded-md px-4 py-2" style={{marginLeft: "10px"}}>내게쓰기</button>
+                        <button onClick={goToMeMailSend} className="border rounded-md px-4 py-2"
+                                style={{marginLeft: "10px"}}>내게쓰기
+                        </button>
                     </div>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToTalMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>전체메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goReceivedMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>받은메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goAttachMentMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToMeMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
                     </button>
@@ -233,14 +286,17 @@ export default function EmailSend() {
                     <button onClick={goSendMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Send className="mr-2 h-4 w-4"/>
-                        보낸메일함 </button>
+                        보낸메일함
+                    </button>
 
                     <div className="flex">
-                    <button onClick={goMailTrashList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px"}}>
-                        <Trash className="mr-2 h-4 w-4"/>휴지통
-                    </button>
-                    <button onClick={goRealDelete} style={{width:"80px" , height:"30px"}}  className="text-xs border rounded-md px-2 py-2">비우기</button>
+                        <button onClick={goMailTrashList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px"}}>
+                            <Trash className="mr-2 h-4 w-4"/>휴지통
+                        </button>
+                        <button onClick={goRealDelete} style={{width: "80px", height: "30px"}}
+                                className="text-xs border rounded-md px-2 py-2">비우기
+                        </button>
                     </div>
                     {/*<Settings className="h-4 w-4" />*/}
                     <DeletePopup
@@ -279,6 +335,9 @@ export default function EmailSend() {
                         <button onClick={deleteSelectedMails} className="flex items-center flex"
                                 style={{marginLeft: "30px"}}>삭제
                         </button>
+                        <button onClick={againMails} className="flex items-center flex"
+                                style={{marginLeft: "30px"}}>복구
+                        </button>
                         <button onClick={refresh} className="flex items-center flex"
                                 style={{marginLeft: "30px"}}>새로고침<RefreshCw
                             className="h-4 w-4"/></button>
@@ -286,32 +345,35 @@ export default function EmailSend() {
                     <div style={{marginBottom: "20px"}}>
                         {(searchList ? serachResult : currentMails).length > 0 ? (
                             (searchList ? serachResult : currentMails).map((v, i) => (
-                                <div className="flex" key={i} style={{ marginBottom: "10px", alignItems: "center" }}>
-                                    <input type="checkbox" checked={selectedCheckboxes[i] || false} onChange={() => handleCheckboxChange(i)} />
-                                    <button onClick={deleteSelectedMails} style={{ marginLeft: "40px" }}>
-                                        <Trash className="mr-2 h-4 w-4" />
+                                <div className="flex" key={i} style={{marginBottom: "10px", alignItems: "center"}}>
+                                    <input type="checkbox" checked={selectedCheckboxes[i] || false}
+                                           onChange={() => handleCheckboxChange(i)}/>
+                                    <button onClick={deleteSelectedMails} style={{marginLeft: "40px"}}>
+                                        <Trash className="mr-2 h-4 w-4"/>
                                     </button>
-                                    <div className="flex" style={{ marginLeft: "20px", width: "100%", justifyContent: "space-between" }}>
+                                    <div className="flex"
+                                         style={{marginLeft: "20px", width: "100%", justifyContent: "space-between"}}>
                                         <p style={{
                                             width: "30%", textAlign: "left", overflow: "hidden",
                                             whiteSpace: "nowrap", textOverflow: "ellipsis"
                                         }}>{v.mailTarget}</p>
-                                        <div className="flex items-center" style={{ width: "30%", textAlign: "left", minWidth: "150px" }}>
+                                        <div className="flex items-center"
+                                             style={{width: "30%", textAlign: "left", minWidth: "150px"}}>
                                             {v.fileName && (
-                                                <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨" />
+                                                <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨"/>
                                             )}
-                                            <p onClick={() => gogoDetail(v)} className="cursor-pointer" style={{ marginLeft: v.fileName ? '0' : '1.25rem' }}>
+                                            <p onClick={() => gogoDetail(v)} className="cursor-pointer"
+                                               style={{marginLeft: v.fileName ? '0' : '1.25rem'}}>
                                                 {v.title}
                                             </p>
                                         </div>
-                                        <p style={{ width: "30%", textAlign: "right" }}>{formatDate(v.startDate)}</p>
+                                        <p style={{width: "30%", textAlign: "right"}}>{formatDate(v.startDate)}</p>
                                     </div>
                                 </div>
                             ))
                         ) : (
                             <p>메일이 없습니다.</p>
                         )}
-
 
 
                     </div>

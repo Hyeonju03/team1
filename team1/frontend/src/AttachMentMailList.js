@@ -53,14 +53,14 @@ export default function EmailSend() {
     };
 
     //로그인시 empcode를 일단 가져오는코드
-    
+
     //그리고 이메일내꺼 가져오는거 해야함
     useEffect(() => {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
             const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
-           const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
+            const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
             console.log("->" , mailEmpCode)
             // ->2048209555dffdsfd@damail.com
             setMailEmpCode(mailEmpCode)
@@ -130,7 +130,7 @@ export default function EmailSend() {
     }
 
     const refresh =(e)=>{
-        navigate("/ToMeMailSendList");
+        navigate("/AttachMentMailList");
         window.location.reload();
     }
 
@@ -138,6 +138,8 @@ export default function EmailSend() {
         navigate("/MailTrashList");
         window.location.reload();
     }
+
+
 
     const deleteSelectedMails = async () => {
         const mailNumsToDelete = sendList
@@ -191,6 +193,29 @@ export default function EmailSend() {
         setIsPopupOpen(true)
     }
 
+    const goToMeMailSendList =()=>{
+        //내게
+        navigate("/ToMeMailSendList");
+        window.location.reload();
+    }
+
+    const goAttachMentMailList =()=>{
+        //첨부
+        navigate("/AttachMentMailList");
+        window.location.reload();
+    }
+
+    const goToTalMailSendList =()=>{
+        //전부
+        navigate("/ToTalMailSendList");
+        window.location.reload();
+    }
+
+    const goReceivedMailList =()=>{
+        //받은
+        navigate("/ReceivedMailList");
+        window.location.reload();
+    }
     const handleConfirmDelete = async ()=>{
         try {
             await axios.delete('/AlldeleteMail');
@@ -224,22 +249,22 @@ export default function EmailSend() {
                         </button>
                     </div>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goToTalMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>전체메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goReceivedMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Mail className="mr-2 h-4 w-4"/>받은메일함
                     </button>
 
-                    <button className="w-full flex items-center text-lg"
+                    <button onClick={goAttachMentMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
                     </button>
 
-                    <button onClick={goToMeMailList} className="w-full flex items-center text-lg"
+                    <button onClick={goToMeMailSendList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
                     </button>
