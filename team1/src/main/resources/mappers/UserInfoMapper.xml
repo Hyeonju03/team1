@@ -67,7 +67,7 @@
             EMP_CODE = #{empCode}
     </update>
 
-    <!-- 수정하면서 동시에 MODIFY_REQ 비우기 -->
+    <!-- 승인 : 수정하면서 동시에 MODIFY_REQ 비우기 -->
     <update id="modifyReqDelete" parameterType="String">
         <include refid="modifyReqDelete" />
     </update>

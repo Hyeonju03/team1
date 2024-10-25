@@ -80,4 +80,5 @@ public class UserInfoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("반려 실패: " + e.getMessage());
         }
     }
+
 }

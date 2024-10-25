@@ -5,6 +5,18 @@ export default function UserInfoModifyRequest() {
 
     const [subordinates, setSubordinates] = useState([]); // 부하직원 관련 내용
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [hasModifyReq, setHasModifyReq] = useState(false);
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    useEffect(() => {
+        // 부하직원 중 수정 요청이 있는지 확인
+        const hasRequest = subordinates.some(subordinate => subordinate && subordinate.modifyReq);
+        setHasModifyReq(hasRequest);
+    }, [subordinates]);
 
 
     useEffect(() => {
@@ -21,42 +33,52 @@ export default function UserInfoModifyRequest() {
 
     // 부하직원이 변경될 때마다
     useEffect(() => {
-        if (subordinates.length > 0) {
+        if (subordinates.length > 0 && subordinates[0] && subordinates[0].modifyReq) {
             const modifyReq = subordinates[0].modifyReq;
 
             // modifyReq가 있을 때만 split
-            if (modifyReq) {
+            if (modifyReq && modifyReq.includes(":")) {
                 // ":" 기준으로 나누기
                 const [prefix, data] = modifyReq.split(":"); // ":" 기준으로 앞에꺼는 prefix, 뒤에꺼는 data에 저장
 
-                // "_" 기준으로 나누기
-                const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = data.split("_");
+                if (data && data.includes("_")) {
+                    // "_" 기준으로 나누기
+                    const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = data.split("_");
 
-                // 파싱한 데이터 설정
-                setModifyReqData({
-                    prefix, // 사원코드
-                    empName,
-                    depCode,
-                    posCode,
-                    empPass,
-                    phoneNum,
-                    extNum,
-                    empMail,
-                    corCode
-                });
-                console.log("prefix 값:", prefix);
+                    // 파싱한 데이터 설정
+                    setModifyReqData({
+                        prefix, // 사원코드
+                        empName,
+                        depCode,
+                        posCode,
+                        empPass,
+                        phoneNum,
+                        extNum,
+                        empMail,
+                        corCode
+                    });
+                } else {
+                    // data가 올바르지 않은 경우
+                    setModifyReqData(null);
+                }
+            } else {
+                // modifyReq가 ":"를 포함하지 않는 경우
+                setModifyReqData(null);
             }
+        } else {
+            // subordinates가 없거나 modifyReq가 없는 경우
+            setModifyReqData(null);
         }
     }, [subordinates]); // subordinates가 변경될 때마다 실행
 
+    // 보류 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 유지)
+    const handleHold = () => {
+        alert("수정 요청이 보류되었습니다.");
+    };
 
-    console.log(process.env.REACT_APP_COR_CODE)
-    // 반려 버튼 클릭 시
+    // 반려 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 삭제)
     const handleReject = async () => {
         if (!modifyReqData) return;
-
-
-        console.log(modifyReqData);
 
         try {
             // modify_req 값 비우기 요청
@@ -68,8 +90,7 @@ export default function UserInfoModifyRequest() {
         }
     };
 
-
-    // 승인 버튼 클릭 시
+    // 승인 버튼 클릭 시(인사 정보 수정 o, 수정 요청 내역 삭제)
     const handleApprove = async () => {
         if (!modifyReqData) return;
 
@@ -93,9 +114,24 @@ export default function UserInfoModifyRequest() {
     };
 
     return (
-        <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+        <div className="max-w-6xl mx-auto p-5 bg-white rounded-lg shadow-md">
+            <header className="bg-gray-100 p-3 mb-5 text-center">
+                <div className="text-2xl font-bold">
+                    로고
+                </div>
+            </header>
+            {/* 수정 요청 내역이 있을 때 메인에 "인사관리" 탭에 알림 아이콘 표시 할 때 사용 하고 싶음 */}
+            <div className="tabs">
+                <div className="tab">
+                    <span>인사관리</span>
+                    {hasModifyReq && (
+                        <span className="notification-icon">🔔</span> // 알림 아이콘으로 대체
+                    )}
+                </div>
+            </div>
+
             <h1 className="text-2xl font-bold text-center mb-6">직원 정보 수정 요청</h1>
-            {modifyReqData && (
+            {modifyReqData ? (
                 <div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -149,6 +185,7 @@ export default function UserInfoModifyRequest() {
                     </div>
                     <div className="flex justify-evenly">
                         <button
+                            onClick={handleHold}
                             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
                             보류
                         </button>
@@ -164,7 +201,37 @@ export default function UserInfoModifyRequest() {
                         </button>
                     </div>
                 </div>
+            ) : (
+                <p> 수정 요청 내역이 없습니다.</p>
             )}
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    <h2 className="text-xl font-bold mb-4">로그인</h2>
+                    <input type="text" placeholder="아이디" className="w-full p-2 mb-2 border rounded"/>
+                    <input type="password" placeholder="비밀번호" className="w-full p-2 mb-4 border rounded"/>
+                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                        로그인
+                    </button>
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
+            </div>
         </div>
     );
 }
