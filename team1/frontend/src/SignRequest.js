@@ -76,6 +76,18 @@ export default function SignRequest() {
         setDocuments([...documents, newDoc]);
     };
 
+    /* 공지사항 내용 가져오기 */
+    const [noticeHtml, setNoticeHtml] = useState("")
+    const fetchData = async () => {
+        const result = await ListLibrary.noticeList("3118115625-jys", setBtnCtl);
+        setNoticeHtml(result);
+    };
+    useEffect(() => {
+        if(btnCtl === 3){
+            fetchData();
+        }
+    }, [btnCtl])
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-100"  onContextMenu={windowRClick}>
             {/* Header with logo */}
@@ -311,7 +323,7 @@ export default function SignRequest() {
                                             </>
                                             :
                                             btnCtl === 3 ?
-                                                ListLibrary.noticeList("3118115625-jys",setBtnCtl)
+                                                <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
                                                 :
                                                 btnCtl === 4 ?
                                                     <>

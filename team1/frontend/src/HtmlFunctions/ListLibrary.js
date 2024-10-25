@@ -23,7 +23,6 @@ class ListLibrary {
     static startDate = [];
     static endDate = [];
     static targetState = [];
-    static isReturn = false;
 
     static WorkerList(code) {
         const depLayout = () => {
@@ -68,6 +67,7 @@ class ListLibrary {
             this.returnList = "";
             this.returnList = depLayout()
         }
+
         listCheck();
         return (
             <div className="h-[100%] overflow-y-auto">
@@ -77,16 +77,18 @@ class ListLibrary {
             </div>
         );
     }
-    static findChildren(getChildList,isCheck){
+
+    static findChildren(getChildList, isCheck) {
         getChildList = getChildList.children[1].children
-        for(let i = 0; i < getChildList.length; i++) {
-            const getChilds =  Array.from(getChildList);
+        for (let i = 0; i < getChildList.length; i++) {
+            const getChilds = Array.from(getChildList);
             getChilds[i].children[0].checked = isCheck
-            getChilds[i].querySelectorAll("input").forEach((tag)=>{
+            getChilds[i].querySelectorAll("input").forEach((tag) => {
                 tag.checked = isCheck
             })
         }
     }
+
     static WorkerList2(code) {
         const depLayout = () => {
             this.data = ["", "", "", ""];
@@ -199,9 +201,9 @@ class ListLibrary {
         return [this.mail, this.PH]
     }
 
-    static noticeList(code, setBtnCtl) {
-        const dataSet = async() =>{
-            await axios.get("/noticeListSelect1",  { params: { code } })
+    static async noticeList(code, setBtnCtl) {
+        const dataSet = async () => {
+            await axios.get("/noticeListSelect1", {params: {code}})
                 .then(response => {
                     this.noticeNum = response.data[0];
                     this.title = response.data[1];
@@ -213,38 +215,65 @@ class ListLibrary {
                 })
                 .catch(error => console.log(error));
 
-            await axios.get("/noticeListSelect2",  { params: { code } })
+            await axios.get("/noticeListSelect2", {params: {code}})
                 .then(response => {
-                    this.targets = response.data;
-                    this.isReturn = true
+                    this.targets = response.data
                 })
                 .catch(error => console.log(error));
-        }
-        dataSet();
 
+            return {
+                noticeNum: this.noticeNum,
+                title: this.title,
+                content: this.content,
+                startDate: this.startDate,
+                targetState: this.targetState,
+                endDate: this.endDate,
+                targets: this.targets
+            }
+        }
+
+        const res = await dataSet();
         let htmlList = {};
-        this.noticeNum.forEach((v1, i1) => {
-            const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange=""><ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+        let index = 0;
+
+        for (const item of this.noticeNum) {
+            const htmlTag = new DOMParser().parseFromString(
+                `<li id=${item} class=${this.upDepCode[index]} style="list-style-type: none">${item}<input id="${item}Btn" type="checkbox" onchange=""><ul class="list-disc pl-5"></ul></li>`,
+                'text/html'
+            ).body.firstChild;
             htmlList[htmlTag.id] = htmlTag;
-        });
+            index++;
+        }
+        this.returnList3 = htmlList;
+
+
+        /* htmlList의 값을 읽어와서 뿌려줘야할 것 같음 */
+        console.log(htmlList)
+        let contents = ""
+        for(let key in htmlList){
+            contents += `<li key=${key}></li>`
+            console.log(key)
+        }
 
         return (
-            <>
-                <div className="h-[390px] overflow-y-auto">
-                    <div className="text-xs border break-words" onClick={() => console.log("좌클릭")}>
-                        <p>{this.title[0]}</p>
-                        <p>{this.startDate[0]}~{this.endDate[0]}</p>
-                        <p>{this.targetState[0] === 0 ? '확인안함' : '확인함'}</p>
-                    </div>
-                    {<div dangerouslySetInnerHTML={{__html: this.returnList3.outerHTML}}/>}
-                </div>
-                <div>
-                    <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(6)}> 공지사항 추가하기
-                    </button>
-                </div>
-            </>
+        `<div className="h-[390px] overflow-y-auto">
+            <div className="text-xs border break-words" onClick={() => console.log("좌클릭")}>
+                <p>${res.title[0]}</p>
+                <p>${res.startDate[0]}~${res.endDate[0]}</p>
+                <p>${res.targetState[0] === 0 ? '확인안함' : '확인함'}</p>
+            </div>
+             <div dangerouslySetInnerHTML={{ __html: this.returnList3.outerHTML }} />
+               ${contents}
+        </div>
+        <div>
+            <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(6)}> 공지사항 추가하기
+            </button>
+        </div>
+        `
         );
     }
+
+
 
     static noticeWritePage(code, setBtnCtl) {
         this.WorkerList2(code)
@@ -257,6 +286,7 @@ class ListLibrary {
         if (this.data.length === 0) {
             alert("공지사항을 입력해주세요");
         } else {
+            console.log("else")
             for (let i = 0; i < this.data.length; i++) {
                 if (this.data[i] === "") {
                     switch (i) {
@@ -272,10 +302,6 @@ class ListLibrary {
                             alert("내용을 입력해주세요");
                             isNotNull++;
                             break;
-                        case 3:
-                            alert("대상자가 없습니다")
-                            isNotNull++;
-                            break;
                     }
                     break;
                 }
@@ -283,23 +309,30 @@ class ListLibrary {
             if (isNotNull === 0) {
                 const topParent = document.getElementById('topUL');
 
-                topParent.querySelectorAll("input").forEach((tag)=>{
-                    if (tag.checked && !!tag.parentNode.getAttribute('data-value')){
+                topParent.querySelectorAll("input").forEach((tag) => {
+                    if (tag.checked && !!tag.parentNode.getAttribute('data-value')) {
                         this.data[3] += tag.parentNode.getAttribute('data-value') + ":0,"
                     }
 
                 })
-                const jsonData = {
-                    empCode : code,
-                    title : this.data[0],
-                    content : this.data[2],
-                    targets : this.data[3],
-                    endTime : new Date(this.data[1]).toISOString()
+                if (this.data[3] === "") {
+                    alert("대상자가 없습니다")
+                    isNotNull++;
                 }
-                axios.post("/noticeInsert", jsonData)
-                    .then(response => {
-                    })
-                    .catch(error => console.log(error));
+                if (isNotNull === 0) {
+                    console.log(this.data)
+                    const jsonData = {
+                        empCode: code,
+                        title: this.data[0],
+                        content: this.data[2],
+                        targets: this.data[3],
+                        endDate: new Date(this.data[1]).toISOString()
+                    }
+                    axios.post("/noticeInsert", jsonData)
+                        .then(response => {
+                        })
+                        .catch(error => console.log(error));
+                }
             }
         }
     }

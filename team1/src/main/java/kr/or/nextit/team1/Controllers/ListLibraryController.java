@@ -58,7 +58,6 @@ public class ListLibraryController {
     public ResponseEntity<List<String>[]> noticeListSelect1(String code) {
         List<ListLibraryDTO> data = listLibraryService.noticeListSelect1(code);
         List<String>[] list = new ArrayList[6];
-        System.out.println(data);
         for (int i = 0; i < list.length; i++) {
             list[i] = new ArrayList<>();
         }
