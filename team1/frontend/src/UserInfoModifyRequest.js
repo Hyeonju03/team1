@@ -34,6 +34,7 @@ export default function UserInfoModifyRequest() {
     // 부하직원이 변경될 때마다
     useEffect(() => {
         if (subordinates.length > 0 && subordinates[0] && subordinates[0].modifyReq) {
+
             const modifyReq = subordinates[0].modifyReq;
 
             // modifyReq가 있을 때만 split
@@ -78,6 +79,7 @@ export default function UserInfoModifyRequest() {
 
     // 반려 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 삭제)
     const handleReject = async () => {
+
         if (!modifyReqData) return;
 
         try {

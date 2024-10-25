@@ -153,6 +153,8 @@ export default function UserInfo() {
             modifyReq // 수정 요청 정보
         };
 
+        console.log("modifyReq 값:", modifyReq);
+
         axios.post(`/modifyRequest`, userInfoUpdate)
             .then(response => {
                 console.log("수정 요청 성공: ", response.data);

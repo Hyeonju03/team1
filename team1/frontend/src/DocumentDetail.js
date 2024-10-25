@@ -27,6 +27,12 @@ export default function DocumentDetail() {
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
 
+    // const data = {
+    //     키:값
+    //     키:값
+    // }
+    // const response = await axios.get(`/documents/${id}`,{params:벨류})
+    
     useEffect(() => {
         async function documentDetail() {
             try {
