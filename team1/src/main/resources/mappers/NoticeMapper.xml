@@ -4,6 +4,30 @@
 
 <mapper namespace="kr.or.nextit.team1.mappers.NoticeMapper">
 
+    <!-- Result Map 정의 -->
+    <resultMap id="NoticeResultMap" type="kr.or.nextit.team1.notice.NoticeDTO">
+        <result property="noticeNum" column="notice_num"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="startDate" column="start_date"/>
+        <result property="adminId" column="admin_id"/> <!-- 관리자 ID -->
+        <result property="empCode" column="emp_code"/> <!-- 직원 ID -->
+    </resultMap>
+
+    <!-- 관리자 로그인 -->
+    <select id="validateAdmin" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM admininfo
+        WHERE ADMIN_ID = #{adminId}
+    </select>
+
+    <!--  일반 로그인  -->
+    <select id="validateUser" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM employeetest
+        WHERE EMP_CODE = #{empCode}
+    </select>
+
     <!--  List  -->
     <select id="noticeList" resultType="kr.or.nextit.team1.notice.NoticeDTO">
         SELECT *

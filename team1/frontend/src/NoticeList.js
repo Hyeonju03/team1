@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {useAuth} from "./noticeAuth";
+
 
 const NoticeList = () => {
     const [notices, setNotices] = useState([]); // 공지사항 목록 상태 초기화
     const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 초기화
     const [totalPages, setTotalPages] = useState(1); // 총 페이지 수 상태 초기화
     const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 초기화
-    const [empCode, setEmpCode] = useState("");  // 사원 번호 상태 초기화
+    const [userId, setUserId] = useState(""); // 사용자 ID 상태 초기화
+    const [userType, setUserType] = useState("user"); // 사용자 유형 상태 초기화
     const [error, setError] = useState(null); // 오류 상태 초기화
+    const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
+    const {  login } = useAuth(); // login 함수 가져오기
+
     const PAGE_SIZE = 6; // 페이지당 공지사항 수
-
     const navigate = useNavigate();
-
 
     // 공지사항을 가져오는 함수
     const fetchNotices = async () => {
         if (!isLoggedIn) return; // 로그인하지 않은 경우 함수 종료
 
+        console.log("공지사항 가져오기 시도"); // 추가된 로그
+
         try {
             const response = await axios.get(`/api/notice/list`, {
-                headers: { Authorization: `Bearer ${empCode}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } // JWT 토큰 사용
             });
-            setNotices(response.data); // 백엔드(DB) 데이터 공지사항리스트 화면으로 불러오기
+            setNotices(response.data); // DB 데이터로 공지사항 목록 업데이트
             setTotalPages(Math.ceil(response.data.length / PAGE_SIZE)); // 총 페이지 수 계산
             setError(null);
         } catch (error) {
@@ -31,44 +37,90 @@ const NoticeList = () => {
         }
     };
 
-    // 로그인 여부 확인
+    // 로그인 상태 확인 및 유효성 검사
     useEffect(() => {
-        const storedEmpCode = localStorage.getItem('empCode'); // 임시로 로컬 데이터 가져옴
-        if (storedEmpCode) {
-            setIsLoggedIn(true); // 저장된 empCode가 있다면 로그인 상태로 설정
-            setEmpCode(storedEmpCode); // 사원 번호 초기화
+        const storedId = localStorage.getItem(userType === "admin" ? 'adminId' : 'empCode');
+        const token = localStorage.getItem('token'); // 토큰 가져오기
+        const storedUserType = localStorage.getItem('userType') || "user"; // 사용자 유형 가져오기
+
+        console.log("저장된 ID:", storedId);
+        console.log("저장된 토큰:", token);
+
+        if (storedId && token) {
+            setIsLoggedIn(true);
+            setUserId(storedId);
+            setUserType(storedUserType); // 사용자 유형 설정
+        } else {
+            setIsLoggedIn(false); // 저장된 ID가 없으면 로그아웃 상태로 설정
+            setUserId(""); // 사용자 ID 초기화
+            setUserType("user"); // 기본값으로 초기화
         }
     }, []);
 
-    // 로그인 후 공지사항 가져오기
+    // 로그인 상태가 변경될 때마다 공지사항 가져오기
     useEffect(() => {
-        if (isLoggedIn) {
-            fetchNotices();
+        fetchNotices(); // 로그인 상태가 변경될 때마다 공지사항 가져오기
+    }, [isLoggedIn]); // isLoggedIn이 변경될 때마다 실행
+
+    // 로그인 처리 함수
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        console.log("로그인 시도:", inputId, userType); // 추가된 로그
+
+        if (!inputId) {
+            setError("아이디를 입력해주세요.");
+            return;
         }
-    }, [isLoggedIn, empCode]); // isLoggedIn 또는 empCode가 변경될 때마다 실행
+
+        try {
+            const response = await axios.post(
+                userType === "admin" ? '/api/admin/login' : '/api/employ/login',
+                { [userType === "admin" ? 'adminId' : 'empCode']: inputId }
+            );
+            console.log("로그인 응답:", response.data); // 추가된 로그
+
+            if (response.data.success) {
+                const userRole = userType === "admin" ? 'admin' : 'user'; // 기본 역할 설정
+                login(inputId, response.data.role, response.data.token); // 역할과 토큰 추가
+                console.log("로그인 성공");
+                setIsLoggedIn(true);
+                setUserId(inputId);
+                localStorage.setItem(userType === "admin" ? 'adminId' : 'empCode', inputId); // 로그인 정보 로컬 스토리지에 저장
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userType', userType); // 사용자 유형 저장
+                console.log("저장된 ID:", localStorage.getItem(userType === "admin" ? 'adminId' : 'empCode'));
+                console.log("저장된 토큰:", localStorage.getItem('token'));
+                navigate('/notice/list'); // 로그인 후 리스트 페이지로 이동
+            } else {
+                setError("유효하지 않은 로그인 정보입니다.");
+            }
+        } catch (error) {
+            console.error("로그인 중 오류 발생:", error);
+            setError("로그인에 실패했습니다. 다시 시도해주세요.");
+        }
+
+    };
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post(userType === "admin" ? '/api/admin/logout' : '/api/employ/logout'); // 적절한 로그아웃 API 호출
+            setIsLoggedIn(false); // 로그인 상태 업데이트
+            setUserId(""); // 사용자 ID 초기화
+            localStorage.removeItem(userType === "admin" ? 'adminId' : 'empCode'); // ID 제거
+            localStorage.removeItem('token'); // 토큰 제거
+            navigate('/notice/list'); // 리스트 페이지로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 페이지 변경 처리 함수
     const handlePageChange = (page) => {
         setCurrentPage(page); // 현재 페이지 업데이트
     };
 
-    // 로그인 처리 함수
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        const inputEmpCode = e.target.empCode.value; // 입력된 사원 번호 가져오기
-        setIsLoggedIn(true); // 로그인 한 상태
-        setEmpCode(inputEmpCode);
-        localStorage.setItem('empCode', inputEmpCode); // 로컬 스토리지에 사원 번호 저장
-        await fetchNotices(); // 로그인 후 즉시 공지사항 불러오기
-    };
 
-    // 로그아웃 처리 함수
-    const handleLogout = () => {
-        setIsLoggedIn(false); // 로그아웃
-        setEmpCode("");  // 사원 번호 초기화
-        localStorage.removeItem('empCode'); // 로컬 스토리지에서 사원 번호 삭제
-        setNotices([]); // 로그아웃 시 공지사항 목록 초기화
-    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -94,12 +146,11 @@ const NoticeList = () => {
                         <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full md:w-4/5 lg:w-3/4 mx-auto">
                             {isLoggedIn ? ( // 로그인 상태 확인
                                 <ul className="divide-y divide-gray-200">
-                                    {notices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => ( // 현재 페이지의 공지사항 리스트 표시
-                                        <li key={notice.noticeNum}
-                                            className="p-3 hover:bg-indigo-50 transition duration-200">
+                                    {notices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
+                                        <li key={notice.noticeNum} className="p-3 hover:bg-indigo-50 transition duration-200">
                                             <h3
                                                 className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
-                                                onClick={() => navigate(`/notice/detail/${notice.noticeNum}`)} // 제목 클릭 시 상세 페이지로 이동
+                                                onClick={() => navigate(`/notice/detail/${notice.noticeNum}`)}
                                             >
                                                 {notice.title}
                                             </h3>
@@ -108,7 +159,6 @@ const NoticeList = () => {
                                             </p>
                                         </li>
                                     ))}
-
                                 </ul>
                             ) : (
                                 <p className="p-4 text-center text-gray-600">로그인 해주세요.</p>  // 로그인하지 않은 경우 안내 메시지
@@ -118,16 +168,16 @@ const NoticeList = () => {
                         {isLoggedIn && ( // 로그인 상태에서만 공지사항 리스트 불러오기
                             <div className="flex justify-between items-center w-full mt-4 md:w-4/5 lg:w-3/4 mx-auto">
                                 <button
-                                    onClick={() => handlePageChange(currentPage - 1)} // 이전 페이지 버튼 클릭 시 페이지 변경
-                                    disabled={currentPage === 1} // 첫 페이지에서는 이전 버튼 비활성화
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
                                     className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
                                 >
                                     이전
                                 </button>
-                                <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span> {/* 현재 페이지와 총 페이지 수 표시 */}
+                                <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span>
                                 <button
-                                    onClick={() => handlePageChange(currentPage + 1)} // 다음 페이지 버튼 클릭 시 페이지 변경
-                                    disabled={currentPage === totalPages} // 마지막 페이지에서는 다음 버튼 비활성화
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
                                     className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
                                 >
                                     다음
@@ -135,10 +185,10 @@ const NoticeList = () => {
                             </div>
                         )}
 
-                        {isLoggedIn && ( // 로그인 상태에서만 '공지사항 등록' 버튼 표시
+                        {isLoggedIn && userType === "admin" &&  ( // 관리자 로그인 상태에서만 보이는 공지사항 등록 버튼
                             <div className="flex justify-center mt-6">
                                 <button
-                                    onClick={() => navigate('/notice/register')} // 등록 버튼 클릭 시 register 페이지로 이동
+                                    onClick={() => navigate('/notice/register')}
                                     className="bg-green-500 text-white font-bold py-2 px-4 text-sm rounded-full hover:bg-green-400 transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                                 >
                                     공지사항 등록
@@ -151,23 +201,32 @@ const NoticeList = () => {
                 <aside className="w-64 p-4 border-l border-gray-300">
                     {isLoggedIn ? ( // 로그인 상태 확인
                         <div className="mb-4">
-                            <p className="mb-2">로그인됨: {empCode}</p> {/* 로그인된 사원 번호 표시 */}
+                            <p className="mb-2">{userId}님<br/>반갑습니다.</p>
                             <button
-                                onClick={handleLogout} // 로그아웃 버튼 클릭 시 로그아웃 처리
+                                onClick={handleLogout}
                                 className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200"
                             >
                                 로그아웃
                             </button>
                         </div>
                     ) : (
-                        <form onSubmit={handleLogin} className="mb-4"> {/* 로그인 폼 */}
+                        <form onSubmit={handleLogin} className="mb-4">
                             <input
                                 type="text"
-                                name="empCode"
-                                placeholder="사원 번호"
+                                name="id"
+                                value={inputId}  // 상태를 관리
+                                onChange={(e) => setInputId(e.target.value)} // ID 입력 시 상태 업데이트
+                                placeholder={userType === "admin" ? "관리자 ID" : "사원 번호"} // 사용자 ID 입력 필드
                                 className="w-full p-2 border mb-2"
                                 required // 필수 입력 필드
                             />
+                            <select name="userType" value={userType} onChange={(e) => {
+                                setUserType(e.target.value);
+                                setInputId(""); // 사용자 유형 변경 시 ID 초기화
+                            }} className="w-full p-2 border mb-2">
+                                <option value="user">일반 사용자</option>
+                                <option value="admin">관리자</option>
+                            </select>
                             <button
                                 type="submit"
                                 className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
