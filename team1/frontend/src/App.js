@@ -16,6 +16,7 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
+import UserInfoModifyRequest from "./UserInfoModifyRequest";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail"
 import MailList from "./MailList";
@@ -46,12 +47,12 @@ function App() {
                     <Route path="/AdminOneToOneDetail" element={<AdminOneToOneDetail/>}/>
                     <Route path="/Log" element={<Log/>}/>
                     <Route path="/LogList" element={<LogList/>}/>
-                      
+
                     <Route path="/documents" element={<DocumentList/>}/>
                     <Route path="/documents/:id" element={<DocumentDetail/>}/>
                       
                     <Route path="/document/register" element={<DocumentRegister/>}/>
-                    <Route path="/documents/update/:id" element={<DocumentUpdate />} />
+                    <Route path="/documents/update/:id" element={<DocumentUpdate/>}/>
 
                     <Route path="/notices" element={<Notice/>}/>
                     <Route path="/apply" element={<ApplyForBusiness/>}/>
@@ -60,7 +61,9 @@ function App() {
 
                     <Route path="/sign" element={<SignList/>}/>
                     <Route path="/sign/register" element={<SignRequest/>}/>
+
                     <Route path="/userInfo" element={<UserInfo/>}/>
+                    <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
 
                     <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
 

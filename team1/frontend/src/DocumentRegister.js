@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
+import useComCode from "hooks/useComCode";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -22,22 +23,23 @@ export default function DocumentRegister() {
     const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(location.state?.selectedCategory || ''); // location.state : 이전페이지에서 전달된 상태 객체
+    const [codeCategory] = useComCode();
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // code 테이블에서 카테고리 가져오기
-        axios.get(`/code`) // API 엔드포인트를 조정하세요
-            .then(response => {
-                console.log(response.data);
-                // 응답이 카테고리 배열이라고 가정할 때
-                const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-                setCategories(uniqueCategories); // 카테고리 상태에 저장
-            })
-            .catch(error => console.log(error));
-    }, []);
+    // useEffect(() => {
+    //     // code 테이블에서 카테고리 가져오기
+    //     axios.get(`/code`)
+    //         .then(response => {
+    //             console.log(response.data);
+    //             // 응답이 카테고리 배열이라고 가정할 때
+    //             const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
+    //             setCategories(uniqueCategories); // 카테고리 상태에 저장
+    //         })
+    //         .catch(error => console.log(error));
+    // }, []);
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
@@ -67,7 +69,7 @@ export default function DocumentRegister() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if(!validateForm()){
+        if (!validateForm()) {
             return;
         }
 
@@ -116,15 +118,13 @@ export default function DocumentRegister() {
                         </Button>
                         {isExpanded && (
                             <div className="ml-8 shandleDelete pace-y-2 mt-2">
-                                {categories.map((category, index) => (
-                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
-                                    category.split(',').map((item, subIndex) => (
-                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}
+                                {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                        <Button variant="ghost" className="w-full" key={`${item}`}
                                                 onClick={() => setCategory(item)}>
                                             {item}
                                         </Button>
-                                    ))
-                                ))}
+                                    )
+                                )}
                             </div>
                         )}
                     </div>
@@ -145,13 +145,10 @@ export default function DocumentRegister() {
                                                 onChange={(e) => setCategory(e.target.value)}
                                                 className="border rounded p-2">
                                             <option value="">카테고리</option>
-                                            {categories.map((cate, index) => (
-                                                // 카테고리가 ','로 구분된 경우 이를 개별적으로 렌더링
-                                                cate.split(',').map((item, subIndex) => (
-                                                    <option key={`${index}-${subIndex}`} value={item}>
-                                                        {item}
-                                                    </option>
-                                                ))
+                                            {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                                <option key={`${item}`} value={item}>
+                                                    {item}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>

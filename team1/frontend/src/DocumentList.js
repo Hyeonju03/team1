@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import useComCode from "hooks/useComCode";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -21,7 +22,8 @@ export default function DocumentList() {
 
     const [isExpanded, setIsExpanded] = useState(true);
     const [documents, setDocuments] = useState([]);
-    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    // const [codeCategory, setCodeCategory] = useState();
+    const [codeCategory] = useComCode();
     const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
@@ -31,23 +33,12 @@ export default function DocumentList() {
     const navigate = useNavigate(); // navigate 함수 사용
 
     useEffect(() => {
-        const comCode = 3118115625; // 회사코드
         // documenttest 테이블에서 문서 가져오기
-        axios.get(`/company/${comCode}`)
+        axios.get(`/company/${process.env.REACT_APP_EMP_CODE}`)
             .then(response => {
                 console.log(response.data);
                 setDocuments(response.data);
                 setFilteredDocuments(response.data); // 초기값은 전체 문서
-            })
-            .catch(error => console.log(error));
-
-        // code 테이블에서 카테고리 가져오기
-        axios.get(`/code`) // API 엔드포인트를 조정하세요
-            .then(response => {
-                // console.log(response.data);
-                // 응답이 카테고리 배열이라고 가정할 때
-                const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-                setCategories(uniqueCategories); // 카테고리 상태에 저장
             })
             .catch(error => console.log(error));
     }, []);
@@ -125,6 +116,7 @@ export default function DocumentList() {
             .catch(error => console.log(error));
     };
 
+
     return (
         <div className="min-h-screen flex flex-col">
             <header className="bg-gray-200 p-4">
@@ -145,15 +137,13 @@ export default function DocumentList() {
                         </Button>
                         {isExpanded && (
                             <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                {categories.map((category, index) => (
-                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
-                                    category.split(',').map((item, subIndex) => (
-                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}
+                                {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                        <Button variant="ghost" className="w-full" key={`${item}`}
                                                 onClick={() => handleCategorySelect(item)}>
                                             {item}
                                         </Button>
-                                    ))
-                                ))}
+                                    )
+                                )}
                             </div>
                         )}
                     </div>
@@ -171,6 +161,7 @@ export default function DocumentList() {
                         </div>
                         <Button variant="outline" onClick={handleSearch}>검색</Button>
                     </div>
+
                     <div className="flex justify-end space-x-2 mb-4">
                         <Button variant="outline"
                                 onClick={() => {
@@ -199,7 +190,9 @@ export default function DocumentList() {
                                 <Paperclip className="h-4 w-4 text-gray-400"/>
                                 <div className="flex-1">
                                     {/* 제목 클릭시 페이지 이동*/}
-                                    <div className="font-semibold text-left cursor-pointer hover:text-indigo-500 hover:underline hover:underline-offset-1" onClick={() => handleDocumentClick(document.docNum)}>{document.title}</div>
+                                    <div
+                                        className="font-semibold text-left cursor-pointer hover:text-indigo-500 hover:underline hover:underline-offset-1"
+                                        onClick={() => handleDocumentClick(document.docNum)}>{document.title}</div>
                                     <div className="text-sm text-gray-600 text-left">{document.docCateCode}</div>
                                 </div>
                                 <div className="text-sm text-gray-500">{formatDate(document.startDate)}</div>

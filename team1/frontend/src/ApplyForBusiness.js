@@ -59,7 +59,7 @@ export default function ApplyForBusiness() {
         if (!contectPhone) {
             alert("담당자 연락처를 입력해주세요.");
             return false;
-        } else if(!contectPhoneCheck.test(contectPhone)){
+        } else if (!contectPhoneCheck.test(contectPhone)) {
             alert("담당자 연락처는 000-0000-0000 형식이어야 합니다.");
             return false;
         }
@@ -85,7 +85,7 @@ export default function ApplyForBusiness() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(!validateForm()){
+        if (!validateForm()) {
             return;
         }
 
