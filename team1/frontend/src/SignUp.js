@@ -29,6 +29,7 @@ export default function SignUpForm() {
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
     const [signUpResponse,setSignUpResponse] = useState("")
+    const [empCodeCheck,setEmpCodeCheck] = useState("")
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -98,20 +99,15 @@ export default function SignUpForm() {
             return; // ID가 비어있으면 함수 종료
         }
         try {
-            const response = await axios.get('/findAllempCode', {params: { comCode: companyCode }});
-            const empCodes = response.data.map(item => item.empCode);
+            const response = await axios.post('/findAllempCode',  {empCode: `${companyCode}-${id}` });
 
-            const resultEmpCode = empCodes.map(code => code.split('-')[1]);
-            console.log(resultEmpCode)
-            for (let i = 0; i <= resultEmpCode.length; i++) {
-                if(id == resultEmpCode[i] ){
-                    alert("이미 있는 아이디입니다");
-                    break;
-                }else{
-                    alert("가능");
-                    setIdConfirm(true)
-                }
+            if(response.data > 0) {
+                alert("중복입니다.")
+            }else{
+                alert("사용가능합니다.")
+                setIdConfirm(true)
             }
+
 
 
 
@@ -173,6 +169,8 @@ export default function SignUpForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        console.log("회원가입 하기");
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -214,6 +212,7 @@ export default function SignUpForm() {
         console.log('Form submitted:', formData);
 
         const send = {
+            companyCode: formData.companyCode,
             empCode: `${formData.companyCode}-${formData.id}`,  // 아이디
             empName: formData.name, // 이름
             empPass: formData.password, // 비밀번호

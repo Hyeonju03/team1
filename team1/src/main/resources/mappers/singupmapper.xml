@@ -7,8 +7,15 @@
     <insert id="insertUserXML" parameterType="kr.or.nextit.team1.DTOs.SignUpDTO">
 
         INSERT INTO employeetest
+
         (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN)
         VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn});
+    </insert>
+
+    <insert id="insertAuthData" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
+        INSERT INTO authoritytest
+        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management)
+        VALUES(#{empCode},#{empName},#{depCode},1, 1);
     </insert>
 
     <select id="findAllCodes" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
@@ -16,8 +23,14 @@
         WHERE COM_CODE = #{comCode}
     </select>
 
-    <select id="findAllempCode" resultType="kr.or.nextit.team1.DTOs.SignUpDTO">
-        SELECT EMP_CODE
+    <select id="findAllempCode" resultType="int">
+        SELECT COUNT(*) AS CNT
+        FROM employeetest
+        WHERE EMP_CODE = #{empCode}
+    </select>
+
+    <select id="countEmpCode" resultType="int">
+        SELECT count(*)
         FROM employeetest
         WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
     </select>

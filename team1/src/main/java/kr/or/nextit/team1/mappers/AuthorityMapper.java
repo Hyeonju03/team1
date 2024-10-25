@@ -15,4 +15,6 @@ public interface AuthorityMapper {
     List<AuthorityDTO> selectAllAuth(String empCode);
 
     void updateAuth(AuthorityDTO authorityDTO);
+
+    int permissionSelect(String empCode);
 }

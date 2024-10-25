@@ -41,10 +41,10 @@ public class SignUpController {
         return signUpMapper.findAllCodes(comCode); // SignUpMapper의 메소드를 호출
     }
 
-    @GetMapping("/findAllempCode")
-    public List<SignUpDTO> getAllAllempCodes(@RequestParam String comCode) {
-
-        return signUpMapper.findAllempCode(comCode);
+    @PostMapping("/findAllempCode")
+    public int getAllAllempCodes(@RequestBody SignUpDTO signUpDTO) {
+        System.out.println(signUpDTO);
+        return signUpMapper.findAllempCode(signUpDTO);
     }
 
     private String RendomCode() {

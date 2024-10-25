@@ -14,6 +14,7 @@ export default function EmailSend() {
     const [mailDetailList,setMailDetailList] = useState(location.state)
     const navigate = useNavigate();
     const [mailDetailNum,setMailDetailNum] = useState(mailDetailList.mailNum)
+    console.log("->",mailDetailList)
     console.log(mailDetailNum)
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 

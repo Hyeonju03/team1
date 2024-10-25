@@ -23,6 +23,11 @@ public class AuthorityController {
         this.authorityMapper = authorityMapper;
     }
 
+    @GetMapping("/permissionSelect")
+    public int permissionSelect(@RequestParam String empCode) {
+        return authorityMapper.permissionSelect(empCode);
+    }
+
     @GetMapping("/selectEmployeeList")
     public List<AuthorityDTO> selectEmployeeList(@RequestParam String empCode) {
         return authorityMapper.selectEmployeeList(empCode);

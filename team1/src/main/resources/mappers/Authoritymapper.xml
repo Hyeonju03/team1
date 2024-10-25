@@ -38,7 +38,8 @@
         a.PERS_INFO,
         a.SCHEDULE
         FROM
-        employee AS e
+<!--        employee AS e-->
+        employeetest AS e
         LEFT JOIN
         authoritytest AS a ON e.EMP_CODE = a.EMP_CODE
         WHERE
@@ -55,4 +56,10 @@
         permission_edit=#{permissionEdit}, department_management=#{departmentManagement}
         where  EMP_CODE= #{empCode}
     </update>
+    <select id="permissionSelect" resultType="int">
+        select count(*)
+        from authoritytest a
+        where permission_edit=1
+        and EMP_CODE = #{empCode}
+    </select>
 </mapper>

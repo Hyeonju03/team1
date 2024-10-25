@@ -36,15 +36,33 @@ export default function Component() {
     const [empCode, setEmpCode] = useState("");
     const [empList, setEmpList] = useState([]);
     const [formData, setFormData] = useState([]);
+    const [hasPermission, setHasPermission] = useState(true);
+
+    const fetchEmpCode = async () => {
+        //1. 로그인한 emp_code로 select문 조회 -> where _edit = 1; --> cnt > 0 / cnt < 0
+        const loggedInEmpCode = "3218600105-aa"; // 로그인 후 받아온 empCode
+        // 3118115625-cjm
+        //3118115625-bbb 권한ㅇ
+        //2218701188-abcmart354 권한ㅇ 3218600105-aa
+        const EmpCode2 = loggedInEmpCode.split("-")[0];
+        setEmpCode(EmpCode2);
+
+
+        const response = await axios.get("/permissionSelect",{params: {empCode:loggedInEmpCode}})
+        console.log("->->",response.data);
+
+        if (response.data === 0) {
+            setHasPermission(false);
+        } else {
+            setHasPermission(true);
+            fetchData(); // 권한이 있을 경우 fetchData 호출
+        }
+    };
 
     useEffect(() => {
-        const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3118115625-cjm"; // 로그인 후 받아온 empCode
-            const EmpCode2 = loggedInEmpCode.split("-")[0];
-            setEmpCode(EmpCode2);
-        };
         fetchEmpCode();
     }, []);
+
 
     // 직원 데이터를 가져오는 함수
     const fetchData = async () => {
@@ -130,6 +148,14 @@ export default function Component() {
             alert("저장 중 오류가 발생했습니다.");
         }
     };
+
+    if (!hasPermission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500" >권한이 없습니다.  접근할 수 없습니다.</h1>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-4">
