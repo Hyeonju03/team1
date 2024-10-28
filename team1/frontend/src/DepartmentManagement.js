@@ -1,0 +1,126 @@
+import React, {useEffect, useState} from 'react';
+import {ChevronDown, ChevronRight, Plus, Trash} from 'lucide-react';
+import axios from 'axios';
+
+// 부서 트리
+const DepartmentTree = ({departments, onAdd, onDelete}) => {
+    const [expanded, setExpanded] = useState({});
+
+    // 부서 확장, 축소
+    const toggleExpand = (code) => {
+        setExpanded(prev => ({...prev, [code]: !prev[code]}));
+    };
+
+    return (
+        <ul className="pl-4">
+            {departments.map(dept => (
+                <li key={dept.depCode} className="my-2">
+                    <div className="flex items-center">
+                        {dept.children && dept.children.length > 0 ? (
+                            <button onClick={() => toggleExpand(dept.depCode)} className="mr-1">
+                                {expanded[dept.depCode] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
+                            </button>
+                        ) : (
+                            <span className="w-4 mr-1"/>
+                        )}
+                        <span>{dept.depCode}</span>
+                        <button onClick={() => onAdd(dept.depCode)} className="ml-2 text-blue-500">
+                            <Plus size={16}/>
+                        </button>
+                        <button onClick={() => onDelete(dept.depCode)} className="ml-2 text-red-500">
+                            <Trash size={16}/>
+                        </button>
+                    </div>
+                    {expanded[dept.depCode] && dept.children.length > 0 && (
+                        <DepartmentTree departments={dept.children} onAdd={onAdd} onDelete={onDelete}/>
+                    )}
+                </li>
+            ))}
+        </ul>
+    );
+};
+
+// 부서 관리
+export default function DepartmentManagement() {
+    const [departments, setDepartments] = useState([]);
+
+    // 부서 데이터 가져오기
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await axios.get('/departments/tree');
+                console.log("response.data 값:", response.data);
+                setDepartments(response.data);
+            } catch (e) {
+                console.error('부서 트리를 가져오는 중 오류가 발생했습니다.', e);
+            }
+        };
+
+        fetchDepartments();
+    }, []);
+
+    // 부서 추가
+    const updateDepartment = async (parentCode) => {
+        const newName = prompt('새 부서 이름을 입력하세요:');
+        if (newName) {
+            const newDepartment = {depCode: newName, name: newName, children: []};
+
+            // 부서 트리 업데이트 함수
+            const updateDepartments = (deps) => {
+                return deps.map(dept => {
+                    if (dept.depCode === parentCode) {
+                        return {...dept, children: [...dept.children, newDepartment]};
+                    }
+                    return {...dept, children: updateDepartments(dept.children)};
+                });
+            };
+
+            // 부서 트리 업데이트
+            setDepartments(updateDepartments(departments));
+
+            // comCode 값 설정
+            const comCode = 3148127227;
+
+            // 백엔드에 부서 추가 요청
+            try {
+                console.log({comCode: comCode, depCode: newName, updepCode: parentCode});
+                await axios.put('/departments/update', {comCode: comCode, depCode: newName, updepCode: parentCode});
+                alert('부서가 성공적으로 추가되었습니다.');
+            } catch (e) {
+                console.error('부서 추가 중 오류가 발생했습니다.', e);
+            }
+        }
+    };
+
+    // 부서 삭제
+    const deleteDepartment = async (depCode) => {
+        console.log("삭제할 부서 : ", depCode);
+
+        const confirmDelete = window.confirm('부서를 삭제하시겠습니까?');
+        if (confirmDelete) {
+            // 부서 트리 업데이트 함수
+            const updateDepartments = (deps) => {
+                return deps.filter(dept => dept.depCode !== depCode).map(dept => ({
+                    ...dept,
+                    children: updateDepartments(dept.children),
+                }));
+            };
+            setDepartments(updateDepartments(departments));
+
+            // 백엔드에 부서 삭제 요청
+            try {
+                await axios.delete(`/departments/delete/${depCode}`);
+                alert('부서가 성공적으로 삭제되었습니다.');
+            } catch (e) {
+                console.error('부서 삭제 중 오류가 발생했습니다.', e);
+            }
+        }
+    };
+
+    return (
+        <div className="p-4 max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4">부서 관리</h1>
+            <DepartmentTree departments={departments} onAdd={updateDepartment} onDelete={deleteDepartment}/>
+        </div>
+    );
+}

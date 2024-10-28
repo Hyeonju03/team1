@@ -3,12 +3,49 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.CodeMapper">
-    <select id="selectCategories" resultType="CodeDTO">
+    <select id="selectCategory" resultType="CodeDTO">
         SELECT
-            DEP_CODE, POS_CODE, DOC_CATE_CODE, SIGN_CATE_CODE
+            DEP_CODE, UPDEP_CODE, POS_CODE, DOC_CATE_CODE, SIGN_CATE_CODE
+        FROM CODE
+        WHERE 1=1
+        <if test='comCode != null'>
+            AND COM_CODE = #{comCode}
+        </if>
+        <if test='depCode != null'>
+            AND DEP_CODE LIKE CONCAT('%', #{depCode}, '%')
+        </if>
+    </select>
+
+    <select id="getDepCode" resultType="CodeDTO">
+        SELECT
+            DEP_CODE, UPDEP_CODE
         FROM
             CODE
         WHERE
-            COM_CODE = #{comCode}
+            COM_CODE = 3148127227
     </select>
+
+    <insert id="insertDepartment" parameterType="CodeDTO">
+        INSERT INTO CODE
+            (COM_CODE, DEP_CODE, UPDEP_CODE)
+        VALUES 
+            (3148127227, #{depCode}, #{updepCode})
+    </insert>
+
+    <update id="updateDepartment">
+        UPDATE
+            CODE
+        SET
+            DEP_CODE = #{depCode},
+            UPDEP_CODE = #{updepCode}
+        WHERE
+            COM_CODE = 3148127227
+    </update>
+
+    <delete id="deleteDepartment">
+        DELETE FROM
+            CODE
+        WHERE
+            DEP_CODE = #{depCode}
+    </delete>
 </mapper>
