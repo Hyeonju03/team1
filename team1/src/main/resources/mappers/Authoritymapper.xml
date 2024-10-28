@@ -5,27 +5,11 @@
 <mapper namespace="kr.or.nextit.team1.mappers.AuthorityMapper">
     <insert id="insertAuth" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         INSERT into authoritytest
-        (EMP_CODE,  emp_Name, dep_code, pos_code, permission_edit, department_management)
-        VALUES(#{empCode}, #{empName}, #{depCode}, #{posCode},#{permissionEdit}, #{departmentManagement});
+        (EMP_CODE,  emp_Name, dep_code, pos_code, permission_edit, department_management , rank_edit)
+        VALUES(#{empCode}, #{empName}, #{depCode}, #{posCode},#{permissionEdit}, #{departmentManagement},#{rankEdit});
     </insert>
 
     <select id="selectEmployeeList" resultType="kr.or.nextit.team1.DTOs.AuthorityDTO">
-<!--        select EMP_CODE,EMP_NAME,DEP_CODE,POS_CODE-->
-<!--        from employee e-->
-<!--        where EMP_CODE like concat('%',#{empCode},'%')-->
-
-<!--        select e.EMP_CODE ,-->
-<!--               e.EMP_NAME ,-->
-<!--               e.DEP_CODE ,-->
-<!--               e.pos_code ,-->
-<!--               a.permission_edit ,-->
-<!--               a.department_management ,-->
-<!--               a.NOTICE,a.DOCUMENT,-->
-<!--               a.PERS_INFO ,-->
-<!--               a.SCHEDULE-->
-<!--        from employee AS e JOIN authoritytest AS a ON e.EMP_CODE = a.EMP_CODE-->
-<!--        WHERE e.EMP_CODE LIKE CONCAT('%', #{empCode}, '%');-->
-
         SELECT
         e.EMP_CODE,
         e.EMP_NAME,
@@ -33,6 +17,7 @@
         e.pos_code,
         a.permission_edit,
         a.department_management,
+        a.rank_edit,
         a.NOTICE,
         a.DOCUMENT,
         a.PERS_INFO,
@@ -53,7 +38,7 @@
     <update id="updateAuth">
         UPDATE authoritytest
         set  NOTICE=#{notice}, DOCUMENT=#{document}, PERS_INFO=#{persInfo}, SCHEDULE=#{schedule},
-        permission_edit=#{permissionEdit}, department_management=#{departmentManagement}
+        permission_edit=#{permissionEdit}, department_management=#{departmentManagement} , rank_edit=#{rankEdit}
         where  EMP_CODE= #{empCode}
     </update>
     <select id="permissionSelect" resultType="int">

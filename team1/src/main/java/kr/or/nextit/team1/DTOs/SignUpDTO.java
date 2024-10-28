@@ -17,6 +17,7 @@ public class SignUpDTO {
     private String empRrn;
     private String empId;
     private String comCode;
+    private String posCode;
 
 //    public SignUpDTO() {
 //    }

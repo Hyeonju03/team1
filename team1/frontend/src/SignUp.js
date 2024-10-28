@@ -6,6 +6,7 @@ export default function SignUpForm() {
 
 
     const [departments,setDepartments] = useState([])
+    const [ranks,setRanks] = useState([])
     const [formData, setFormData] = useState({
         companyCode: '',
         name:'',
@@ -17,6 +18,7 @@ export default function SignUpForm() {
         verificationCode: '',
         department: '',
         supervisorCode: '',
+        rank: '',
         residentNumber1: '',
         residentNumber2: '',
     });
@@ -55,8 +57,9 @@ export default function SignUpForm() {
             newErrors.email = "유효한 이메일 주소를 입력해주세요";
         }
         if (!formData.verificationCode) newErrors.verificationCode = "인증번호를 입력해주세요";
-        if (!formData.department) newErrors.department = "부서를 입력해주세요";
+        if (!formData.department) newErrors.department = "부서를 선택해주세요";
         if (!formData.supervisorCode) newErrors.supervisorCode = "상관 코드를 입력해주세요";
+        if (!formData.rank) newErrors.rank = "직급을 선택해주세요";
         if (!formData.residentNumber1) newErrors.residentNumber1 = "주민등록번호 앞자리 입력해주세요";
         if (!formData.residentNumber2) newErrors.residentNumber2 = "주민등록번호 뒷자리 입력해주세요";
 
@@ -74,18 +77,39 @@ export default function SignUpForm() {
                 //부서검색누르면 부서리스트나와서하는기능
                 //3148200040
                 try {
-                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`);
                     const list = response.data
 
                     const newDepartments = list.map(v => v.depCode);
-                    newDepartments.map((v,i)=>{
-                        setDepartments(newDepartments);
-                    })
+                    const dede = newDepartments.join(",").split(",");
+                        setDepartments(dede);
 
 
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 }
+        } else {
+            alert("없는 회사코드임");
+        }
+    }
+
+    const rankCheck = async () => {
+        const response = await axios.get('/apitest');
+        const companyFound = response.data.some(company => company[2] === formData.companyCode);  // 입력한 회사코드가 있는지 확인
+
+        if (companyFound) {
+            try {
+                const response = await axios.get(`http://localhost:8080/rankSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                const list = response.data
+
+                const newRanks = list.map(v=>v.posCode)
+                console.log("오잉",newRanks)
+
+               const nene =   newRanks.join(",").split(",");
+                setRanks(nene)
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         } else {
             alert("없는 회사코드임");
         }
@@ -219,7 +243,10 @@ export default function SignUpForm() {
             depCode: formData.department, // 부서
             phoneNum: formData.phone, // 전화번호
             empMail: formData.email, // 이메일
-            empRrn: `${formData.residentNumber1}-${formData.residentNumber2}` // 주민등록번호
+            empRrn: `${formData.residentNumber1}-${formData.residentNumber2}`, // 주민등록번호
+            supervisorCode: formData.supervisorCode,//상관
+            posCode: formData.rank
+
         };
 
         const config = {
@@ -240,7 +267,17 @@ export default function SignUpForm() {
 
     return (
         <div className="w-full max-w-3xl mx-auto p-4 border rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{ marginBottom: "30px" }}>로고</h2>
+            <style>
+                {`
+                 input::placeholder {
+                        color: ${errors.companyCode ? 'red' : 'gray'};
+                    }
+                    input.error {
+                        color: red; /* 에러가 있을 때 텍스트 색상 */
+                    }
+            `}
+            </style>
+            <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {/* 회사코드 */}
@@ -255,8 +292,14 @@ export default function SignUpForm() {
                         className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
                         placeholder={errors.companyCode || '회사코드 입력'}
                         disabled={companyConfirm ? true : false}
+                        style={{color: errors.companyCode ? 'red' : 'black'}}
                     />
-                    <button onClick={companyCodeCheck} type="button" className="ml-2 border p-2">확인</button>
+                    <button onClick={() => {
+                        companyCodeCheck();
+                        rankCheck();
+                    }} type="button" className="ml-2 border p-2">확인
+                    </button>
+
                 </div>
 
                 {/* 이름 */}
@@ -418,6 +461,29 @@ export default function SignUpForm() {
                     </div>
                 </div>
 
+                {/* 직급 */}
+                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                    <label htmlFor="rank" className="flex-none w-32 text-left">직급</label>
+                    <div className="flex-grow relative flex">
+                        <select
+                            id="rank"
+                            name="rank"
+                            value={formData.rank}
+                            onChange={handleChange}
+                            className={`border p-2 flex-grow ${errors.rank ? 'border-red-500' : ''}`}
+                        >
+                            <option value="">직급 선택</option>
+                            {/* 기본 선택 옵션 */}
+                            {ranks.map((r, index) => (
+                                <option key={index} value={r}>
+                                    {r}
+                                </option>
+                            ))}
+                        </select>
+
+                    </div>
+                </div>
+
                 {/* 주민등록번호 */}
                 <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
                     <label htmlFor="residentNumber1" className="flex-none w-32 text-left">주민등록번호</label>
@@ -452,7 +518,7 @@ export default function SignUpForm() {
                     </div>
                 </div>
 
-                <button  type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
+                <button type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
             </form>
         </div>
     );

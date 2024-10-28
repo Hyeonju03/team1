@@ -40,7 +40,7 @@ export default function Component() {
 
     const fetchEmpCode = async () => {
         //1. 로그인한 emp_code로 select문 조회 -> where _edit = 1; --> cnt > 0 / cnt < 0
-        const loggedInEmpCode = "3218600105-aa"; // 로그인 후 받아온 empCode
+        const loggedInEmpCode = "3148620215-응엥"; // 로그인 후 받아온 empCode
         // 3118115625-cjm
         //3118115625-bbb 권한ㅇ
         //2218701188-abcmart354 권한ㅇ 3218600105-aa
@@ -72,6 +72,7 @@ export default function Component() {
             setFormData(response.data.map(item => ({
                 permissionEdit: item.permissionEdit,
                 departmentManagement: item.departmentManagement,
+                rankEdit: item.rankEdit,
                 notice: item.notice,
                 document: item.document,
                 persInfo: item.persInfo,
@@ -111,6 +112,7 @@ export default function Component() {
                 posCode: item.posCode,
                 permissionEdit: formData[index]?.permissionEdit !== undefined ? formData[index].permissionEdit : item.permissionEdit,
                 departmentManagement: formData[index]?.departmentManagement !== undefined ? formData[index].departmentManagement : item.departmentManagement,
+                rankEdit: formData[index]?.rankEdit !== undefined ? formData[index].rankEdit : item.rankEdit,
                 notice: formData[index]?.notice !== undefined ? formData[index].notice : item.notice,
                 document: formData[index]?.document !== undefined ? formData[index].document : item.document,
                 persInfo: formData[index]?.persInfo !== undefined ? formData[index].persInfo : item.persInfo,
@@ -170,6 +172,7 @@ export default function Component() {
                             <TableHead>직급</TableHead>
                             <TableHead>권한수정</TableHead>
                             <TableHead>부서관리</TableHead>
+                            <TableHead>직급관리</TableHead>
                             <TableHead>공지사항권한</TableHead>
                             <TableHead>문서함권한</TableHead>
                             <TableHead>인사정보권한</TableHead>
@@ -193,6 +196,11 @@ export default function Component() {
                                         <input type="checkbox"
                                                checked={formData[index]?.departmentManagement}
                                                onChange={() => handleCheckboxChange(index, 'departmentManagement')}/>
+                                    </TableCell>
+                                    <TableCell>
+                                        <input type="checkbox"
+                                               checked={formData[index]?.rankEdit}
+                                               onChange={() => handleCheckboxChange(index, 'rankEdit')}/>
                                     </TableCell>
                                     <TableCell>
                                         <select className="text-center"

@@ -41,6 +41,11 @@ public class SignUpController {
         return signUpMapper.findAllCodes(comCode); // SignUpMapper의 메소드를 호출
     }
 
+    @GetMapping("/rankSignUp")
+    public List<CodeDTO> getAllranks(@RequestParam String comCode) {
+        return signUpMapper.getAllranks(comCode); // SignUpMapper의 메소드를 호출
+    }
+
     @PostMapping("/findAllempCode")
     public int getAllAllempCodes(@RequestBody SignUpDTO signUpDTO) {
         System.out.println(signUpDTO);
@@ -57,7 +62,6 @@ public class SignUpController {
         String code = RendomCode(); // 생성한 코드
         emailService.sendVerificationCode(email, code); // 이메일 전송
 
-        // Java 8을 사용할 경우 Map을 수동으로 생성
         Map<String, String> response = new HashMap<>();
         response.put("code", code);
 

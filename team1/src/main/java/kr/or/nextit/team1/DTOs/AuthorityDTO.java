@@ -20,4 +20,5 @@ public class AuthorityDTO {
     private String schedule;
     private boolean permissionEdit;
     private boolean departmentManagement;
+    private boolean rankEdit;
 }

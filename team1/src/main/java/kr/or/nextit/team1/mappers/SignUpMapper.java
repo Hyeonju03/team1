@@ -13,6 +13,8 @@ public interface SignUpMapper {
 
     List<CodeDTO> findAllCodes(String comCode);
 
+    List<CodeDTO> getAllranks(String comCode);
+
     int findAllempCode(SignUpDTO signUpDTO);
 
     int insertAuthData(SignUpDTO signUpDTO);

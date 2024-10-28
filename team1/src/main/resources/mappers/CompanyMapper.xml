@@ -9,4 +9,29 @@
        VALUES(#{comCode}, #{comName}, #{ceoName}, #{ceoPhone}, #{contectPhone}, #{empNum}, #{comEmail}, current_timestamp(), #{deleteDate}, #{payStatus});
 
    </insert>
+
+    <select id="selectComList" parameterType="kr.or.nextit.team1.DTOs.CompanyDTO">
+        select *
+        from company
+        where COM_CODE = #{comCode}
+    </select>
+
+    <update id="updateInfo">
+        UPDATE company
+        SET CEO_NAME=#{ceoName}, CONTECT_PHONE=#{contectPhone}, COM_EMAIL=#{comEmail} , COM_NAME=#{comName}
+        WHERE COM_CODE=#{comCode};
+    </update>
+
+    <update id="updateStatus">
+        update company
+        set PAY_STATUS =1
+        where COM_CODE =#{comCode}
+    </update>
+
+    <select id="selectStatus" resultType="int">
+        select count(*)
+        from company
+        where COM_CODE =#{comCode}
+        and PAY_STATUS = 1
+    </select>
 </mapper>

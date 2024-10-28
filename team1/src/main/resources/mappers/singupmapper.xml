@@ -8,18 +8,24 @@
 
         INSERT INTO employeetest
 
-        (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN)
-        VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn});
+        (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN , pos_code)
+        VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn},#{posCode});
     </insert>
 
     <insert id="insertAuthData" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         INSERT INTO authoritytest
-        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management)
-        VALUES(#{empCode},#{empName},#{depCode},1, 1);
+        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management,rank_edit)
+        VALUES(#{empCode},#{empName},#{depCode},1, 1,1);
     </insert>
 
     <select id="findAllCodes" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
-        SELECT DEP_CODE FROM codetest
+        SELECT DEP_CODE FROM code
+        WHERE COM_CODE = #{comCode}
+    </select>
+
+<!--    직급가져오기-->
+    <select id="getAllranks" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
+        select POS_CODE from code
         WHERE COM_CODE = #{comCode}
     </select>
 
