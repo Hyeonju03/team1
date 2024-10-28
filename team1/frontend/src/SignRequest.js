@@ -1,13 +1,25 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
 import ListLibrary from "./HtmlFunctions/ListLibrary";
+import {useListLibrary} from "./Context/ListLibraryContext";
 
 export default function SignRequest() {
-    const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
     const [newWindowData, setNewWindowData] = useState([])
+    const {btnCtl, setBtnCtl} = useListLibrary()
+    /* 공지사항 내용 가져오기 */
+    const [noticeHtml, setNoticeHtml] = useState("")
+    const fetchData = async () => {
+        const result = await ListLibrary.noticeList("3118115625-jys");
+        setNoticeHtml(result);
+    };
+    useEffect(() => {
+        if(btnCtl === 3){
+            fetchData();
+        }
+    }, [btnCtl])
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -75,18 +87,6 @@ export default function SignRequest() {
         };
         setDocuments([...documents, newDoc]);
     };
-
-    /* 공지사항 내용 가져오기 */
-    const [noticeHtml, setNoticeHtml] = useState("")
-    const fetchData = async () => {
-        const result = await ListLibrary.noticeList("3118115625-jys", setBtnCtl);
-        setNoticeHtml(result);
-    };
-    useEffect(() => {
-        if(btnCtl === 3){
-            fetchData();
-        }
-    }, [btnCtl])
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100"  onContextMenu={windowRClick}>

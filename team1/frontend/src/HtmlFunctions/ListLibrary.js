@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import {useListLibrary} from "Context/ListLibraryContext"
 
 class ListLibrary {
     static depCode = [];
@@ -201,7 +202,8 @@ class ListLibrary {
         return [this.mail, this.PH]
     }
 
-    static async noticeList(code, setBtnCtl) {
+    static async noticeList(code) {
+
         const dataSet = async () => {
             await axios.get("/noticeListSelect1", {params: {code}})
                 .then(response => {
@@ -231,48 +233,25 @@ class ListLibrary {
                 targets: this.targets
             }
         }
-
         const res = await dataSet();
-        let htmlList = {};
+        let htmlList = "";
         let index = 0;
 
         for (const item of this.noticeNum) {
-            const htmlTag = new DOMParser().parseFromString(
-                `<li id=${item} class=${this.upDepCode[index]} style="list-style-type: none">${item}<input id="${item}Btn" type="checkbox" onchange=""><ul class="list-disc pl-5"></ul></li>`,
-                'text/html'
-            ).body.firstChild;
-            htmlList[htmlTag.id] = htmlTag;
+            htmlList += `<div id="${item}" class="text-xs border break-words" onClick="console.log('좌클릭')"><p>${res.title[index]}</p><p>${res.startDate[index]}~${res.endDate[index]}</p><p>${res.targetState[index] === 0 ? '확인안함' : '확인함'}</p></div>`
             index++;
-        }
-        this.returnList3 = htmlList;
-
-
-        /* htmlList의 값을 읽어와서 뿌려줘야할 것 같음 */
-        console.log(htmlList)
-        let contents = ""
-        for(let key in htmlList){
-            contents += `<li key=${key}></li>`
-            console.log(key)
         }
 
         return (
-        `<div className="h-[390px] overflow-y-auto">
-            <div className="text-xs border break-words" onClick={() => console.log("좌클릭")}>
-                <p>${res.title[0]}</p>
-                <p>${res.startDate[0]}~${res.endDate[0]}</p>
-                <p>${res.targetState[0] === 0 ? '확인안함' : '확인함'}</p>
+            `<div class="h-[390px] overflow-y-auto">
+                ${this.returnList3}
             </div>
-             <div dangerouslySetInnerHTML={{ __html: this.returnList3.outerHTML }} />
-               ${contents}
-        </div>
-        <div>
-            <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(6)}> 공지사항 추가하기
-            </button>
-        </div>
-        `
+            <div>
+                <button class="text-center border w-full h-[45px]" onClick="${setBtnCtl(6)}"> 공지사항 추가하기
+                </button>
+            </div>`
         );
     }
-
 
 
     static noticeWritePage(code, setBtnCtl) {
@@ -337,6 +316,5 @@ class ListLibrary {
         }
     }
 }
-
 window.ListLibrary = ListLibrary;
 export default ListLibrary;
