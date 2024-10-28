@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {useAuth} from "./noticeAuth";
-
+import { useAuth } from "./noticeAuth";
 
 const NoticeList = () => {
     const [notices, setNotices] = useState([]); // 공지사항 목록 상태 초기화
@@ -13,7 +12,10 @@ const NoticeList = () => {
     const [userType, setUserType] = useState("user"); // 사용자 유형 상태 초기화
     const [error, setError] = useState(null); // 오류 상태 초기화
     const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
-    const {  login } = useAuth(); // login 함수 가져오기
+    const { login } = useAuth(); // login 함수 가져오기
+
+    const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태 추가
+    const [searchType, setSearchType] = useState("title"); // 검색 기준 상태 추가
 
     const PAGE_SIZE = 6; // 페이지당 공지사항 수
     const navigate = useNavigate();
@@ -43,9 +45,6 @@ const NoticeList = () => {
         const token = localStorage.getItem('token'); // 토큰 가져오기
         const storedUserType = localStorage.getItem('userType') || "user"; // 사용자 유형 가져오기
 
-        console.log("저장된 ID:", storedId);
-        console.log("저장된 토큰:", token);
-
         if (storedId && token) {
             setIsLoggedIn(true);
             setUserId(storedId);
@@ -65,8 +64,6 @@ const NoticeList = () => {
     // 로그인 처리 함수
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log("로그인 시도:", inputId, userType); // 추가된 로그
-
         if (!inputId) {
             setError("아이디를 입력해주세요.");
             return;
@@ -77,28 +74,22 @@ const NoticeList = () => {
                 userType === "admin" ? '/api/admin/login' : '/api/employ/login',
                 { [userType === "admin" ? 'adminId' : 'empCode']: inputId }
             );
-            console.log("로그인 응답:", response.data); // 추가된 로그
 
             if (response.data.success) {
                 const userRole = userType === "admin" ? 'admin' : 'user'; // 기본 역할 설정
                 login(inputId, response.data.role, response.data.token); // 역할과 토큰 추가
-                console.log("로그인 성공");
                 setIsLoggedIn(true);
                 setUserId(inputId);
                 localStorage.setItem(userType === "admin" ? 'adminId' : 'empCode', inputId); // 로그인 정보 로컬 스토리지에 저장
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userType', userType); // 사용자 유형 저장
-                console.log("저장된 ID:", localStorage.getItem(userType === "admin" ? 'adminId' : 'empCode'));
-                console.log("저장된 토큰:", localStorage.getItem('token'));
                 navigate('/notice/list'); // 로그인 후 리스트 페이지로 이동
             } else {
                 setError("유효하지 않은 로그인 정보입니다.");
             }
         } catch (error) {
-            console.error("로그인 중 오류 발생:", error);
             setError("로그인에 실패했습니다. 다시 시도해주세요.");
         }
-
     };
 
     // 로그아웃 처리 함수
@@ -120,7 +111,27 @@ const NoticeList = () => {
         setCurrentPage(page); // 현재 페이지 업데이트
     };
 
+    // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
+    const handleNoticeClick = (noticeNum) => {
+        navigate('/notice/detail', { state: { noticeNum } });
+    };
 
+    // 필터링된 공지사항 가져오기 (검색창)
+    const filteredNotices = notices.filter((notice) => {
+        if (searchType === "title") {
+            return notice.title.toLowerCase().includes(searchQuery.toLowerCase());
+        } else if (searchType === "content") {
+            return notice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                notice.content.toLowerCase().includes(searchQuery.toLowerCase());
+        }
+        return true; // 기본적으로 모든 공지사항 반환
+    });
+
+    // 페이지를 넘겨도 검색 기능 유지 함수
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        setCurrentPage(1); // 검색할 때마다 페이지를 1로 초기화
+    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -137,20 +148,40 @@ const NoticeList = () => {
                     <div className="max-w-4xl mx-auto">
                         <h1 className="text-3xl font-bold text-center mb-6 text-indigo-800">공지사항</h1>
 
-                        {error && ( // 오류가 있는 경우 오류 메시지 표시
+                        {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                                 <span className="block sm:inline">{error}</span>
                             </div>
                         )}
 
+                        {isLoggedIn && (
+                            <div className="flex justify-center mb-4">
+                                <select
+                                    value={searchType}
+                                    onChange={(e) => setSearchType(e.target.value)}
+                                    className="p-2 border mr-2"
+                                >
+                                    <option value="title">제목만</option>
+                                    <option value="content">제목 + 내용</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    placeholder="검색어 입력"
+                                    className="border w-72 pl-2.5"
+                                />
+                            </div>
+                        )}
+
                         <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full md:w-4/5 lg:w-3/4 mx-auto">
-                            {isLoggedIn ? ( // 로그인 상태 확인
+                            {isLoggedIn ? (
                                 <ul className="divide-y divide-gray-200">
-                                    {notices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
+                                    {filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
                                         <li key={notice.noticeNum} className="p-3 hover:bg-indigo-50 transition duration-200">
                                             <h3
                                                 className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
-                                                onClick={() => navigate(`/notice/detail/${notice.noticeNum}`)}
+                                                onClick={() => handleNoticeClick(notice.noticeNum)}
                                             >
                                                 {notice.title}
                                             </h3>
@@ -161,11 +192,11 @@ const NoticeList = () => {
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="p-4 text-center text-gray-600">로그인 해주세요.</p>  // 로그인하지 않은 경우 안내 메시지
+                                <p className="p-4 text-center text-gray-600">로그인 해주세요.</p>
                             )}
                         </div>
 
-                        {isLoggedIn && ( // 로그인 상태에서만 공지사항 리스트 불러오기
+                        {isLoggedIn && (
                             <div className="flex justify-between items-center w-full mt-4 md:w-4/5 lg:w-3/4 mx-auto">
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
@@ -185,7 +216,7 @@ const NoticeList = () => {
                             </div>
                         )}
 
-                        {isLoggedIn && userType === "admin" &&  ( // 관리자 로그인 상태에서만 보이는 공지사항 등록 버튼
+                        {isLoggedIn && userType === "admin" && (
                             <div className="flex justify-center mt-6">
                                 <button
                                     onClick={() => navigate('/notice/register')}
@@ -199,7 +230,7 @@ const NoticeList = () => {
                 </main>
 
                 <aside className="w-64 p-4 border-l border-gray-300">
-                    {isLoggedIn ? ( // 로그인 상태 확인
+                    {isLoggedIn ? (
                         <div className="mb-4">
                             <p className="mb-2">{userId}님<br/>반갑습니다.</p>
                             <button
@@ -214,11 +245,11 @@ const NoticeList = () => {
                             <input
                                 type="text"
                                 name="id"
-                                value={inputId}  // 상태를 관리
-                                onChange={(e) => setInputId(e.target.value)} // ID 입력 시 상태 업데이트
-                                placeholder={userType === "admin" ? "관리자 ID" : "사원 번호"} // 사용자 ID 입력 필드
+                                value={inputId}
+                                onChange={(e) => setInputId(e.target.value)}
+                                placeholder={userType === "admin" ? "관리자 ID" : "사원 번호"}
                                 className="w-full p-2 border mb-2"
-                                required // 필수 입력 필드
+                                required
                             />
                             <select name="userType" value={userType} onChange={(e) => {
                                 setUserType(e.target.value);

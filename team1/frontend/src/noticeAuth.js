@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
     };
 
-
     useEffect(() => {
         const storedEmpCode = localStorage.getItem('empCode');
         const storedToken = localStorage.getItem('token');

@@ -1,28 +1,34 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from './noticeAuth';
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from  './noticeAuth';
 
 const NoticeDetail = () => {
-    const { noticeNum } = useParams(); // 각각 noticeNum 추출
+    // 수정된 부분: useParams 대신 useLocation 사용
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { empCode, role, logout, config } = useAuth();
+
     const [notice, setNotice] = useState(null); // 공지사항 데이터 상태 초기화
     const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태 초기화
     const [formData, setFormData] = useState({ title: "", content: "" }); // 입력 폼 데이터 초기화
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // 삭제 확인 팝업 초기화
-    const [showEditConfirm, setShowEditConfirm] = useState(false); // 수정 확인 팝업 초기화
-    const { empCode, role, logout, setRole } = useAuth(); // 로그인 상태 가져오기
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        const storedRole = localStorage.getItem('role'); // 역할 가져오기
-        setRole(storedRole); // 역할 상태 업데이트
-    }, []);
+
+    // 수정된 부분: URL 파라미터 대신 location state에서 noticeNum 가져오기
+    const noticeNum = location.state?.noticeNum;
 
     useEffect(() => {
         const fetchNotice = async () => {
+            if (!noticeNum) {
+                console.error("noticeNum이 없습니다.");
+                navigate('/notice/list');
+                return;
+            }
+
             try {
                 // 공지사항 게시글 백엔드(DB) 연동
-                const response = await axios.get(`/api/notice/detail/${noticeNum}`);
+                const response = await axios.get(`/api/notice/detail/${noticeNum}`, config);
                 setNotice(response.data);
                 setFormData({ title: response.data.title, content: response.data.content });
             } catch (error) {
@@ -31,7 +37,7 @@ const NoticeDetail = () => {
             }
         };
         fetchNotice();
-    }, [noticeNum]);
+    }, [noticeNum, navigate, config]);
 
     // 수정시에 발생하는 입력 변화 함수
     const handleInputChange = (e) => {
@@ -42,15 +48,16 @@ const NoticeDetail = () => {
     // 수정 버튼 클릭시 호출되는 함수
     const handleEdit = () => {
         setIsEditing(true);
-
     }
 
-
-
+    // 수정 모드 취소(종료) 함수
+    const handleCancelEdit = () => {
+        setIsEditing(false); // 수정 모드 종료
+        setFormData({ title: notice.title, content: notice.content }); // 원래 내용으로 복구
+    }
 
     // 수정 폼 제출 처리 함수
     const submitEdit = async () => {
-
         const config = {
             withCredentials: true
         };
@@ -91,7 +98,6 @@ const NoticeDetail = () => {
         setShowDeleteConfirm(false); // 팝업창 닫기
     };
 
-
     const handleLogout = () => {
         logout(); // 로그아웃 함수 호출
         navigate('/notice/list'); // 리스트 페이지로 이동
@@ -131,6 +137,9 @@ const NoticeDetail = () => {
                                     </div>
                                     <button type="submit"
                                             className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">수정하기
+                                    </button>
+                                    <button type="button" onClick={handleCancelEdit}
+                                            className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 ml-4">취소
                                     </button>
                                 </form>
                             ) : notice ? (

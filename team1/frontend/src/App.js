@@ -46,7 +46,7 @@ function App() {
 
                       <Route path="/notice/list" exact element={<NoticeList/>} />
                       <Route path="/notice/register" element={<NoticeRegister/>} />
-                      <Route path="/notice/detail/:noticeNum" element={<NoticeDetail/>} />
+                      <Route path="/notice/detail" element={<NoticeDetail/>} />
 
 
                     <Route path="/schedule" element={<Schedule />} />

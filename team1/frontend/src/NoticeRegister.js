@@ -17,6 +17,7 @@ const NoticeRegister = () => {
     // 입력된 내용 제출 함수
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(formData); // 추가: 전송할 데이터 확인
         try {
             // 백엔드(DB)로 데이터 저장
             await axios.post("/api/notice/register", formData);
@@ -25,7 +26,6 @@ const NoticeRegister = () => {
             console.error("등록 중 오류 발생:", error);
         }
     };
-
 
     const handleLogout = () => {
         logout(); // 로그아웃 처리
