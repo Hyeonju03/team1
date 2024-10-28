@@ -64,18 +64,20 @@ public class SignController {
         Path filePath = Paths.get(signDTO.getFilePath()).toAbsolutePath().normalize();
         Resource resource = new UrlResource(filePath.toUri());
 
-        if(!resource.exists()) {
+        if (!resource.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         String contentType = Files.probeContentType(filePath);
         if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = "application/octet-stream"; // 기본 바이너리 타입
         }
+
+        String fileName = signDTO.getFileName();
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", resource.getFilename()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", fileName != null ? fileName : "downloadedFile"))
                 .body(resource);
     }
 

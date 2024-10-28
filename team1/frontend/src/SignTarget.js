@@ -11,11 +11,14 @@ export default function SignTarget({onClose, empCode}) {
 
     useEffect(() => {
         const renderList = async () => {
-            const listElement = ListLibrary.WorkerList(comCode); // 직접 호출
+            const listElement = await ListLibrary.WorkerList(comCode); // 비동기 호출 확인
 
-            if (listContainerRef.current) {
-                const root = createRoot(listContainerRef.current); // createRoot 사용
-                root.render(listElement); // 요소 렌더링
+            // listElement가 유효한지 체크
+            if (listElement && listContainerRef.current) {
+                const root = createRoot(listContainerRef.current);
+                root.render(listElement);
+            } else {
+                console.error("ListElement가 유효하지 않습니다.", listElement);
             }
         };
 
@@ -87,7 +90,7 @@ export default function SignTarget({onClose, empCode}) {
                             >
                                 주소록
                             </div>
-                            <div className=" w-[400px] h-[550px] border-2 border-black rounded-[3px]">
+                            <div className=" w-[400px] h-[550px] border-2 border-black rounded-[3px] overflow-auto">
                                 <div ref={listContainerRef} onClick={handleListClick}/>
                             </div>
                         </div>

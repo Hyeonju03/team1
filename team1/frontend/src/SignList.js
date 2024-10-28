@@ -198,10 +198,11 @@ export default function SignList() {
                             <tbody>
                             {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document, docIndex) => {
                                 const target = document.target
+                                console.log(documents);
                                 return (
                                     <tr key={docIndex} className="cursor-pointer hover:bg-gray-100"
-                                        onClick={handleDocumentClick}>
-                                        <td className="p-2">{document.signNum}</td>
+                                        onClick={() => handleDocumentClick(document.signNum)}>
+                                        <td className="p-2">{docIndex+1}</td>
                                         <td className="p-2">{document.signCateCode}</td>
                                         <td className="p-2">{document.title}</td>
                                         <td className="p-2">{document.startDate}</td>

@@ -49,7 +49,7 @@ function App() {
 
                     <Route path="/sign" element={<SignList />} />
                     <Route path="/sign/register" element={<SignRegister />} />
-                    <Route path="/sign/detail/:id}" element={<SignDetail />} />
+                    <Route path="/sign/detail/:id" element={<SignDetail />} />
 
                     <Route path="/userInfo" element={<UserInfo/>} />
 

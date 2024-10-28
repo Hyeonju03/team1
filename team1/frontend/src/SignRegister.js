@@ -31,6 +31,23 @@ export default function SignRegister() {
     const [userInfo, setUserInfo] = useState([]);
     const empCode = "3118115625-jys1902";
 
+    // 양식 사용하면
+    const [companyName, setCompanyName] = useState("");
+    const [companyAddress, setCompanyAddress] = useState("");
+    const [companyTel, setCompanyTel] = useState("");
+    const [companyFax, setCompanyFax] = useState("");
+    const [docNum, setDocNum] = useState("");
+    const [docReception, setDocReception] = useState("");
+    const [docReference, setDocReference] = useState("");
+    const [docTitle, setDocTitle] = useState("");
+    const [docOutline, setDocOutline] = useState("");
+    const [docContent, setDocContent] = useState("");
+    const [docAttached1, setDocAttached1] = useState("");
+    const [docAttached2, setDocAttached2] = useState("");
+    const [docAttached3, setDocAttached3] = useState("");
+    const [docDate, setDocDate] = useState("");
+    const [docCeo, setDocCeo] = useState("");
+
 
     // 오른쪽 슬라이드 관련
     const windowRClick = async (e) => {
@@ -63,10 +80,15 @@ export default function SignRegister() {
             .then(response => {
                 console.log(response.data);
                 const user = response.data
-                setUserInfo([{empCode:user.empCode, name:user.empName, dep:user.depCode, pos:user.posCode, sign:"기안"}])
+                setUserInfo([{
+                    empCode: user.empCode,
+                    name: user.empName,
+                    dep: user.depCode,
+                    pos: user.posCode,
+                    sign: "기안"
+                }])
             })
     }, []);
-
 
 
     const handleFileChange = (event) => {
@@ -78,44 +100,96 @@ export default function SignRegister() {
         setOpenTarget(false);
         if (param) {
             console.log(param)
-            setUserInfo([...userInfo,...param])
+            setUserInfo([...userInfo, ...param])
         }
     }
-
-    const validationCheck = () => {
-        if (category=="") {
-            alert("카테고리 입력은 필수입니다.")
-            return false;
-        }
-
-        if (!title) {
-            alert("제목을 입력해주세요")
-            return false;
-        }
-
-        if (!content) {
-            alert("내용을 입력해주세요")
-            return false;
-        }
-
-        if (!attachment) {
-            alert("첨부파일을 넣어주세요")
-            return false;
-        }
-
-        return true;
-    }
-
 
     // 문서 작성 버튼 클릭 시
     const handleSubmit = async () => {
         const formData = new FormData();
 
-        // 결재선 길이에 따라 처리
+        // 비동기라 함수 따로 만드는거 안먹힌다 조졌네이거
+        // 유효성 검사
+        // 결재선
         if (userInfo.length == 1) {
             alert("결재선을 추가해야 합니다."); // 길이가 1인 경우 알림
             return; // DB와 연결하지 않음
         }
+        // 카테고리
+        if (category == "") {
+            alert("카테고리 입력은 필수입니다.")
+            return;
+        }
+        // 제목
+        if (title == "") {
+            alert("제목을 입력해주세요.")
+            return;
+        }
+        // 양식 사용 여부
+        if (isToggled) {
+            // 양식 사용하면
+            if (companyName == "") {
+                alert("회사명 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (companyAddress == "") {
+                alert("주소 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (companyTel == "") {
+                alert("전화번호 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (companyFax == "") {
+                alert("팩스 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docNum == "") {
+                alert("문서번호 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docReception == "") {
+                alert("수신 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docTitle == "") {
+                alert("문서제목 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docOutline == "") {
+                alert("개요 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docContent == "") {
+                alert("문서내용 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docDate == "") {
+                alert("날짜 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docCeo == "") {
+                alert("대표작성 칸이 비어 있습니다.")
+                return;
+            }
+
+            setContent("양식,companyName:" + companyName + "_companyAddress:" + companyAddress + "_companyTel:" + companyTel + "_companyFax:" + companyFax + "_docNum:" + docNum + "_docReception:" + docReception + "_docReference:" + docReference + "_docTitle:" + docTitle + "_docOutline:" + docOutline + "_docContent:" + docContent + `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` + `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` + `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` + "_docDate:" + docDate + "_docCeo:" + docCeo);
+
+        } else if (content == "") {
+            alert("전체 내용이 비어있습니다. 다시 확인해 주세요.")
+            return;
+        }
+
 
         // 결재선 구성
         let target = "";
@@ -126,9 +200,6 @@ export default function SignRegister() {
             }
         }
 
-        if(!validationCheck) {
-            return false;
-        }
 
         formData.append('empCode', empCode); // 사용자 코드
         formData.append('title', title); // 제목
@@ -262,157 +333,171 @@ export default function SignRegister() {
 
                                 {isToggled ?
                                     <form>
-                                    <div
-                                        className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
-                                        {/* 내용 추가 가능 */}
-                                        {/*  회사명, 결재라인  */}
-                                        <table className="h-[178px]">
+                                        <div
+                                            className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
+                                            {/* 내용 추가 가능 */}
+                                            {/*  회사명, 결재라인  */}
+                                            <table className="h-[178px]">
 
-                                                    <tr>
-                                                        <td className="w-[500px] text-2xl">
-                                                            <input name="companyName" type="text" placeholder="기업명"
-                                                                   className="text-center h-[100px] w-[450px] text-2xl"/>
-                                                        </td>
-                                                        <td className="w-[500px] flex flex-row justify-center mt-5">
-                                                            {userInfo.map((user, index) => {
-                                                                return (
-                                                            <div
-                                                                className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                                                <div className="h-[30px] bg-gray-200">
-                                                                    {user.sign == "미승인" ? "승인" : user.sign}
-                                                                </div>
-                                                                <div
-                                                                    className="h-[90px] border-t-2 border-black p-2">{user.name}
-                                                                    <br/>
-                                                                    <br/>
-                                                                    {user.sign}
-                                                                </div>
-                                                                {/*  결재자 있으면 추가 작성되게 하기  */}
-                                                            </div>
-                                                                )
-                                                            })}
-                                                        </td>
-                                                    </tr>
-
-                                                < /table>
-                                            {/*    */}
-                                                <div className="mt-[20px]">
-                                                <input name="companyAddress" type="text" placeholder="주소"
-                                                className="text-center h-[50px] w-[900px] text-lg"/>
-                                                </div>
-                                            {/*    */}
-                                                <table className="mb-[40px] border-t-2 border-b-4 border-black">
                                                 <tr>
-                                                <td className="w-[500px] border-r-2 border-black">
-                                                <input name="companyTel" type="tel"
-                                                placeholder="TEL: (000)0000-0000"
-                                                className="text-center h-[50px] w-[400px] text-lg"/>
-                                                </td>
-                                                <td className="w-[500px] border-l-2 border-black">
-                                                <input name="companyFax" type="tel"
-                                                           placeholder="FAX: (000)0000-0000"
-                                                           className="text-center h-[50px] w-[400px] text-lg"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        {/*    */}
-                                        <table className="border-t-4 border-b-4 border-black mb-[20px]">
-                                            <tr className="border-b-2 border-black">
-                                                <td className="w-[200px] border-r-2 border-black">
-                                                    <div>문 서 번 호</div>
-                                                </td>
-                                                <td className="w-[800px]">
-                                                    <input name="docNum" type="text"
-                                                           className="text-center h-[50px] w-[700px] text-lg"/>
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-black">
-                                                <td className="w-[200px] border-r-2 border-black">
-                                                    <div>수 신</div>
-                                                </td>
-                                                <td className="w-[800px]">
-                                                    <input name="docReception" type="text"
-                                                           className="text-center h-[50px] w-[700px] text-lg"/>
-                                                </td>
-                                            </tr>
-                                            <tr className="border-b-2 border-black">
-                                                <td className="w-[200px] border-r-2 border-black">
-                                                    <div>참 조</div>
-                                                </td>
-                                                <td className="w-[800px]">
-                                                    <input name="docReference" type="text"
-                                                           className="text-center h-[50px] w-[700px] text-lg"/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="w-[200px] border-r-2 border-black">
-                                                    <div>제 목</div>
-                                                </td>
-                                                <td className="w-[800px]">
-                                                    <input name="docTitle" type="text"
-                                                           className="text-center h-[50px] w-[700px] text-lg"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        {/*    */}
-                                        <div>
+                                                    <td className="w-[500px] text-2xl">
+                                                        <input name="companyName" type="text" placeholder="기업명"
+                                                               className="text-center h-[100px] w-[450px] text-2xl"
+                                                               onChange={(e) => setCompanyName(e.target.value)}/>
+                                                    </td>
+                                                    <td className="w-[500px] flex flex-row justify-center mt-5">
+                                                        {userInfo.map((user, index) => {
+                                                            return (
+                                                                <div
+                                                                    className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                                                    <div className="h-[30px] bg-gray-200">
+                                                                        {user.sign == "미승인" ? "승인" : user.sign}
+                                                                    </div>
+                                                                    <div
+                                                                        className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
+                                                                        <div>{user.name}</div>
+                                                                        <div>{user.sign}</div>
+                                                                    </div>
+                                                                    {/*  결재자 있으면 추가 작성되게 하기  */}
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </td>
+                                                </tr>
+
+                                            < /table>
+                                            {/*    */}
+                                            <div className="mt-[20px]">
+                                                <input name="companyAddress" type="text" placeholder="주소"
+                                                       className="text-center h-[50px] w-[900px] text-lg"
+                                                       onChange={(e) => setCompanyAddress(e.target.value)}/>
+                                            </div>
+                                            {/*    */}
+                                            <table className="mb-[40px] border-t-2 border-b-4 border-black">
+                                                <tr>
+                                                    <td className="w-[500px] border-r-2 border-black">
+                                                        <input name="companyTel" type="tel"
+                                                               placeholder="TEL: (000)0000-0000"
+                                                               className="text-center h-[50px] w-[400px] text-lg"
+                                                               onChange={(e) => setCompanyTel(e.target.value)}/>
+                                                    </td>
+                                                    <td className="w-[500px] border-l-2 border-black">
+                                                        <input name="companyFax" type="tel"
+                                                               placeholder="FAX: (000)0000-0000"
+                                                               className="text-center h-[50px] w-[400px] text-lg"
+                                                               onChange={(e) => setCompanyFax(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <table className="border-t-4 border-b-4 border-black mb-[20px]">
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>문 서 번 호</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docNum" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocNum(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>수 신</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docReception" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocReception(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>참 조</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docReference" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocReference(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>제 목</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docTitle" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocTitle(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <div>
                                             <textarea name="docOutline" className="w-[950px] h-[300px]"
-                                                      placeholder="문서의 개요를 작성하세요."/>
-                                        </div>
-                                        {/*    */}
-                                        <table>
-                                            <tr>
-                                                <td className="h-[50px]">
-                                                    <div>- 아 래 -</div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div>
+                                                      placeholder="문서의 개요를 작성하세요."
+                                                      onChange={(e) => setDocOutline(e.target.value)}/>
+                                            </div>
+                                            {/*    */}
+                                            <table>
+                                                <tr>
+                                                    <td className="h-[50px]">
+                                                        <div>- 아 래 -</div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div>
                                                     <textarea name="docContent" className="w-[950px] h-[400px]"
-                                                              placeholder="문서의 내용을 작성하세요."/>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        {/*    */}
-                                        <table className="w-[950px]">
-                                            <tr>
-                                                <td rowSpan="3">
-                                                    <div>※ 붙임</div>
-                                                </td>
-                                                <td>
-                                                    1. <input name="docAttached1" type="text"
-                                                              className="w-[700px] h-[50px]"
-                                                              placeholder="내용을 입력해주세요."/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    2. <input name="docAttached2" type="text"
-                                                              className="w-[700px] h-[50px]"
-                                                              placeholder="내용을 입력해주세요."/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    3. <input name="docAttached3" type="text"
-                                                              className="w-[700px] h-[50px]"
-                                                              placeholder="내용을 입력해주세요."/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <div>
-                                            <input name="docDate" className="text-center h-[50px] w-[200px]"
-                                                   placeholder="20oo년  oo월  oo일"/>
+                                                              placeholder="문서의 내용을 작성하세요."
+                                                              onChange={(e) => setDocContent(e.target.value)}/>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <table className="w-[950px]">
+                                                <tr>
+                                                    <td rowSpan="3">
+                                                        <div>※ 붙임</div>
+                                                    </td>
+                                                    <td>
+                                                        1. <input name="docAttached1" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached1(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        2. <input name="docAttached2" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached2(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        3. <input name="docAttached3" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached3(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <div>
+                                                <input name="docDate" className="text-center h-[50px] w-[200px]"
+                                                       placeholder="20oo.  oo.  oo."
+                                                       onChange={(e) => setDocDate(e.target.value)}/>
+                                            </div>
+                                            <div>
+                                                <input name="docCeo" type='textbox'
+                                                       className="text-center h-[100px] w-[300px] text-2xl"
+                                                       placeholder="대표이사   ○ ○ ○"
+                                                       onChange={(e) => setDocCeo(e.target.value)}/>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <input name="docCeo" type='textbox'
-                                                   className="text-center h-[100px] w-[300px] text-2xl"
-                                                   placeholder="대표이사   ○ ○ ○"/>
-                                        </div>
-                                    </div>
-                                    </form>:
+                                    </form> :
                                     <div className="flex mb-2">
                     <textarea className="p-1 w-[1200px] h-[400px] border border-black rounded"
                               placeholder="파일과 함께 보낼 내용을 작성해주세요."
@@ -453,12 +538,12 @@ export default function SignRegister() {
                                     <tbody>
                                     {userInfo.map((user, index) => {
                                         return (<tr key={index}>
-                                            <td>{index+1}</td>
-                                            <td>{user.name}</td>
-                                            <td>{user.dep}</td>
-                                            <td>{user.pos}</td>
-                                            <td>{user.sign}</td>
-                                        </tr>
+                                                <td>{index + 1}</td>
+                                                <td>{user.name}</td>
+                                                <td>{user.dep}</td>
+                                                <td>{user.pos}</td>
+                                                <td>{user.sign}</td>
+                                            </tr>
                                         )
                                     })}
                                     </tbody>
