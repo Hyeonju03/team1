@@ -3,9 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.CodeMapper">
-    <select id="selectCategory" resultType="CodeDTO">
+    <select id="selectCode" resultType="CodeDTO">
         SELECT
-            DEP_CODE, UPDEP_CODE, POS_CODE, DOC_CATE_CODE, SIGN_CATE_CODE
+            COM_CODE, DEP_CODE, UPDEP_CODE, POS_CODE, DOC_CATE_CODE, SIGN_CATE_CODE
         FROM CODE
         WHERE 1=1
         <if test='comCode != null'>
@@ -28,8 +28,8 @@
     <insert id="insertDepartment" parameterType="CodeDTO">
         INSERT INTO CODE
             (COM_CODE, DEP_CODE, UPDEP_CODE)
-        VALUES 
-            (3148127227, #{depCode}, #{updepCode})
+        VALUES
+            (#{comCode}, #{depCode}, #{updepCode})
     </insert>
 
     <update id="updateDepartment">
@@ -39,13 +39,13 @@
             DEP_CODE = #{depCode},
             UPDEP_CODE = #{updepCode}
         WHERE
-            COM_CODE = 3148127227
+            COM_CODE = #{comCode}
     </update>
 
-    <delete id="deleteDepartment">
-        DELETE FROM
-            CODE
-        WHERE
-            DEP_CODE = #{depCode}
-    </delete>
+<!--    <delete id="deleteDepartment">-->
+<!--        DELETE FROM-->
+<!--            CODE-->
+<!--        WHERE-->
+<!--            DEP_CODE = #{depCode}-->
+<!--    </delete>-->
 </mapper>

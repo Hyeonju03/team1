@@ -7,7 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface CodeMapper {
-    CodeDTO selectCategory(String comCode, String depCode); // 모든 카테고리 가져오기
+    CodeDTO selectCode(String comCode, String depCode); // 모든 카테고리 가져오기
 
     List<CodeDTO> getDepCode();
 
@@ -15,5 +15,5 @@ public interface CodeMapper {
 
     void updateDepartment(CodeDTO codeDTO);
 
-    void deleteDepartment(String depCode);
+//    void deleteDepartment(String depCode);
 }

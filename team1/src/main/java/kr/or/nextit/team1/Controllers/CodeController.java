@@ -36,9 +36,14 @@ public class CodeController {
 
     // 부서 추가
     @PostMapping("/departments/insert")
-    public ResponseEntity<String> insertDepartment(@RequestBody CodeDTO newDepartment) {
-        codeService.insertDepartment(newDepartment);
-        return ResponseEntity.ok("부서 추가 성공");
+    public ResponseEntity<String> insertDepartment(@RequestBody CodeDTO codeDTO, String updepCode) {
+        try {
+            // updepCode가 없으면 최상위 부서로 생각
+            codeService.insertDepartment(codeDTO, updepCode != null ? updepCode : "");
+            return ResponseEntity.ok("부서가 성공적으로 추가 되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("부서 추가 중 오류가 발생했습니다.");
+        }
     }
 
     // depCode와 updepCode 업데이트
@@ -47,21 +52,16 @@ public class CodeController {
         codeService.updateDepartment(codeDTO);
         return "부서 코드가 성공적으로 업데이트되었습니다.";
     }
-
-
+    
     // 부서 삭제
-    @DeleteMapping("/departments/delete/{depCode}")
-    public ResponseEntity<String> deleteDepartment(@PathVariable String depCode) {
-        System.out.println("depCode 값 : " + depCode);
+    @DeleteMapping("/departments/delete/{comCode}/{depCode}")
+    public ResponseEntity<String> deleteDepartment(@PathVariable String comCode, @PathVariable String depCode) {
         try {
-            boolean result = codeService.deleteDepartment(depCode);
-            if (result) {
-                return ResponseEntity.ok("부서가 성공적으로 삭제되었습니다.");
-            } else {
-                return ResponseEntity.status(404).body("부서 코드가 존재하지 않습니다.");
-            }
+            codeService.deleteDepartment(comCode, depCode);
+            return ResponseEntity.ok("부서가 성공적으로 삭제되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("서버 오류:" + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("부서 삭제 중 오류가 발생했습니다.");
         }
     }
 }
