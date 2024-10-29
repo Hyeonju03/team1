@@ -3,6 +3,7 @@ import axios from "axios";
 import {useListLibrary} from "Context/ListLibraryContext"
 
 class ListLibrary {
+
     static depCode = [];
     static upDepCode = [];
     static empCode = [];
@@ -12,10 +13,8 @@ class ListLibrary {
     static returnList2 = "";
     static returnList3 = "";
     static top = ""
-    static RClick = false
     static mail = "";
     static PH = "";
-    static state = "";
     static data = [];
     static noticeNum = [];
     static title = [];
@@ -203,7 +202,6 @@ class ListLibrary {
     }
 
     static async noticeList(code) {
-
         const dataSet = async () => {
             await axios.get("/noticeListSelect1", {params: {code}})
                 .then(response => {
@@ -220,6 +218,7 @@ class ListLibrary {
             await axios.get("/noticeListSelect2", {params: {code}})
                 .then(response => {
                     this.targets = response.data
+
                 })
                 .catch(error => console.log(error));
 
@@ -238,21 +237,45 @@ class ListLibrary {
         let index = 0;
 
         for (const item of this.noticeNum) {
-            htmlList += `<div id="${item}" class="text-xs border break-words" onClick="console.log('좌클릭')"><p>${res.title[index]}</p><p>${res.startDate[index]}~${res.endDate[index]}</p><p>${res.targetState[index] === 0 ? '확인안함' : '확인함'}</p></div>`
+            htmlList += `<div id="${item}" class="text-xs border break-words testEvent"><p>${res.title[index]}</p><p>${res.startDate[index]}~${res.endDate[index]}</p><p>${res.targetState[index] === "0" ? '확인안함' : '확인함'}</p></div>`
             index++;
         }
-
+        this.returnList3 = htmlList
         return (
             `<div class="h-[390px] overflow-y-auto">
                 ${this.returnList3}
-            </div>
-            <div>
-                <button class="text-center border w-full h-[45px]" onClick="${setBtnCtl(6)}"> 공지사항 추가하기
-                </button>
             </div>`
         );
     }
 
+    static async loadNotice(code) {
+
+        this.title = "";
+        this.startDate = "";
+        this.endDate = "";
+        this.content = "";
+        this.targets = "";
+        if (!!code) {
+            await axios.get("/loadNoticeSelect", {params: {code}})
+                .then(response => {
+                    this.title = response.data[0];
+                    this.startDate = response.data[1];
+                    this.endDate = response.data[2];
+                    this.content = response.data[3];
+                    this.targets = response.data[4];
+                    //console.log(this.title, this.startDate, this.endDate, this.content, this.targets)
+                })
+                .catch(error => console.log(error));
+        }
+        return `
+            <div class = "border h-[210px]" >
+                <div class = "border w-[100%] h-[25px]">${this.title}</div>
+                <div class="border w-[100%] h-[25px]">${this.startDate}~${this.endDate}</div>
+                <div class="border w-[100%] h-[160px]">${this.content}</div>
+            </div>
+            <div class="border h-[180px]">조직도 들어갈 부분</div>
+            `
+    }
 
     static noticeWritePage(code, setBtnCtl) {
         this.WorkerList2(code)
@@ -265,7 +288,6 @@ class ListLibrary {
         if (this.data.length === 0) {
             alert("공지사항을 입력해주세요");
         } else {
-            console.log("else")
             for (let i = 0; i < this.data.length; i++) {
                 if (this.data[i] === "") {
                     switch (i) {
@@ -315,6 +337,36 @@ class ListLibrary {
             }
         }
     }
+
+    static async noticeUpdate(noticeNum, code){
+
+        const jsonData = {
+            noticeNum: noticeNum,
+            empCode: code,
+            state: "1",
+        }
+        console.log(jsonData)
+        await axios.post("/noticeUpdate", jsonData)
+            .then(response => {
+                console.log('Success:', response.data);
+            })
+            .catch(error => {
+                if (error.response) {
+                    console.error('Error data:', error.response.data);
+                    console.error('Error status:', error.response.status);
+                    console.error('Error headers:', error.response.headers);
+                } else if (error.request) {
+                    console.error('No response received:', error.request);
+                } else {
+                    console.error('Error:', error.message);
+                }
+            });
+    }
+    static addressBook(){
+
+        return
+    }
 }
+
 window.ListLibrary = ListLibrary;
 export default ListLibrary;

@@ -5,6 +5,7 @@ import kr.or.nextit.team1.mappers.ListLibraryMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ListLibraryService {
@@ -29,5 +30,11 @@ public class ListLibraryService {
     }
     public List<ListLibraryDTO> noticeListSelect2(String code){
         return listLibraryMapper.noticeListSelect2(code);
+    }
+    public List<ListLibraryDTO> loadNoticeSelect(String code){
+        return listLibraryMapper.loadNoticeSelect(code);
+    }
+    public void noticeUpdate(Map<String, Object> data){
+        listLibraryMapper.noticeUpdate(data);
     }
 }

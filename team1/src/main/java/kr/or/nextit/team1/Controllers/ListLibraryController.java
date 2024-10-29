@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ListLibraryController {
@@ -88,5 +89,27 @@ public class ListLibraryController {
             list.add(innerList);  // 이 부분 수정
         }
         return ResponseEntity.ok(list);
+    }
+    @GetMapping("/loadNoticeSelect")
+    public ResponseEntity<List<String>[]> loadNoticeSelect(String code) {
+        List<ListLibraryDTO> data = listLibraryService.loadNoticeSelect(code);
+        List<String>[] list = new ArrayList[5];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < data.size(); i++) {
+            list[0].add(data.get(i).getTitle());
+            list[1].add(String.valueOf(data.get(i).getStartDate()));
+            list[2].add(String.valueOf(data.get(i).getEndDate()));
+            list[3].add(data.get(i).getContent());
+            list[4].add(data.get(i).getTargets());
+        }
+        return ResponseEntity.ok(list);
+    }
+    @PostMapping("/noticeUpdate")
+    public ResponseEntity<Void> noticeUpdate(@RequestBody Map<String, Object> data) {
+        System.out.println(data);
+        listLibraryService.noticeUpdate(data);
+        return ResponseEntity.ok().build();
     }
 }

@@ -8,18 +8,47 @@ export default function SignRequest() {
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
     const [newWindowData, setNewWindowData] = useState([])
+    const [noticeNum,setNoticeNum] = useState("")
     const {btnCtl, setBtnCtl} = useListLibrary()
     /* 공지사항 내용 가져오기 */
     const [noticeHtml, setNoticeHtml] = useState("")
+    const [loadNoticeHtml, setLoadNoticeHtml] = useState("")
     const fetchData = async () => {
-        const result = await ListLibrary.noticeList("3118115625-jys");
-        setNoticeHtml(result);
+        const result1 = await ListLibrary.noticeList("3118115625-jys",btnCtl);
+        setNoticeHtml(result1);
+        const result2 = await  ListLibrary.loadNotice(noticeNum);
+        setLoadNoticeHtml(result2);
     };
     useEffect(() => {
-        if(btnCtl === 3){
-            fetchData();
-        }
+        fetchData();
     }, [btnCtl])
+    useEffect(()=>{
+        const elements = document.querySelectorAll(".testEvent");
+
+        const handleClick = (event) => {
+            setBtnCtl(5);
+            setNoticeNum(event.currentTarget.id)
+            ListLibrary.noticeUpdate(event.currentTarget.id,"3118115625-jys")
+        };
+
+        elements.forEach((element) => {
+            element.addEventListener('click', handleClick);
+        });
+
+        return () => {
+            elements.forEach((element) => {
+                element.removeEventListener('click', handleClick);
+            });
+        };
+    },[noticeHtml, btnCtl])
+
+
+
+
+
+
+
+
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -313,7 +342,7 @@ export default function SignRequest() {
                                                     </div>
                                                     <div className="flex">
                                                         <div
-                                                            className="border text-xs flex items-center pl-1 w-[30%]"> 전화번호
+                                                            className="border text-xs flex items-center pl-1 w-[30%]"> 연락처
                                                         </div>
                                                         <input className="border w-[70%]"/>
                                                     </div>
@@ -323,7 +352,12 @@ export default function SignRequest() {
                                             </>
                                             :
                                             btnCtl === 3 ?
-                                                <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
+                                                <>
+                                                    <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
+                                                    <div>
+                                                        <button className="text-center border w-full h-[45px]" onClick={()=>setBtnCtl(6)}> 공지사항 추가하기</button>
+                                                    </div>
+                                                </>
                                                 :
                                                 btnCtl === 4 ?
                                                     <>
@@ -357,17 +391,11 @@ export default function SignRequest() {
                                                     :
                                                     btnCtl === 5 ?
                                                         <>
-                                                            <div className="border h-[235px]">
-                                                                <div className="border w-[100%] h-[25px]">제목</div>
-                                                                <div className="border w-[100%] h-[25px]">기간</div>
-                                                                <div className="border w-[100%] h-[185px]">내용</div>
-                                                            </div>
-                                                            <div className="border h-[200px]">조직도 들어갈 부분</div>
+                                                            <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
                                                             <div>
                                                                 <button
                                                                     className="text-center border w-full h-[45px]"
-                                                                    onClick={() => setBtnCtl(6)}>공지사항
-                                                                    추가하기
+                                                                    onClick={() => setBtnCtl(3)}>목록으로
                                                                 </button>
                                                             </div>
                                                         </>

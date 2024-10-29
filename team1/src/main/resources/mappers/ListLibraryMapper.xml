@@ -21,11 +21,26 @@
     <select id="noticeListSelect1" resultType="ListLibraryDTO" parameterType="String">
         select n.NOTICE_NUM, n.TITLE, n.CONTENT, n.START_DATE ,SUBSTRING(n.TARGET , locate(CONCAT(#{code}, ':'),n.TARGET)+length(CONCAT(#{code}, ':')), 1) AS targetState, n.END_DATE
         from notice n
-        where n.TARGET LIKE CONCAT('%', #{code}, '%');
+        where n.TARGET LIKE CONCAT('%', #{code}, ':%');
     </select>
     <select id="noticeListSelect2" resultType="ListLibraryDTO" parameterType="String">
         select n.TARGET as targets
         from notice n
         where n.TARGET LIKE CONCAT('%', #{code}, '%');
     </select>
+    <select id="loadNoticeSelect" resultType="ListLibraryDTO" parameterType="String">
+        select n.TITLE,n.START_DATE,n.END_DATE,n.CONTENT,n.TARGET as TARGETS
+        from notice n
+        where n.NOTICE_NUM = #{code}
+    </select>
+    <update id="noticeUpdate" parameterType="Map">
+        UPDATE notice
+        SET TARGET = CONCAT(
+        SUBSTRING(TARGET, 1, LOCATE(CONCAT(#{empCode}, ':'), TARGET) + LENGTH(CONCAT(#{empCode}, ':')) - 1),
+        #{state},
+        SUBSTRING(TARGET, LOCATE(CONCAT(#{empCode}, ':'), TARGET) + LENGTH(CONCAT(#{empCode}, ':')) + 1)
+        )
+        WHERE TARGET LIKE CONCAT('%', #{empCode}, ':%')
+        and NOTICE_NUM like #{noticeNum}
+    </update>
 </mapper>
