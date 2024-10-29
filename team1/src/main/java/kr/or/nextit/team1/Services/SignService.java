@@ -77,12 +77,21 @@ public class SignService {
 
     @Transactional
     public String signUpdate(int id, String target) {
-        mapper.signUpdate(target);
-        return target;
+        int updatedCount = mapper.signUpdate(id, target);
+
+        if (updatedCount > 0) {
+            return "업데이트 성공";
+        } else {
+            return "업데이트 실패";
+        }
     }
 
     @Transactional
     public void signDelete(int id) {
-        mapper.signDelete(id);
+        int deletedCount = mapper.signDelete(id);
+        System.out.println("삭제된 행의 수: " + deletedCount);
+        if (deletedCount == 0) {
+            System.out.println(">>>>>>>>>>>여기!!!!!!!!!<<<<<<<<<<<<<");
+        }
     }
 }

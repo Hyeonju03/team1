@@ -1,7 +1,7 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from "axios";
-import {ChevronDown, ChevronRight, Paperclip, Search} from "lucide-react";
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 
 export default function SignList() {
@@ -13,12 +13,12 @@ export default function SignList() {
     const [categories, setCategories] = useState([]);
     const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
-    const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
+    const [checkDoc, setCheckDoc] = useState([]);
 
     useEffect(() => {
         // doc리스트 가져오기
-        const empCode = "3118115625-jys1902"
+        const empCode = "3118115625-eee";
 
         const comCode = 3118115625
 
@@ -49,7 +49,34 @@ export default function SignList() {
     }
 
     // 제목 클릭 시 상세 페이지로 이동
-    const handleDocumentClick = (signNum) => {
+    const handleDocumentClick = async (signNum) => {
+        // 문서의 세부 정보 가져오기
+        const detailResponse = await axios.get(`/sign/detail/${signNum}`);
+
+        const { target } = detailResponse.data;
+
+        // 현재 사용자의 empCode
+        const empCode = "3118115625-eee"; // 실제 empCode로 변경
+
+        // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
+        const targetEntries = target.split(',');
+        const updatedTargetEntries = targetEntries.map(entry => {
+            // entry 형식: "AB:미확인_미승인"
+            const [code, status] = entry.split(':');
+            if (code === empCode && status === '미확인_미승인') {
+                return `${code}:확인_미승인`; // 업데이트된 값
+            }
+            return entry; // 업데이트하지 않은 값
+        });
+
+        // 새로운 TARGET 값 생성
+        const updatedTarget = updatedTargetEntries.join(',');
+        // DB 업데이트 요청
+        await axios.put(`/sign/update/${signNum}`, {
+            target: updatedTarget // 업데이트할 데이터를 포함
+        });
+
+        // 이동
         navigate(`/sign/detail/${signNum}`)
     }
 
@@ -93,7 +120,7 @@ export default function SignList() {
 
     // 체크박스 상태 변화
     const handleCheckboxChange = (signNum) => {
-        setSelectedDocuments(prevState => {
+        setCheckDoc(prevState => {
             if (prevState.includes(signNum)) {
                 return prevState.filter(num => num !== signNum); // 이미 선택된 문서는 해제
             } else {
@@ -102,23 +129,29 @@ export default function SignList() {
         });
     };
 
-    const handleDelete = () => {
-        const deletePromises = selectedDocuments.map(signNum =>
-            axios.delete(`/sign/${signNum}`) // 실제 삭제 API 호출
-        );
+    const handleDelete = async () => {
+        const deletePromises = checkDoc.map(signNum => {
+            return axios.delete(`/sign/delete/${signNum}`); // DELETE 요청을 반환하도록 수정
+        });
 
-        Promise.all(deletePromises)
-            .then(() => {
-                // 삭제 후 상태 업데이트
-                setDocuments(prevDocuments =>
-                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.signNum))
-                );
-                setFilteredDocuments(prevDocuments =>
-                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.signNum))
-                );
-                setSelectedDocuments([]); // 선택된 문서 초기화
-            })
-            .catch(error => console.log(error));
+        try {
+            await Promise.all(deletePromises);
+
+            // 상태 업데이트: 삭제된 문서들을 필터링하여 상태를 갱신
+            setDocuments(prevDocuments =>
+                prevDocuments.filter(doc => !checkDoc.includes(doc.signNum))
+            );
+            setFilteredDocuments(prevFilteredDocuments =>
+                prevFilteredDocuments.filter(doc => !checkDoc.includes(doc.signNum))
+            );
+
+            // 체크박스 초기화
+            setCheckDoc([]); // 체크된 문서 초기화
+            alert("삭제 완료");
+        } catch (error) {
+            console.error("삭제 오류:", error);
+            alert("삭제 중 오류가 발생했습니다.");
+        }
     };
 
     return (
@@ -153,6 +186,14 @@ export default function SignList() {
                             </div>
                         )}
                     </div>
+                    <div>
+                        <button
+                            className="w-full flex items-center mt-4"
+                        >
+                                <ChevronRight className="mr-2 h-4 w-4"/>
+                            내 작성 결재함
+                        </button>
+                    </div>
 
                 </aside>
 
@@ -173,13 +214,13 @@ export default function SignList() {
                         </div>
 
                     </div>
-                    <div className="flex justify-end space-x-2 mb-4">
-                        <button onClick={() => {
+                    <div className="flex justify-end space-x-2 mb-4 ">
+                        <button className="w-[50px] h-[40px] hover:bg-gray-400 rounded" onClick={() => {
                             // 등록 페이지로 이동할 때 선택된 카테고리를 전달
                             navigate('/sign/register', {state: {selectedCategory: selectedCategory}});
                         }}>등록
                         </button>
-                        <button onClick={handleDelete}>삭제</button>
+                        <button className="bg-red-700 text-white rounded w-[50px] h-[40px] ml-2" onClick={handleDelete}>삭제</button>
                     </div>
                     <h1 className="text-2xl font-bold mb-4">문서결재</h1>
                     <div className="space-y-2">
@@ -187,6 +228,7 @@ export default function SignList() {
                         <table className="w-full mb-6">
                             <thead>
                             <tr className="bg-gray-200">
+                                <th></th>
                                 <th className="p-2 text-center">문서번호</th>
                                 <th className="p-2 text-center">분류</th>
                                 <th className="p-2 text-center">제목</th>
@@ -200,18 +242,20 @@ export default function SignList() {
                                 const target = document.target
                                 console.log(documents);
                                 return (
-                                    <tr key={docIndex} className="cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleDocumentClick(document.signNum)}>
-                                        <td className="p-2">{docIndex+1}</td>
-                                        <td className="p-2">{document.signCateCode}</td>
-                                        <td className="p-2">{document.title}</td>
-                                        <td className="p-2">{document.startDate}</td>
-                                        <td className="p-2">{document.endDate}</td>
-                                        <td className="p-2">
-                                            {target.split(',')[0]?.split('_')[1] || '없음'}
-                                            {target.split(',')[1]? (" > "+target.split(',')[1].split('_')[1]) : ""}
+                                    <tr key={docIndex} className="cursor-pointer hover:bg-gray-100">
+                                        <td><input type="checkbox" className="checkDelete"
+                                                   onChange={() => handleCheckboxChange(document.signNum)}
+                                                   checked={checkDoc.includes(document.signNum)}/></td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{docIndex+1}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.signCateCode}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.title}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.startDate}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.endDate}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>
+                                            {target.split(',')[1]?.split('_')[1] || ''}
                                             {target.split(',')[2]? (" > "+target.split(',')[2].split('_')[1]) : ""}
                                             {target.split(',')[3]? (" > "+target.split(',')[3].split('_')[1]) : ""}
+                                            {target.split(',')[4]? (" > "+target.split(',')[4].split('_')[1]) : ""}
                                         </td>
                                     </tr>
                                 );

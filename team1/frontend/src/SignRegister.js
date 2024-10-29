@@ -21,7 +21,7 @@ export default function SignRegister() {
     const [category, setCategory] = useState(location.state?.selectCategory || '');
     const [categories, setCategories] = useState([]);
 
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [isToggled, setIsToggled] = useState(false);
     const [openTarget, setOpenTarget] = useState(false);
 
@@ -29,7 +29,7 @@ export default function SignRegister() {
     const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
     const [userInfo, setUserInfo] = useState([]);
-    const empCode = "3118115625-jys1902";
+    const empCode = "3118115625-eee";
 
     // 양식 사용하면
     const [companyName, setCompanyName] = useState("");
@@ -90,6 +90,29 @@ export default function SignRegister() {
             })
     }, []);
 
+    useEffect(() => {
+        if (isToggled) {
+            // 양식이 사용될 때 content 업데이트
+            const newContent = "양식_companyName:" + companyName +
+                "_companyAddress:" + companyAddress +
+                "_companyTel:" + companyTel +
+                "_companyFax:" + companyFax +
+                "_docNum:" + docNum +
+                "_docReception:" + docReception +
+                "_docReference:" + docReference +
+                "_docTitle:" + docTitle +
+                "_docOutline:" + docOutline +
+                "_docContent:" + docContent +
+                `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` +
+                `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` +
+                `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` +
+                "_docDate:" + docDate +
+                "_docCeo:" + docCeo;
+
+            setContent(newContent);
+        }
+    }, [isToggled, companyName, companyAddress, companyTel, companyFax, docNum, docReception, docReference, docTitle, docOutline, docContent, docAttached1, docAttached2, docAttached3, docDate, docCeo]);
+
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
@@ -108,8 +131,6 @@ export default function SignRegister() {
     const handleSubmit = async () => {
         const formData = new FormData();
 
-        // 비동기라 함수 따로 만드는거 안먹힌다 조졌네이거
-        // 유효성 검사
         // 결재선
         if (userInfo.length == 1) {
             alert("결재선을 추가해야 합니다."); // 길이가 1인 경우 알림
@@ -183,8 +204,6 @@ export default function SignRegister() {
                 return;
             }
 
-            setContent("양식,companyName:" + companyName + "_companyAddress:" + companyAddress + "_companyTel:" + companyTel + "_companyFax:" + companyFax + "_docNum:" + docNum + "_docReception:" + docReception + "_docReference:" + docReference + "_docTitle:" + docTitle + "_docOutline:" + docOutline + "_docContent:" + docContent + `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` + `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` + `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` + "_docDate:" + docDate + "_docCeo:" + docCeo);
-
         } else if (content == "") {
             alert("전체 내용이 비어있습니다. 다시 확인해 주세요.")
             return;
@@ -192,7 +211,7 @@ export default function SignRegister() {
 
 
         // 결재선 구성
-        let target = "";
+        let target = `${userInfo[0].empCode}:확인_기안,`;
         for (let i = 1; i < userInfo.length; i++) {
             target += `${userInfo[i].empCode}:미확인_미승인`; // 첫 번째 인덱스 제외
             if (i < userInfo.length - 1) {
@@ -219,9 +238,15 @@ export default function SignRegister() {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            console.log(response.data); // 성공 메시지
-            // 성공 시 문서 리스트로 이동
-            navigate('/sign');
+            const success = window.confirm("정말 저장 하시겠습니까? 수정이 불가하니 양식을 사용한다면 다시 한번 확인하는것을 권장드립니다."); // 성공 메시지
+
+            if(success) {
+                // 성공 시 문서 리스트로 이동
+                navigate('/sign');
+            } else {
+                return;
+            }
+
         } catch (error) {
             console.error('Error creating sign:', error);
             // 오류 처리: 사용자에게 알림 추가 가능

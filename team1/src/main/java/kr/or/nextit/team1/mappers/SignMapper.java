@@ -11,6 +11,6 @@ public interface SignMapper {
     List<SignDTO> signSelect(@Param("empCode") String empCode);
     void signInsert(SignDTO signDTO);
     SignDTO signDetail(int id);
-    void signUpdate(String target);
-    void signDelete(int id);
+    int signUpdate(@Param("id") int id, @Param("target") String target);
+    int signDelete(int id);
 }

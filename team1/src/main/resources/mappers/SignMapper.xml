@@ -11,6 +11,8 @@
             SIGN_TEST
         WHERE
             EMP_CODE = #{empCode}
+        OR
+            TARGET LIKE CONCAT('%', #{empCode}, '%')
     </select>
 
     <select id="signDetail" parameterType="int" resultType="SignDTO">
@@ -40,19 +42,19 @@
             (#{empCode}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
     </insert>
 
-    <update id="signUpdate" parameterType="SignDTO">
+    <update id="signUpdate" parameterType="map">
         UPDATE
             SIGN_TEST
         SET
             TARGET = #{target}
-		WHERE
-			SIGN_NUM = #{signNum}
+        WHERE
+            SIGN_NUM = #{id}
     </update>
 
-    <delete id="signDelete">
+    <delete id="signDelete" parameterType="int">
         DELETE FROM
             SIGN_TEST
         WHERE
-            SIGN_NUM = #{signNum}
+            SIGN_NUM = #{id}
     </delete>
 </mapper>

@@ -1,9 +1,14 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import axios from "axios";
 import {ChevronDown, ChevronRight, Paperclip} from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function SignDetail() {
+    // pdf
+    const printRef = useRef(null); // useRef로 초기화
+
     const navigate = useNavigate();
     const [isToggled, setIsToggled] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
@@ -13,9 +18,34 @@ export default function SignDetail() {
     const [loading, setLoading] = useState(true);
     const [userInfo, setUserInfo] = useState([]); // useState로 변경
     const [user, setUser] = useState(null);
+    let contentType;
 
-    const empCode = "3118115625-jys1902";
+    const empCode = "3118115625-eee";
     const comCode = "3118115625";
+
+    const handleDownloadPdf = async () => {
+        const element = printRef.current;
+        if (!element) {
+            return;
+        }
+        const canvas = await html2canvas(element);
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('portrait', 'pt', 'a4');
+
+        const componentWidth = element.offsetWidth;
+        const componentHeight = element.offsetHeight;
+
+        // A4 사이즈에 맞게 비율 조정
+        const pdfWidth = 595.28; // A4 Width in pt
+        const pdfHeight = 842.52; // A4 Height in pt
+
+        const imgWidth = (componentWidth * pdfHeight) / componentHeight;
+        const imgHeight = pdfHeight;
+
+        // 이미지 추가
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save('결재문서.pdf');
+    };
 
     useEffect(() => {
         // 결재선에 본인꺼 띄우기
@@ -89,7 +119,19 @@ export default function SignDetail() {
             }
         };
 
+        const fetchSignContent = () => {
+            if (!sign.content || !sign) {
+                return;
+            }
+
+            contentType = sign.content.split("_")[0]
+            if(contentType == "양식") {
+                setIsToggled(true);
+            }
+        }
+
         fetchUserDetails();
+        fetchSignContent();
     }, [sign]);
 
 
@@ -129,31 +171,103 @@ export default function SignDetail() {
         }
     };
 
-    const consoleSignBtn = () => {
-        let index;
+    // 승인하기 버튼
+    const asignButton = async (signNum) => {
+        // 현재 사용자의 empCode
+        const empCode = "3118115625-eee"; // 실제 empCode로 변경
 
-        axios.get(`/sign/detail/${id}`)
-            .then(response => {
-                const targetList = response.data.target.split(",");
-                targetList.map((target, targetIndex) => {
-                    if(target.contains(empCode)) {
-                        index = targetIndex;
-                        target.split("")
+        // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
+        const targetEntries = sign.target.split(',');
+        const updatedTargetEntries = targetEntries.map((entry, index) => {
+            const [code, status] = entry.split(':');
+
+            // 자기 앞에 있는 사람이 미승인 상태인지 체크
+            if (status === '확인_미승인') {
+                if (index > 0) {
+                    const previousEntry = targetEntries[index - 1].split(':');
+                    const previousStatus = previousEntry[1];
+
+                    // 앞 사람이 미승인인 경우 승인 불가
+                    if (previousStatus === '미확인_미승인') {
+                        alert("앞에 있는 사람이 미승인 상태입니다. 승인할 수 없습니다.");
+                        return entry; // 변경하지 않음
                     }
-                })
-            })
-            .catch(error => console.log(error));
+                }
 
-        // axios.get(`/sign/update/${id}`)
-        //     .then(response => {
-        //         console.log("된건가")
-        //     })
-        //     .catch(error => console.log(error));
+                // 현재 사용자의 empCode가 맞고 확인 상태일 때 승인으로 변경
+                if (code === empCode) {
+                    alert("승인 하였습니다.");
+                    return `${code}:확인_승인`; // 업데이트된 값
+                }
+            }
+
+            return entry; // 업데이트하지 않은 값
+        });
+
+        // 새로운 TARGET 값 생성
+        const updatedTarget = updatedTargetEntries.join(',');
+
+        console.log("sign >>", sign);
+        // DB 업데이트 요청
+        await axios.put(`/sign/update/${signNum}`, {
+            target: updatedTarget // 업데이트할 데이터를 포함
+        });
+
+        // 업데이트 후 페이지 새로고침
+        window.location.reload();
     };
+
+    const rejectButton = async (signNum) => {
+        // 현재 사용자의 empCode
+        const empCode = "3118115625-eee"; // 실제 empCode로 변경
+
+        // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
+        const targetEntries = sign.target.split(',');
+        const updatedTargetEntries = targetEntries.map((entry, index) => {
+            const [code, status] = entry.split(':');
+
+            // 자기 앞에 있는 사람이 미승인 상태인지 체크
+            if (status === '확인_미승인') {
+                if (index > 0) {
+                    const previousEntry = targetEntries[index - 1].split(':');
+                    const previousStatus = previousEntry[1];
+
+                    // 앞 사람이 미승인인 경우 승인 불가
+                    if (previousStatus === '미확인_미승인') {
+                        alert("앞에 있는 사람이 미승인 상태입니다. 결재를 진행 할 수 없습니다.");
+                        return entry; // 변경하지 않음
+                    }
+                }
+
+                // 현재 사용자의 empCode가 맞고 확인 상태일 때 승인으로 변경
+                if (code === empCode) {
+                    alert("반려 하였습니다.");
+                    return `${code}:확인_반려`; // 업데이트된 값
+                }
+            }
+
+            return entry; // 업데이트하지 않은 값
+        });
+
+        // 새로운 TARGET 값 생성
+        const updatedTarget = updatedTargetEntries.join(',');
+
+        // DB 업데이트 요청
+        await axios.put(`/sign/update/${signNum}`, {
+            target: updatedTarget // 업데이트할 데이터를 포함
+        });
+
+        // 업데이트 후 페이지 새로고침
+        window.location.reload();
+    }
 
     const handleHome = () => {
         navigate(`/sign`);
     };
+
+
+
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -199,20 +313,193 @@ export default function SignDetail() {
                                 <div className="flex">
                                     <div
                                         className="border rounded text-center p-2 mr-2 mb-2 w-[70px] text-sm font-bold text-gray-600 text-left">{sign.signCateCode}</div>
-                                    <input type="text" className="w-[1087px] p-2 border rounded mb-2"
+                                    <input type="text" className="w-[1122px] p-2 border rounded mb-2"
                                            value={sign.title} readOnly/>
                                 </div>
-                                {isToggled ? (
-                                    <form>
-                                        {/* ... form content ... */}
-                                        {/* Rest of your form elements go here */}
-                                    </form>
-                                ) : (
-                                    <div className="flex mb-2">
+                                {isToggled ?
+                                        <form ref={printRef}>
+                                            <div
+                                                className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4"
+                                                >
+                                                {/* 내용 추가 가능 */}
+                                                {/*  회사명, 결재라인  */}
+                                                <table className="h-[178px]">
+
+                                                    <tr>
+                                                        <td className="w-[500px] text-2xl">
+                                                            <input name="companyName" type="text" placeholder="기업명"
+                                                                   className="text-center h-[100px] w-[450px] text-2xl"
+                                                                   value={sign.content.split("_")[1].split(":")[1]} readOnly/>
+                                                        </td>
+                                                        <td className="w-[500px] flex flex-row justify-center mt-5">
+                                                            {userInfo.map((user, index) => {
+                                                                return (
+                                                                    <div
+                                                                        className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                                                        <div className="h-[30px] bg-gray-200">
+                                                                            {user.sign == "미승인" ? "승인" : user.sign}
+                                                                        </div>
+                                                                        <div
+                                                                            className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
+                                                                            <div>{user.name}</div>
+                                                                            <div>{user.sign}</div>
+                                                                        </div>
+                                                                        {/*  결재자 있으면 추가 작성되게 하기  */}
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </td>
+                                                    </tr>
+
+                                                < /table>
+                                                {/*    */}
+                                                <div className="mt-[20px]">
+                                                    <input name="companyAddress" type="text" placeholder="주소"
+                                                           className="text-center h-[50px] w-[900px] text-lg"
+                                                           value={sign.content.split("_")[2].split(":")[1]} readOnly/>
+                                                </div>
+                                                {/*    */}
+                                                <table className="mb-[40px] border-t-2 border-b-4 border-black">
+                                                    <tr>
+                                                        <td className="w-[500px] border-r-2 border-black">
+                                                            <input name="companyTel" type="tel"
+                                                                   placeholder="TEL: (000)0000-0000"
+                                                                   className="text-center h-[50px] w-[400px] text-lg"
+                                                                   value={sign.content.split("_")[3].split(":")[1]} readOnly/>
+                                                        </td>
+                                                        <td className="w-[500px] border-l-2 border-black">
+                                                            <input name="companyFax" type="tel"
+                                                                   placeholder="FAX: (000)0000-0000"
+                                                                   className="text-center h-[50px] w-[400px] text-lg"
+                                                                   value={sign.content.split("_")[4].split(":")[1]} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                {/*    */}
+                                                <table className="border-t-4 border-b-4 border-black mb-[20px]">
+                                                    <tr className="border-b-2 border-black">
+                                                        <td className="w-[200px] border-r-2 border-black">
+                                                            <div>문 서 번 호</div>
+                                                        </td>
+                                                        <td className="w-[800px]">
+                                                            <input name="docNum" type="text"
+                                                                   className="text-center h-[50px] w-[700px] text-lg"
+                                                                   value={sign.content.split("_")[5].split(":")[1]} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr className="border-b-2 border-black">
+                                                        <td className="w-[200px] border-r-2 border-black">
+                                                            <div>수 신</div>
+                                                        </td>
+                                                        <td className="w-[800px]">
+                                                            <input name="docReception" type="text"
+                                                                   className="text-center h-[50px] w-[700px] text-lg"
+                                                                   value={sign.content.split("_")[6].split(":")[1]} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr className="border-b-2 border-black">
+                                                        <td className="w-[200px] border-r-2 border-black">
+                                                            <div>참 조</div>
+                                                        </td>
+                                                        <td className="w-[800px]">
+                                                            <input name="docReference" type="text"
+                                                                   className="text-center h-[50px] w-[700px] text-lg"
+                                                                   value={sign.content.split("_")[7].split(":")[1]} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="w-[200px] border-r-2 border-black">
+                                                            <div>제 목</div>
+                                                        </td>
+                                                        <td className="w-[800px]">
+                                                            <input name="docTitle" type="text"
+                                                                   className="text-center h-[50px] w-[700px] text-lg"
+                                                                   value={sign.content.split("_")[8].split(":")[1]} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                {/*    */}
+                                                <div>
+                                            <textarea name="docOutline" className="w-[950px] h-[300px]"
+                                                      placeholder="문서의 개요를 작성하세요."
+                                                      value={sign.content.split("_")[9].split(":")[1]} readOnly/>
+                                                </div>
+                                                {/*    */}
+                                                <table>
+                                                    <tr>
+                                                        <td className="h-[50px]">
+                                                            <div>- 아 래 -</div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div>
+                                                    <textarea name="docContent" className="w-[950px] h-[400px]"
+                                                              placeholder="문서의 내용을 작성하세요."
+                                                              value={sign.content.split("_")[10].split(":")[1]} readOnly/>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                {/*    */}
+                                                <table className="w-[950px]">
+                                                    <tr>
+                                                        <td rowSpan="3">
+                                                            <div>※ 붙임</div>
+                                                        </td>
+                                                        <td>
+                                                            1. <input name="docAttached1" type="text"
+                                                                      className="w-[700px] h-[50px]"
+                                                                      placeholder="내용을 입력해주세요."
+                                                                      value={sign.content.split("_")[11].split(":")[0] == "docAttached1" ? sign.content.split("_")[11].split(":")[1] : ""} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            2. <input name="docAttached2" type="text"
+                                                                      className="w-[700px] h-[50px]"
+                                                                      placeholder="내용을 입력해주세요."
+                                                                      value={sign.content.split("_")[12].split(":")[0] == "docAttached2" ? sign.content.split("_")[12].split(":")[1] : ""} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            3. <input name="docAttached3" type="text"
+                                                                      className="w-[700px] h-[50px]"
+                                                                      placeholder="내용을 입력해주세요."
+                                                                      value={sign.content.split("_")[13].split(":")[0] == "docAttached3" ? sign.content.split("_")[13].split(":")[1] : ""} readOnly/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div>
+                                                    <input name="docDate" className="text-center h-[50px] w-[200px]"
+                                                           placeholder="20oo.  oo.  oo."
+                                                           value={sign.content.split("_")[11].split(":")[0] == "docDate" ?
+                                                               (sign.content.split("_")[11].split(":")[1]) :
+                                                               (sign.content.split("_")[12].split(":")[0] == "docDate"?
+                                                                   sign.content.split("_")[12].split(":")[1] :
+                                                                   (sign.content.split("_")[13].split(":")[0] == "docDate"?
+                                                                       sign.content.split("_")[13].split(":")[1] :
+                                                                       sign.content.split("_")[14].split(":")[1]))} readOnly/>
+                                                </div>
+                                                <div>
+                                                    <input name="docCeo" type='textbox'
+                                                           className="text-center h-[100px] w-[300px] text-2xl"
+                                                           placeholder="대표이사   ○ ○ ○"
+                                                           value={sign.content.split("_")[12].split(":")[0] == "docDate" ?
+                                                               (sign.content.split("_")[12].split(":")[1]) :
+                                                               (sign.content.split("_")[13].split(":")[0] == "docDate"?
+                                                                   sign.content.split("_")[13].split(":")[1] :
+                                                                   (sign.content.split("_")[14].split(":")[0] == "docDate"?
+                                                                       sign.content.split("_")[14].split(":")[1] :
+                                                                       sign.content.split("_")[15].split(":")[1]))} readOnly/>
+                                                </div>
+                                            </div>
+                                        </form> : <div className="flex mb-2">
                                         <textarea className="p-1 w-[1200px] h-[400px] border border-black rounded"
                                                   value={sign.content} readOnly/>
                                     </div>
-                                )}
+                                }
                                 <div>
                                     <div className="flex justify-between mb-4 w-[1200px] p-2 border rounded">
                                         <div className="flex items-center">
@@ -238,17 +525,10 @@ export default function SignDetail() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>{user.empName}</td>
-                                            <td>{user.depCode}</td>
-                                            <td>{user.posCode}</td>
-                                            <td>기안</td>
-                                        </tr>
                                     {userInfo.map((user, index) => {
                                         return (
                                             <tr key={index}>
-                                                <td>{index + 2}</td>
+                                                <td>{index + 1}</td>
                                                 <td>{user.name}</td>
                                                 <td>{user.dep}</td>
                                                 <td>{user.pos}</td>
@@ -259,17 +539,25 @@ export default function SignDetail() {
                                     })}
                                     </tbody>
                                 </table>
+                                {isToggled ?
+                                    <button onClick={handleDownloadPdf}>
+                                    <span>PDF 다운로드</span>
+                                </button> : ""}
                             </div>
                         </div>
                     </div>
                     <div className="mt-4">
                         <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]"
-                                onClick={consoleSignBtn}
+                                onClick={() => asignButton(sign.signNum)}
                         >
                             결재승인
                         </button>
                         <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]">
                             목록으로
+                        </button>
+                        <button className="bg-red-700 text-white px-6 py-2 rounded hover:bg-red-900 ml-[5px]"
+                                onClick={() => rejectButton(sign.signNum)}>
+                            결재반려
                         </button>
                     </div>
                 </main>

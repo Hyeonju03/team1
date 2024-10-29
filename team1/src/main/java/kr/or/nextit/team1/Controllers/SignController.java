@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -83,10 +84,12 @@ public class SignController {
 
     // 결재 수정 (target만 수정됨)
     @PutMapping("/sign/update/{id}")
-    public ResponseEntity<String> signUpdate(@PathVariable int id, @RequestParam String target) {
+    public ResponseEntity<String> signUpdate(@PathVariable int id, @RequestBody Map<String, String> body) {
+        String target = body.get("target");
         String sign = service.signUpdate(id, target);
         return ResponseEntity.ok(sign);
     }
+
 
 
     @DeleteMapping("/sign/delete/{id}")
