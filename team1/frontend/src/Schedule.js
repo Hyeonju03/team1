@@ -16,21 +16,87 @@ export default function Schedule() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSchedule, setEditingSchedule] = useState(null);
+    const [empCode,setEmpCode] = useState("")
+    const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+    const [auth, setAuth] = useState("");
     const [newSchedule, setNewSchedule] = useState({
+        snum : 0,
         content: '',
         startDate: new Date(),
         endDate: new Date(),
-        type: '개인',
+        category: '개인',
     });
 
+    //로그인시 empcode를 일단 가져오는코드
     useEffect(() => {
-        const res = axios.get('/schedule')
-            .then(response => {
-                console.log(response.data);
-                setSchedules(response.data); // 서버에서 받은 데이터를 상태에 설정
-            })
-        console.log(res)
+        // 로그인 후 empCode를 설정하는 로직
+        const fetchEmpCode = async () => {
+            // 여기에서 실제 empCode를 설정
+            const loggedInEmpCode = "2218701188-d"; // 로그인 후 받아온 empCode
+            setEmpCode(loggedInEmpCode);
+        };
+        fetchEmpCode();
     }, []);
+
+    //console.log(empCode)
+
+    useEffect(() => {
+        if(empCode){
+            const fetchSchedules = async () => {
+                try {
+                    const response = await axios.get(`/selectSchedule?empCode=${empCode}`);
+                    const schedulesWithDates = response.data.map(schedule => ({
+                        ...schedule,
+                        snum : schedule.snum,
+                        startDate: new Date(schedule.startDate), // 문자열을 Date 객체로 변환
+                        endDate: new Date(schedule.endDate), // 문자열을 Date 객체로 변환
+                    }));
+                    console.log(schedulesWithDates);
+                    setSchedules(schedulesWithDates);
+                } catch (error) {
+                    console.error("개에러", error);
+                }
+            };
+            fetchSchedules();
+        }
+    }, [empCode]);
+
+    useEffect(() => {
+        if(empCode) {
+            const fetchData = async () => {
+                console.log(empCode)
+                try {
+                    const resp = await axios.get("/selectAuth", {params: {empCode: empCode}});
+                    console.log(resp);
+                    setAuth(resp.data)
+                } catch (error){
+                    console.error(error)
+                }
+            }
+                if (auth ==0){
+                    //암것도못함
+                }
+                else if(auth == 1){
+                    //작성가능
+                }else if (auth == 2) {
+                    //수정가능
+                }else if (auth== 3) {
+                    //삭제
+                }else if (auth == 4) {
+                    //작성+수정
+                }else if (auth== 5) {
+                    //작성+삭제
+                }else if (auth == 6) {
+                    //수정+삭제
+                }else {
+                    //다가능
+                }
+            }
+
+        if(empCode){
+            fetch();
+        }
+        },[empCode])
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -42,39 +108,87 @@ export default function Schedule() {
         setIsModalOpen(true);
     };
 
-    const handleAddSchedule = () => {
-        if (newSchedule.content && newSchedule.type) {
-            setSchedules(prev => [
-                ...prev,
-                { id: Date.now(), ...newSchedule },
-            ]);
-            resetModal();
+    const handleAddSchedule = async () => {
+        if (newSchedule.content && newSchedule.category) {
+
+            try {
+                const resp = await axios.post("/scheduleInsert", {
+                    empCode: empCode,
+                    content: newSchedule.content,
+                    startDate: newSchedule.startDate.toISOString(),
+                    endDate: newSchedule.endDate.toISOString(),
+                    category: newSchedule.category,
+                });
+                console.log(resp);
+
+                const newScheduleWithId = {
+                    //id: Date.now(),
+                    id: newSchedule.snum,
+                    content: newSchedule.content,
+                    startDate: newSchedule.startDate,
+                    endDate: newSchedule.endDate,
+                    category: newSchedule.category,
+                };
+
+                setSchedules(prev => [...prev, newScheduleWithId]); // 새로운 일정 추가
+
+                resetModal();
+            }catch (error){
+                console.error(error)
+            }
         }
     };
 
-    const handleEditSchedule = (schedule) => {
+    const handleEditSchedule = async (schedule) => {
         setEditingSchedule(schedule);
         setNewSchedule(schedule);
         setIsModalOpen(true);
+        console.log("..?",newSchedule)
+
     };
 
-    const handleUpdateSchedule = () => {
-        if (editingSchedule && newSchedule.content && newSchedule.type) {
+    const handleUpdateSchedule = async () => {
+        if (editingSchedule && newSchedule.content && newSchedule.category) {
+
+            try {
+                const resp = await axios.put("/updateSchedule",  newSchedule);
+                console.log(resp)
+            } catch (error){
+                console.error(error)
+            }
+
             setSchedules(prev =>
-                prev.map(s => (s.id === editingSchedule.id ? { ...s, ...newSchedule } : s))
+                prev.map(s => (s.snum === editingSchedule.snum ? { ...s, ...newSchedule } : s))
             );
             resetModal();
         }
+
+
     };
 
-    const handleDeleteSchedules = () => {
+    const handleDeleteSchedules = async () => {
+        console.log("handleDeleteSchedules");
+        console.log(selectedScheduleId);
+        try {
+            const resp = await axios.delete("/deleteSchedule", {
+                params: { sNum: selectedScheduleId }});
+            console.log(resp)
+        } catch (error){
+            console.error(error)
+        }
+
         setSchedules(prev => prev.filter(s => !s.selected));
+
     };
 
     const toggleScheduleSelection = (id) => {
+        setSelectedScheduleId(prev => (prev === id ? null : id));
         setSchedules(prev =>
-            prev.map(s => (s.id === id ? { ...s, selected: !s.selected } : s))
+            prev.map(s => ({ ...s, selected: s.snum === id }))
         );
+    };
+    const handleScheduleTypeChange = (category) => {
+        setNewSchedule(prev => ({ ...prev, category }));
     };
 
     const resetModal = () => {
@@ -84,7 +198,7 @@ export default function Schedule() {
             content: '',
             startDate: new Date(),
             endDate: new Date(),
-            type: '개인',
+            category: '개인',
         });
         setSelectedDate(null);
     };
@@ -102,22 +216,34 @@ export default function Schedule() {
                             onChange={handleDateClick}
                             value={selectedDate}
                             className="w-full h-full text-lg" // Tailwind 클래스로 크기 설정
+
                             tileContent={({ date }) => {
                                 const daySchedules = schedules.filter(s => {
+
+                                    //console.log(s.snum);
                                     const start = s.startDate;
                                     const end = s.endDate;
-                                    // 시작일과 종료일 사이에 현재 날짜가 포함되는지 확인
-                                    return date >= start && date <= end;
+                                    // 현재 날짜가 시작일과 종료일 사이에 있는지 확인
+
+                                    const title = date >= start && date <= end;
+
+                                    //console.log(title);
+
+                                    return title;
                                 });
+
                                 return (
                                     <div className="text-xs mt-1">
-                                        {daySchedules.slice(0, 2).map(s => (
-                                            <div key={s.id} className={`truncate ${typeColors[s.type]}`}>{s.content}</div>
+                                        {daySchedules.map(s => (
+                                            <div key={s.snum} className={`truncate ${typeColors[s.category]}`}>
+                                                {s.content}
+                                            </div>
                                         ))}
                                         {daySchedules.length > 2 && <div>...</div>}
                                     </div>
                                 );
                             }}
+
                         />
                     </div>
                     <div className="w-2/5 pl-4">
@@ -138,17 +264,17 @@ export default function Schedule() {
                         <div className="h-[calc(100vh-200px)] overflow-y-auto border rounded p-2">
                             <ul>
                                 {schedules.sort((a, b) => a.startDate.getTime() - b.startDate.getTime()).map(schedule => (
-                                    <li key={schedule.id}
-                                        className={`mb-2 p-2 border rounded ${typeColors[schedule.type]}`}>
+                                    <li key={schedule.snum}
+                                        className={`mb-2 p-2 border rounded ${typeColors[schedule.category]}`}>
                                         <div className="flex items-center">
                                             <input
                                                 type="checkbox"
-                                                checked={schedule.selected}
-                                                onChange={() => toggleScheduleSelection(schedule.id)}
+                                                checked={selectedScheduleId === schedule.snum}
+                                                onChange={() => toggleScheduleSelection(schedule.snum)} // 선택 토글
                                                 className="mr-2"
                                             />
                                             <span>{schedule.content}</span>
-                                            <span className="ml-auto">{schedule.type}</span>
+                                            <span className="ml-auto text-xs">{schedule.category} 일정</span>
                                             <button
                                                 onClick={() => handleEditSchedule(schedule)}
                                                 className="ml-2 bg-gray-200 px-2 py-1 rounded"
@@ -180,10 +306,10 @@ export default function Schedule() {
                             className="w-full p-2 mb-2 border rounded"
                         />
                         <div className="flex mb-2">
-                        <input
+                            <input
                                 type="date"
                                 value={newSchedule.startDate.toISOString().split('T')[0]}
-                                onChange={e => setNewSchedule(prev => ({ ...prev, startDate: new Date(e.target.value) }))}
+                                onChange={e => setNewSchedule(prev => ({...prev, startDate: new Date(e.target.value)}))}
                                 className="w-1/2 p-2 border rounded mr-2"
                             />
                             <input
@@ -199,8 +325,9 @@ export default function Schedule() {
                                     type="radio"
                                     name="type"
                                     value="개인"
-                                    checked={newSchedule.type === '개인'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '개인' }))}
+                                    checked={newSchedule.category === '개인'}
+                                    // onChange={() => setNewSchedule(prev => ({ ...prev, type: '개인' }))}
+                                    onChange={() => handleScheduleTypeChange('개인')}
                                     className="mr-1"
                                 />
                                 개인
@@ -210,8 +337,8 @@ export default function Schedule() {
                                     type="radio"
                                     name="type"
                                     value="부서"
-                                    checked={newSchedule.type === '부서'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '부서' }))}
+                                    checked={newSchedule.category === '부서'}
+                                    onChange={() => handleScheduleTypeChange('부서')}
                                     className="mr-1"
                                 />
                                 부서
@@ -221,8 +348,8 @@ export default function Schedule() {
                                     type="radio"
                                     name="type"
                                     value="전체"
-                                    checked={newSchedule.type === '전체'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '전체' }))}
+                                    checked={newSchedule.category === '전체'}
+                                    onChange={() => handleScheduleTypeChange('전체')}
                                     className="mr-1"
                                 />
                                 전체

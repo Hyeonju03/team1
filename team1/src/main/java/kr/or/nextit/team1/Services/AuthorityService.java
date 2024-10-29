@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class AuthorityService {
+public class    AuthorityService {
     private static AuthorityMapper authorityMapper;
 
     @Autowired

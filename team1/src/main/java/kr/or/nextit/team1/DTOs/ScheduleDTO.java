@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class ScheduleDTO {
     private String empCode;
-    private int id;
+    private int sNum;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String content;

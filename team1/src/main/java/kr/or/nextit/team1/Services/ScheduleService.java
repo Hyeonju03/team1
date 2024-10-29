@@ -5,17 +5,44 @@ import java.util.List;
 import kr.or.nextit.team1.DTOs.ScheduleDTO;
 import kr.or.nextit.team1.mappers.ScheduleMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
-    private final ScheduleMapper mapper;
+    private final ScheduleMapper scheduleMapper;
+
 
     @Transactional
-    public List<ScheduleDTO> selectSchedules() {
-        return mapper.selectSchedules();
+    public List<ScheduleDTO> selectSchedules(String empCode) {
+        return scheduleMapper.selectSchedules(empCode);
+    }
+
+    @Transactional
+    public void scheduleInsert(ScheduleDTO scheduleDTO) {
+        try{
+            scheduleMapper.scheduleInsert(scheduleDTO);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw  e;
+        }
+    }
+
+    @Transactional
+    public void updateSchedule(ScheduleDTO scheduleDTO) {
+        scheduleMapper.updateSchedule(scheduleDTO);
+    }
+
+    @Transactional
+    public void deleteSchedule(String sNum) {
+        scheduleMapper.deleteSchedule(sNum);
+    }
+
+
+    public String selectAuth(String empCode) {
+      return   scheduleMapper.selectAuth(empCode);
     }
 
 //    @Transactional
@@ -23,10 +50,6 @@ public class ScheduleService {
 //        return mapper.selectSchedule(id);
 //    }
 //
-//    @Transactional
-//    public int registerSchedule(ScheduleDTO schedule) {
-//        return mapper.registerSchedule(schedule);
-//    }
 //
 //    @Transactional
 //    int modifySchedule(ScheduleDTO schedule) {

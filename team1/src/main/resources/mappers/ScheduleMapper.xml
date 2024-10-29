@@ -13,18 +13,36 @@
     </resultMap>
 
     <select id="selectSchedules" resultType="scheduleDTO">
-        SELECT
-            ID,
-            START_DATE,
-            END_DATE,
-            CONTENT,
-            CATEGORY
+        SELECT *
         FROM
-            SCHEDULE_TEST
+            SCHEDULE
         WHERE
             EMP_CODE = #{empCode}
     </select>
 
+    <insert id="scheduleInsert" parameterType="kr.or.nextit.team1.DTOs.ScheduleDTO">
+        INSERT INTO schedule
+        (EMP_CODE, START_DATE, END_DATE, CONTENT, CATEGORY)
+        VALUES(#{empCode},#{startDate} ,#{endDate},#{content},#{category});
+    </insert>
+
+    <update id="updateSchedule">
+        UPDATE schedule
+        SET START_DATE=#{startDate}, END_DATE=#{endDate}, CONTENT=#{content}, CATEGORY=#{category}
+        WHERE s_Num=#{sNum}
+        and emp_code = #{empCode}
+    </update>
+
+    <delete id="deleteSchedule">
+        DELETE FROM schedule
+        WHERE s_Num= #{sNum}
+    </delete>
+
+    <select id="selectAuth" parameterType="java.lang.String" resultType="java.lang.String">
+        select SCHEDULE
+        from authoritytest
+        where EMP_CODE =#{empCode}
+    </select>
 <!--    <select id="selectSchedule" parameterType="int" resultMap="scheduleMap">-->
 <!--        SELECT-->
 <!--            ID,-->
