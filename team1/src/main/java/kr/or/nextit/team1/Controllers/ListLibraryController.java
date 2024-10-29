@@ -108,7 +108,6 @@ public class ListLibraryController {
     }
     @PostMapping("/noticeUpdate")
     public ResponseEntity<Void> noticeUpdate(@RequestBody Map<String, Object> data) {
-        System.out.println(data);
         listLibraryService.noticeUpdate(data);
         return ResponseEntity.ok().build();
     }

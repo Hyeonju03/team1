@@ -55,7 +55,7 @@ class ListLibrary {
         }
 
         const listCheck = async () => {
-            await axios.get("/chartSelect", code)
+            await axios.get("/chartSelect", {params: {code}})
                 .then(response => {
                     this.depCode = response.data[0]
                     this.upDepCode = response.data[1]
@@ -170,7 +170,7 @@ class ListLibrary {
         }
 
         const listCheck = async () => {
-            await axios.get("/chartSelect", code)
+            await axios.get("/chartSelect", {params: {code}})
                 .then(response => {
                     this.depCode = response.data[0]
                     this.upDepCode = response.data[1]
@@ -348,19 +348,8 @@ class ListLibrary {
         console.log(jsonData)
         await axios.post("/noticeUpdate", jsonData)
             .then(response => {
-                console.log('Success:', response.data);
             })
-            .catch(error => {
-                if (error.response) {
-                    console.error('Error data:', error.response.data);
-                    console.error('Error status:', error.response.status);
-                    console.error('Error headers:', error.response.headers);
-                } else if (error.request) {
-                    console.error('No response received:', error.request);
-                } else {
-                    console.error('Error:', error.message);
-                }
-            });
+            .catch(error => {});
     }
     static addressBook(){
 

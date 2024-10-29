@@ -6,7 +6,7 @@
     <select id="chartSelect" resultType="ListLibraryDTO" parameterType="String">
         select e.EMP_CODE ,e.EMP_NAME , e.DEP_CODE AS "EMP_DEP_CODE",c.DEP_CODE ,c.UPDEP_CODE
         from employeetest e, code c
-        where SUBSTRING_INDEX(e.EMP_CODE,'-',1) like "3118115625"
+        where SUBSTRING_INDEX(e.EMP_CODE,'-',1) like #{code}
         and SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
     </select>
     <select id="RClickWindowSelect" resultType="ListLibraryDTO" parameterType="String">

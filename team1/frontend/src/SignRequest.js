@@ -10,11 +10,13 @@ export default function SignRequest() {
     const [newWindowData, setNewWindowData] = useState([])
     const [noticeNum,setNoticeNum] = useState("")
     const {btnCtl, setBtnCtl} = useListLibrary()
+    const [user, setUser] = useState('3118115625-kim')
+    const [com,setCom] = useState("3118115625")
     /* 공지사항 내용 가져오기 */
     const [noticeHtml, setNoticeHtml] = useState("")
     const [loadNoticeHtml, setLoadNoticeHtml] = useState("")
     const fetchData = async () => {
-        const result1 = await ListLibrary.noticeList("3118115625-jys",btnCtl);
+        const result1 = await ListLibrary.noticeList(user,btnCtl);
         setNoticeHtml(result1);
         const result2 = await  ListLibrary.loadNotice(noticeNum);
         setLoadNoticeHtml(result2);
@@ -28,7 +30,7 @@ export default function SignRequest() {
         const handleClick = (event) => {
             setBtnCtl(5);
             setNoticeNum(event.currentTarget.id)
-            ListLibrary.noticeUpdate(event.currentTarget.id,"3118115625-jys")
+            ListLibrary.noticeUpdate(event.currentTarget.id,user)
         };
 
         elements.forEach((element) => {
@@ -311,7 +313,7 @@ export default function SignRequest() {
                         <div className="border text-left h-[435px] blue">
                             {
                                 btnCtl === 0 ?
-                                    ListLibrary.WorkerList("3118115625")
+                                    ListLibrary.WorkerList(com)
                                     :
                                     btnCtl === 1 ?
                                         <>
@@ -402,8 +404,8 @@ export default function SignRequest() {
                                                         :
                                                         btnCtl === 6 ?
                                                             <>
-                                                            {ListLibrary.noticeWritePage("3118115625",setBtnCtl)}
-                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);ListLibrary.noticeInsert("3118115625-kim")}}>공지사항 등록</button>
+                                                            {ListLibrary.noticeWritePage(com,setBtnCtl)}
+                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);ListLibrary.noticeInsert(user)}}>공지사항 등록</button>
                                                             </>: <></>
 
                             }
