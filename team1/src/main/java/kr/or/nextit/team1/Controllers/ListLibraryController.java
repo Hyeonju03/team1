@@ -3,10 +3,7 @@ package kr.or.nextit.team1.Controllers;
 import kr.or.nextit.team1.DTOs.ListLibraryDTO;
 import kr.or.nextit.team1.Services.ListLibraryService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +106,54 @@ public class ListLibraryController {
     @PostMapping("/noticeUpdate")
     public ResponseEntity<Void> noticeUpdate(@RequestBody Map<String, Object> data) {
         listLibraryService.noticeUpdate(data);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+
+
+
+
+
+    @GetMapping("/addressBookSelect")
+    public ResponseEntity<List<String>[]> addressBookSelect(String code) {
+        List<ListLibraryDTO> data = listLibraryService.addressBookSelect(code);
+        List<String>[] list = new ArrayList[5];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < data.size(); i++) {
+            list[0].add(data.get(i).getDepCode());
+            list[1].add(data.get(i).getEmpName());
+            list[2].add(data.get(i).getPosCode());
+            list[3].add(data.get(i).getPH());
+            list[4].add(data.get(i).getMail());
+        }
+        return ResponseEntity.ok(list);
+    }
+    @GetMapping("/addressBookListSelect")
+    public ResponseEntity<List<String>[]> addressBookListSelect(String code) {
+        List<ListLibraryDTO> data = listLibraryService.addressBookListSelect(code);
+        List<String>[] list = new ArrayList[1];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        String[] splitData = data.get(0).getEmpAdd().split(",");
+        for (int i = 0; i < splitData.length; i++) {
+            list[0].add(splitData[i]);
+        }
+        return ResponseEntity.ok(list);
+    }
+    @PostMapping("/addressBookAdd")
+    public ResponseEntity<Void> addressBookAdd(@RequestBody Map<String, Object> data) {
+        listLibraryService.addressBookAdd(data);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/addressBookDelete")
+    public ResponseEntity<Void> addressBookDelete(@RequestBody Map<String, Object> data) {
+        listLibraryService.addressBookDelete(data);
         return ResponseEntity.ok().build();
     }
 }

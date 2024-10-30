@@ -37,4 +37,14 @@ public class ListLibraryService {
     public void noticeUpdate(Map<String, Object> data){
         listLibraryMapper.noticeUpdate(data);
     }
+
+    public List<ListLibraryDTO> addressBookSelect(String code){return listLibraryMapper.addressBookSelect(code);}
+    public List<ListLibraryDTO> addressBookListSelect(String code){return listLibraryMapper.addressBookListSelect(code);}
+    public void addressBookAdd(Map<String, Object> data){
+        listLibraryMapper.addressBookAdd(data);
+    }
+    public void addressBookDelete(Map<String, Object> data){
+        listLibraryMapper.addressBookDelete(data);
+    }
+
 }

@@ -15,11 +15,13 @@ public class ListLibraryDTO {
     private String mail;
     private String PH;
     private String state;
-    private String noticeNum;//
-    private String title;//
-    private String content;//
-    private String targets;//
-    private LocalDateTime startDate;//
-    private LocalDateTime endDate;//
-    private String targetState;//
+    private String noticeNum;
+    private String title;
+    private String content;
+    private String targets;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private String targetState;
+    private String posCode;
+    private String empAdd;
 }

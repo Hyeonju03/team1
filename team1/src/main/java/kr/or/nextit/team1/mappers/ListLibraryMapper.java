@@ -14,4 +14,8 @@ public interface ListLibraryMapper {
     List<ListLibraryDTO> noticeListSelect2(String code);
     List<ListLibraryDTO> loadNoticeSelect(String code);
     void noticeUpdate(Map<String, Object> data);
+    List<ListLibraryDTO> addressBookSelect(String code);
+    List<ListLibraryDTO> addressBookListSelect(String code);
+    void addressBookAdd(Map<String, Object> data);
+    void addressBookDelete(Map<String, Object> data);
 }

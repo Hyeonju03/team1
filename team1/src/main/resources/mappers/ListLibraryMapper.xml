@@ -5,13 +5,13 @@
 <mapper namespace="kr.or.nextit.team1.mappers.ListLibraryMapper">
     <select id="chartSelect" resultType="ListLibraryDTO" parameterType="String">
         select e.EMP_CODE ,e.EMP_NAME , e.DEP_CODE AS "EMP_DEP_CODE",c.DEP_CODE ,c.UPDEP_CODE
-        from employeetest e, code c
+        from employeetest2 e, code c
         where SUBSTRING_INDEX(e.EMP_CODE,'-',1) like #{code}
         and SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
     </select>
     <select id="RClickWindowSelect" resultType="ListLibraryDTO" parameterType="String">
         select e.EMP_MAIL as mail, e.PHONE_NUM as PH
-        from employeetest e
+        from employeetest2 e
         where e.EMP_CODE = #{code}
     </select>
     <insert id="noticeInsert" parameterType="ListLibraryDTO">
@@ -42,5 +42,25 @@
         )
         WHERE TARGET LIKE CONCAT('%', #{empCode}, ':%')
         and NOTICE_NUM like #{noticeNum}
+    </update>
+    <select id="addressBookSelect" resultType="ListLibraryDTO" parameterType="String">
+        select e.DEP_CODE ,e.EMP_NAME ,e.POS_CODE ,e.PHONE_NUM as PH ,e.EMP_MAIL as mail
+        from employeetest2 e
+        where e.EMP_CODE like #{code}
+    </select>
+    <select id="addressBookListSelect" resultType="ListLibraryDTO" parameterType="String">
+        select e.EMP_ADD
+        from employeetest2 e
+        where e.EMP_CODE like #{code};
+    </select>
+    <update id="addressBookAdd" parameterType="Map">
+        update employeetest2
+        set EMP_ADD = CONCAT(EMP_ADD ,#{target},',')
+        where EMP_CODE like #{code};
+    </update>
+    <update id="addressBookDelete" parameterType="Map">
+        update employeetest2
+        set EMP_ADD = trim(replace(EMP_ADD,CONCAT(#{target},','),''))
+        where EMP_CODE like #{code};
     </update>
 </mapper>

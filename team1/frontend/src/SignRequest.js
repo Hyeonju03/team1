@@ -10,16 +10,24 @@ export default function SignRequest() {
     const [newWindowData, setNewWindowData] = useState([])
     const [noticeNum,setNoticeNum] = useState("")
     const {btnCtl, setBtnCtl} = useListLibrary()
-    const [user, setUser] = useState('3118115625-kim')
+    const [user, setUser] = useState('3118115625-qwer')
     const [com,setCom] = useState("3118115625")
     /* 공지사항 내용 가져오기 */
     const [noticeHtml, setNoticeHtml] = useState("")
     const [loadNoticeHtml, setLoadNoticeHtml] = useState("")
+    const [addressBookHtml, setAddressBookHtml] = useState("")
     const fetchData = async () => {
         const result1 = await ListLibrary.noticeList(user,btnCtl);
         setNoticeHtml(result1);
         const result2 = await  ListLibrary.loadNotice(noticeNum);
         setLoadNoticeHtml(result2);
+        const result3 = await  ListLibrary.addressBook(user);
+        setAddressBookHtml(result3);
+
+        //ListLibrary.dataTest1('3118115625-abcc')
+        //ListLibrary.dataTest2('3118115625-qwer')
+        //ListLibrary.dataTest3('3118115625-abcc','3118115625-qwer')
+        //ListLibrary.dataTest4('3118115625-abcc','3118115625-qwer')
     };
     useEffect(() => {
         fetchData();
@@ -43,7 +51,45 @@ export default function SignRequest() {
             });
         };
     },[noticeHtml, btnCtl])
+    useEffect(()=>{
+        const elements = document.querySelectorAll(".AddBtn");
+        const btnElement = document.querySelector("#BtnAddressBookAdd");
+        const InputAddressBookAdd = document.querySelectorAll(".InputAddressBookAdd");
 
+        const addBtnClick = async (e) =>{
+            if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value,InputAddressBookAdd[1].value)) {
+                if (!await ListLibrary.addressEmpAddSelect(user, InputAddressBookAdd[0].value)) {
+                    await ListLibrary.addressBookAdd(InputAddressBookAdd[0].value, user)
+                } else {
+                    alert("이미 존재하는 아이디 입니다")
+                }
+                setAddressBookHtml(await ListLibrary.addressBook(user));
+            }else{
+                alert("정보가 일치하지 않습니다")
+            }
+        }
+
+        const handleClick = async (e) => {
+            await ListLibrary.addressBookDelete(e.currentTarget.parentNode.parentNode.id.replace("Add", ""), user)
+            setAddressBookHtml(await ListLibrary.addressBook(user));
+        }
+        elements.forEach((element) => {
+            element.addEventListener('click', handleClick);
+        });
+        if (btnElement) {
+            btnElement.addEventListener('click', addBtnClick);
+        } else {
+            //첫 로딩 거르기(주소록 누르기전 방지)
+        }
+        return () => {
+            elements.forEach((element) => {
+                element.removeEventListener('click', handleClick);
+            });
+            if (btnElement) {
+                btnElement.removeEventListener('click', addBtnClick);
+            }
+        };
+    },[addressBookHtml, btnCtl])
 
 
 
@@ -326,31 +372,7 @@ export default function SignRequest() {
                                         </> :
                                         btnCtl === 2 ?
                                             <>
-                                                <div className="h-[355px] overflow-y-auto">
-                                                    <div className="text-xs border break-words">
-                                                        <p>부서:</p>
-                                                        <p>이름:</p>
-                                                        <p className="flex justify-between">직급: <button>삭제</button></p>
-                                                        <p>연락처:</p>
-                                                        <p>사내이메일:</p>
-                                                    </div>
-                                                </div>
-                                                <div className="h-[80px]">
-                                                    <div className="flex">
-                                                        <div
-                                                            className="border text-xs flex items-center pl-1 w-[30%]"> 아이디
-                                                        </div>
-                                                        <input className="border w-[70%]"/>
-                                                    </div>
-                                                    <div className="flex">
-                                                        <div
-                                                            className="border text-xs flex items-center pl-1 w-[30%]"> 연락처
-                                                        </div>
-                                                        <input className="border w-[70%]"/>
-                                                    </div>
-                                                    <button className="text-center border w-full">주소록에 추가 하기
-                                                    </button>
-                                                </div>
+                                                <div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>
                                             </>
                                             :
                                             btnCtl === 3 ?
