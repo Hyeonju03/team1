@@ -22,7 +22,7 @@
         FROM
             CODE
         WHERE
-            COM_CODE = 3148127227
+            COM_CODE = #{comCode}
     </select>
 
     <insert id="insertDepartment" parameterType="CodeDTO">
@@ -42,10 +42,31 @@
             COM_CODE = #{comCode}
     </update>
 
-<!--    <delete id="deleteDepartment">-->
-<!--        DELETE FROM-->
-<!--            CODE-->
-<!--        WHERE-->
-<!--            DEP_CODE = #{depCode}-->
-<!--    </delete>-->
+    <select id="selectPosition" resultType="CodeDTO">
+        SELECT
+            POS_CODE
+        FROM
+            CODE
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
+
+    <update id="updatePosition">
+        UPDATE
+            CODE
+        SET
+            POS_CODE = #{posCode}
+        WHERE
+            COM_CODE = #{comCode}
+    </update>
+
+    <update id="updatePositionOrder">
+        UPDATE
+            CODE
+        SET
+            POS_CODE = #{posCode}
+        WHERE
+            COM_CODE = #{comCode}
+    </update>
+
 </mapper>

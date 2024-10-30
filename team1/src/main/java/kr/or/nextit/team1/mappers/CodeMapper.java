@@ -9,11 +9,16 @@ import java.util.List;
 public interface CodeMapper {
     CodeDTO selectCode(String comCode, String depCode); // 모든 카테고리 가져오기
 
-    List<CodeDTO> getDepCode();
+    List<CodeDTO> getDepCode(String comCode);
 
     void insertDepartment(CodeDTO newDepartment);
 
     void updateDepartment(CodeDTO codeDTO);
 
-//    void deleteDepartment(String depCode);
+    CodeDTO selectPosition(String comCode);
+
+    void updatePosition(CodeDTO codeDTO);
+
+    void updatePositionOrder(String comCode, String posCode);
+
 }

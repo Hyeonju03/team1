@@ -17,42 +17,16 @@ public class CodeService {
     }
 
     // 모든 부서 가져오기
-    public List<CodeDTO> getDepCode() {
-        return codeMapper.getDepCode();
+    public List<CodeDTO> getDepCode(String comCode) {
+        return codeMapper.getDepCode(comCode);
     }
 
     // 부서 추가
-    public void insertDepartment(CodeDTO codeDTO, String updepCode) {
-        CodeDTO existingCodes = codeMapper.selectCode(codeDTO.getComCode(), null);
-
-        String updatedDepCode;
-        String updatedUpdepCode;
-
-        if (existingCodes == null) {
-            // 처음 추가하는 부서일 경우 depCode에만 추가
-            updatedDepCode = codeDTO.getDepCode();
-            updatedUpdepCode = "";
-        } else {
-            // 기존 depCode와 updepCode가 있을 때 새로운 값 이어붙임
-            updatedDepCode = existingCodes.getDepCode() + "," + codeDTO.getDepCode();
-            updatedUpdepCode = existingCodes.getUpdepCode() + "," + updepCode;
-        }
-
-        // 업데이트할 DTO 설정
-        CodeDTO updatedCodeDTO = new CodeDTO();
-        updatedCodeDTO.setDepCode(updatedDepCode);
-        updatedCodeDTO.setUpdepCode(updatedUpdepCode);
-        updatedCodeDTO.setComCode(codeDTO.getComCode());
-
-        codeMapper.updateDepartment(updatedCodeDTO);
-    }
-
-    // depCode와 updepCode 업데이트
-    public void updateDepartment(CodeDTO codeDTO) {
+    public void insertDepartment(CodeDTO codeDTO) {
         // 기존 depCode와 updepCode를 조회
         CodeDTO existingCodes = codeMapper.selectCode(codeDTO.getComCode(), null);
 
-        if (existingCodes != null && !codeDTO.getUpdepCode().isEmpty()) {
+        if (existingCodes != null) {
 
             // 새로운 depCode와 updepCode 값 추가
             String updatedDepCode = (existingCodes.getDepCode() != null ? existingCodes.getDepCode() + "," : "") + codeDTO.getDepCode();
@@ -60,20 +34,47 @@ public class CodeService {
 
             // 업데이트 할 DTO 설정
             //CodeDTO updatedCodeDTO = new CodeDTO();
-            existingCodes.setDepCode(updatedDepCode);
-            existingCodes.setUpdepCode(updatedUpdepCode);
+            codeDTO.setDepCode(updatedDepCode);
+            codeDTO.setUpdepCode(updatedUpdepCode);
 
-            codeMapper.updateDepartment(existingCodes);
+            codeMapper.updateDepartment(codeDTO);
 
 
         } else {
-            //throw new RuntimeException("부서 코드가 존재하지 않습니다: " + codeDTO.getDepCode());
-
-            System.out.println("최초의 부서임");
-            existingCodes.setUpdepCode(",");
-            existingCodes.setDepCode(codeDTO.getDepCode());
-            codeMapper.updateDepartment(existingCodes);
+            throw new RuntimeException("부서 코드가 존재하지 않습니다: " + codeDTO.getDepCode());
         }
+
+    }
+
+    // 부서 이름 수정
+    public void updateDepartmentName(String comCode, String oldDepCode, String newDepCode) {
+        CodeDTO code = codeMapper.selectCode(comCode, oldDepCode);
+
+        List<String> updepCodeList = new ArrayList<>();
+        updepCodeList.addAll(Arrays.asList(code.getUpdepCode().split(",")));
+
+        List<String> depCodeList = new ArrayList<>();
+        depCodeList.addAll(Arrays.asList(code.getDepCode().split(",")));
+
+        // depCodeList에서 oldDepCode의 인덱스를 찾고 해당 위치에 newDepCode로 교체
+        int foundIndex = depCodeList.indexOf(oldDepCode);
+        if (foundIndex != -1) {
+            depCodeList.set(foundIndex, newDepCode);
+        }
+
+        // 기존의 depCode를 참고하는 updepCode 값을 찾아 업데이트
+        while (updepCodeList.lastIndexOf(oldDepCode) != -1) {
+            int foundLastIndex = updepCodeList.lastIndexOf(oldDepCode);
+            updepCodeList.set(foundLastIndex, newDepCode);
+        }
+
+        // CodeDTO에 @Builder 만들어야지 사용 가능
+        CodeDTO codeDto = CodeDTO.builder().comCode(comCode)
+                .depCode(String.join(",", depCodeList)) // depCodeList를 ,로 이어 붙임
+                .updepCode(String.join(",", updepCodeList)) // updepCodeList를 ,로 이어 붙임
+                .build();
+
+        codeMapper.updateDepartment(codeDto);
     }
 
 
@@ -108,9 +109,9 @@ public class CodeService {
     }
 
     // 부서 트리 생성
-    public List<CodeDTO> createDepartmentTree() {
+    public List<CodeDTO> createDepartmentTree(String comCode) {
         // 모든 부서 코드와 상위 부서 코드를 가져오는 로직
-        List<CodeDTO> allDepartments = codeMapper.getDepCode();
+        List<CodeDTO> allDepartments = codeMapper.getDepCode(comCode);
 
         // 부서 코드와 상위 부서 코드 분리
         String depCodes = String.join(",", allDepartments.stream().map(CodeDTO::getDepCode).toArray(String[]::new));
@@ -158,5 +159,34 @@ public class CodeService {
         return tree;
     }
 
+    // 모든 부서 가져오기
+    public CodeDTO selectPosition(String comCode) {
+        CodeDTO code = codeMapper.selectPosition(comCode);
 
+        if (code != null && code.getPosCode() != null) {
+            String[] positionNames = code.getPosCode().split(","); // 쉼표로 분리
+            CodeDTO codeDTO = new CodeDTO();
+            codeDTO.setPosCode(String.join(",", positionNames)); // 다시 문자열로 조합하여 설정
+            return codeDTO;
+        }
+        return null;
+    }
+
+    // 직급 추가
+    public void insertPosition(CodeDTO codeDTO) {
+        CodeDTO currentPosition = codeMapper.selectCode(codeDTO.getComCode(), null);
+        if (currentPosition != null) {
+            // 새로운 값 추가
+            String updatedPosCode = (currentPosition.getPosCode() != null ? currentPosition.getPosCode() + "," : "") + codeDTO.getPosCode();
+            codeDTO.setPosCode(updatedPosCode);
+            codeMapper.updatePosition(codeDTO);
+        } else {
+            throw new RuntimeException("직급 코드가 존재하지 않습니다: " + codeDTO.getPosCode());
+        }
+    }
+
+    // 직급 순서 변경
+    public void updatePositionOrder(String comCode, String posCode) {
+        codeMapper.updatePositionOrder(comCode, posCode);
+    }
 }

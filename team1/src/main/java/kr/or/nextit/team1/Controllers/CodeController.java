@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CodeController {
@@ -22,37 +23,42 @@ public class CodeController {
 
     // 부서 조회
     @GetMapping("/departments")
-    public ResponseEntity<List<CodeDTO>> getDepCode() {
-        List<CodeDTO> departmentList = codeService.getDepCode();
+    public ResponseEntity<List<CodeDTO>> getDepCode(@RequestParam String comCode) {
+        List<CodeDTO> departmentList = codeService.getDepCode(comCode);
         return ResponseEntity.ok(departmentList);
     }
 
     // 부서 트리 구조 가져오기
     @GetMapping("/departments/tree")
-    public ResponseEntity<List<CodeDTO>> getDepartmentTree() {
-        List<CodeDTO> departmentTree = codeService.createDepartmentTree();
+    public ResponseEntity<List<CodeDTO>> getDepartmentTree(@RequestParam String comCode) {
+        List<CodeDTO> departmentTree = codeService.createDepartmentTree(comCode);
         return ResponseEntity.ok(departmentTree);
     }
 
     // 부서 추가
-    @PostMapping("/departments/insert")
-    public ResponseEntity<String> insertDepartment(@RequestBody CodeDTO codeDTO, String updepCode) {
+    @PutMapping("/departments/insert")
+    public String insertDepartment(@RequestBody CodeDTO codeDTO) {
+        codeService.insertDepartment(codeDTO);
+
+        return "부서 코드가 성공적으로 업데이트되었습니다.";
+    }
+
+    // 부서 수정
+    @PutMapping("/departments/update")
+    public ResponseEntity<String> updateDepartmentName(@RequestBody Map<String, String> params) {
+        String comCode = params.get("comCode");
+        String oldDepCode = params.get("oldDepCode");
+        String newDepCode = params.get("depCode");
+
         try {
-            // updepCode가 없으면 최상위 부서로 생각
-            codeService.insertDepartment(codeDTO, updepCode != null ? updepCode : "");
-            return ResponseEntity.ok("부서가 성공적으로 추가 되었습니다.");
+            codeService.updateDepartmentName(comCode, oldDepCode, newDepCode);
+            return ResponseEntity.ok("부서가 성공적으로 수정되었습니다.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("부서 추가 중 오류가 발생했습니다.");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("부서 이름 수정 중 오류가 발생했습니다.");
         }
     }
 
-    // depCode와 updepCode 업데이트
-    @PutMapping("/departments/update")
-    public String updateDepartment(@RequestBody CodeDTO codeDTO) {
-        codeService.updateDepartment(codeDTO);
-        return "부서 코드가 성공적으로 업데이트되었습니다.";
-    }
-    
     // 부서 삭제
     @DeleteMapping("/departments/delete/{comCode}/{depCode}")
     public ResponseEntity<String> deleteDepartment(@PathVariable String comCode, @PathVariable String depCode) {
@@ -63,5 +69,30 @@ public class CodeController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("부서 삭제 중 오류가 발생했습니다.");
         }
+    }
+
+    // 직급 조회
+    @GetMapping("/positions")
+    public ResponseEntity<CodeDTO> selectPosition(@RequestParam String comCode) {
+        CodeDTO positionList = codeService.selectPosition(comCode);
+        return ResponseEntity.ok(positionList);
+    }
+
+    // 직급 추가
+    @PutMapping("/positions/insert")
+    public String insertPosition(@RequestBody CodeDTO codeDTO) {
+        codeService.insertPosition(codeDTO);
+        return "직급이 추가 되었습니다.";
+    }
+
+    // 직급 순서 변경
+    @PutMapping("/positions/updateOrder")
+    public ResponseEntity<String> updatePositionOrder(@RequestBody Map<String, String> params) {
+        String comCode = params.get("comCode");
+        String posCode = params.get("posCode");
+
+        codeService.updatePositionOrder(comCode, posCode);
+
+        return ResponseEntity.ok("직급 순서 변경 성공");
     }
 }
