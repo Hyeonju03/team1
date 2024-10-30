@@ -13,11 +13,16 @@
     </resultMap>
 
     <select id="selectSchedules" resultType="scheduleDTO">
+<!--        SELECT *-->
+<!--        FROM-->
+<!--            SCHEDULE-->
+<!--        WHERE-->
+<!--            EMP_CODE = #{empCode}-->
+<!--        AND CATEGORY != '부서'-->
         SELECT *
-        FROM
-            SCHEDULE
-        WHERE
-            EMP_CODE = #{empCode}
+        FROM SCHEDULE
+        WHERE EMP_CODE = #{empCode}
+        AND CATEGORY NOT IN ('부서', '전체')
     </select>
 
     <insert id="scheduleInsert" parameterType="kr.or.nextit.team1.DTOs.ScheduleDTO">
@@ -42,6 +47,28 @@
         select SCHEDULE
         from authoritytest
         where EMP_CODE =#{empCode}
+    </select>
+
+    <select id="selectDepSchedule" parameterType="String" resultType="kr.or.nextit.team1.DTOs.ScheduleDTO">
+        SELECT s.*
+        FROM SCHEDULE s
+        JOIN employee e ON s.EMP_CODE = e.EMP_CODE
+        WHERE e.EMP_CODE LIKE CONCAT(
+        SUBSTRING(e.EMP_CODE, 1, INSTR(#{empCode}, '-') - 1), '%'
+        )
+        AND e.dep_code = (
+        SELECT dep_code
+        FROM employee
+        WHERE EMP_CODE = #{empCode}
+        )
+        AND s.category = '부서';
+    </select>
+
+    <select id="selectFullScgedule">
+        SELECT *
+        FROM SCHEDULE
+        WHERE EMP_CODE LIKE CONCAT(SUBSTRING_INDEX(#{empCode}, '-', 1), '%')
+        AND CATEGORY = '전체'
     </select>
 <!--    <select id="selectSchedule" parameterType="int" resultMap="scheduleMap">-->
 <!--        SELECT-->

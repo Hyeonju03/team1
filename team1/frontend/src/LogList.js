@@ -64,19 +64,20 @@ export default function Component() {
     const [searchResults, setSearchResults] = useState(results); // 검색 결과 상태
 
     return (
-        <div className="container mx-auto p-4">
+        // <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
 
-            <div className="mb-6">
+            <div className="mb-6 ">
                 <h2 className="text-xl font-semibold mb-4">{companyName} 로그정보</h2>
             </div>
-            <div className="border bg-gray-200 " style={{height:"300px"}}>
+            <div className="border bg-gray-200  " style={{height: "300px"}}>
                 {(searchResults.map((item, index) => (
-                                <div key={index}>
-                                    <p style={{fontSize:"20px"}}>{item.num} {item.who} {item.where} {item.what} {item.with} {item.logInfo}</p>
-                                </div>
-                            ))
-                        )}
+                        <div key={index}>
+                            <p style={{fontSize: "20px"}}>{item.num} {item.who} {item.where} {item.what} {item.with} {item.logInfo}</p>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

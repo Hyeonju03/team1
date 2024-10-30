@@ -45,20 +45,13 @@ public class ScheduleService {
       return   scheduleMapper.selectAuth(empCode);
     }
 
-//    @Transactional
-//    public ScheduleDTO selectSchedule(int id) {
-//        return mapper.selectSchedule(id);
-//    }
-//
-//
-//    @Transactional
-//    int modifySchedule(ScheduleDTO schedule) {
-//        return mapper.modifySchedule(schedule);
-//    }
-//
-//    @Transactional
-//    int removeSchedule(int id) {
-//        return mapper.removeSchedule(id);
-//    }
+    public List<ScheduleDTO>selectDepSchedule(String empCode) {
+        return scheduleMapper.selectDepSchedule(empCode);
+    }
+
+    public List<ScheduleDTO>selectFullScgedule(String empCode) {
+        return scheduleMapper.selectFullScgedule(empCode);
+    }
+
 
 }

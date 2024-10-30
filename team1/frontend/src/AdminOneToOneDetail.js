@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useLocation } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios";
 
 
@@ -57,6 +57,7 @@ export default function Component() {
     const location = useLocation();
     const {item} = location.state || { qNum: "없음" };
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const navigate = useNavigate();
 
     const [Qlist,setQList] = useState([])
     const [filterQlist,setFilterQlist] = useState([])
@@ -96,13 +97,19 @@ export default function Component() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    const goBack =()=>{
+        navigate(-1)
+    }
 
     return (
-        <div className="container mx-auto p-4">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
+            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6 ">로고</header>
 
-            <h1 className="text-2xl font-bold mb-4 text-left">{item.qNum} {item.title}</h1>
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold mb-4 text-left "  style={{marginLeft:"375px"}}>{item.qNum} {item.title}</h1>
+                <button onClick={goBack} style={{ marginRight:"415px", marginTop:"-10px" , height:"50px"}} className=" border rounded-md px-4 text-lg font-bold">목록</button>
+            </div>
+            <div className="flex flex-col md:flex-row gap-6" style={{marginLeft:"350px"}}>
 
 
                 {/*<main className="flex-1">*/}
@@ -158,7 +165,7 @@ export default function Component() {
                         className="w-full p-2 mb-4 border rounded"
                     />
                     <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                    로그인
+                        로그인
                     </button>
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>

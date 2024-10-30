@@ -120,8 +120,11 @@ export default function SignUpForm() {
     }
     return (
         <form onSubmit={goUpdate}>
-            <div className="w-full max-w-3xl mx-auto p-4 border rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
+            <div className="w-full">
+                <h2 className="text-2xl font-bold text-center bg-gray-200 py-2"
+                    style={{marginBottom: "30px"}}>로고</h2>
+            </div>
+            <div className=" max-w-4xl mx-auto p-4 rounded-lg">
                 <div style={{marginBottom: "30px"}}>
                     <p className="text-sm text-left">회사정보 관리</p>
                     <p className="text-sm text-left">회사 정보를 확인하고 수정합니다.</p>
@@ -187,10 +190,10 @@ export default function SignUpForm() {
                                 value={v.comEmail}
                             />
                         </p>
-                        <div className="flex items-center mb-4" >
-                            <p >직원수:</p>
-                            <p style={{marginLeft:"80px"}} className="ml-4">{v.empNum}</p>
-                            {v.empNum > 10 && showMessage &&(
+                        <div className="flex items-center mb-4">
+                            <p>직원수:</p>
+                            <p style={{marginLeft: "80px"}} className="ml-4">{v.empNum}</p>
+                            {v.empNum > 10 && showMessage && (
                                 <div
                                     className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-md ml-4 flex items-center">
                                     <AlertTriangle className="h-5 w-5 mr-2"/>

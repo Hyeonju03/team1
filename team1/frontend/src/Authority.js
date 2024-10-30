@@ -160,7 +160,7 @@ export default function Component() {
     }
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
             <div>
                 <Table>

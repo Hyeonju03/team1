@@ -52,4 +52,16 @@ public class ScheduleController {
         String result = scheduleService.selectAuth(empCode);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/selectDepSchedule")
+    public ResponseEntity<List<ScheduleDTO>> selectDepSchedule(@RequestParam String empCode) {
+        List<ScheduleDTO> schedules = scheduleService.selectDepSchedule(empCode);
+        return ResponseEntity.ok(schedules);
+    }
+
+    @GetMapping("/selectFullScgedule")
+    public ResponseEntity<List<ScheduleDTO>> selectFullScgedule(@RequestParam String empCode) {
+        List<ScheduleDTO> schedules = scheduleService.selectFullScgedule(empCode);
+        return ResponseEntity.ok(schedules);
+    }
 }

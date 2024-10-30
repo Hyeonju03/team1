@@ -151,7 +151,7 @@ export default function EmailSend() {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex flex-col md:flex-row gap-6">
 
@@ -208,22 +208,23 @@ export default function EmailSend() {
                 </div>
 
                 {/* Main content */}
-                <main className="flex-grow flex items-center justify-center flex-col" style={{marginTop: "-50px"}}>
-                    <div className="mb-4 text-left">
-                        <h1 className="text-2xl font-bold" style={{marginLeft: "-400px"}}>
+                <main className="flex-grow flex justify-between flex-col" style={{marginTop: "50px"}}>
+                    <div className="text-left" style={{marginLeft:"250px"}}>
+                        <h1 style={{marginBottom:"20px"}} className="text-2xl font-bold">
                             {mailDetailList.title}
                         </h1>
-                    </div>
-
-                    <div className="text-left">
                         <p>보낸사람 : {empCode}</p>
                         <p>받는사람 : {mailDetailList.mailTarget}</p>
                         <div className="flex" style={{marginBottom: "30px"}}>
                             <p>보낸일자 : {formatDate(mailDetailList.startDate)}</p>
-                            <button onClick={deleteSelectedMails} style={{marginLeft: "450px"}} className="border rounded-md px-4 py-2">삭제</button>
-                            <button onClick={goBack} style={{marginLeft: "10px"}} className="border rounded-md px-4 py-2">목록</button>
+                            <button onClick={deleteSelectedMails} style={{marginLeft: "450px"}}
+                                    className="border rounded-md px-4 py-2">삭제
+                            </button>
+                            <button onClick={goBack} style={{marginLeft: "10px"}}
+                                    className="border rounded-md px-4 py-2">목록
+                            </button>
                         </div>
-                        <hr className="border-gray-300 my-2 w-full" style={{width: "auto"}}/>
+                        <hr className="border-gray-300 my-2 w-full" style={{width: "800px"}}/>
                         <p style={{marginBottom: "30px", display: 'flex', alignItems: 'center'}}>
                             {mailDetailList.fileName ? (
                                 <>

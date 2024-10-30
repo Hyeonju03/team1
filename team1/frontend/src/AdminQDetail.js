@@ -165,29 +165,32 @@ export default function Component() {
 
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
 
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
-                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer" style={{marginLeft: "-40px" ,marginTop:"-200px"}}>
-                        <span   className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                                style={{marginRight: "15px"}}/>FAQ</h2>
+                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer"
+                        style={{marginLeft: "-40px", marginTop: "-200px"}}>
+                        <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
+                              style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
                             1:1 상담
                             <ul className="ml-4">
-                                <li onClick={qRegister}  className="text-lg cursor-pointer" style={{fontWeight: "400"}}>- 문의작성</li>
-                                <li onClick={goQDetail}  className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                    문의작성
+                                </li>
+                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                    <hr className="border-gray-300 my-2 w-full" style={{marginTop:"250px"}}/>
+                    <hr className="border-gray-300 my-2 w-full" style={{marginTop: "250px"}}/>
                     <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
                     <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
                     <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
@@ -210,11 +213,12 @@ export default function Component() {
                                 filterQlist.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="text-left">{item.qNum}</TableCell>
-                                        <TableCell onClick={()=>goDetail(item)} className="text-left cursor-pointer">
+                                        <TableCell onClick={() => goDetail(item)} className="text-left cursor-pointer">
                                             <span className="cursor-pointer">{item.title}</span></TableCell>
                                         <TableCell className="text-left">{item.startDate}</TableCell>
                                         <TableCell className="text-left flex items-center">
-                                            <Button size="sm" variant="outline">{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
+                                            <Button size="sm"
+                                                    variant="outline">{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
                                             <input
                                                 type="checkbox"
                                                 className="ml-2"
@@ -234,7 +238,7 @@ export default function Component() {
 
                     <div className="flex items-center gap-4 mt-4">
                         <div className="flex-1">
-                            <Input onChange={qListOnChangeHandler} placeholder="검색" />
+                            <Input onChange={qListOnChangeHandler} placeholder="검색"/>
                         </div>
                         <Button onClick={search} size="icon" variant="outline">
                             <span className="material-icons">검색</span>

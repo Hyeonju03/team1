@@ -266,7 +266,8 @@ export default function SignUpForm() {
 
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-4 border rounded-lg shadow-md">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
+        {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
             <style>
                 {`
                  input::placeholder {
@@ -278,10 +279,10 @@ export default function SignUpForm() {
             `}
             </style>
             <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-
+            <div style={{marginLeft:"480px"}} className="max-w-4xl items-center">
+            <form onSubmit={handleSubmit} className="space-y-0.5">
                 {/* 회사코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>
                     <input
                         id="companyCode"
@@ -303,7 +304,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 이름 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="name" className="flex-none w-32 text-left">이름</label>
                     <input
                         id="name"
@@ -317,7 +318,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* ID */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="id" className="flex-none w-32 text-left">ID</label>
                     <input
                         id="id"
@@ -333,7 +334,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* PW */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="password" className="flex-none w-32 text-left">PW</label>
                     <input
                         id="password"
@@ -349,7 +350,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* PW 확인 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="confirmPassword" className="flex-none w-32 text-left">PW 확인</label>
                     <input
                         id="confirmPassword"
@@ -367,7 +368,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 휴대전화 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="phone" className="flex-none w-32 text-left">휴대전화</label>
                     <input
                         id="phone"
@@ -385,7 +386,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 이메일 주소 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="email" className="flex-none w-32 text-left">이메일 주소</label>
                     <div className="flex items-center flex-grow space-x-2">
                         <input
@@ -404,7 +405,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 인증번호 입력 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="verificationCode" className="flex-none w-32 text-left">인증번호 입력</label>
                     <input
                         id="verificationCode"
@@ -422,7 +423,7 @@ export default function SignUpForm() {
 
 
                 {/* 부서 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
                     <div className="flex-grow relative flex">
                         <select
@@ -445,7 +446,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 상관 코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="supervisorCode" className="flex-none w-32 text-left">상관 코드</label>
                     <div className="flex-grow relative flex">
                         <input
@@ -462,7 +463,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 직급 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="rank" className="flex-none w-32 text-left">직급</label>
                     <div className="flex-grow relative flex">
                         <select
@@ -485,7 +486,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 주민등록번호 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="residentNumber1" className="flex-none w-32 text-left">주민등록번호</label>
                     <div className="flex items-center space-x-2 flex-grow">
                         <input
@@ -518,8 +519,9 @@ export default function SignUpForm() {
                     </div>
                 </div>
 
-                <button type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
+                <button type="submit" className="border bg-blue-500 text-white p-2">회원가입</button>
             </form>
+            </div>
         </div>
     );
 }

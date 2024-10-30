@@ -236,7 +236,7 @@ export default function EmailSend() {
 
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex flex-col md:flex-row gap-6">
 

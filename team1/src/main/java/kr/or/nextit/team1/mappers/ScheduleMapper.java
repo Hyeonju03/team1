@@ -17,7 +17,9 @@ public interface ScheduleMapper {
     void deleteSchedule(String sNum);
 
     String selectAuth(String empCode);
-    //    int removeSchedule(int id);
-//    int modifySchedule(ScheduleDTO board);
-//    ScheduleDTO selectSchedule(int id);
+
+    List<ScheduleDTO> selectDepSchedule(String empCode);
+
+    List<ScheduleDTO> selectFullScgedule(String empCode);
+
 }

@@ -131,7 +131,7 @@ export default function EmailSend() {
     }
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex flex-col md:flex-row gap-6">
 
@@ -142,40 +142,53 @@ export default function EmailSend() {
                         <button className="border rounded-md px-4 py-2" style={{marginLeft: "10px"}}>내게쓰기</button>
                     </div>
 
-                    <button className="w-full flex items-center text-lg" style={{marginBottom: "30px" , marginLeft:"50px"}}>
-                        <Mail className="mr-2 h-4 w-4"/>전체메일함</button>
+                    <button className="w-full flex items-center text-lg"
+                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                        <Mail className="mr-2 h-4 w-4"/>전체메일함
+                    </button>
 
-                    <button className="w-full flex items-center text-lg" style={{marginBottom: "30px" , marginLeft:"50px"}}>
-                        <Mail className="mr-2 h-4 w-4"/>받은메일함</button>
+                    <button className="w-full flex items-center text-lg"
+                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                        <Mail className="mr-2 h-4 w-4"/>받은메일함
+                    </button>
 
-                    <button className="w-full flex items-center text-lg" style={{marginBottom: "30px", marginLeft:"50px"}}>
-                        <Archive className="mr-2 h-4 w-4" />첨부파일메일함</button>
+                    <button className="w-full flex items-center text-lg"
+                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                        <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
+                    </button>
 
-                    <button className="w-full flex items-center text-lg" style={{marginBottom: "30px", marginLeft:"50px"}}>
-                        <FileText className="mr-2 h-4 w-4" />내게쓴메일함</button>
+                    <button className="w-full flex items-center text-lg"
+                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                        <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
+                    </button>
 
                     <button onClick={goSendMailList} className="w-full flex items-center text-lg"
                             style={{marginBottom: "30px", marginLeft: "50px"}}>
                         <Send className="mr-2 h-4 w-4"/>
-                        보낸메일함 <button className="border rounded-md px-2 py-2 text-xs" style={{marginLeft:"10px"}}>수신확인</button></button>
+                        보낸메일함 <button className="border rounded-md px-2 py-2 text-xs"
+                                      style={{marginLeft: "10px"}}>수신확인</button></button>
 
-                    <button className="w-full flex items-center text-lg" style={{marginBottom: "30px", marginLeft:"50px"}}>
-                        <Trash className="mr-2 h-4 w-4" />휴지통</button>
+                    <button className="w-full flex items-center text-lg"
+                            style={{marginBottom: "30px", marginLeft: "50px"}}>
+                        <Trash className="mr-2 h-4 w-4"/>휴지통
+                    </button>
 
                     {/*<Settings className="h-4 w-4" />*/}
                 </div>
 
                 {/* Main content */}
                 <main>
-                <h1 style={{marginBottom:"50px" , marginTop:"70px"}} className="text-xl font-bold text-left">메일을 보냈습니다.</h1>
-                <div style={{marginBottom:"80px"}} >
-                <p style={{marginBottom:"20px"}} className="text-left">{title? `제목: ${title}` : '제목 : 제목없음'}</p>
-                <p className="text-left">받는사람: {to}</p>
-                <p className="text-left">{cc ? `참조: ${cc}` : null}</p>
-                </div>
+                    <h1 style={{marginBottom: "50px", marginTop: "70px"}} className="text-xl font-bold text-left">메일을
+                        보냈습니다.</h1>
+                    <div style={{marginBottom: "80px"}}>
+                        <p style={{marginBottom: "20px"}}
+                           className="text-left">{title ? `제목: ${title}` : '제목 : 제목없음'}</p>
+                        <p className="text-left">받는사람: {to}</p>
+                        <p className="text-left">{cc ? `참조: ${cc}` : null}</p>
+                    </div>
                     <div>
-                        <button onClick={goSendMailList} className="border rounded-md px-4 py-2"  >확인</button>
-                        <button className="border rounded-md px-4 py-2" style={{marginLeft:"30px"}}>쓰던 페이지 가기</button>
+                        <button onClick={goSendMailList} className="border rounded-md px-4 py-2">확인</button>
+                        <button className="border rounded-md px-4 py-2" style={{marginLeft: "30px"}}>쓰던 페이지 가기</button>
                     </div>
                 </main>
             </div>
