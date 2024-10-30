@@ -29,7 +29,7 @@ export default function SignRegister() {
     const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
     const [userInfo, setUserInfo] = useState([]);
-    const empCode = "3118115625-eee";
+    const empCode = "3118115625-ccc";
 
     // 양식 사용하면
     const [companyName, setCompanyName] = useState("");
@@ -154,28 +154,8 @@ export default function SignRegister() {
                 return;
             }
 
-            if (companyAddress == "") {
-                alert("주소 칸이 비어 있습니다.")
-                return;
-            }
-
-            if (companyTel == "") {
-                alert("전화번호 칸이 비어 있습니다.")
-                return;
-            }
-
-            if (companyFax == "") {
-                alert("팩스 칸이 비어 있습니다.")
-                return;
-            }
-
             if (docNum == "") {
                 alert("문서번호 칸이 비어 있습니다.")
-                return;
-            }
-
-            if (docReception == "") {
-                alert("수신 칸이 비어 있습니다.")
                 return;
             }
 
@@ -240,7 +220,7 @@ export default function SignRegister() {
             });
             const success = window.confirm("정말 저장 하시겠습니까? 수정이 불가하니 양식을 사용한다면 다시 한번 확인하는것을 권장드립니다."); // 성공 메시지
 
-            if(success) {
+            if (success) {
                 // 성공 시 문서 리스트로 이동
                 navigate('/sign');
             } else {
@@ -573,6 +553,21 @@ export default function SignRegister() {
                                     })}
                                     </tbody>
                                 </table>
+                                <div>
+                                    <div className="rounded bg-amber-100 mt-2 p-3 text-left">
+                                        <div className="mb-2">
+                                            <span className="font-bold">필수 입력 요소</span>
+                                            <br/>
+                                            - 결재선(본인 제외 최대 5명), 카테고리, 제목, 내용
+                                        </div>
+                                        <div>
+                                            <span className="font-bold">양식 사용시 필수 입력 요소</span>
+                                            <br/>
+                                            - 회사명, 문서번호, 문서제목, 개요, 내용, 날짜, 대표자
+                                        </div>
+
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

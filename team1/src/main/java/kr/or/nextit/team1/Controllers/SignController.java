@@ -84,10 +84,11 @@ public class SignController {
 
     // 결재 수정 (target만 수정됨)
     @PutMapping("/sign/update/{id}")
-    public ResponseEntity<String> signUpdate(@PathVariable int id, @RequestBody Map<String, String> body) {
-        String target = body.get("target");
-        String sign = service.signUpdate(id, target);
-        return ResponseEntity.ok(sign);
+    public ResponseEntity<?> signUpdate(
+            @PathVariable Long signNum,
+            @RequestBody SignDTO request) {
+        service.updateSign(signNum, request.getTarget(), request.getEndDate());
+        return ResponseEntity.ok().build();
     }
 
 

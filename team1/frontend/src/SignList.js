@@ -8,7 +8,7 @@ export default function SignList() {
     const navigate = useNavigate(); // 경로 navigate
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [categories, setCategories] = useState([]);
     const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
@@ -16,10 +16,12 @@ export default function SignList() {
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
     const [checkDoc, setCheckDoc] = useState([]);
 
+    const [rejectedCount, setRejectedCount] = useState(0); // 반려 문서 수 상태 추가
+
+    const empCode = "3118115625-aaa";
+
     useEffect(() => {
         // doc리스트 가져오기
-        const empCode = "3118115625-eee";
-
         const comCode = 3118115625
 
         axios.get(`/sign/${empCode}`)
@@ -36,8 +38,24 @@ export default function SignList() {
                 setCategories(uniqueCategories);
             })
 
-
     }, []);
+
+    useEffect(() => {
+        axios.get(`/sign/${empCode}`)
+            .then(response => {
+                let count = 0;
+                response.data.map((data, index) => {
+                    if(data.empCode === empCode) {
+                        if(data.target.includes("반려")) {
+                            count+=1;
+                        }
+                    }
+                })
+                setRejectedCount(count)
+            })
+            .catch(error => console.log(error));
+
+    }, [empCode]);
 
     // 화면 옆 슬라이드 열림 구분
     const togglePanel = () => {
@@ -56,7 +74,7 @@ export default function SignList() {
         const { target } = detailResponse.data;
 
         // 현재 사용자의 empCode
-        const empCode = "3118115625-eee"; // 실제 empCode로 변경
+        const empCode = "3118115625-jys1902"; // 실제 empCode로 변경
 
         // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
         const targetEntries = target.split(',');
@@ -82,7 +100,8 @@ export default function SignList() {
 
     // 날짜 형식 변환
     const formatDate = (dateString) => {
-        return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
+        if (!dateString) return ''; // null 또는 undefined일 경우 빈 문자열 반환
+        return dateString.replace("T", " ").slice(0, 16);
     };
 
     // 검색 버튼 클릭 시
@@ -118,6 +137,14 @@ export default function SignList() {
         }
     }
 
+    const mineSignDoc = () => {
+        const filtered = documents.filter((document) => document.empCode == "3118115625-jys1902");
+        setFilteredDocuments(filtered);
+        if(filtered.length === 0) {
+            alert("본인이 작성한 문서가 없습니다.");
+        }
+    }
+
     // 체크박스 상태 변화
     const handleCheckboxChange = (signNum) => {
         setCheckDoc(prevState => {
@@ -145,9 +172,15 @@ export default function SignList() {
                 prevFilteredDocuments.filter(doc => !checkDoc.includes(doc.signNum))
             );
 
+            if(checkDoc.length > 0) {
+                alert("삭제 완료");
+            } else {
+                alert("삭제할 문서가 선택되지 않았습니다.")
+            }
+
             // 체크박스 초기화
             setCheckDoc([]); // 체크된 문서 초기화
-            alert("삭제 완료");
+
         } catch (error) {
             console.error("삭제 오류:", error);
             alert("삭제 중 오류가 발생했습니다.");
@@ -162,7 +195,12 @@ export default function SignList() {
             </header>
             <div className="flex-1 flex">
                 <aside className="w-64 bg-gray-100 p-4 space-y-2">
-
+                    <div>
+                        <button className="w-full flex items-center">
+                            <ChevronRight className="mr-2 h-4 w-4"/>
+                            전체 보기
+                        </button>
+                    </div>
                     <div>
                         <button
                             className="w-full flex items-center"
@@ -188,10 +226,11 @@ export default function SignList() {
                     </div>
                     <div>
                         <button
-                            className="w-full flex items-center mt-4"
+                            className="w-full flex justify-between items-center"
+                            onClick={mineSignDoc}
                         >
-                                <ChevronRight className="mr-2 h-4 w-4"/>
-                            내 작성 결재함
+                            <span className="flex"><ChevronRight className="mr-2 h-4 w-4"/> 내 결재함</span>
+                            {rejectedCount > 0 && <span className="bg-red-700 text-white rounded-full w-6">{rejectedCount}</span>}
                         </button>
                     </div>
 
@@ -240,7 +279,6 @@ export default function SignList() {
                             <tbody>
                             {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document, docIndex) => {
                                 const target = document.target
-                                console.log(documents);
                                 return (
                                     <tr key={docIndex} className="cursor-pointer hover:bg-gray-100">
                                         <td><input type="checkbox" className="checkDelete"
@@ -249,8 +287,8 @@ export default function SignList() {
                                         <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{docIndex+1}</td>
                                         <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.signCateCode}</td>
                                         <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.title}</td>
-                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.startDate}</td>
-                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{document.endDate}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{formatDate(document.startDate)}</td>
+                                        <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>{target.includes("반려") ? (<div className="font-bold text-red-700">반려</div>) : formatDate(document.endDate)}</td>
                                         <td className="p-2" onClick={() => handleDocumentClick(document.signNum)}>
                                             {target.split(',')[1]?.split('_')[1] || ''}
                                             {target.split(',')[2]? (" > "+target.split(',')[2].split('_')[1]) : ""}

@@ -90,7 +90,7 @@ export default function SignTarget({onClose, empCode}) {
                             >
                                 주소록
                             </div>
-                            <div className=" w-[400px] h-[550px] border-2 border-black rounded-[3px] overflow-auto">
+                            <div className=" w-[400px] h-[550px] border-2 border-black rounded-[3px] overflow-auto p-2">
                                 <div ref={listContainerRef} onClick={handleListClick}/>
                             </div>
                         </div>

@@ -2,7 +2,6 @@ package kr.or.nextit.team1.Services;
 
 import kr.or.nextit.team1.DTOs.SignDTO;
 import kr.or.nextit.team1.mappers.SignMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -75,15 +75,8 @@ public class SignService {
         return mapper.signDetail(id);
     }
 
-    @Transactional
-    public String signUpdate(int id, String target) {
-        int updatedCount = mapper.signUpdate(id, target);
-
-        if (updatedCount > 0) {
-            return "업데이트 성공";
-        } else {
-            return "업데이트 실패";
-        }
+    public void updateSign(Long signNum, String target, LocalDateTime endDate) {
+        mapper.signUpdate(signNum, target, endDate);
     }
 
     @Transactional
