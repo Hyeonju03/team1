@@ -18,6 +18,7 @@ public class SignUpDTO {
     private String empId;
     private String comCode;
     private String posCode;
+    private String corCode;
 
 //    public SignUpDTO() {
 //    }

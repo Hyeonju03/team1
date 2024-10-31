@@ -4,7 +4,7 @@ const DeleteConfirmationPopup = ({ isOpen, onClose, onConfirm }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center border bg-black bg-opacity-50">
             <div className="bg-white rounded p-6 shadow-lg" style={{width:"500px"}}>
                 <p>휴지통의 모든 메일을 삭제하시겠습니까?</p>
                 <p>삭제한 메일은 영구 삭제되어 복구할 수 없습니다.</p>

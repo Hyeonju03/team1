@@ -40,4 +40,12 @@
         FROM employeetest
         WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
     </select>
+
+    <select id="selectCorcode" resultType="hashmap">
+        select EMP_CODE ,EMP_NAME , POS_CODE
+        from employee
+        where EMP_CODE like '3118115625%'
+        and DEP_CODE = '개발부'
+        order by EMP_NAME
+    </select>
 </mapper>

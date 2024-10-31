@@ -15,9 +15,9 @@ function Button({ children, size, variant, onClick }) {
     );
 }
 
-function Input({ placeholder ,onChange }) {
+function Input({ placeholder ,onChange ,onKeyDown }) {
     return (
-        <input type="text"  onChange={onChange}  placeholder={placeholder} className="border border-gray-300 p-2 rounded w-full" />
+        <input type="text"  onChange={onChange} onKeyDown={onKeyDown}  placeholder={placeholder} className="border border-gray-300 p-2 rounded w-full" />
     );
 }
 
@@ -34,11 +34,11 @@ function TableHeader({ children }) {
 }
 
 function TableBody({ children }) {
-    return <tbody>{children}</tbody>;
+    return <tbody className="border">{children}</tbody>;
 }
 
 function TableRow({ children }) {
-    return <tr className="border-b">{children}</tr>;
+    return <tr >{children}</tr>;
 }
 
 function TableHead({ children }) {
@@ -129,6 +129,13 @@ export default function Component() {
     const qListOnChangeHandler =(e)=>{
         setQSearch(e.target.value)
     }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault(); // 기본 동작 방지
+            search();
+        }
+    };
 
     const search =(e)=>{
         console.log("클릭");
@@ -238,7 +245,7 @@ export default function Component() {
 
                     <div className="flex items-center gap-4 mt-4">
                         <div className="flex-1">
-                            <Input onChange={qListOnChangeHandler} placeholder="검색"/>
+                            <Input onKeyDown={handleKeyDown} onChange={qListOnChangeHandler} placeholder="검색"/>
                         </div>
                         <Button onClick={search} size="icon" variant="outline">
                             <span className="material-icons">검색</span>

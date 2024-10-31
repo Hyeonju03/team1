@@ -1,6 +1,7 @@
 import { useState,useEffect } from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import SelectCorCodePopup from "./SelectCorCodePopup";
 
 export default function SignUpForm() {
 
@@ -32,15 +33,25 @@ export default function SignUpForm() {
     const navigate = useNavigate();
     const [signUpResponse,setSignUpResponse] = useState("")
     const [empCodeCheck,setEmpCodeCheck] = useState("")
+    const [corCode, setCorCode] = useState([]);
+    const[popUp,setPopUp] = useState(false)
+    const[checkCorCode,setCheckCorCode] = useState("")
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInputIdCheck(e.target)
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
+
+        if (name === 'department') {
+            corCheck(value); // 업데이트된 부서 값 전달
+            console.log(formData.department)
+        }
     };
 
     const validateForm = () => {
+
+        console.log("validateForm")
         const newErrors = {};
 
         if (!formData.companyCode) newErrors.companyCode = "회사코드를 입력해주세요";
@@ -58,7 +69,7 @@ export default function SignUpForm() {
         }
         if (!formData.verificationCode) newErrors.verificationCode = "인증번호를 입력해주세요";
         if (!formData.department) newErrors.department = "부서를 선택해주세요";
-        if (!formData.supervisorCode) newErrors.supervisorCode = "상관 코드를 입력해주세요";
+        //if (!formData.supervisorCode) newErrors.supervisorCode = "상관 코드를 입력해주세요";
         if (!formData.rank) newErrors.rank = "직급을 선택해주세요";
         if (!formData.residentNumber1) newErrors.residentNumber1 = "주민등록번호 앞자리 입력해주세요";
         if (!formData.residentNumber2) newErrors.residentNumber2 = "주민등록번호 뒷자리 입력해주세요";
@@ -84,7 +95,6 @@ export default function SignUpForm() {
                     const dede = newDepartments.join(",").split(",");
                         setDepartments(dede);
 
-
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 }
@@ -107,6 +117,7 @@ export default function SignUpForm() {
 
                const nene =   newRanks.join(",").split(",");
                 setRanks(nene)
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -114,6 +125,27 @@ export default function SignUpForm() {
             alert("없는 회사코드임");
         }
     }
+    // 상사리스트
+        const corCheck = async (param)=>{
+        console.log("formData" , param)
+        const response = await axios.get('/apitest');
+            const companyFonud = response.data.some(company => company[2] === formData.companyCode);
+
+            if(companyFonud){
+                try {
+                    const response = await axios.get(`http://localhost:8080/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
+                    console.log(response);
+                    setCorCode(response.data)
+
+                } catch (error){
+                    console.error(error);
+                }
+            }
+        }
+
+
+
+
 
     const idCheck = async() => {
         const companyCode = formData.companyCode;
@@ -184,27 +216,41 @@ export default function SignUpForm() {
     };
 
 
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault(); // 기본 동작 방지
         }
     };
+    
+    const searchCorcode=(e)=>{
+        console.log("클릭")
+        setPopUp(true)
+    }
+
+
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         console.log("회원가입 하기");
+
         const validationErrors = validateForm();
+        console.log(validationErrors)
+
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
+            console.log("setErrors")
             return;
         }
+        console.log("회원가입 하기2222");
 
         if(! companyConfirm){
             alert("회사코드 확인하삼")
             return;
         }
+        console.log("회원가입 하기33333");
 
         if(! idConfirm){
             alert("아이디중복확인 하삼")
@@ -233,7 +279,7 @@ export default function SignUpForm() {
         if ((formData.residentNumber1.length + formData.residentNumber2.length) != 13){
             alert("주민등록번호 확인하삼")
         }
-        console.log('Form submitted:', formData);
+        // console.log('Form submitted:', formData);
 
         const send = {
             companyCode: formData.companyCode,
@@ -244,21 +290,26 @@ export default function SignUpForm() {
             phoneNum: formData.phone, // 전화번호
             empMail: formData.email, // 이메일
             empRrn: `${formData.residentNumber1}-${formData.residentNumber2}`, // 주민등록번호
-            supervisorCode: formData.supervisorCode,//상관
+            // supervisorCode: formData.supervisorCode,//상관
+            corCode: checkCorCode,
             posCode: formData.rank
 
         };
+
+        console.log('send send:', send);
 
         const config = {
             headers: { "Content-Type": `application/json`}
         };
 
-        const reuslt = await axios.post('/signUp' ,  send, config);
-        //여기url주소가 contro;ller url이랑 똑같아야함.
-
-        console.log(reuslt);
-
-
+        try{
+            const reuslt = await axios.post('/signUp' ,  send, config);
+            console.log(reuslt);
+            alert("회원가입 완룡")
+        }catch (error){
+            console.error(error)
+        }
+        
     };
 
 
@@ -429,11 +480,11 @@ export default function SignUpForm() {
                         <select
                             id="department"
                             name="department"
-                            value={formData.department}
+                            // value={formData.department}
                             onChange={handleChange}
                             className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
                         >
-                            <option value="">부서 선택</option>
+                            <option value="department">부서 선택</option>
                             {/* 기본 선택 옵션 */}
                             {departments.map((dep, index) => (
                                 <option key={index} value={dep}>
@@ -452,15 +503,26 @@ export default function SignUpForm() {
                         <input
                             id="supervisorCode"
                             name="supervisorCode"
-                            value={formData.supervisorCode}
+                            // value={formData.supervisorCode}
+                            value={checkCorCode}
                             onChange={handleChange}
                             onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
                             placeholder={errors.supervisorCode || '상관 코드 입력'}
                         />
-                        {/*<button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>*/}
+                        <button onClick={searchCorcode}  type="button" className="border p-2 ml-2 flex-none">검색</button>
                     </div>
                 </div>
+                <SelectCorCodePopup
+                    isOpen={popUp}
+                    onClose={() => setPopUp(false)}
+                    onConfirm={(item) => {
+                        console.log("item" ,item.EMP_CODE)
+                        setCheckCorCode(item.EMP_CODE)
+                        setPopUp(false); // 모달 닫기
+                    }}
+                    corCode={corCode}
+                />
 
                 {/* 직급 */}
                 <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>

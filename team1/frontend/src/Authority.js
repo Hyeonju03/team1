@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
-
+// import { ChevronDown, ChevronRight } from 'react-icons/your-icon-library';
 
 
 function Table({ children }) {
@@ -36,7 +36,24 @@ export default function Component() {
     const [empCode, setEmpCode] = useState("");
     const [empList, setEmpList] = useState([]);
     const [formData, setFormData] = useState([]);
-    const [hasPermission, setHasPermission] = useState(true);
+    const [hasPermission, setHasPermission] = useState(true)
+
+    // const [isExpanded, setIsExpanded] = useState(false);
+    // const categories = [];
+
+    // const handleCategorySelect = (category) => {
+    //     setSelectedCategory(category); // 별도의 선택 상태
+    //
+    //     if (category == "all") {
+    //         setFilteredDocuments(documents);
+    //     } else {
+    //         const filtered = documents.filter((document) => document.signCateCode === category);
+    //         setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+    //         if (filtered.length === 0) {
+    //             alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
+    //         }
+    //     }
+    // }
 
     const fetchEmpCode = async () => {
         //1. 로그인한 emp_code로 select문 조회 -> where _edit = 1; --> cnt > 0 / cnt < 0
@@ -162,7 +179,53 @@ export default function Component() {
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
-            <div>
+            <div className="flex" >
+            {/*사이드바*/}
+            <div >
+            <aside className="w-64 bg-gray-100 p-4 space-y-2" style={{height:"800px"}}>
+                <ol>
+                    <li>
+                        <div>
+                            <button
+                                className={`w-full flex items-center transition-colors duration-300`}>
+                                <span className="hover:underline">결재함</span>
+                            </button>
+                                <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                    <li>
+                                        <div>
+                                            <button className="w-full flex items-center">
+                                                <div className="hover:underline">전체 보기</div>
+                                            </button>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <button className="w-full flex items-center">
+                                                <div className="hover:underline">카테고리</div>
+                                            </button>
+                                            <li className={`text-left transition-colors duration-300`}>
+                                                            <div className="flex">
+                                                                <button className="hover:underline">
+                                                                </button>
+                                                            </div>
+                                                        </li>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div className="flex justify-between">
+                                            <button className="w-full flex items-center">
+                                                <div className="hover:underline">내 결재함</div>
+                                            </button>
+
+                                        </div>
+                                    </li>
+                                </div>
+                        </div>
+                    </li>
+                </ol>
+            </aside>
+            </div>
+            <div  className="flex-1" style={{marginLeft:"10px"}}>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -270,6 +333,7 @@ export default function Component() {
                 <div className="text-center mt-4">
                     <button onClick={handleSubmit} className="bg-blue-500 text-white rounded px-4 py-2">저장</button>
                 </div>
+            </div>
             </div>
         </div>
     );

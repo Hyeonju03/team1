@@ -46,6 +46,12 @@ public class SignUpController {
         return signUpMapper.getAllranks(comCode); // SignUpMapper의 메소드를 호출
     }
 
+    @GetMapping("/selectCorcode")
+    public List<SignUpDTO> selectCorcode(@RequestParam String comCode, String depCode) {
+        System.out.println(depCode);
+        return signUpMapper.selectCorcode(comCode, depCode);
+    }
+
     @PostMapping("/findAllempCode")
     public int getAllAllempCodes(@RequestBody SignUpDTO signUpDTO) {
         System.out.println(signUpDTO);

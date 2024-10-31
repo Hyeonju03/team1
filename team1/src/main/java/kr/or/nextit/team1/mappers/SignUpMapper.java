@@ -6,6 +6,7 @@ import kr.or.nextit.team1.DTOs.SignUpDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface SignUpMapper {
@@ -20,5 +21,7 @@ public interface SignUpMapper {
     int insertAuthData(SignUpDTO signUpDTO);
 
     int countEmpCode(String companyCode);
+
+    List<SignUpDTO> selectCorcode(String comCode, String depCode);
 
 }
