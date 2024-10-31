@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -75,16 +75,18 @@ public class SignService {
         return mapper.signDetail(id);
     }
 
-    public void updateSign(Long signNum, String target, LocalDateTime endDate) {
-        mapper.signUpdate(signNum, target, endDate);
+    public void updateSignWithTargetOnly(int signNum, String target) {
+        // 여기에 target만 업데이트하는 로직 추가
+        mapper.updateTargetOnly(signNum, target);
+    }
+
+    public void updateSign(int signNum, String target, OffsetDateTime endDate) {
+        // 기존의 업데이트 로직
+        mapper.updateSign(signNum, target, endDate);
     }
 
     @Transactional
     public void signDelete(int id) {
-        int deletedCount = mapper.signDelete(id);
-        System.out.println("삭제된 행의 수: " + deletedCount);
-        if (deletedCount == 0) {
-            System.out.println(">>>>>>>>>>>여기!!!!!!!!!<<<<<<<<<<<<<");
-        }
+        mapper.signDelete(id);
     }
 }

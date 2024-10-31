@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -85,9 +85,16 @@ public class SignController {
     // 결재 수정 (target만 수정됨)
     @PutMapping("/sign/update/{id}")
     public ResponseEntity<?> signUpdate(
-            @PathVariable Long signNum,
-            @RequestBody SignDTO request) {
-        service.updateSign(signNum, request.getTarget(), request.getEndDate());
+            @PathVariable int id,
+            @RequestParam String target,
+            @RequestParam(required = false) OffsetDateTime endDate) {
+        if (endDate == null) {
+            // endDate가 없을 경우
+            service.updateSignWithTargetOnly(id, target);
+        } else {
+            // endDate가 있을 경우
+            service.updateSign(id, target, endDate);
+        }
         return ResponseEntity.ok().build();
     }
 

@@ -42,10 +42,19 @@
             (#{empCode}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
     </insert>
 
-    <update id="signUpdate" parameterType="map">
-        UPDATE sign_table
-        SET target = #{target}, end_date = #{endDate}
-        WHERE sign_num = #{signNum}
+    <update id="updateSign">
+        UPDATE SIGN_TEST
+        SET TARGET = #{target}, end_date = #{endDate}
+        WHERE
+            SIGN_NUM = #{signNum}
+    </update>
+
+    <update id="updateTargetOnly">
+        UPDATE SIGN_TEST
+        SET
+            TARGET = #{target}
+        WHERE
+            SIGN_NUM = #{signNum}
     </update>
 
     <delete id="signDelete" parameterType="int">

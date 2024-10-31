@@ -4,6 +4,7 @@ import axios from "axios";
 import {ChevronDown, ChevronRight, Paperclip} from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import SignModal from "./SignModal";
 
 export default function SignDetail() {
     // pdf
@@ -20,9 +21,15 @@ export default function SignDetail() {
     const [user, setUser] = useState(null);
     let contentType;
 
-    const empCode = "3118115625-jys1902";
+    // confirm 오류로 만든 modal 관련
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [currentAction, setCurrentAction] = useState(null);
+    const [modalMessage, setModalMessage] = useState("");
+
+    const empCode = "3118115625-aaa";
     const comCode = "3118115625";
 
+    // pdf제작
     const handleDownloadPdf = async () => {
         const element = printRef.current
         if (!element) {
@@ -47,37 +54,8 @@ export default function SignDetail() {
         pdf.save('결재서.pdf')
     }
 
+    // 아이디 바뀔때 마다 실행(렌더링 마다로 하면 카운트 오류 발생 사람이 계속 나옴.)
     useEffect(() => {
-        // 결재선에 본인꺼 띄우기
-        const fetchUserInfo = async () => {
-            try {
-                const response = await axios.get(`/${empCode}`);
-                if (!response.data) {
-                    return;
-                }
-                setUser(response.data); // user 상태 업데이트
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        const fetchSignDetail = async () => {
-            try {
-                const response = await axios.get(`/sign/detail/${id}`);
-                setSign(response.data);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchCategories = async () => {
-            const response = await axios.get(`/code/${comCode}`);
-            const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))];
-            setCategories(uniqueCategories);
-        };
-
         fetchUserInfo();
         fetchCategories();
         fetchSignDetail();
@@ -87,53 +65,85 @@ export default function SignDetail() {
         if (!sign || !sign.target) {
             return;
         }
-
-        const fetchUserDetails = async () => {
-            const signUsers = sign.target.split(",");
-
-            for (const signUser of signUsers) {
-                const empUser = signUser.split(":")[0];
-                const signList = signUser.split(":")[1].split("_")[1];
-
-                try {
-                    const response = await axios.get(`/${empUser}`);
-                    const newUser = {
-                        empCode: response.data.empCode,
-                        name: response.data.empName,
-                        dep: response.data.depCode,
-                        pos: response.data.posCode,
-                        sign: signList,
-                    };
-
-                    // userInfo에 새로운 사용자 추가
-                    setUserInfo(prevUserInfo => {
-                        // 중복 체크
-                        if (!prevUserInfo.find(user => user.name === newUser.name)) {
-                            return [...prevUserInfo, newUser];
-                        }
-                        return prevUserInfo; // 중복일 경우 이전 상태 반환
-                    });
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        };
-
-        const fetchSignContent = () => {
-            if (!sign.content || !sign) {
-                return;
-            }
-
-            contentType = sign.content.split("_")[0]
-            if (contentType == "양식") {
-                setIsToggled(true);
-            }
-        }
-
         fetchUserDetails();
         fetchSignContent();
     }, [sign]);
 
+    // 유저 정보 조회 (필요성 재확인 필요.)
+    const fetchUserInfo = async () => {
+        try {
+            const response = await axios.get(`/${empCode}`);
+            if (!response.data) {
+                return;
+            }
+            setUser(response.data); // user 상태 업데이트
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // sign의 정보 불러옴
+    const fetchSignDetail = async () => {
+        try {
+            const response = await axios.get(`/sign/detail/${id}`);
+            setSign(response.data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 카테고리 불러옴
+    const fetchCategories = async () => {
+        const response = await axios.get(`/code/${comCode}`);
+        const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))];
+        setCategories(uniqueCategories);
+    };
+
+    // target 입력
+    const fetchUserDetails = async () => {
+        const signUsers = sign.target.split(",");
+
+        for (const signUser of signUsers) {
+            const empUser = signUser.split(":")[0];
+            const signList = signUser.split(":")[1].split("_")[1];
+
+            try {
+                const response = await axios.get(`/${empUser}`);
+                const newUser = {
+                    empCode: response.data.empCode,
+                    name: response.data.empName,
+                    dep: response.data.depCode,
+                    pos: response.data.posCode,
+                    sign: signList,
+                };
+
+                // userInfo에 새로운 사용자 추가
+                setUserInfo(prevUserInfo => {
+                    // 중복 체크
+                    if (!prevUserInfo.find(user => user.name === newUser.name)) {
+                        return [...prevUserInfo, newUser];
+                    }
+                    return prevUserInfo; // 중복일 경우 이전 상태 반환
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+
+    // 양식 사용 여부
+    const fetchSignContent = () => {
+        if (!sign.content || !sign) {
+            return;
+
+        }
+        contentType = sign.content.split("_")[0]
+        if (contentType == "양식") {
+            setIsToggled(true);
+        }
+    }
 
     if (loading) {
         return null;
@@ -143,9 +153,6 @@ export default function SignDetail() {
         return null;
     }
 
-    const formatDate = (dateString) => {
-        return dateString.replace("T", " ").slice(0, 16);
-    };
 
     const fileDownload = (blobData, fileName) => {
         const url = window.URL.createObjectURL(blobData);
@@ -171,126 +178,130 @@ export default function SignDetail() {
         }
     };
 
-    // 승인하기 버튼
-    const asignButton = async (signNum) => {
-        // 현재 사용자의 empCode
-        const empCode = "3118115625-jys1902"; // 실제 empCode로 변경
-
-        // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
-        const targetEntries = sign.target.split(',');
-        const updatedTargetEntries = targetEntries.map((entry, index) => {
-            const [code, status] = entry.split(':');
-
-            // 자기 앞에 있는 사람이 미승인 상태인지 체크
-            if (status === '확인_미승인') {
-                if (index > 0) {
-                    if (code !== empCode) {
-                        alert("해당 권한이 없는 사용자 입니다.")
-                        return entry;
-                    }
-                    if (code === empCode) {
-                        const previousEntry = targetEntries[index - 1].split(':');
-                        const previousStatus = previousEntry[1];
-
-                        // 앞 사람이 미승인인 경우 승인 불가
-                        if (previousStatus.includes('미승인')) {
-                            alert("앞에 있는 사람이 미승인 상태입니다. 승인할 수 없습니다.");
-                            return entry; // 변경하지 않음
-                        }
-                        // 앞 사람이 반려 경우 승인 불가
-                        if (previousStatus.includes('반려')) {
-                            alert("이미 반려 된 문서입니다.");
-                            return entry; // 변경하지 않음
-                        }
-
-                        // eslint-disable-next-line no-restricted-globals
-                        const result = confirm("승인하시겠습니까?");
-                        if(result){
-                            alert("승인되었습니다.");
-                            return `${code}:확인_승인`; // 업데이트된 값
-                        } else {
-                            return;
-                        }
-
-                        // 현재 사용자의 empCode가 맞고 확인 상태일 때 승인으로 변경
-
-
-                    }
+    // 반려/승인 업데이트
+    const handleSignUpdate = async (signNum, updatedTarget) => {
+        try {
+            await axios.put(`/sign/update/${signNum}`, null, {
+                params: {
+                    target: updatedTarget,
+                    endDate: new Date().toISOString() // ISO 8601 형식으로 변환
                 }
+            });
+            if (updatedTarget.includes("반려")) {
+                alert("반려되었습니다."); // 확인 알림
+            } else {
+                alert("승인되었습니다."); // 확인 알림
             }
-
-            return entry; // 업데이트하지 않은 값
-        });
-
-        // 새로운 TARGET 값 생성
-        const updatedTarget = updatedTargetEntries.join(',');
-
-        console.log("sign >>", sign);
-        // DB 업데이트 요청
-        await axios.put(`/sign/update/${signNum}`, {
-            target: updatedTarget, // 업데이트할 데이터를 포함
-            endDate: newDate()
-        });
-
-        // 업데이트 후 페이지 새로고침
-        window.location.reload();
+            window.location.reload();
+        } catch (error) {
+            console.error("Error updating sign:", error);
+            alert("결재 처리 중 오류가 발생했습니다.");
+        }
     };
 
-    const rejectButton = async (signNum) => {
-        // 현재 사용자의 empCode
-        const empCode = "3118115625-jys1902"; // 실제 empCode로 변경
+    // modal띄우기
+    const handleConfirm = async () => {
+        if (currentAction) {
+            await currentAction();
+            setCurrentAction(null);
+        }
+        setModalOpen(false);
+    };
 
-        // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
+    // 승인버튼
+    const asignButton = (signNum) => {
+        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
         const targetEntries = sign.target.split(',');
+
+        targetEntries.map((entry, index) => {
+            const [code, status] = entry.split(':');
+
+            if (status === '확인_미승인' && index > 0) {
+                const previousEntry = targetEntries[index - 1].split(':');
+                const previousStatus = previousEntry[1];
+
+                if (previousStatus.includes('미승인')) {
+                    alert("앞에 있는 사람이 미승인 상태입니다. 승인할 수 없습니다.");
+                    return entry;
+                }
+                if (previousStatus.includes('반려')) {
+                    alert("이미 반려된 문서입니다. 승인할 수 없습니다.");
+                    return entry;
+                }
+
+                if (code === empCode) {
+                    setModalMessage("승인하시겠습니까?");
+                    setCurrentAction(() => () => handleAsign(signNum, targetEntries)); // 승인 함수 설정
+                    setModalOpen(true); // 모달 열기
+                    return entry; // 변경하지 않음
+                }
+            }
+            return entry; // 업데이트하지 않은 값
+        });
+    };
+
+    const handleAsign = async (signNum, targetEntries) => {
+        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const updatedTargetEntries = targetEntries.map((entry) => {
+            const [code, status] = entry.split(':');
+            if (code === empCode) {
+                return `${code}:확인_승인`; // 승인된 값으로 업데이트
+            }
+            return entry;
+        });
+
+        const updatedTarget = updatedTargetEntries.join(',');
+        await handleSignUpdate(signNum, updatedTarget); // DB 업데이트
+    };
+
+    // 반려 버튼
+    const rejectButton = (signNum) => {
+        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const targetEntries = sign.target.split(',');
+
         const updatedTargetEntries = targetEntries.map((entry, index) => {
             const [code, status] = entry.split(':');
 
-            // 자기 앞에 있는 사람이 미승인 상태인지 체크
-            if (status === '확인_미승인') {
-                if (index > 0) {
-                    const previousEntry = targetEntries[index - 1].split(':');
-                    const previousStatus = previousEntry[1];
+            if (status === '확인_미승인' && index > 0) {
+                const previousEntry = targetEntries[index - 1].split(':');
+                const previousStatus = previousEntry[1];
 
-                    // 앞 사람이 미승인인 경우 승인 불가
-                    if (previousStatus.includes('미승인')) {
-                        alert("앞에 있는 사람이 미승인 상태입니다. 결재를 진행 할 수 없습니다.");
-                        return entry; // 변경하지 않음
-                    }
-                    // 앞 사람이 반려 경우 승인 불가
-                    if (previousStatus.includes('반려')) {
-                        alert("이미 반려 된 문서입니다. 결재를 진행 할 수 없습니다.");
-                        return entry; // 변경하지 않음
-                    }
+                if (previousStatus.includes('미승인')) {
+                    alert("앞에 있는 사람이 미승인 상태입니다. 결재를 진행할 수 없습니다.");
+                    return entry;
+                }
+                if (previousStatus.includes('반려')) {
+                    alert("이미 반려된 문서입니다. 결재를 진행할 수 없습니다.");
+                    return entry;
                 }
 
-                // 현재 사용자의 empCode가 맞고 확인 상태일 때 승인으로 변경
                 if (code === empCode) {
-                    // eslint-disable-next-line no-restricted-globals
-                    const result = confirm("반려 시 다음 결재 진행이 불가합니다. 반려하시겠습니까?");
-                    if(result){
-                        alert("반려되었습니다.")
-                        return `${code}:확인_반려`; // 업데이트된 값
-                    } else {
-                        return;
-                    }
+                    setModalMessage("반려 시 다음 결재 진행이 불가합니다. 반려하시겠습니까?");
+                    setCurrentAction(() => () => handleReject(signNum, targetEntries)); // 반려 함수 설정
+                    setModalOpen(true); // 모달 열기
+                    return entry; // 변경하지 않음
                 }
             }
-
             return entry; // 업데이트하지 않은 값
         });
+    };
 
-        // 새로운 TARGET 값 생성
-        const updatedTarget = updatedTargetEntries.join(',');
-
-        // DB 업데이트 요청
-        await axios.put(`/sign/update/${signNum}`, {
-            target: updatedTarget // 업데이트할 데이터를 포함
+    const handleReject = async (signNum, targetEntries) => {
+        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const updatedTargetEntries = targetEntries.map((entry) => {
+            const [code] = entry.split(':');
+            if (code === empCode) {
+                return `${code}:확인_반려`; // 반려된 값으로 업데이트
+            }
+            return entry;
         });
 
-        // 업데이트 후 페이지 새로고침
-        window.location.reload();
-    }
+        const updatedTarget = updatedTargetEntries.join(',');
+        await handleSignUpdate(signNum, updatedTarget); // DB 업데이트
 
+    };
+
+    // 목록으로
     const handleHome = () => {
         navigate(`/sign`);
     };
@@ -585,6 +596,12 @@ export default function SignDetail() {
                                 onClick={() => rejectButton(sign.signNum)}>
                             결재반려
                         </button>
+                        <SignModal
+                            isOpen={isModalOpen}
+                            onClose={() => setModalOpen(false)}
+                            onConfirm={handleConfirm}
+                            message={modalMessage}
+                        />
                     </div>
                 </main>
             </div>

@@ -29,7 +29,7 @@ export default function SignRegister() {
     const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
     const [userInfo, setUserInfo] = useState([]);
-    const empCode = "3118115625-ccc";
+    const empCode = "3118115625-bbb";
 
     // 양식 사용하면
     const [companyName, setCompanyName] = useState("");
