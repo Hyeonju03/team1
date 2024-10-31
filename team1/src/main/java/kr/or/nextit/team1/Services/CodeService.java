@@ -9,17 +9,8 @@ import org.springframework.stereotype.Service;
 public class CodeService {
     @Autowired
     private CodeMapper codeMapper;
-
-    public CodeDTO selectCategories(String comCode) {
+    public List<CodeDTO> selectCategories(String comCode) 
         return codeMapper.selectCategories(comCode);
 
     }
-
-
-
-
-
-
-
-
 }

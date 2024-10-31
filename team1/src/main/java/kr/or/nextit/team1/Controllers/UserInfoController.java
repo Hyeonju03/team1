@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -28,6 +27,18 @@ public class UserInfoController {
         return ResponseEntity.ok(userInfoDTO);
     }
 
+    // 수정
+    @PostMapping("/userInfo/update")
+    public ResponseEntity<String> userInfoUpdate(@RequestBody UserInfoDTO userInfoDTO) {
+        try {
+            userInfoService.userInfoUpdate(userInfoDTO);
+//            System.out.println("userInfoDTO 값 확인: " + userInfoDTO);
+            return ResponseEntity.ok("정보가 수정 되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
+
+        }
+    }
 
     // 상관에게 수정 요청
     @PostMapping("/modifyRequest")
@@ -49,7 +60,6 @@ public class UserInfoController {
         String posCode = userInfoService.getPosCode(empCode);
         return ResponseEntity.ok(posCode);
     }
-
 
     @GetMapping("/userInfo/{corCode}")
     public ResponseEntity<List<UserInfoDTO>> corCodeCheck(@PathVariable String corCode) {

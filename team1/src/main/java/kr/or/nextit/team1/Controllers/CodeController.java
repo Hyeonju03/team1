@@ -14,9 +14,8 @@ public class CodeController {
     private CodeService codeService;
 
     @GetMapping("/code/{comCode}")
-    public CodeDTO selectCategories(@PathVariable String comCode) {
-        return codeService.selectCategories(comCode); // 모든 카테고리 반환
+    public List<CodeDTO> selectCategories(@PathVariable String comCode) {
+       return codeService.selectCategories(comCode); // 모든 카테고리 반환 
     }
-
-
+    //public CodeDTO selectCategories(@PathVariable String comCode) {}
 }

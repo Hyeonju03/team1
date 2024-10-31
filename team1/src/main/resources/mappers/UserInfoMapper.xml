@@ -12,8 +12,6 @@
             EMP_CODE = #{empCode}
     </select>
 
-
-
     <!-- 상관에게 수정 요청 전송 -->
       <update id="modifyReqUpdate" parameterType="UserInfoDTO">
         UPDATE
@@ -82,5 +80,4 @@
     <update id="modifyReqClear">
         <include refid="modifyReqDelete" />
     </update>
-
 </mapper>

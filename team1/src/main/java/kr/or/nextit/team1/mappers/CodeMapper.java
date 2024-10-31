@@ -5,5 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface CodeMapper {
-   CodeDTO selectCategories(String comCode); // 모든 카테고리 가져오기
+   List<CodeDTO> selectCategories(String comCode); // 모든 카테고리 가져오기
+
+   //CodeDTO selectCategories(String comCode); // 모든 카테고리 가져오기
 }
