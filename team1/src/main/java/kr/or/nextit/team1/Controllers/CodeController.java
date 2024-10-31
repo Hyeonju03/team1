@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 public class CodeController {
 
@@ -17,9 +15,7 @@ public class CodeController {
 
     @GetMapping("/code/{comCode}")
     public List<CodeDTO> selectCategories(@PathVariable String comCode) {
-        System.out.println("controller>" +comCode);
-        return codeService.selectCategories(comCode); // 모든 카테고리 반환
+       return codeService.selectCategories(comCode); // 모든 카테고리 반환 
     }
-
-
+    //public CodeDTO selectCategories(@PathVariable String comCode) {}
 }

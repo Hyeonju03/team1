@@ -90,30 +90,30 @@ export default function EmailClient({ emails, setEmails, trash, setTrash}) {
                     </div>
 
             <h1 className="text-2xl font-bold mb-4">받은메일함</h1>
-                    <div className="space-y-2">
-                        {emails.map((email) => (
-                            <div
-                                key={email.id}
-                                className="flex items-center space-x-4 p-2 border rounded cursor-pointer"
-                                onChange={() => handleCheckboxChange(email.id)}
-                                onClick={() => handleMailClick(email.id)} // 제목 클릭 시 페이지 이동
-                            >
-                                <input
-                                    type="checkbox"
-                                    className="h-4 w-4"
-                                    checked={checkedEmails.includes(email.id)}
-                                    onChange={(event) => handleCheckboxChange(event, email.id)} // 체크박스 클릭 시 상태만 변경
-                                    onClick={(event) => event.stopPropagation()} // 체크박스 클릭 시 상위 클릭 이벤트 전파 방지
-                                />
-                                <Paperclip className="h-4 w-4 text-gray-400"/>
-                                <div className="flex-1">
-                                    <div className="font-semibold text-left">{email.sender}</div>
-                                    <div className="text-sm text-gray-600 text-left">{email.subject}</div>
-                                </div>
-                                <div className="text-sm text-gray-500">{email.date}</div>
-                            </div>
-                        ))}
-                    </div>
+                    {/*<div className="space-y-2">*/}
+                    {/*    {emails.map((email) => (*/}
+                    {/*        <div*/}
+                    {/*            key={email.id}*/}
+                    {/*            className="flex items-center space-x-4 p-2 border rounded cursor-pointer"*/}
+                    {/*            onChange={() => handleCheckboxChange(email.id)}*/}
+                    {/*            onClick={() => handleMailClick(email.id)} // 제목 클릭 시 페이지 이동*/}
+                    {/*        >*/}
+                    {/*            <input*/}
+                    {/*                type="checkbox"*/}
+                    {/*                className="h-4 w-4"*/}
+                    {/*                checked={checkedEmails.includes(email.id)}*/}
+                    {/*                onChange={(event) => handleCheckboxChange(event, email.id)} // 체크박스 클릭 시 상태만 변경*/}
+                    {/*                onClick={(event) => event.stopPropagation()} // 체크박스 클릭 시 상위 클릭 이벤트 전파 방지*/}
+                    {/*            />*/}
+                    {/*            <Paperclip className="h-4 w-4 text-gray-400"/>*/}
+                    {/*            <div className="flex-1">*/}
+                    {/*                <div className="font-semibold text-left">{email.sender}</div>*/}
+                    {/*                <div className="text-sm text-gray-600 text-left">{email.subject}</div>*/}
+                    {/*            </div>*/}
+                    {/*            <div className="text-sm text-gray-500">{email.date}</div>*/}
+                    {/*        </div>*/}
+                    {/*    ))}*/}
+                    {/*</div>*/}
                 </main>
             </div>
         </div>
