@@ -14,7 +14,7 @@ export default function UserInfo() {
     const [corCode, setCorCode] = useState(""); // 상관코드 (필수아님)
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [codeCategory, setCodeCategory] = useState();
-
+    const [userEmpCode, setUserEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     // 모든 칸에 스페이스바 입력 금지
     const preventSpaceBar = (e) => {
         if (e.key === ' ') {
@@ -47,7 +47,7 @@ export default function UserInfo() {
 
 
     useEffect(() => {
-        axios.get(`/${process.env.REACT_APP_EMP_CODE}`)
+        axios.get(`/${userEmpCode}`)
             .then(response => {
                 setUserInfo(response.data);
 
@@ -65,7 +65,7 @@ export default function UserInfo() {
                     setCorCode(response.data.corCode || "");
 
                     // code 테이블에서 카테고리 가져오기
-                    axios.get(`/code/${process.env.REACT_APP_EMP_CODE.split('-')[0]}`)
+                    axios.get(`/code/${userEmpCode.split('-')[0]}`)
                         .then(response => {
                             setCodeCategory(response.data);
                         })
@@ -152,6 +152,8 @@ export default function UserInfo() {
             corCode: userInfo.corCode,
             modifyReq // 수정 요청 정보
         };
+
+        console.log("modifyReq 값:", modifyReq);
 
         axios.post(`/modifyRequest`, userInfoUpdate)
             .then(response => {

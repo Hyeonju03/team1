@@ -7,6 +7,7 @@ export default function UserInfoModifyRequest() {
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [hasModifyReq, setHasModifyReq] = useState(false);
+    const [corCode, setCorCode] = useState(process.env.REACT_APP_COR_CODE);
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -22,7 +23,7 @@ export default function UserInfoModifyRequest() {
     useEffect(() => {
         const fetchSubordinates = async () => {
             try {
-                const response = await axios.get(`/userInfo/${process.env.REACT_APP_COR_CODE}`);
+                const response = await axios.get(`/userInfo/${corCode}`);
                 setSubordinates(response.data);
             } catch (e) {
                 console.error(e);
@@ -34,6 +35,7 @@ export default function UserInfoModifyRequest() {
     // 부하직원이 변경될 때마다
     useEffect(() => {
         if (subordinates.length > 0 && subordinates[0] && subordinates[0].modifyReq) {
+
             const modifyReq = subordinates[0].modifyReq;
 
             // modifyReq가 있을 때만 split
@@ -78,6 +80,7 @@ export default function UserInfoModifyRequest() {
 
     // 반려 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 삭제)
     const handleReject = async () => {
+
         if (!modifyReqData) return;
 
         try {

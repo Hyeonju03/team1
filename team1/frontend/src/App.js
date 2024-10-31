@@ -31,6 +31,8 @@ import ToMeMailSendList from "./ToMeMailSendList";
 import AttachMentMailList from "./AttachMentMailList";
 import ToTalMailSendList from "./ToTalMailSendList";
 import ReceivedMailList from "./ReceivedMailList";
+import DepartmentManagement from "./DepartmentManagement";
+import PositionManagement from "./PositionManagement";
 
 function App() {
     return (
@@ -51,7 +53,6 @@ function App() {
 
                     <Route path="/documents" element={<DocumentList/>}/>
                     <Route path="/documents/:id" element={<DocumentDetail/>}/>
-                      
                     <Route path="/document/register" element={<DocumentRegister/>}/>
                     <Route path="/documents/update/:id" element={<DocumentUpdate/>}/>
 
@@ -81,6 +82,9 @@ function App() {
                     <Route path="/AttachMentMailList" element={<AttachMentMailList/>}/>
                     <Route path="/ToTalMAilSendList" element={<ToTalMailSendList/>}/>
                     <Route path="/ReceivedMailList" element={<ReceivedMailList/>}/>
+
+                    <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
+                    <Route path="/PositionManagement" element={<PositionManagement/>}/>
                 </Routes>
             </div>
         </Router>

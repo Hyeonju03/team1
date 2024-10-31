@@ -39,8 +39,8 @@ public class DocumentController {
             @RequestParam String title,
             @RequestParam String category,
             @RequestParam String content,
-            @RequestParam(required = false) MultipartFile attachment) {
-        documentService.documentInsert(title, category, content, attachment);
+            @RequestParam(required = false) MultipartFile attachment, @RequestParam String empCode) {
+        documentService.documentInsert(title, category, content, attachment, empCode);
         return ResponseEntity.ok("Document saved successfully");
     }
 
@@ -119,10 +119,8 @@ public class DocumentController {
                 documentDTO.setFileSize(attachment.getSize()); // 파일 크기 설정
 
 
-
                 String generatedFileName = UUID.randomUUID().toString();
                 documentDTO.setFileName(generatedFileName);
-
 
 
             } else {
@@ -148,7 +146,7 @@ public class DocumentController {
 
     // 문서함 삭제
     @DeleteMapping("/documents/{id}")
-    public ResponseEntity<Void> documentDelete(@PathVariable int id){
+    public ResponseEntity<Void> documentDelete(@PathVariable int id) {
         documentService.documentDelete(id);
         return ResponseEntity.noContent().build(); // 삭제 성공시 204 No Content 반환
     }

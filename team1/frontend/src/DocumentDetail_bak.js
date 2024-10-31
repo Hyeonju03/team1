@@ -24,6 +24,7 @@ export default function DocumentDetail() {
     const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
+    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
 
     useEffect(() => {
         const documentDetail = async () => {
@@ -38,7 +39,7 @@ export default function DocumentDetail() {
         };
 
         // code 테이블에서 카테고리 가져오기
-        axios.get(`/code/${process.env.REACT_APP_COM_CODE}`)
+        axios.get(`/code/${comCode}`)
             .then(response => {
                 setCodeCategory(response.data);
             })

@@ -28,18 +28,7 @@ export default function DocumentRegister() {
     const [attachment, setAttachment] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const navigate = useNavigate();
-
-    // useEffect(() => {
-    //     // code 테이블에서 카테고리 가져오기
-    //     axios.get(`/code`)
-    //         .then(response => {
-    //             console.log(response.data);
-    //             // 응답이 카테고리 배열이라고 가정할 때
-    //             const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-    //             setCategories(uniqueCategories); // 카테고리 상태에 저장
-    //         })
-    //         .catch(error => console.log(error));
-    // }, []);
+    const [empCode, setEmpCode] = useState(process.env.REACT_APP_COM_CODE);
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
@@ -80,6 +69,7 @@ export default function DocumentRegister() {
         if (attachment) {
             formData.append('attachment', attachment);
         }
+        formData.append('empCode', empCode);
 
         axios.post('/documents', formData)
             .then(response => {
