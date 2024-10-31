@@ -69,10 +69,10 @@ export default function SignRegister() {
 
         axios.get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
             .then(response => {
-                console.log(response.data);
-                // 응답이 카테고리 배열이라고 가정할 때
-                const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))]; // 중복 제거
-                setCategories(uniqueCategories); // 카테고리 상태에 저장
+                console.log(response.data.signCateCode)
+                const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
+                console.log("uniqueCategories::",uniqueCategories)
+                setCategories(uniqueCategories);
             })
             .catch(error => console.log(error));
 
@@ -259,30 +259,18 @@ export default function SignRegister() {
             {/* Main content */}
             <div className="flex-1 flex">
                 <aside className="w-64 bg-gray-100 p-4 space-y-2">
-
-                    <div>
-                        <button
-                            className="w-full flex items-center"
-                            onClick={() => setIsExpanded(!isExpanded)}
-                        >
-                            {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
-                                <ChevronRight className="mr-2 h-4 w-4"/>}
-                            결재함
-                        </button>
-                        {isExpanded && (
-                            <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                {categories.map((category, index) => (
-                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
-                                    category.split(',').map((item, subIndex) => (
-                                        <button className="w-full" key={`${index}-${subIndex}`}
-                                                onClick={() => setCategory(item)}>
-                                            {item}
-                                        </button>
-                                    ))
-                                ))}
+                    <ol>
+                        <li>
+                            <div>
+                                <button
+                                    className={`w-full flex items-center transition-colors duration-300`}
+                                    onClick={handleHome}>
+                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                    <span className="hover:underline">결재함</span>
+                                </button>
                             </div>
-                        )}
-                    </div>
+                        </li>
+                    </ol>
                 </aside>
                 <main className="flex-1 p-4">
                     <div className="flex justify-start space-x-2 mb-4">

@@ -97,7 +97,7 @@ export default function SignDetail() {
     // 카테고리 불러옴
     const fetchCategories = async () => {
         const response = await axios.get(`/code/${comCode}`);
-        const uniqueCategories = [...new Set(response.data.map(category => category.signCateCode))];
+        const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
         setCategories(uniqueCategories);
     };
 
@@ -314,11 +314,20 @@ export default function SignDetail() {
             </header>
 
             <div className="flex-1 flex">
-
-                <div className="w-64 bg-gray-100 p-4 space-y-2">
-                </div>
-
-
+                <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                    <ol>
+                        <li>
+                            <div>
+                                <button
+                                    className={`w-full flex items-center transition-colors duration-300`}
+                                    onClick={handleHome}>
+                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                    <span className="hover:underline">결재함</span>
+                                </button>
+                            </div>
+                        </li>
+                    </ol>
+                </aside>
                 <main className="flex-1 p-4">
                     <div className="flex justify-start space-x-2 mb-4">
                         <button className="w-[80px] h-[40px] bg-gray-200 hover:bg-gray-400 rounded"

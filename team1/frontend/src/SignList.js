@@ -37,7 +37,9 @@ export default function SignList() {
         // code 가져오기
         axios.get(`/code/${comCode} `)
             .then(response => {
-                const uniqueCategories = [...new Set(response.data.signCateCode)];
+                console.log(response.data.signCateCode)
+                const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
+                console.log("uniqueCategories::",uniqueCategories)
                 setCategories(uniqueCategories);
             })
 
@@ -278,9 +280,7 @@ export default function SignList() {
                                 )}
                             </div>
                         </li>
-
                     </ol>
-
                 </aside>
 
                 {/* Main content */}
