@@ -45,8 +45,10 @@ public class CodeService {
         }
 
     }
-    public List<CodeDTO> selectCategories(String comCode)  {
+
+    public List<CodeDTO> selectCategories(String comCode) {
         return codeMapper.selectCategories(comCode);
+    }
 
     // 부서 이름 수정
     public void updateDepartmentName(String comCode, String oldDepCode, String newDepCode) {
