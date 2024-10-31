@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import {useListLibrary} from "Context/ListLibraryContext"
+import {json} from "react-router-dom";
 
 class ListLibrary {
 
@@ -23,7 +24,7 @@ class ListLibrary {
     static startDate = [];
     static endDate = [];
     static targetState = [];
-    static codeList =[];
+    static codeList = [];
 
     static WorkerList(code) {
         const depLayout = () => {
@@ -238,7 +239,9 @@ class ListLibrary {
         let index = 0;
 
         for (const item of this.noticeNum) {
-            htmlList += `<div id="${item}" class="text-xs border break-words testEvent"><p>${res.title[index]}</p><p>${res.startDate[index]}~${res.endDate[index]}</p><p>${res.targetState[index] === "0" ? '확인안함' : '확인함'}</p></div>`
+            if(typeof this.startDate[index] === "string"){
+                htmlList += `<div id="${item}" class="text-xs border break-words testEvent"><p>${res.title[index]}</p><p>${res.startDate[index].split('T')[0]}~${res.endDate[index].split('T')[0]}</p><p>${res.targetState[index] === "0" ? '확인안함' : '확인함'}</p></div>`
+            }
             index++;
         }
         this.returnList3 = htmlList
@@ -248,6 +251,7 @@ class ListLibrary {
             </div>`
         );
     }
+
     static async loadNotice(code) {
 
         this.title = "";
@@ -259,11 +263,11 @@ class ListLibrary {
             await axios.get("/loadNoticeSelect", {params: {code}})
                 .then(response => {
                     this.title = response.data[0];
-                    this.startDate = response.data[1];
-                    this.endDate = response.data[2];
+                    this.startDate = response.data[1][0].split('T')[0];
+                    this.endDate = response.data[2][0].split('T')[0];
                     this.content = response.data[3];
                     this.targets = response.data[4];
-                    //console.log(this.title, this.startDate, this.endDate, this.content, this.targets)
+                    //console.log(this.title, this.startDate,this.endDate, this.content, this.targets)
                 })
                 .catch(error => console.log(error));
         }
@@ -276,11 +280,13 @@ class ListLibrary {
             <div class="border h-[180px]">조직도 들어갈 부분</div>
             `
     }
+
     static noticeWritePage(code, setBtnCtl) {
         this.WorkerList2(code)
         if (!this.returnList2) return setBtnCtl(3)
         return <>{<div dangerouslySetInnerHTML={{__html: this.returnList2.outerHTML}}/>}</>
     }
+
     static noticeInsert(code) {
         let isNotNull = 0
         if (this.data.length === 0) {
@@ -335,7 +341,8 @@ class ListLibrary {
             }
         }
     }
-    static async noticeUpdate(noticeNum, code){
+
+    static async noticeUpdate(noticeNum, code) {
 
         const jsonData = {
             noticeNum: noticeNum,
@@ -345,16 +352,11 @@ class ListLibrary {
         await axios.post("/noticeUpdate", jsonData)
             .then(response => {
             })
-            .catch(error => {});
+            .catch(error => {
+            });
     }
 
-    /*
-    addressBook를 이벤트에 키워드 검색칸 변경될때 마다 다시 실행
-    이벤트에 키워드 검색칸 변경될때 마다 controller에서
-    불러오는 값 중에 키워드 있는지 찾고 하나라도 있으면 데이터를 axios에 리턴
-    만약 이벤트 키워드가 null이면 모든 데이터 axios에 리턴
-    */
-    static async addressBook(code){
+    static async addressBook(code, keyWord) {
         let depCode = [];
         let empName = [];
         let posCode = [];
@@ -367,10 +369,14 @@ class ListLibrary {
                 })
                 .catch(error => console.log(error));
         }
+        let nonCompliant = []
         const ListDataSet = async () => {
             for (const v1 of this.codeList) {
-                await axios.get("/addressBookSelect", {params:{code: v1}})
+                await axios.get("/addressBookSelect", {params: {code: v1, keyWord: keyWord}})
                     .then(response => {
+                        if (response.data[0][0]) {
+                            nonCompliant.push(v1);
+                        }
                         depCode.push(response.data[0]);
                         empName.push(response.data[1]);
                         posCode.push(response.data[2]);
@@ -384,12 +390,14 @@ class ListLibrary {
         await ListDataSet();
         let htmlList = "";
 
-        this.codeList.forEach((v1,i1)=>{
-            htmlList += `<div id="Add${v1}" class="text-xs border break-words"><p>부서: ${depCode[i1]}</p><p>이름: ${empName[i1]}</p><p class="flex justify-between">직급: ${posCode[i1]}<button class="AddBtn">삭제</button></p><p>전화번호: ${PH[i1]}</p><p>메일: ${mail[i1]}</p></div>`
+        this.codeList.forEach((v1, i1) => {
+            if (nonCompliant.includes(v1)) {
+                htmlList += `<div id="Add${v1}" class="text-xs border break-words"><p>부서: ${depCode[i1]}</p><p>이름: ${empName[i1]}</p><p class="flex justify-between">직급: ${posCode[i1]}<button class="AddBtn">삭제</button></p><p>전화번호: ${PH[i1]}</p><p>메일: ${mail[i1]}</p></div>`
+            }
         })
         return `
             <div>
-                <input class="border w-[100%] h-[30px] InputAddressBookSearch" placeholder="여기에 키워드 검색">
+                <input class="border w-[100%] h-[30px] InputAddressBookSearch" placeholder="여기에 키워드 검색" value="${keyWord}">
             </div>
             <div class="h-[325px] overflow-y-auto">
                 ${htmlList}
@@ -407,12 +415,13 @@ class ListLibrary {
                     </div>
                     <input class="border w-[70%] InputAddressBookAdd"/>
                 </div>
-                <button id="BtnAddressBookAdd" class="text-center border w-full">주소록에 추가 하기
+                <button class="text-center border w-full BtnAddressBookAdd">주소록에 추가 하기
                 </button>
             </div>
         `
     }
-    static async addressBookDelete(target,code){
+
+    static async addressBookDelete(target, code) {
         const jsonData = {
             target: target,
             code: code,
@@ -420,9 +429,11 @@ class ListLibrary {
         await axios.post("/addressBookDelete", jsonData)
             .then(response => {
             })
-            .catch(error => {});
+            .catch(error => {
+            });
     }
-    static async addressBookAdd(target,code){
+
+    static async addressBookAdd(target, code) {
         const jsonData = {
             target: target,
             code: code,
@@ -430,26 +441,28 @@ class ListLibrary {
         await axios.post("/addressBookAdd", jsonData)
             .then(response => {
             })
-            .catch(error => {});
+            .catch(error => {
+            });
     }
-    static async addressTargetSelect(code,ph){
+
+    static async addressTargetSelect(code, ph) {
         let isFound = false;
-        await axios.get("/addressBookSelect", {params:{code}})
+        await axios.get("/addressBookSelect", {params: {code}})
             .then(response => {
-                if (response.data[3][0] === ph){
+                if (response.data[3][0] === ph) {
                     isFound = true;
                 }
             })
             .catch(error => console.log(error));
-        console.log(isFound)
         return isFound
     }
-    static async addressEmpAddSelect(code,target){
+
+    static async addressEmpAddSelect(code, target) {
         let isTrue = false;
         await axios.get("/addressBookListSelect", {params: {code}})
             .then(response => {
-                response.data[0].forEach((v1,i1)=>{
-                    if (v1 === target){
+                response.data[0].forEach((v1, i1) => {
+                    if (v1 === target) {
                         isTrue = true
                     }
                 })
@@ -457,21 +470,24 @@ class ListLibrary {
             .catch(error => console.log(error));
         return isTrue
     }
-    static async dataTest1(code){
-        await axios.get("/addressBookSelect", {params:{code}})
+
+    static async dataTest1(code) {
+        await axios.get("/addressBookSelect", {params: {code}})
             .then(response => {
             })
             .catch(error => console.log(error));
         return ''
     }
-    static async dataTest2(code){
+
+    static async dataTest2(code) {
         await axios.get("/addressBookListSelect", {params: {code}})
             .then(response => {
             })
             .catch(error => console.log(error));
         return ''
     }
-    static async dataTest3(target,code){
+
+    static async dataTest3(target, code) {
         const jsonData = {
             target: target,
             code: code,
@@ -479,10 +495,12 @@ class ListLibrary {
         await axios.post("/addressBookAdd", jsonData)
             .then(response => {
             })
-            .catch(error => {});
+            .catch(error => {
+            });
         return ''
     }
-    static async dataTest4(target,code){
+
+    static async dataTest4(target, code) {
         const jsonData = {
             target: target,
             code: code,
@@ -490,7 +508,8 @@ class ListLibrary {
         await axios.post("/addressBookDelete", jsonData)
             .then(response => {
             })
-            .catch(error => {});
+            .catch(error => {
+            });
         return ''
     }
 }

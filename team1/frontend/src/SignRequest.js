@@ -8,20 +8,20 @@ export default function SignRequest() {
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
     const [newWindowData, setNewWindowData] = useState([])
-    const [noticeNum,setNoticeNum] = useState("")
+    const [noticeNum, setNoticeNum] = useState("")
     const {btnCtl, setBtnCtl} = useListLibrary()
     const [user, setUser] = useState('3118115625-qwer')
-    const [com,setCom] = useState("3118115625")
+    const [com, setCom] = useState("3118115625")
     /* 공지사항 내용 가져오기 */
     const [noticeHtml, setNoticeHtml] = useState("")
     const [loadNoticeHtml, setLoadNoticeHtml] = useState("")
     const [addressBookHtml, setAddressBookHtml] = useState("")
     const fetchData = async () => {
-        const result1 = await ListLibrary.noticeList(user,btnCtl);
+        const result1 = await ListLibrary.noticeList(user, btnCtl);
         setNoticeHtml(result1);
-        const result2 = await  ListLibrary.loadNotice(noticeNum);
+        const result2 = await ListLibrary.loadNotice(noticeNum);
         setLoadNoticeHtml(result2);
-        const result3 = await  ListLibrary.addressBook(user);
+        const result3 = await ListLibrary.addressBook(user, "");
         setAddressBookHtml(result3);
 
         //ListLibrary.dataTest1('3118115625-abcc')
@@ -32,13 +32,13 @@ export default function SignRequest() {
     useEffect(() => {
         fetchData();
     }, [btnCtl])
-    useEffect(()=>{
+    useEffect(() => {
         const elements = document.querySelectorAll(".testEvent");
 
         const handleClick = (event) => {
             setBtnCtl(5);
             setNoticeNum(event.currentTarget.id)
-            ListLibrary.noticeUpdate(event.currentTarget.id,user)
+            ListLibrary.noticeUpdate(event.currentTarget.id, user)
         };
 
         elements.forEach((element) => {
@@ -50,28 +50,36 @@ export default function SignRequest() {
                 element.removeEventListener('click', handleClick);
             });
         };
-    },[noticeHtml, btnCtl])
-    useEffect(()=>{
+    }, [noticeHtml, btnCtl])
+    useEffect(() => {
         const elements = document.querySelectorAll(".AddBtn");
-        const btnElement = document.querySelector("#BtnAddressBookAdd");
+        const btnElement = document.querySelector(".BtnAddressBookAdd");
         const InputAddressBookAdd = document.querySelectorAll(".InputAddressBookAdd");
+        const InputAddressBookSearch = document.querySelector(".InputAddressBookSearch");
+        let keyWord = ""
+        const keyWordSet = async (e) => {
+            if (e.key === "Enter"){
+                keyWord = e.currentTarget.value;
+                setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
+            }
+        }
 
-        const addBtnClick = async (e) =>{
-            if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value,InputAddressBookAdd[1].value)) {
+        const addBtnClick = async (e) => {
+            if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value, InputAddressBookAdd[1].value)) {
                 if (!await ListLibrary.addressEmpAddSelect(user, InputAddressBookAdd[0].value)) {
                     await ListLibrary.addressBookAdd(InputAddressBookAdd[0].value, user)
                 } else {
                     alert("이미 존재하는 아이디 입니다")
                 }
-                setAddressBookHtml(await ListLibrary.addressBook(user));
-            }else{
+                setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
+            } else {
                 alert("정보가 일치하지 않습니다")
             }
         }
 
         const handleClick = async (e) => {
             await ListLibrary.addressBookDelete(e.currentTarget.parentNode.parentNode.id.replace("Add", ""), user)
-            setAddressBookHtml(await ListLibrary.addressBook(user));
+            setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
         }
         elements.forEach((element) => {
             element.addEventListener('click', handleClick);
@@ -81,6 +89,9 @@ export default function SignRequest() {
         } else {
             //첫 로딩 거르기(주소록 누르기전 방지)
         }
+        if (InputAddressBookSearch) {
+            InputAddressBookSearch.addEventListener('keydown', keyWordSet)
+        }
         return () => {
             elements.forEach((element) => {
                 element.removeEventListener('click', handleClick);
@@ -88,14 +99,11 @@ export default function SignRequest() {
             if (btnElement) {
                 btnElement.removeEventListener('click', addBtnClick);
             }
+            if (InputAddressBookSearch) {
+                InputAddressBookSearch.removeEventListener('keydown', keyWordSet)
+            }
         };
-    },[addressBookHtml, btnCtl])
-
-
-
-
-
-
+    }, [addressBookHtml, btnCtl])
 
 
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -104,12 +112,11 @@ export default function SignRequest() {
 
     const windowRClick = async (e) => {
         e.preventDefault()
-        if (e.target.className.includes("worker"))
-        {
+        if (e.target.className.includes("worker")) {
             await setNewWindowPosY(e.target.getBoundingClientRect().y + 24);
             await setNewWindowPosX(50);
             setIsRClick(true);
-            ListLibrary.RClickWindow(newWindowPosX,newWindowPosY,e.target.getAttribute("data-value")).then(data=> setNewWindowData([data[0],data[1]]))
+            ListLibrary.RClickWindow(newWindowPosX, newWindowPosY, e.target.getAttribute("data-value")).then(data => setNewWindowData([data[0], data[1]]))
         }
 
     }
@@ -166,7 +173,7 @@ export default function SignRequest() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-100"  onContextMenu={windowRClick}>
+        <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
             {/* Header with logo */}
             <header className="bg-white shadow-md p-4">
                 <div className="container mx-auto">
@@ -379,7 +386,9 @@ export default function SignRequest() {
                                                 <>
                                                     <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
                                                     <div>
-                                                        <button className="text-center border w-full h-[45px]" onClick={()=>setBtnCtl(6)}> 공지사항 추가하기</button>
+                                                        <button className="text-center border w-full h-[45px]"
+                                                                onClick={() => setBtnCtl(6)}> 공지사항 추가하기
+                                                        </button>
                                                     </div>
                                                 </>
                                                 :
@@ -426,16 +435,22 @@ export default function SignRequest() {
                                                         :
                                                         btnCtl === 6 ?
                                                             <>
-                                                            {ListLibrary.noticeWritePage(com,setBtnCtl)}
-                                                            <button className="text-center border w-full h-[45px]" onClick={() => {setBtnCtl(3);ListLibrary.noticeInsert(user)}}>공지사항 등록</button>
-                                                            </>: <></>
+                                                                {ListLibrary.noticeWritePage(com, setBtnCtl)}
+                                                                <button className="text-center border w-full h-[45px]"
+                                                                        onClick={() => {
+                                                                            setBtnCtl(3);
+                                                                            ListLibrary.noticeInsert(user)
+                                                                        }}>공지사항 등록
+                                                                </button>
+                                                            </> : <></>
 
                             }
                         </div>
                     </div>
                     {isRClick === true ?
                         (
-                            <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            <div className={`flex absolute`}
+                                 style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
                                 <div className="w-1/3 border">
                                     <img src="/logo192.png"/>
                                 </div>

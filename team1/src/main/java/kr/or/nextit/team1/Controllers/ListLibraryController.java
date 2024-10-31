@@ -118,18 +118,20 @@ public class ListLibraryController {
 
 
     @GetMapping("/addressBookSelect")
-    public ResponseEntity<List<String>[]> addressBookSelect(String code) {
+    public ResponseEntity<List<String>[]> addressBookSelect(String code, String keyWord) {
         List<ListLibraryDTO> data = listLibraryService.addressBookSelect(code);
         List<String>[] list = new ArrayList[5];
         for (int i = 0; i < list.length; i++) {
             list[i] = new ArrayList<>();
         }
         for (int i = 0; i < data.size(); i++) {
-            list[0].add(data.get(i).getDepCode());
-            list[1].add(data.get(i).getEmpName());
-            list[2].add(data.get(i).getPosCode());
-            list[3].add(data.get(i).getPH());
-            list[4].add(data.get(i).getMail());
+            if (keyWord == null ||data.get(i).getDepCode().contains(keyWord)||data.get(i).getEmpName().contains(keyWord)||data.get(i).getPosCode().contains(keyWord)||data.get(i).getPH().contains(keyWord)||data.get(i).getMail().contains(keyWord)){
+                list[0].add(data.get(i).getDepCode());
+                list[1].add(data.get(i).getEmpName());
+                list[2].add(data.get(i).getPosCode());
+                list[3].add(data.get(i).getPH());
+                list[4].add(data.get(i).getMail());
+            }
         }
         return ResponseEntity.ok(list);
     }
