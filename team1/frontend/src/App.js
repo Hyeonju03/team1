@@ -31,7 +31,7 @@ import AttachMentMailList from "./AttachMentMailList";
 import ToTalMailSendList from "./ToTalMailSendList";
 import ReceivedMailList from "./ReceivedMailList";
 import DepartmentManagement from "./DepartmentManagement";
-import RankManagement from "./PositionManagement";
+import PositionManagement from "./PositionManagement";
 
 function App() {
     return (
@@ -81,7 +81,7 @@ function App() {
                     <Route path="/ReceivedMailList" element={<ReceivedMailList/>}/>
 
                     <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
-                    <Route path="/RankManagement" element={<RankManagement/>}/>
+                    <Route path="/PositionManagement" element={<PositionManagement/>}/>
                 </Routes>
             </div>
         </Router>

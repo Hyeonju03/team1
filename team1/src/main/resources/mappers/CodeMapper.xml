@@ -14,6 +14,9 @@
         <if test='depCode != null'>
             AND DEP_CODE LIKE CONCAT('%', #{depCode}, '%')
         </if>
+        <if test='depCode != null'>
+            AND DEP_CODE LIKE CONCAT('%', #{depCode}, '%')
+        </if>
     </select>
 
     <select id="getDepCode" resultType="CodeDTO">
@@ -60,13 +63,13 @@
             COM_CODE = #{comCode}
     </update>
 
-    <update id="updatePositionOrder">
-        UPDATE
-            CODE
-        SET
-            POS_CODE = #{posCode}
+    <select id="selectCompanyName" resultType="String">
+        SELECT
+            COM_NAME
+        FROM
+            COMPANY
         WHERE
             COM_CODE = #{comCode}
-    </update>
+    </select>
 
 </mapper>

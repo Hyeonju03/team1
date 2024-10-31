@@ -7,6 +7,7 @@ export default function UserInfoModifyRequest() {
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [hasModifyReq, setHasModifyReq] = useState(false);
+    const [corCode, setCorCode] = useState(process.env.REACT_APP_COR_CODE);
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -22,7 +23,7 @@ export default function UserInfoModifyRequest() {
     useEffect(() => {
         const fetchSubordinates = async () => {
             try {
-                const response = await axios.get(`/userInfo/${process.env.REACT_APP_COR_CODE}`);
+                const response = await axios.get(`/userInfo/${corCode}`);
                 setSubordinates(response.data);
             } catch (e) {
                 console.error(e);

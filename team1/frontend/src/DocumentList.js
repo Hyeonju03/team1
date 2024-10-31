@@ -28,13 +28,12 @@ export default function DocumentList() {
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
-
-
     const navigate = useNavigate(); // navigate 함수 사용
+    const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
 
     useEffect(() => {
         // documenttest 테이블에서 문서 가져오기
-        axios.get(`/company/${process.env.REACT_APP_EMP_CODE}`)
+        axios.get(`/company/${empCode}`)
             .then(response => {
                 console.log(response.data);
                 setDocuments(response.data);

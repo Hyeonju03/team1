@@ -17,8 +17,11 @@ public interface CodeMapper {
 
     CodeDTO selectPosition(String comCode);
 
+    // 추가, 수정, 삭제 모두 사용
     void updatePosition(CodeDTO codeDTO);
 
-    void updatePositionOrder(String comCode, String posCode);
+    // 회사명 불러오기
+    String selectCompanyName(String comCode);
+
 
 }

@@ -159,7 +159,7 @@ public class CodeService {
         return tree;
     }
 
-    // 모든 부서 가져오기
+    // 모든 직급 가져오기
     public CodeDTO selectPosition(String comCode) {
         CodeDTO code = codeMapper.selectPosition(comCode);
 
@@ -186,7 +186,49 @@ public class CodeService {
     }
 
     // 직급 순서 변경
-    public void updatePositionOrder(String comCode, String posCode) {
-        codeMapper.updatePositionOrder(comCode, posCode);
+    public void updatePositionOrder(CodeDTO codeDTO) {
+        codeMapper.updatePosition(codeDTO);
+    }
+
+    // 직급 수정
+    public void updatePosition(String comCode, String oldPosCode, String newPosCode) {
+        CodeDTO code = codeMapper.selectCode(comCode, null);
+
+        List<String> posCodeList = new ArrayList<>();
+        posCodeList.addAll(Arrays.asList(code.getPosCode().split(",")));
+
+        int foundIndex = posCodeList.indexOf(oldPosCode);
+        if (foundIndex != -1) {
+            posCodeList.set(foundIndex, newPosCode);
+        }
+
+        CodeDTO codeDto = CodeDTO.builder().comCode(comCode)
+                .posCode(String.join(",", posCodeList))
+                .build();
+
+        codeMapper.updatePosition(codeDto);
+    }
+
+    // 직급 삭제
+    public void deletePosition(String comCode, String posCode) {
+        CodeDTO code = codeMapper.selectCode(comCode, null);
+
+        List<String> posCodeList = new ArrayList<>();
+        posCodeList.addAll(Arrays.asList(code.getPosCode().split(",")));
+
+        int foundIndex = posCodeList.indexOf(posCode);
+        System.out.println("foundIndex 값 : " + foundIndex);
+        posCodeList.remove(foundIndex);
+
+        CodeDTO codeDto = CodeDTO.builder().comCode(comCode)
+                .posCode(String.join(",", posCodeList))
+                .build();
+
+        codeMapper.updatePosition(codeDto);
+    }
+
+    // 회사명 불러오기
+    public String selectCompanyName(String comCode) {
+        return codeMapper.selectCompanyName(comCode);
     }
 }

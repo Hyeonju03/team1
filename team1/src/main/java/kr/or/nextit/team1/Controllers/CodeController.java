@@ -87,12 +87,46 @@ public class CodeController {
 
     // 직급 순서 변경
     @PutMapping("/positions/updateOrder")
-    public ResponseEntity<String> updatePositionOrder(@RequestBody Map<String, String> params) {
-        String comCode = params.get("comCode");
-        String posCode = params.get("posCode");
-
-        codeService.updatePositionOrder(comCode, posCode);
+    public ResponseEntity<String> updatePositionOrder(@RequestBody CodeDTO codeDTO) {
+        codeService.updatePositionOrder(codeDTO);
 
         return ResponseEntity.ok("직급 순서 변경 성공");
     }
+
+    // 직급 수정
+    @PutMapping("/positions/update")
+    public ResponseEntity<String> updatePosition(@RequestBody Map<String, String> params) {
+        System.out.println("params 값 : " + params);
+
+        String comCode = params.get("comCode");
+        String oldPosCode = params.get("oldPosCode");
+        String newPosCode = params.get("newPosCode");
+
+        try {
+            codeService.updatePosition(comCode, oldPosCode, newPosCode);
+            return ResponseEntity.ok("직급이 성공적으로 수정되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("직급 이름 수정 중 오류가 발생했습니다.");
+        }
+    }
+
+    // 직급 삭제
+    @DeleteMapping("/positions/delete/{comCode}/{posCode}")
+    public ResponseEntity<String> deletePosition(@PathVariable String comCode, @PathVariable String posCode) {
+        try {
+            codeService.deletePosition(comCode, posCode);
+            return ResponseEntity.ok("직급이 성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("직급 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
+    // 회사명 불러오기
+    @GetMapping("/companyName")
+    public String selectCompanyName(@RequestParam String comCode) {
+        return codeService.selectCompanyName(comCode);
+    }
+
 }

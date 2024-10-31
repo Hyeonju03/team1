@@ -56,12 +56,13 @@ const DepartmentTree = ({departments, onAdd, onDelete, onUpdate}) => {
 // 부서 관리
 export default function DepartmentManagement() {
     const [departments, setDepartments] = useState([]);
+    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_TEST_CODE);
 
     // 부서 데이터 가져오기
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
-                const response = await axios.get('/departments/tree', {params: {comCode: process.env.REACT_APP_COM_TEST_CODE}});
+                const response = await axios.get('/departments/tree', {params: {comCode: comCode}});
                 setDepartments(response.data);
             } catch (e) {
                 console.error('부서 트리를 가져오는 중 오류가 발생했습니다.', e);
@@ -94,7 +95,7 @@ export default function DepartmentManagement() {
             let ok = true;
             try {
                 await axios.put('/departments/insert', {
-                    comCode: process.env.REACT_APP_COM_TEST_CODE,
+                    comCode: comCode,
                     depCode: newName,
                     updepCode: parentCode
                 });
@@ -128,12 +129,11 @@ export default function DepartmentManagement() {
         if (newName && newName !== department.depCode) {
             try {
                 await axios.put('/departments/update', {
-                    comCode: process.env.REACT_APP_COM_TEST_CODE,
+                    comCode: comCode,
                     depCode: newName,
                     updepCode: department.updepCode,
                     oldDepCode: department.depCode
                 });
-                console.log("들어옴?");
 
                 // 부서 트리 업데이트 함수
                 const updateDepartments = (deps) => {
@@ -161,7 +161,7 @@ export default function DepartmentManagement() {
         if (confirmDelete) {
             // 백엔드에 부서 삭제 요청
             try {
-                await axios.delete(`/departments/delete/${process.env.REACT_APP_COM_TEST_CODE}/${depCode}`);
+                await axios.delete(`/departments/delete/${comCode}/${depCode}`);
                 // 부서 트리 업데이트 함수
                 const updateDepartments = (deps) => {
                     return deps.filter(dept => dept.depCode !== depCode).map(dept => ({
