@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import java.util.List;
+
 @RestController
 public class CodeController {
 
@@ -16,8 +18,8 @@ public class CodeController {
     private CodeService codeService;
 
     @GetMapping("/code/{comCode}")
-    public CodeDTO selectCategories(@PathVariable String comCode) {
-        return codeService.selectCategories(comCode); // 모든 카테고리 반환
+    public CodeDTO selectCategorie(@PathVariable String comCode) {
+        return codeService.selectCategorie(comCode); // 모든 카테고리 반환
 
     }
 
@@ -129,4 +131,7 @@ public class CodeController {
         return codeService.selectCompanyName(comCode);
     }
 
+    public List<CodeDTO> selectCategories(@PathVariable String comCode) {
+       return codeService.selectCategories(comCode); // 모든 카테고리 반환 
+    }
 }

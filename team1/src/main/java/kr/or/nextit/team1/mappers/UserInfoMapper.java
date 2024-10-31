@@ -10,6 +10,7 @@ import java.util.List;
 public interface UserInfoMapper {
     UserInfoDTO userInfoSelect(String empCode);
 
+    void userInfoUpdate(UserInfoDTO userInfoDTO);
 
     // 상관의 기존 modifyReq 값 가져오기
     String getModifyReq(String corCode);

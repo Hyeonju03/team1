@@ -27,6 +27,13 @@
         WHERE
             COM_CODE = #{comCode}
     </select>
+    <select id="selectCategories" resultType="CodeDTO">
+        SELECT *
+        FROM
+            CODE
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
 
     <insert id="insertDepartment" parameterType="CodeDTO">
         INSERT INTO CODE

@@ -12,7 +12,7 @@ public class CodeService {
     @Autowired
     private CodeMapper codeMapper;
 
-    public CodeDTO selectCategories(String comCode) {
+    public CodeDTO selectCategorie(String comCode) {
         return codeMapper.selectCode(comCode, null);
     }
 
@@ -45,6 +45,8 @@ public class CodeService {
         }
 
     }
+    public List<CodeDTO> selectCategories(String comCode)  {
+        return codeMapper.selectCategories(comCode);
 
     // 부서 이름 수정
     public void updateDepartmentName(String comCode, String oldDepCode, String newDepCode) {
@@ -76,7 +78,6 @@ public class CodeService {
 
         codeMapper.updateDepartment(codeDto);
     }
-
 
     // 부서 삭제
     public void deleteDepartment(String comCode, String depCode) {

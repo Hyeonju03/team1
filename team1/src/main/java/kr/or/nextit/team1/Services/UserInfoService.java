@@ -19,6 +19,10 @@ public class UserInfoService {
         return userInfoMapper.userInfoSelect(empCode);
     }
 
+    // 수정
+    public void userInfoUpdate(UserInfoDTO userInfoDTO) {
+        userInfoMapper.userInfoUpdate(userInfoDTO);
+    }
 
     // 상관에게 수정 요청
     @Transactional

@@ -24,4 +24,5 @@ public interface CodeMapper {
     String selectCompanyName(String comCode);
 
 
+   List<CodeDTO> selectCategories(String comCode); // 모든 카테고리 가져오기
 }
