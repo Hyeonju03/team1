@@ -5,11 +5,13 @@ import kr.or.nextit.team1.mappers.CodeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CodeService {
     @Autowired
     private CodeMapper codeMapper;
-    public List<CodeDTO> selectCategories(String comCode) 
+    public List<CodeDTO> selectCategories(String comCode)  {
         return codeMapper.selectCategories(comCode);
 
     }

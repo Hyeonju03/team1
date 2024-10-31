@@ -63,7 +63,7 @@ function App() {
                     <Route path="/sign/detail/:id" element={<SignDetail />} />
 
                     <Route path="/sign" element={<SignList/>}/>
-                    <Route path="/sign/register" element={<SignRequest/>}/>
+                    <Route path="/sign/register" element={<SignRegister/>}/>
 
                     <Route path="/userInfo" element={<UserInfo/>}/>
                     <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
