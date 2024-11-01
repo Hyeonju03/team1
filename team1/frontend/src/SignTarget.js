@@ -11,7 +11,7 @@ export default function SignTarget({onClose, empCode}) {
 
     useEffect(() => {
         const renderList = async () => {
-            const listElement = await ListLibrary.WorkerList(comCode); // 비동기 호출 확인
+            const listElement = await ListLibrary.WorkerList3(comCode); // 비동기 호출 확인
 
             // listElement가 유효한지 체크
             if (listElement && listContainerRef.current) {

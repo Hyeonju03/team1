@@ -72,7 +72,7 @@
 
     <sql id="modifyReqDelete">
         UPDATE EMPLOYEE SET
-        MODIFY_REQ = NULL
+        MODIFY_REQ = ''
         WHERE EMP_CODE = #{corCode}
     </sql>
 

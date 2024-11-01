@@ -18,7 +18,7 @@ export default function SignRegister() {
   const [newWindowData, setNewWindowData] = useState([]);
   const [noticeNum, setNoticeNum] = useState("");
   const { btnCtl, setBtnCtl } = useListLibrary();
-  const [user, setUser] = useState("3118115625-qwer");
+  const [user, setUser] = useState("3118115625-bbb");
   const [com, setCom] = useState("3118115625");
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
