@@ -1,31 +1,55 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import SignTarget from "./SignTarget";
 import axios from "axios";
-import {Paperclip} from "lucide-react";
-import {useNavigate} from "react-router-dom";
+import {ChevronDown, ChevronRight, Paperclip} from "lucide-react";
+import {useLocation, useNavigate} from "react-router-dom";
 
-export default function SignRequest() {
-    const nevigate = useNavigate();
+export default function SignRegister() {
+    const navigate = useNavigate();
+    const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
+
+    // 슬라이드 부분
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [newWindowPosX, setNewWindowPosX] = useState(500)
-    const [list, setList] = useState([{ number: "", empCode: "" }]);
-
-    const [isToggled, setIsToggled] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [documents, setDocuments] = useState([]);
-    const [openDocumentId, setOpenDocumentId] = useState(null); // 열려 있는 문서 ID 저장
+
+
+    // 카테고리
+    const [category, setCategory] = useState(location.state?.selectCategory || '');
+    const [categories, setCategories] = useState([]);
+
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isToggled, setIsToggled] = useState(false);
     const [openTarget, setOpenTarget] = useState(false);
 
     const [title, setTitle] = useState("");
-    const [category, setCategory] = useState('');
+    const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
+    const [userInfo, setUserInfo] = useState([]);
+    const empCode = "3118115625-bbb";
 
-    const categories = ["카테고리 1", "카테고리 2", "카테고리 3", "카테고리 4"];
+    // 양식 사용하면
+    const [companyName, setCompanyName] = useState("");
+    const [companyAddress, setCompanyAddress] = useState("");
+    const [companyTel, setCompanyTel] = useState("");
+    const [companyFax, setCompanyFax] = useState("");
+    const [docNum, setDocNum] = useState("");
+    const [docReception, setDocReception] = useState("");
+    const [docReference, setDocReference] = useState("");
+    const [docTitle, setDocTitle] = useState("");
+    const [docOutline, setDocOutline] = useState("");
+    const [docContent, setDocContent] = useState("");
+    const [docAttached1, setDocAttached1] = useState("");
+    const [docAttached2, setDocAttached2] = useState("");
+    const [docAttached3, setDocAttached3] = useState("");
+    const [docDate, setDocDate] = useState("");
+    const [docCeo, setDocCeo] = useState("");
 
 
+    // 오른쪽 슬라이드 관련
     const windowRClick = async (e) => {
         e.preventDefault()
         await setNewWindowPosY(e.target.getBoundingClientRect().y + 24)
@@ -37,298 +61,520 @@ export default function SignRequest() {
             setIsRClick(true) : setIsRClick(false)
     }
 
-    const setDoc = useCallback(() => {
-        // doc리스트 가져오기
-        setDocuments([
-            {
-                id: '001',
-                classification: '일반',
-                title: '2023년 4분기 보고서',
-                submissionDate: '2023-12-01',
-                completionDate: '2023-12-05',
-                approvalStatus: '승인 > 미승인 > 미승인',
-                content: '2023년 4분기 보고서에 대한 상세 내용입니다.',
-            },
-            {
-                id: '002',
-                classification: '긴급',
-                title: '신규 프로젝트 계획서',
-                submissionDate: '2023-12-10',
-                completionDate: '-',
-                approvalStatus: '승인 > 승인 > 미승인',
-                content: '신규 프로젝트 계획서에 대한 상세 내용입니다.',
-            },
-        ]);
+    // 카테고리 불러오기
+    useEffect(() => {
+        // 나중에 지금 로그인 한 사원의 코드를 받아와서 split해줘야함 <<<<<<<<<<<<<<<<<<<
+        const comCode = 3118115625;
+
+
+        axios.get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
+            .then(response => {
+                console.log(response.data.signCateCode)
+                const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
+                console.log("uniqueCategories::",uniqueCategories)
+                setCategories(uniqueCategories);
+            })
+            .catch(error => console.log(error));
+
+        axios.get(`/${empCode}`)
+            .then(response => {
+                console.log(response.data);
+                const user = response.data
+                setUserInfo([{
+                    empCode: user.empCode,
+                    name: user.empName,
+                    dep: user.depCode,
+                    pos: user.posCode,
+                    sign: "기안"
+                }])
+            })
     }, []);
 
     useEffect(() => {
-        setDoc();
-    }, [setDoc]);
+        if (isToggled) {
+            // 양식이 사용될 때 content 업데이트
+            const newContent = "양식_companyName:" + companyName +
+                "_companyAddress:" + companyAddress +
+                "_companyTel:" + companyTel +
+                "_companyFax:" + companyFax +
+                "_docNum:" + docNum +
+                "_docReception:" + docReception +
+                "_docReference:" + docReference +
+                "_docTitle:" + docTitle +
+                "_docOutline:" + docOutline +
+                "_docContent:" + docContent +
+                `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` +
+                `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` +
+                `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` +
+                "_docDate:" + docDate +
+                "_docCeo:" + docCeo;
+
+            setContent(newContent);
+        }
+    }, [isToggled, companyName, companyAddress, companyTel, companyFax, docNum, docReception, docReference, docTitle, docOutline, docContent, docAttached1, docAttached2, docAttached3, docDate, docCeo]);
+
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
     }
 
+
+    const goClose = (param) => {
+        setOpenTarget(false);
+        if (param) {
+            console.log(param)
+            setUserInfo([...userInfo, ...param])
+        }
+    }
+
+    // 문서 작성 버튼 클릭 시
+    const handleSubmit = async () => {
+        const formData = new FormData();
+
+        // 결재선
+        if (userInfo.length == 1) {
+            alert("결재선을 추가해야 합니다."); // 길이가 1인 경우 알림
+            return; // DB와 연결하지 않음
+        }
+        // 카테고리
+        if (category == "") {
+            alert("카테고리 입력은 필수입니다.")
+            return;
+        }
+        // 제목
+        if (title == "") {
+            alert("제목을 입력해주세요.")
+            return;
+        }
+        // 양식 사용 여부
+        if (isToggled) {
+            // 양식 사용하면
+            if (companyName == "") {
+                alert("회사명 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docNum == "") {
+                alert("문서번호 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docTitle == "") {
+                alert("문서제목 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docOutline == "") {
+                alert("개요 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docContent == "") {
+                alert("문서내용 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docDate == "") {
+                alert("날짜 칸이 비어 있습니다.")
+                return;
+            }
+
+            if (docCeo == "") {
+                alert("대표작성 칸이 비어 있습니다.")
+                return;
+            }
+
+        } else if (content == "") {
+            alert("전체 내용이 비어있습니다. 다시 확인해 주세요.")
+            return;
+        }
+
+
+        // 결재선 구성
+        let target = `${userInfo[0].empCode}:확인_기안,`;
+        for (let i = 1; i < userInfo.length; i++) {
+            target += `${userInfo[i].empCode}:미확인_미승인`; // 첫 번째 인덱스 제외
+            if (i < userInfo.length - 1) {
+                target += ","; // 마지막 인덱스가 아니면 쉼표 추가
+            }
+        }
+
+
+        formData.append('empCode', empCode); // 사용자 코드
+        formData.append('title', title); // 제목
+        formData.append('category', category); // 카테고리
+        formData.append('content', content); // 내용
+        formData.append('target', target); // 결재선
+
+
+        // 첨부파일이 있는 경우 추가
+        if (attachment) {
+            formData.append('attachment', attachment);
+        }
+
+        try {
+            const response = await axios.post('/sign/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            const success = window.confirm("정말 저장 하시겠습니까? 수정이 불가하니 양식을 사용한다면 다시 한번 확인하는것을 권장드립니다."); // 성공 메시지
+
+            if (success) {
+                // 성공 시 문서 리스트로 이동
+                navigate('/sign');
+            } else {
+                return;
+            }
+
+        } catch (error) {
+            console.error('Error creating sign:', error);
+            // 오류 처리: 사용자에게 알림 추가 가능
+        }
+    };
+
+    // 목록 버튼 클릭 시 리스트 페이지로 이동
+    const handleHome = () => {
+        navigate('/sign')
+    };
+
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const toggleDocument = (docId) => {
-        // 클릭한 문서 ID가 열려 있는 문서 ID와 같으면 닫고, 다르면 그 문서 ID로 변경
-        setOpenDocumentId(openDocumentId === docId ? null : docId);
-    };
-
     const handleToggle = () => {
         setIsToggled(prevState => !prevState);
+
+        console.log(isToggled)
+
     };
-
-    const addNewDocument = () => {
-        const newDoc = {
-            id: `00${documents.length + 1}`,
-            classification: '신규',
-            title: `새 문서 ${documents.length + 1}`,
-            submissionDate: new Date().toISOString().split('T')[0],
-            completionDate: '-',
-            approvalStatus: '미승인 > 미승인 > 미승인',
-            content: '새 문서에 대한 상세 내용입니다.',
-        };
-        setDocuments([...documents, newDoc]);
-    };
-
-    const goClose = (param) => {
-        setOpenTarget(false);
-        if(param) {
-            console.log(param)
-            // setList([
-            //     ...list,
-            //     {
-            //         number: param.number,
-            //         empCode: param.empCode,
-            //     }
-            // ])
-        }
-    }
-
-
 
     return (
-    <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
-        {/* Header with logo */}
-            <header className="bg-white shadow-md p-4">
-                <div className="container mx-auto">
-                    <div className="w-32 h-8 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
-                </div>
+        <div className="min-h-screen flex flex-col" onContextMenu={windowRClick}>
+            {/* Header with logo */}
+            <header className="bg-gray-200 p-4">
+                <h1 className="text-2xl font-bold text-center">로고</h1>
             </header>
 
             {/* Main content */}
-        <main className="flex-grow flex flex-col items-center container mx-auto mt-8 p-4 bg-white rounded-lg shadow">
-            <h1 className="text-2xl font-bold mb-6">문서작성</h1>
-
-            <div className="flex justify-between w-[350px] mb-4">
-                <div className={`${isToggled ? '' : 'font-bold'}`}>파일만 첨부하기 </div>
-                <p className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${isToggled ? 'on bg-blue-300' : 'off'}`} onClick={handleToggle}>
-                    <div className={`w-[25px] h-[25px] rounded-full bg-blue-600 absolute top-[2px] ${isToggled ? 'right-[3px]': 'left-[3px] border-blue-600'}`}></div>
-                </p>
-                <div className={`${isToggled ? 'font-bold' : ''}`}>제공된 양식 사용하기</div>
-            </div>
-
-            <div className="flex items-center space-x-4 mb-4">
-                <fieldset>
-                    {/*<legend>카테고리</legend>*/}
-                    <div>
-                        <select name="category" value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                className="border rounded p-2">
-                            <option value="">카테고리</option>
-                            {categories.map((cate, index) => ( // 공통 카테고리 배열 사용
-                                <option key={index} value={cate}>
-                                    {cate}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </fieldset>
-
-                <input type="text" className="w-[810px] p-2 border rounded mb-2"
-                       placeholder="제목을 입력하세요" value={title}
-                       onChange={(e) => setTitle(e.target.value)}/>
-            </div>
-            {openTarget ? <SignTarget onClose={goClose}/> : null}
-
-            {isToggled ?
-                <div
-                    className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
-                    {/* 내용 추가 가능 */}
-                    {/*  회사명, 결재라인  */}
-                    <table className="h-[178px]">
-                        <tr>
-                            <td className="w-[500px] text-2xl">
-                                <input type="text" placeholder="기업명"
-                                       className="text-center h-[100px] w-[450px] text-2xl"/>
-                            </td>
-                            <td className="w-[500px] flex flex-row justify-center mt-5">
-                                <div className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                    <div className="h-[30px] bg-gray-200">
-                                        결 재
-                                    </div>
-                                    <div className="h-[100px] border-t-2 border-black">그렇게됬다</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    {/*    */}
-                    <div className="mt-[20px]">
-                    <input type="text" placeholder="주소" className="text-center h-[50px] w-[900px] text-lg"/>
-                </div>
-                {/*    */}
-                <table className="mb-[40px] border-t-2 border-b-4 border-black">
-                    <tr>
-                        <td className="w-[500px] border-r-2 border-black">
-                            <input type="tel" placeholder="TEL: (000)0000-0000"
-                                   className="text-center h-[50px] w-[400px] text-lg"/>
-                        </td>
-                        <td className="w-[500px] border-l-2 border-black">
-                            <input type="tel" placeholder="FAX: (000)0000-0000"
-                                   className="text-center h-[50px] w-[400px] text-lg"/>
-                        </td>
-                    </tr>
-                </table>
-                {/*    */}
-                <table className="border-t-4 border-b-4 border-black mb-[20px]">
-                    <tr className="border-b-2 border-black">
-                        <td className="w-[200px] border-r-2 border-black">
-                            <div>문 서 번 호</div>
-                        </td>
-                        <td className="w-[800px]">
-                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                        </td>
-                    </tr>
-                    <tr className="border-b-2 border-black">
-                        <td className="w-[200px] border-r-2 border-black">
-                            <div>수 신</div>
-                        </td>
-                        <td className="w-[800px]">
-                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                        </td>
-                    </tr>
-                    <tr className="border-b-2 border-black">
-                        <td className="w-[200px] border-r-2 border-black">
-                            <div>참 조</div>
-                        </td>
-                        <td className="w-[800px]">
-                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="w-[200px] border-r-2 border-black">
-                            <div>제 목</div>
-                        </td>
-                        <td className="w-[800px]">
-                            <input type="text" className="text-center h-[50px] w-[700px] text-lg"/>
-                        </td>
-                    </tr>
-                </table>
-                {/*    */}
-                <div>
-                    <textarea className="w-[950px] h-[300px]" placeholder="문서의 개요를 작성하세요."/>
-                </div>
-                {/*    */}
-                <table>
-                    <tr>
-                        <td className="h-[50px]">
-                            <div>- 아 래 -</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
+            <div className="flex-1 flex">
+                <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                    <ol>
+                        <li>
                             <div>
-                                <textarea className="w-[950px] h-[400px]" placeholder="문서의 내용을 작성하세요."/>
+                                <button
+                                    className={`w-full flex items-center transition-colors duration-300`}
+                                    onClick={handleHome}>
+                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                    <span className="hover:underline">결재함</span>
+                                </button>
                             </div>
-                        </td>
-                    </tr>
-                </table>
-                {/*    */}
-                <table className="w-[950px]">
-                    <tr>
-                        <td rowSpan="3">
-                            <div>※ 붙임</div>
-                        </td>
-                        <td>
-                            1. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            2. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            3. <input type="text" className="w-[700px] h-[50px]" placeholder="내용을 입력해주세요."/>
-                        </td>
-                    </tr>
-                </table>
-                <div>
-                    <input className="text-center h-[50px] w-[200px]" placeholder="20oo년  oo월  oo일"/>
-                </div>
-                <div>
-                    <input type='textbox' className="text-center h-[100px] w-[300px] text-2xl"
-                           placeholder="대표이사   ○ ○ ○"/>
-                </div>
-            </div> :
-                <div>
-                    <textarea className="p-1 w-[950px] h-[400px] border-2 border-black rounded" placeholder="파일과 함께 보낼 내용을 작성해주세요."/>
-                </div>}
-            <div>
-                <div className="flex justify-between mb-4 w-[950px] p-2 border rounded">
-                    <div className="flex items-center">
-                        <Paperclip className="h-5 w-5 mr-2"/>
-                        <span className="whitespace-nowrap">첨부파일</span>
-                        <input type="file" className="m-1" onChange={handleFileChange}/>
+                        </li>
+                    </ol>
+                </aside>
+                <main className="flex-1 p-4">
+                    <div className="flex justify-start space-x-2 mb-4">
+                        <button className="w-[80px] h-[40px] bg-gray-200 hover:bg-gray-400 rounded"
+                                onClick={handleHome}>목록
+                        </button>
                     </div>
-                    <div> {attachment ?
-                        `${(attachment.size / 1024).toFixed(2)} KB / 10 MB` :
-                        '0 KB / 10 MB'}</div>
-                </div>
-            </div>
-            <div className="mt-4">
-                <button className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]"
-                        onClick={() => {
-                            setOpenTarget(true)
-                        }}>
-                    결재선 정하기
-                </button>
-                <table className="table-auto">
-                    <tr>
-                        <td>순서</td>
-                        <td>성명</td>
-                        <td>부서</td>
-                        <td>직급</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>ㅇㅇㅇ</td>
-                        <td>경리부</td>
-                        <td>대리</td>
-                    </tr>
-                </table>
-            </div>
-            <div className="mt-4">
-                <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]">
-                    문서 만들기
-                </button>
-                <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]"
-                onClick={()=>{nevigate('/sign')}}>
-                    취소
-                </button>
-            </div>
-        </main>
+                    <h1 className="text-2xl font-bold mb-4">결재 문서 작성</h1>
 
-        {/*결재선 관련*/}
 
-        {/* Slide-out panel with toggle button */}
+                    <div className="flex justify-center">
+                        <div className="flex justify-between w-[350px] mb-4">
+                            <div className={`${isToggled ? '' : 'font-bold'}`}>파일만 첨부하기</div>
+                            <p className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${isToggled ? 'on bg-blue-300' : 'off'}`}
+                               onClick={handleToggle}>
+                                <div
+                                    className={`w-[25px] h-[23px] rounded-full bg-blue-600 absolute top-[1px] ${isToggled ? 'right-[3px]' : 'left-[3px] border-blue-600'}`}></div>
+                            </p>
+                            <div className={`${isToggled ? 'font-bold' : ''}`}>제공된 양식 사용하기</div>
+                        </div>
+                    </div>
+
+                    <div className="border border-black rounded p-2">
+                        <div className="flex">
+                            <div>
+                                <div className="flex">
+                                    <fieldset className="mr-2">
+                                        {/*<legend>카테고리</legend>*/}
+                                        <div>
+                                            <select name="category" value={category}
+                                                    onChange={(e) => setCategory(e.target.value)}
+                                                    className="border rounded p-2"
+                                            >
+                                                <option value="">카테고리</option>
+                                                {categories.map((category, index) => (
+                                                    category.split(',').map((item, subIndex) => (
+                                                        <option key={subIndex} value={item}>
+                                                            {item}
+                                                        </option>
+                                                    ))
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </fieldset>
+
+
+                                    <input type="text" className="w-[1087px] p-2 border rounded mb-2"
+                                           placeholder="제목을 입력하세요" value={title}
+                                           onChange={(e) => setTitle(e.target.value)}/>
+                                </div>
+                                {openTarget ? <SignTarget onClose={goClose} empCode={empCode}/> : null}
+
+
+                                {isToggled ?
+                                    <form>
+                                        <div
+                                            className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
+                                            {/* 내용 추가 가능 */}
+                                            {/*  회사명, 결재라인  */}
+                                            <table className="h-[178px]">
+
+                                                <tr>
+                                                    <td className="w-[500px] text-2xl">
+                                                        <input name="companyName" type="text" placeholder="기업명"
+                                                               className="text-center h-[100px] w-[450px] text-2xl"
+                                                               onChange={(e) => setCompanyName(e.target.value)}/>
+                                                    </td>
+                                                    <td className="w-[500px] flex flex-row justify-center mt-5">
+                                                        {userInfo.map((user, index) => {
+                                                            return (
+                                                                <div
+                                                                    className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                                                    <div className="h-[30px] bg-gray-200">
+                                                                        {user.sign == "미승인" ? "승인" : user.sign}
+                                                                    </div>
+                                                                    <div
+                                                                        className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
+                                                                        <div>{user.name}</div>
+                                                                        <div>{user.sign}</div>
+                                                                    </div>
+                                                                    {/*  결재자 있으면 추가 작성되게 하기  */}
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </td>
+                                                </tr>
+
+                                            < /table>
+                                            {/*    */}
+                                            <div className="mt-[20px]">
+                                                <input name="companyAddress" type="text" placeholder="주소"
+                                                       className="text-center h-[50px] w-[900px] text-lg"
+                                                       onChange={(e) => setCompanyAddress(e.target.value)}/>
+                                            </div>
+                                            {/*    */}
+                                            <table className="mb-[40px] border-t-2 border-b-4 border-black">
+                                                <tr>
+                                                    <td className="w-[500px] border-r-2 border-black">
+                                                        <input name="companyTel" type="tel"
+                                                               placeholder="TEL: (000)0000-0000"
+                                                               className="text-center h-[50px] w-[400px] text-lg"
+                                                               onChange={(e) => setCompanyTel(e.target.value)}/>
+                                                    </td>
+                                                    <td className="w-[500px] border-l-2 border-black">
+                                                        <input name="companyFax" type="tel"
+                                                               placeholder="FAX: (000)0000-0000"
+                                                               className="text-center h-[50px] w-[400px] text-lg"
+                                                               onChange={(e) => setCompanyFax(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <table className="border-t-4 border-b-4 border-black mb-[20px]">
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>문 서 번 호</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docNum" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocNum(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>수 신</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docReception" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocReception(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr className="border-b-2 border-black">
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>참 조</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docReference" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocReference(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="w-[200px] border-r-2 border-black">
+                                                        <div>제 목</div>
+                                                    </td>
+                                                    <td className="w-[800px]">
+                                                        <input name="docTitle" type="text"
+                                                               className="text-center h-[50px] w-[700px] text-lg"
+                                                               onChange={(e) => setDocTitle(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <div>
+                                            <textarea name="docOutline" className="w-[950px] h-[300px]"
+                                                      placeholder="문서의 개요를 작성하세요."
+                                                      onChange={(e) => setDocOutline(e.target.value)}/>
+                                            </div>
+                                            {/*    */}
+                                            <table>
+                                                <tr>
+                                                    <td className="h-[50px]">
+                                                        <div>- 아 래 -</div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div>
+                                                    <textarea name="docContent" className="w-[950px] h-[400px]"
+                                                              placeholder="문서의 내용을 작성하세요."
+                                                              onChange={(e) => setDocContent(e.target.value)}/>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            {/*    */}
+                                            <table className="w-[950px]">
+                                                <tr>
+                                                    <td rowSpan="3">
+                                                        <div>※ 붙임</div>
+                                                    </td>
+                                                    <td>
+                                                        1. <input name="docAttached1" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached1(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        2. <input name="docAttached2" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached2(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        3. <input name="docAttached3" type="text"
+                                                                  className="w-[700px] h-[50px]"
+                                                                  placeholder="내용을 입력해주세요."
+                                                                  onChange={(e) => setDocAttached3(e.target.value)}/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <div>
+                                                <input name="docDate" className="text-center h-[50px] w-[200px]"
+                                                       placeholder="20oo.  oo.  oo."
+                                                       onChange={(e) => setDocDate(e.target.value)}/>
+                                            </div>
+                                            <div>
+                                                <input name="docCeo" type='textbox'
+                                                       className="text-center h-[100px] w-[300px] text-2xl"
+                                                       placeholder="대표이사   ○ ○ ○"
+                                                       onChange={(e) => setDocCeo(e.target.value)}/>
+                                            </div>
+                                        </div>
+                                    </form> :
+                                    <div className="flex mb-2">
+                    <textarea className="p-1 w-[1200px] h-[400px] border border-black rounded"
+                              placeholder="파일과 함께 보낼 내용을 작성해주세요."
+                              onChange={(e) => setContent(e.target.value)}/>
+                                    </div>}
+                                <div>
+                                    <div className="flex justify-between mb-4 w-[1200px] p-2 border rounded">
+                                        <div className="flex items-center">
+                                            <Paperclip className="h-5 w-5 mr-2"/>
+                                            <span className="whitespace-nowrap">첨부파일</span>
+                                            <input type="file" className="m-1" onChange={handleFileChange}/>
+                                        </div>
+                                        <div> {attachment ?
+                                            `${(attachment.size / 1024).toFixed(2)} KB / 10 MB` :
+                                            '0 KB / 10 MB'}</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="flex flex-col ml-2">
+                                <button
+                                    className="bg-amber-500 text-white px-6 py-2 rounded hover:bg-amber-600 mr-[5px]"
+                                    onClick={() => {
+                                        setOpenTarget(true)
+                                    }}>
+                                    결재선 정하기
+                                </button>
+                                <table className="table-auto mt-2 border rounded w-[400px]">
+                                    <thead>
+                                    <tr className="bg-gray-200">
+                                        <td>순서</td>
+                                        <td>성명</td>
+                                        <td>부서</td>
+                                        <td>직급</td>
+                                        <td>승인</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {userInfo.map((user, index) => {
+                                        return (<tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{user.name}</td>
+                                                <td>{user.dep}</td>
+                                                <td>{user.pos}</td>
+                                                <td>{user.sign}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                    </tbody>
+                                </table>
+                                <div>
+                                    <div className="rounded bg-amber-100 mt-2 p-3 text-left">
+                                        <div className="mb-2">
+                                            <span className="font-bold">필수 입력 요소</span>
+                                            <br/>
+                                            - 결재선(본인 제외 최대 5명), 카테고리, 제목, 내용
+                                        </div>
+                                        <div>
+                                            <span className="font-bold">양식 사용시 필수 입력 요소</span>
+                                            <br/>
+                                            - 회사명, 문서번호, 문서제목, 개요, 내용, 날짜, 대표자
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]"
+                                onClick={handleSubmit}>
+                            문서 만들기
+                        </button>
+                        <button className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-[5px]"
+                                onClick={handleHome}>
+                            취소
+                        </button>
+                    </div>
+
+                </main>
+            </div>
+
+
+            {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
@@ -745,7 +991,8 @@ export default function SignRequest() {
                         </div>
                     </div>
                     {isRClick === true ?
-                        <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right:`${newWindowPosX}px`}}>
+                        <div className={`flex absolute`}
+                             style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
                             <div className="w-1/3 border">
                                 <img src="/logo192.png"/>
                             </div>
@@ -753,9 +1000,10 @@ export default function SignRequest() {
                                 <p>사내 이메일:</p>
                                 <p>전화번호:</p>
                                 <p>상태:</p>
-                                <button onClick={()=> {
+                                <button onClick={() => {
 
-                                }}>닫기</button>
+                                }}>닫기
+                                </button>
                             </div>
                         </div>
                         : <></>

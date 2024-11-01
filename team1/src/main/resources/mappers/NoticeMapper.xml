@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC  "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.nextit.team1.mappers.NoticeMapper">
+
+    <!-- Result Map 정의 -->
+    <resultMap id="NoticeResultMap" type="kr.or.nextit.team1.notice.NoticeDTO">
+        <result property="noticeNum" column="notice_num"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="startDate" column="start_date"/>
+        <result property="adminId" column="admin_id"/> <!-- 관리자 ID -->
+        <result property="empCode" column="emp_code"/> <!-- 직원 ID -->
+    </resultMap>
+
+    <!-- 관리자 로그인 -->
+    <select id="validateAdmin" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM admininfo
+        WHERE ADMIN_ID = #{adminId} AND ADMIN_PW = #{adminPw}
+    </select>
+
+    <!--  일반 로그인  -->
+    <select id="validateUser" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM employeetest
+        WHERE EMP_CODE = #{empCode} AND EMP_PASS = #{empPass}
+    </select>
+
+    <!--  List  -->
+    <select id="noticeList" resultType="kr.or.nextit.team1.notice.NoticeDTO">
+        SELECT *
+        FROM adminnotice
+        ORDER BY start_date DESC
+    </select>
+
+    <!--  Detail  -->
+    <select id="noticeDetail" parameterType="int" resultType="kr.or.nextit.team1.notice.NoticeDTO">
+        SELECT *
+        FROM adminnotice
+        WHERE notice_num = #{noticeNum}
+    </select>
+
+    <!--  Update  -->
+    <update id="noticeUpdate" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
+        UPDATE adminnotice
+        SET title = #{title}, content = #{content}
+        WHERE notice_num = #{noticeNum}
+    </update>
+
+    <!--  Delete  -->
+    <delete id="noticeDelete" parameterType="int">
+        DELETE FROM adminnotice
+        WHERE notice_num = #{noticeNum}
+    </delete>
+
+    <!-- Register  -->
+    <insert id="noticeCreate" parameterType="kr.or.nextit.team1.notice.NoticeDTO" useGeneratedKeys="true" keyProperty="noticeNum">
+        INSERT INTO adminnotice (title, content, start_date)
+        VALUES ( #{title}, #{content}, now())
+        <selectKey keyProperty="noticeNum" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+
+</mapper>

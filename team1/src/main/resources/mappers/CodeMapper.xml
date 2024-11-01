@@ -3,8 +3,80 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.CodeMapper">
-    <select id="selectCategories" resultType="CodeDTO">
-        SELECT DOC_CATE_CODE
-        FROM code
+    <select id="selectCode" resultType="CodeDTO">
+        SELECT
+            COM_CODE, DEP_CODE, UPDEP_CODE, POS_CODE, DOC_CATE_CODE, SIGN_CATE_CODE
+        FROM CODE
+        WHERE 1=1
+        <if test='comCode != null'>
+            AND COM_CODE = #{comCode}
+        </if>
+        <if test='depCode != null'>
+            AND DEP_CODE LIKE CONCAT('%', #{depCode}, '%')
+        </if>
+        <if test='depCode != null'>
+            AND DEP_CODE LIKE CONCAT('%', #{depCode}, '%')
+        </if>
     </select>
+
+    <select id="getDepCode" resultType="CodeDTO">
+        SELECT
+            DEP_CODE, UPDEP_CODE
+        FROM
+            CODE
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
+    <select id="selectCategories" resultType="CodeDTO">
+        SELECT *
+        FROM
+            CODE
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
+
+    <insert id="insertDepartment" parameterType="CodeDTO">
+        INSERT INTO CODE
+            (COM_CODE, DEP_CODE, UPDEP_CODE)
+        VALUES
+            (#{comCode}, #{depCode}, #{updepCode})
+    </insert>
+
+    <update id="updateDepartment">
+        UPDATE
+            CODE
+        SET
+            DEP_CODE = #{depCode},
+            UPDEP_CODE = #{updepCode}
+        WHERE
+            COM_CODE = #{comCode}
+    </update>
+
+    <select id="selectPosition" resultType="CodeDTO">
+        SELECT
+            POS_CODE
+        FROM
+            CODE
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
+
+    <update id="updatePosition">
+        UPDATE
+            CODE
+        SET
+            POS_CODE = #{posCode}
+        WHERE
+            COM_CODE = #{comCode}
+    </update>
+
+    <select id="selectCompanyName" resultType="String">
+        SELECT
+            COM_NAME
+        FROM
+            COMPANY
+        WHERE
+            COM_CODE = #{comCode}
+    </select>
+
 </mapper>

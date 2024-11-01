@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
+import useComCode from "hooks/useComCode";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -21,12 +22,19 @@ export default function DocumentDetail() {
     const [isExpanded, setIsExpanded] = useState(true);
     const {id} = useParams(); // 여기서 id는 docNum을 의미
     const [doc, setDoc] = useState(null);
-    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    // const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
+    const [codeCategory] = useComCode();
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
 
+    // const data = {
+    //     키:값
+    //     키:값
+    // }
+    // const response = await axios.get(`/documents/${id}`,{params:벨류})
+    
     useEffect(() => {
-        const documentDetail = async () => {
+        async function documentDetail() {
             try {
                 const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
                 setDoc(response.data);
@@ -35,17 +43,7 @@ export default function DocumentDetail() {
             } finally {
                 setLoading(false); // 로딩이 끝남
             }
-        };
-
-        // code 테이블에서 카테고리 가져오기
-        axios.get(`/code`) // API 엔드포인트를 조정하세요
-            .then(response => {
-                // console.log(response.data);
-                // 응답이 카테고리 배열이라고 가정할 때
-                const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-                setCategories(uniqueCategories); // 카테고리 상태에 저장
-            })
-            .catch(error => console.log(error));
+        }
 
         documentDetail();
     }, [id]);
@@ -138,14 +136,12 @@ export default function DocumentDetail() {
                         </Button>
                         {isExpanded && (
                             <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                {categories.map((category, index) => (
-                                    // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
-                                    category.split(',').map((item, subIndex) => (
-                                        <Button variant="ghost" className="w-full" key={`${index}-${subIndex}`}>
+                                {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                        <Button variant="ghost" className="w-full" key={`${item}`}>
                                             {item}
                                         </Button>
-                                    ))
-                                ))}
+                                    )
+                                )}
                             </div>
                         )}
                     </div>

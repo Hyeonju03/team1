@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.nextit.team1.mappers.UserInfoMapper">
+    <select id="userInfoSelect" resultType="UserInfoDTO">
+        SELECT
+            EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, POS_CODE, PHONE_NUM, EXT_NUM, EMP_MAIL, COR_CODE, EMP_RRN
+        FROM
+            EMPLOYEE
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
+
+    <!-- 상관에게 수정 요청 전송 -->
+      <update id="modifyReqUpdate" parameterType="UserInfoDTO">
+        UPDATE
+            EMPLOYEE
+        SET
+            MODIFY_REQ = #{modifyReq}
+        WHERE
+            EMP_CODE = #{corCode}
+    </update>
+
+    <select id="getModifyReq" parameterType="String" resultType="String">
+        SELECT
+            MODIFY_REQ
+        FROM
+            EMPLOYEE
+        WHERE
+            EMP_CODE = #{corCode}
+    </select>
+
+    <select id="getPosCode" resultType="String">
+        SELECT DISTINCT
+            c.POS_CODE
+        FROM
+            EMPLOYEE e, CODE c
+        WHERE
+            SUBSTRING_INDEX(e.EMP_CODE,'-',1) = c.COM_CODE
+    </select>
+    <select id="corCodeCheck" resultType="UserInfoDTO">
+        SELECT
+            MODIFY_REQ
+        FROM
+            EMPLOYEE
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
+
+    <!-- 수정 -->
+    <update id="userInfoUpdate" parameterType="UserInfoDTO">
+        UPDATE
+            EMPLOYEE
+        SET
+            EMP_NAME = #{userInfo.empName},
+            EMP_PASS = #{userInfo.empPass},
+            DEP_CODE = #{userInfo.depCode},
+            POS_CODE = #{userInfo.posCode},
+            PHONE_NUM = #{userInfo.phoneNum},
+            EXT_NUM = #{userInfo.extNum},
+            EMP_MAIL = #{userInfo.empMail},
+            COR_CODE = #{userInfo.corCode}
+        WHERE
+            EMP_CODE = #{empCode}
+    </update>
+
+    <!-- 승인 : 수정하면서 동시에 MODIFY_REQ 비우기 -->
+    <update id="modifyReqDelete" parameterType="String">
+        <include refid="modifyReqDelete" />
+    </update>
+
+    <sql id="modifyReqDelete">
+        UPDATE EMPLOYEE SET
+        MODIFY_REQ = NULL
+        WHERE EMP_CODE = #{corCode}
+    </sql>
+
+    <!-- 반려 -->
+    <update id="modifyReqClear">
+        <include refid="modifyReqDelete" />
+    </update>
+</mapper>

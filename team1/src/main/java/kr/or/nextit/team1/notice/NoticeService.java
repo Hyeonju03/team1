@@ -1,65 +1,60 @@
 package kr.or.nextit.team1.notice;
 
+import kr.or.nextit.team1.mappers.NoticeMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 @Service
 public class NoticeService {
-    private List<NoticeDTO> notices;
-    private long nextId = 1;
 
-    public NoticeService() {
-        notices = new ArrayList<>();
-        // 임시 데이터 추가
-        for (int i = 1; i <= 10; i++) {
-            NoticeDTO notice = new NoticeDTO();
-            notice.setId((long) i);
-            notice.setTitle("공지사항 " + i);
-            notice.setContent("공지사항 " + i + "의 내용입니다.");
-            notice.setCreatedAt(new Date());
-            notice.setUpdatedAt(new Date());
-            notices.add(notice);
-        }
-        nextId = 11;
+    @Autowired
+    private NoticeMapper noticeMapper;
+
+    // 모든 사용자에게 공지사항 리스트 제공
+    public List<NoticeDTO> noticeList() {
+        return noticeMapper.noticeList();
     }
 
-    public List<NoticeDTO> getAllNotices() {
-        return new ArrayList<>(notices);
+    // 공지사항 상세정보 제공
+    public NoticeDTO getNotice(int noticeNum) {
+        return noticeMapper.noticeDetail(noticeNum);
     }
 
-    public NoticeDTO getNoticeById(Long id) {
-        return notices.stream()
-                .filter(notice -> notice.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public NoticeDTO createNotice(NoticeDTO noticeDTO) {
-        noticeDTO.setId(nextId++);
-        noticeDTO.setCreatedAt(new Date());
-        noticeDTO.setUpdatedAt(new Date());
-        notices.add(noticeDTO);
+    // 새 공지사항 등록 (관리자 전용)
+    public NoticeDTO noticeCreate(NoticeDTO noticeDTO) {
+        noticeDTO.setStartDate(LocalDateTime.now()); // 현재 시간으로 설정
+        noticeMapper.noticeCreate(noticeDTO);
         return noticeDTO;
     }
 
-    public NoticeDTO updateNotice(Long id, NoticeDTO noticeDTO) {
-        for (int i = 0; i < notices.size(); i++) {
-            if (notices.get(i).getId().equals(id)) {
-                noticeDTO.setId(id);
-                noticeDTO.setCreatedAt(notices.get(i).getCreatedAt());
-                noticeDTO.setUpdatedAt(new Date());
-                notices.set(i, noticeDTO);
-                return noticeDTO;
-            }
-        }
-        return null;
+    // 공지사항 업데이트 (관리자 전용)
+    public void noticeUpdate(NoticeDTO noticeDTO) {
+        noticeMapper.noticeUpdate(noticeDTO);
     }
 
-    public boolean deleteNotice(Long id) {
-        return notices.removeIf(notice -> notice.getId().equals(id));
+    // 공지사항 삭제 (관리자 전용)
+    public boolean noticeDelete(int noticeNum) {
+        return noticeMapper.noticeDelete(noticeNum) > 0;
+    }
+
+    // 관리자 인증
+    public boolean validateAdmin(String adminId, String adminPw) {
+        Map<String, String> params = new HashMap<>();
+        params.put("adminId", adminId);
+        params.put("adminPw", adminPw);
+        return noticeMapper.validateAdmin(params) > 0;
+    }
+
+    // 사용자 인증 (추가로 필요 시)
+    public boolean validateUser(String empCode, String empPass) {
+        Map<String, String> params = new HashMap<>();
+        params.put("empCode", empCode);
+        params.put("empPass", empPass);
+        return noticeMapper.validateUser(params) > 0;
     }
 }

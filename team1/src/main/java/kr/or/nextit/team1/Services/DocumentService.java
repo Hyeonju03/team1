@@ -27,13 +27,14 @@ public class DocumentService {
     }
 
     @Transactional
-    public void documentInsert(String title, String category, String content, MultipartFile attachment) {
+    public void documentInsert(String title, String category, String content, MultipartFile attachment, String empCode) {
         DocumentDTO documentDTO = new DocumentDTO();
-        documentDTO.setEmpCode("3118115625");
+        documentDTO.setEmpCode(empCode);
         documentDTO.setTitle(title);
         documentDTO.setDocCateCode(category);
         documentDTO.setContent(content);
 
+        
         try {
             // 첨부파일 처리 (파일을 저장하고, 경로 등을 documentDTO에 설정)
             if (attachment != null && !attachment.isEmpty()) {
@@ -74,7 +75,7 @@ public class DocumentService {
         this.documentMapper = documentMapper;
     }
 
-    public DocumentDTO documentDetail(int id){
+    public DocumentDTO documentDetail(int id) {
         return documentMapper.documentDetail(id);
     }
 
