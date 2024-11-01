@@ -512,6 +512,61 @@ class ListLibrary {
             });
         return ''
     }
+
+
+    static WorkerList2(code) {
+        const depLayout = () => {
+
+            let htmlList = {};
+            this.top = ""
+
+            this.depCode.forEach((v1, i1) => {
+                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<ul class="list-disc pl-5"></ul></li>`, 'text/html').body.firstChild;
+                htmlList[htmlTag.id] = htmlTag;
+            })
+
+            this.empDepCode.forEach((v1, i1) => {
+                htmlList[v1].children[0].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker2 w-[65px]" data-value=${this.empCode[i1]}><span>${this.empName[i1]}</span></li>`, 'text/html').body.firstChild)
+            })
+            this.depCode.forEach((v1, i1) => {
+                this.depCode.forEach((v2, i2) => {
+                    if (htmlList[v1].id !== htmlList[v2].id) {
+                        if (htmlList[v1].id === htmlList[v2].className) {
+                            htmlList[v1].children[0].appendChild(htmlList[v2])
+                        }
+                    }
+                });
+                if (this.upDepCode[i1] === "") {
+                    this.top = v1
+                }
+            })
+
+            return htmlList[this.top]
+        }
+
+        const listCheck = async () => {
+            await axios.get("/chartSelect", {params: {code}})
+                .then(response => {
+                    this.depCode = response.data[0]
+                    this.upDepCode = response.data[1]
+                    this.empCode = response.data[2]
+                    this.empName = response.data[3]
+                    this.empDepCode = response.data[4]
+                })
+                .catch(error => console.log(error));
+            this.returnList = "";
+            this.returnList = depLayout()
+        }
+
+        listCheck();
+        return (
+            <div className="h-[100%] overflow-y-auto">
+                <ul className="list-disc pl-5">
+                    {<div dangerouslySetInnerHTML={{__html: this.returnList.outerHTML}}/>}
+                </ul>
+            </div>
+        );
+    }
 }
 
 window.ListLibrary = ListLibrary;
