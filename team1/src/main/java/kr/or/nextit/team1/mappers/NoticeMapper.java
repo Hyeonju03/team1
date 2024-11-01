@@ -16,11 +16,6 @@ public interface NoticeMapper {
     void noticeUpdate(NoticeDTO noticeDTO);
     int noticeDelete(int noticeNum);
 
-
-    List<Map<String, Object>> getAdminAndEmployeeInfo(String adminId);
-
-    // 관리자 유효성 검사 메소드
-    int validateAdmin(String adminId); // adminId가 존재하면 1, 없으면 0 반환
-
-    int validateUser(String empCode);
+    int validateAdmin(Map<String, String> params);
+    int validateUser(Map<String, String> params);
 }

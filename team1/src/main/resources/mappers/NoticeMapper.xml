@@ -15,17 +15,17 @@
     </resultMap>
 
     <!-- 관리자 로그인 -->
-    <select id="validateAdmin" parameterType="String" resultType="int">
+    <select id="validateAdmin" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM admininfo
-        WHERE ADMIN_ID = #{adminId}
+        WHERE ADMIN_ID = #{adminId} AND ADMIN_PW = #{adminPw}
     </select>
 
     <!--  일반 로그인  -->
-    <select id="validateUser" parameterType="String" resultType="int">
+    <select id="validateUser" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM employeetest
-        WHERE EMP_CODE = #{empCode}
+        WHERE EMP_CODE = #{empCode} AND EMP_PASS = #{empPass}
     </select>
 
     <!--  List  -->
@@ -42,6 +42,19 @@
         WHERE notice_num = #{noticeNum}
     </select>
 
+    <!--  Update  -->
+    <update id="noticeUpdate" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
+        UPDATE adminnotice
+        SET title = #{title}, content = #{content}
+        WHERE notice_num = #{noticeNum}
+    </update>
+
+    <!--  Delete  -->
+    <delete id="noticeDelete" parameterType="int">
+        DELETE FROM adminnotice
+        WHERE notice_num = #{noticeNum}
+    </delete>
+
     <!-- Register  -->
     <insert id="noticeCreate" parameterType="kr.or.nextit.team1.notice.NoticeDTO" useGeneratedKeys="true" keyProperty="noticeNum">
         INSERT INTO adminnotice (title, content, start_date)
@@ -51,16 +64,5 @@
         </selectKey>
     </insert>
 
-    <!--  Update  -->
-    <update id="noticeUpdate" parameterType="kr.or.nextit.team1.notice.NoticeDTO">
-        UPDATE adminnotice
-        SET title = #{title}, content = #{content}
-        WHERE notice_num = #{noticeNum}
-    </update>
 
-    <!--  delete  -->
-    <delete id="noticeDelete" parameterType="int">
-        DELETE FROM adminnotice
-        WHERE notice_num = #{noticeNum}
-    </delete>
 </mapper>
