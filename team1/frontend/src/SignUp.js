@@ -1,11 +1,13 @@
 import { useState,useEffect } from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import SelectCorCodePopup from "./SelectCorCodePopup";
 
 export default function SignUpForm() {
 
 
     const [departments,setDepartments] = useState([])
+    const [ranks,setRanks] = useState([])
     const [formData, setFormData] = useState({
         companyCode: '',
         name:'',
@@ -17,6 +19,7 @@ export default function SignUpForm() {
         verificationCode: '',
         department: '',
         supervisorCode: '',
+        rank: '',
         residentNumber1: '',
         residentNumber2: '',
     });
@@ -29,15 +32,26 @@ export default function SignUpForm() {
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
     const [signUpResponse,setSignUpResponse] = useState("")
+    const [empCodeCheck,setEmpCodeCheck] = useState("")
+    const [corCode, setCorCode] = useState([]);
+    const[popUp,setPopUp] = useState(false)
+    const[checkCorCode,setCheckCorCode] = useState("")
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInputIdCheck(e.target)
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
+
+        if (name === 'department') {
+            corCheck(value); // 업데이트된 부서 값 전달
+            console.log(formData.department)
+        }
     };
 
     const validateForm = () => {
+
+        console.log("validateForm")
         const newErrors = {};
 
         if (!formData.companyCode) newErrors.companyCode = "회사코드를 입력해주세요";
@@ -54,8 +68,9 @@ export default function SignUpForm() {
             newErrors.email = "유효한 이메일 주소를 입력해주세요";
         }
         if (!formData.verificationCode) newErrors.verificationCode = "인증번호를 입력해주세요";
-        if (!formData.department) newErrors.department = "부서를 입력해주세요";
-        if (!formData.supervisorCode) newErrors.supervisorCode = "상관 코드를 입력해주세요";
+        if (!formData.department) newErrors.department = "부서를 선택해주세요";
+        //if (!formData.supervisorCode) newErrors.supervisorCode = "상관 코드를 입력해주세요";
+        if (!formData.rank) newErrors.rank = "직급을 선택해주세요";
         if (!formData.residentNumber1) newErrors.residentNumber1 = "주민등록번호 앞자리 입력해주세요";
         if (!formData.residentNumber2) newErrors.residentNumber2 = "주민등록번호 뒷자리 입력해주세요";
 
@@ -73,14 +88,12 @@ export default function SignUpForm() {
                 //부서검색누르면 부서리스트나와서하는기능
                 //3148200040
                 try {
-                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`);
                     const list = response.data
 
                     const newDepartments = list.map(v => v.depCode);
-                    newDepartments.map((v,i)=>{
-                        setDepartments(newDepartments);
-                    })
-
+                    const dede = newDepartments.join(",").split(",");
+                        setDepartments(dede);
 
                 } catch (error) {
                     console.error('Error fetching data:', error);
@@ -90,6 +103,50 @@ export default function SignUpForm() {
         }
     }
 
+    const rankCheck = async () => {
+        const response = await axios.get('/apitest');
+        const companyFound = response.data.some(company => company[2] === formData.companyCode);  // 입력한 회사코드가 있는지 확인
+
+        if (companyFound) {
+            try {
+                const response = await axios.get(`http://localhost:8080/rankSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                const list = response.data
+
+                const newRanks = list.map(v=>v.posCode)
+                console.log("오잉",newRanks)
+
+               const nene =   newRanks.join(",").split(",");
+                setRanks(nene)
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            alert("없는 회사코드임");
+        }
+    }
+    // 상사리스트
+        const corCheck = async (param)=>{
+        console.log("formData" , param)
+        const response = await axios.get('/apitest');
+            const companyFonud = response.data.some(company => company[2] === formData.companyCode);
+
+            if(companyFonud){
+                try {
+                    const response = await axios.get(`http://localhost:8080/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
+                    console.log(response);
+                    setCorCode(response.data)
+
+                } catch (error){
+                    console.error(error);
+                }
+            }
+        }
+
+
+
+
+
     const idCheck = async() => {
         const companyCode = formData.companyCode;
         const id = formData.id;
@@ -98,20 +155,15 @@ export default function SignUpForm() {
             return; // ID가 비어있으면 함수 종료
         }
         try {
-            const response = await axios.get('/findAllempCode', {params: { comCode: companyCode }});
-            const empCodes = response.data.map(item => item.empCode);
+            const response = await axios.post('/findAllempCode',  {empCode: `${companyCode}-${id}` });
 
-            const resultEmpCode = empCodes.map(code => code.split('-')[1]);
-            console.log(resultEmpCode)
-            for (let i = 0; i <= resultEmpCode.length; i++) {
-                if(id == resultEmpCode[i] ){
-                    alert("이미 있는 아이디입니다");
-                    break;
-                }else{
-                    alert("가능");
-                    setIdConfirm(true)
-                }
+            if(response.data > 0) {
+                alert("중복입니다.")
+            }else{
+                alert("사용가능합니다.")
+                setIdConfirm(true)
             }
+
 
 
 
@@ -164,25 +216,41 @@ export default function SignUpForm() {
     };
 
 
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault(); // 기본 동작 방지
         }
     };
+    
+    const searchCorcode=(e)=>{
+        console.log("클릭")
+        setPopUp(true)
+    }
+
+
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        console.log("회원가입 하기");
+
         const validationErrors = validateForm();
+        console.log(validationErrors)
+
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
+            console.log("setErrors")
             return;
         }
+        console.log("회원가입 하기2222");
 
         if(! companyConfirm){
             alert("회사코드 확인하삼")
             return;
         }
+        console.log("회원가입 하기33333");
 
         if(! idConfirm){
             alert("아이디중복확인 하삼")
@@ -211,28 +279,37 @@ export default function SignUpForm() {
         if ((formData.residentNumber1.length + formData.residentNumber2.length) != 13){
             alert("주민등록번호 확인하삼")
         }
-        console.log('Form submitted:', formData);
+        // console.log('Form submitted:', formData);
 
         const send = {
+            companyCode: formData.companyCode,
             empCode: `${formData.companyCode}-${formData.id}`,  // 아이디
             empName: formData.name, // 이름
             empPass: formData.password, // 비밀번호
             depCode: formData.department, // 부서
             phoneNum: formData.phone, // 전화번호
             empMail: formData.email, // 이메일
-            empRrn: `${formData.residentNumber1}-${formData.residentNumber2}` // 주민등록번호
+            empRrn: `${formData.residentNumber1}-${formData.residentNumber2}`, // 주민등록번호
+            // supervisorCode: formData.supervisorCode,//상관
+            corCode: checkCorCode,
+            posCode: formData.rank
+
         };
+
+        console.log('send send:', send);
 
         const config = {
             headers: { "Content-Type": `application/json`}
         };
 
-        const reuslt = await axios.post('/signUp' ,  send, config);
-        //여기url주소가 contro;ller url이랑 똑같아야함.
-
-        console.log(reuslt);
-
-
+        try{
+            const reuslt = await axios.post('/signUp' ,  send, config);
+            console.log(reuslt);
+            alert("회원가입 완룡")
+        }catch (error){
+            console.error(error)
+        }
+        
     };
 
 
@@ -240,12 +317,23 @@ export default function SignUpForm() {
 
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-4 border rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{ marginBottom: "30px" }}>로고</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
+        {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
+            <style>
+                {`
+                 input::placeholder {
+                        color: ${errors.companyCode ? 'red' : 'gray'};
+                    }
+                    input.error {
+                        color: red; /* 에러가 있을 때 텍스트 색상 */
+                    }
+            `}
+            </style>
+            <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
+            <div style={{marginLeft:"480px"}} className="max-w-4xl items-center">
+            <form onSubmit={handleSubmit} className="space-y-0.5">
                 {/* 회사코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>
                     <input
                         id="companyCode"
@@ -256,12 +344,18 @@ export default function SignUpForm() {
                         className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
                         placeholder={errors.companyCode || '회사코드 입력'}
                         disabled={companyConfirm ? true : false}
+                        style={{color: errors.companyCode ? 'red' : 'black'}}
                     />
-                    <button onClick={companyCodeCheck} type="button" className="ml-2 border p-2">확인</button>
+                    <button onClick={() => {
+                        companyCodeCheck();
+                        rankCheck();
+                    }} type="button" className="ml-2 border p-2">확인
+                    </button>
+
                 </div>
 
                 {/* 이름 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="name" className="flex-none w-32 text-left">이름</label>
                     <input
                         id="name"
@@ -275,7 +369,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* ID */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="id" className="flex-none w-32 text-left">ID</label>
                     <input
                         id="id"
@@ -291,7 +385,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* PW */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="password" className="flex-none w-32 text-left">PW</label>
                     <input
                         id="password"
@@ -307,7 +401,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* PW 확인 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="confirmPassword" className="flex-none w-32 text-left">PW 확인</label>
                     <input
                         id="confirmPassword"
@@ -325,7 +419,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 휴대전화 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="phone" className="flex-none w-32 text-left">휴대전화</label>
                     <input
                         id="phone"
@@ -343,7 +437,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 이메일 주소 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="email" className="flex-none w-32 text-left">이메일 주소</label>
                     <div className="flex items-center flex-grow space-x-2">
                         <input
@@ -362,7 +456,7 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 인증번호 입력 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="verificationCode" className="flex-none w-32 text-left">인증번호 입력</label>
                     <input
                         id="verificationCode"
@@ -380,17 +474,17 @@ export default function SignUpForm() {
 
 
                 {/* 부서 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
                     <div className="flex-grow relative flex">
                         <select
                             id="department"
                             name="department"
-                            value={formData.department}
+                            // value={formData.department}
                             onChange={handleChange}
                             className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
                         >
-                            <option value="">부서 선택</option>
+                            <option value="department">부서 선택</option>
                             {/* 기본 선택 옵션 */}
                             {departments.map((dep, index) => (
                                 <option key={index} value={dep}>
@@ -403,24 +497,58 @@ export default function SignUpForm() {
                 </div>
 
                 {/* 상관 코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="supervisorCode" className="flex-none w-32 text-left">상관 코드</label>
                     <div className="flex-grow relative flex">
                         <input
                             id="supervisorCode"
                             name="supervisorCode"
-                            value={formData.supervisorCode}
+                            // value={formData.supervisorCode}
+                            value={checkCorCode}
                             onChange={handleChange}
                             onKeyDown={handleKeyDown}
                             className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
                             placeholder={errors.supervisorCode || '상관 코드 입력'}
                         />
-                        {/*<button onClick={firmSearch} type="button" className="border p-2 ml-2 flex-none">검색</button>*/}
+                        <button onClick={searchCorcode}  type="button" className="border p-2 ml-2 flex-none">검색</button>
+                    </div>
+                </div>
+                <SelectCorCodePopup
+                    isOpen={popUp}
+                    onClose={() => setPopUp(false)}
+                    onConfirm={(item) => {
+                        console.log("item" ,item.EMP_CODE)
+                        setCheckCorCode(item.EMP_CODE)
+                        setPopUp(false); // 모달 닫기
+                    }}
+                    corCode={corCode}
+                />
+
+                {/* 직급 */}
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                    <label htmlFor="rank" className="flex-none w-32 text-left">직급</label>
+                    <div className="flex-grow relative flex">
+                        <select
+                            id="rank"
+                            name="rank"
+                            value={formData.rank}
+                            onChange={handleChange}
+                            className={`border p-2 flex-grow ${errors.rank ? 'border-red-500' : ''}`}
+                        >
+                            <option value="">직급 선택</option>
+                            {/* 기본 선택 옵션 */}
+                            {ranks.map((r, index) => (
+                                <option key={index} value={r}>
+                                    {r}
+                                </option>
+                            ))}
+                        </select>
+
                     </div>
                 </div>
 
                 {/* 주민등록번호 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "30px"}}>
+                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                     <label htmlFor="residentNumber1" className="flex-none w-32 text-left">주민등록번호</label>
                     <div className="flex items-center space-x-2 flex-grow">
                         <input
@@ -453,8 +581,9 @@ export default function SignUpForm() {
                     </div>
                 </div>
 
-                <button  type="submit" className="w-full bg-blue-500 text-white p-2">회원가입</button>
+                <button type="submit" className="border bg-blue-500 text-white p-2">회원가입</button>
             </form>
+            </div>
         </div>
     );
 }

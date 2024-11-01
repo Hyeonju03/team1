@@ -18,7 +18,7 @@ public class EmailService {
         String title = "하잉 인증코드 보내줄겡";
         String content = code;
         String user_name = "kimdajin@naver.com";
-        String password = "ekwlskim132@";
+        String password = "ekwlskim1325!";
 
         SendMail sendMail = new SendMail();
         sendMail.goMail(sendMail.setting(new Properties(), user_name, password), title, content, to);

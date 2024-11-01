@@ -3,6 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
 import axios from "axios";
+import moment from "moment";
 
 const typeColors = {
     '개인': 'bg-blue-200',
@@ -16,21 +17,114 @@ export default function Schedule() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSchedule, setEditingSchedule] = useState(null);
+    const [empCode,setEmpCode] = useState("")
+    const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+    const [auth, setAuth] = useState("");
     const [newSchedule, setNewSchedule] = useState({
+        snum : 0,
         content: '',
         startDate: new Date(),
         endDate: new Date(),
-        type: '개인',
+        category: '개인',
     });
 
+    /* 로그인 후 empCode 설정 함수 */
+    const fetchEmpCode = async () => {
+        // 여기에서 실제 empCode를 설정
+        const loggedInEmpCode = "2218701188-c"; // 로그인 후 받아온 empCode
+        setEmpCode(loggedInEmpCode);
+    };
+
     useEffect(() => {
-        const res = axios.get('/schedule')
-            .then(response => {
-                console.log(response.data);
-                setSchedules(response.data); // 서버에서 받은 데이터를 상태에 설정
-            })
-        console.log(res)
+        fetchEmpCode();
     }, []);
+
+    /* 권한 조회 함수 */
+    const getAuth = async () => {
+        try {
+            const resp = await axios.get("/selectAuth", {params: {empCode: empCode}});
+            setAuth(resp.data)
+
+            fetchSchedules(); //개일일정조회
+        } catch (error){
+            console.error(error)
+        }
+    }
+
+    /* 개인일정 조회 함수 */
+    const fetchSchedules = async () => {
+        try {
+            const response = await axios.get(`/selectSchedule?empCode=${empCode}`);
+            const schedulesWithDates = response.data.map(schedule => ({
+                ...schedule,
+                snum : schedule.snum,
+                startDate: new Date(schedule.startDate), // 문자열을 Date 객체로 변환
+                endDate: new Date(schedule.endDate), // 문자열을 Date 객체로 변환
+            }));
+            fetchData(schedulesWithDates);
+        } catch (error) {
+            console.error("개에러", error);
+        }
+    };
+
+    /* 부서일정 조회 함수 */
+    const fetchData = async(arr)=> {
+        try{
+            const response = await axios.get("/selectDepSchedule", {params: {empCode: empCode}});
+
+            const schedulesWithDates = response.data.map(schedule => ({
+                ...schedule,
+                snum : schedule.snum,
+                startDate: new Date(schedule.startDate), // 문자열을 Date 객체로 변환
+                endDate: new Date(schedule.endDate),     // 문자열을 Date 객체로 변환
+            }));
+
+           setSchedules(item => [
+                ...arr,
+                ...schedulesWithDates
+            ]);
+
+            fullData([ ...arr,...schedulesWithDates]);
+        }catch (error){
+            console.error(error)
+        }
+    }
+
+    /* 전체일정 조회 */
+    const fullData = async (arr)=>{
+        try {
+            const response = await axios.get("/selectFullScgedule", {params: {empCode: empCode}});
+            console.log("resp",response)
+            const schedulesWithDates = response.data.map(schedule => ({
+                ...schedule,
+                snum : schedule.snum,
+                startDate: new Date(schedule.startDate), // 문자열을 Date 객체로 변환
+                endDate: new Date(schedule.endDate),     // 문자열을 Date 객체로 변환
+            }));
+
+            setSchedules(item => [
+                ...arr,
+                ...schedulesWithDates
+            ]);
+
+
+        } catch (error){
+            console.error(error)
+        }
+    }
+
+
+
+
+    useEffect(() => {
+        if(empCode){
+            getAuth()
+        }
+    }, [empCode]);
+
+    useEffect(()=>{
+        console.log(schedules)
+    },[schedules])
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -42,39 +136,87 @@ export default function Schedule() {
         setIsModalOpen(true);
     };
 
-    const handleAddSchedule = () => {
-        if (newSchedule.content && newSchedule.type) {
-            setSchedules(prev => [
-                ...prev,
-                { id: Date.now(), ...newSchedule },
-            ]);
-            resetModal();
+    const handleAddSchedule = async () => {
+        if (newSchedule.content && newSchedule.category) {
+
+            try {
+                const resp = await axios.post("/scheduleInsert", {
+                    empCode: empCode,
+                    content: newSchedule.content,
+                    startDate: newSchedule.startDate.toISOString(),
+                    endDate: newSchedule.endDate.toISOString(),
+                    category: newSchedule.category,
+                });
+                console.log(resp);
+
+                const newScheduleWithId = {
+                    //id: Date.now(),
+                    id: newSchedule.snum,
+                    content: newSchedule.content,
+                    startDate: newSchedule.startDate,
+                    endDate: newSchedule.endDate,
+                    category: newSchedule.category,
+                };
+
+                setSchedules(prev => [...prev, newScheduleWithId]); // 새로운 일정 추가
+
+                resetModal();
+            }catch (error){
+                console.error(error)
+            }
         }
     };
 
-    const handleEditSchedule = (schedule) => {
+    const handleEditSchedule = async (schedule) => {
         setEditingSchedule(schedule);
         setNewSchedule(schedule);
         setIsModalOpen(true);
+        console.log("..?",newSchedule)
+
     };
 
-    const handleUpdateSchedule = () => {
-        if (editingSchedule && newSchedule.content && newSchedule.type) {
+    const handleUpdateSchedule = async () => {
+        if (editingSchedule && newSchedule.content && newSchedule.category) {
+
+            try {
+                const resp = await axios.put("/updateSchedule",  newSchedule);
+                console.log(resp)
+            } catch (error){
+                console.error(error)
+            }
+
             setSchedules(prev =>
-                prev.map(s => (s.id === editingSchedule.id ? { ...s, ...newSchedule } : s))
+                prev.map(s => (s.snum === editingSchedule.snum ? { ...s, ...newSchedule } : s))
             );
             resetModal();
         }
+
+
     };
 
-    const handleDeleteSchedules = () => {
+    const handleDeleteSchedules = async () => {
+        console.log("handleDeleteSchedules");
+        console.log(selectedScheduleId);
+        try {
+            const resp = await axios.delete("/deleteSchedule", {
+                params: { sNum: selectedScheduleId }});
+            console.log(resp)
+        } catch (error){
+            console.error(error)
+        }
+
         setSchedules(prev => prev.filter(s => !s.selected));
+
     };
 
     const toggleScheduleSelection = (id) => {
+        setSelectedScheduleId(prev => (prev === id ? null : id));
         setSchedules(prev =>
-            prev.map(s => (s.id === id ? { ...s, selected: !s.selected } : s))
+            prev.map(s => ({ ...s, selected: s.snum === id }))
         );
+    };
+    const handleScheduleTypeChange = (category) => {
+        setNewSchedule(prev => ({ ...prev, category }));
     };
 
     const resetModal = () => {
@@ -84,10 +226,14 @@ export default function Schedule() {
             content: '',
             startDate: new Date(),
             endDate: new Date(),
-            type: '개인',
+            category: '개인',
         });
         setSelectedDate(null);
     };
+
+    const canAdd = auth == '1' || auth == '4' || auth == '5' || auth == '7';
+    const canEdit = auth == '2' || auth == '4' || auth == '6' || auth == '7';
+    const canDelete = auth == '3' || auth == '5' || auth == '6' || auth == '7';
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -103,21 +249,27 @@ export default function Schedule() {
                             value={selectedDate}
                             className="w-full h-full text-lg" // Tailwind 클래스로 크기 설정
                             tileContent={({ date }) => {
+                                const calDate = moment(date).format("YYYY-MM-DD")
                                 const daySchedules = schedules.filter(s => {
-                                    const start = s.startDate;
-                                    const end = s.endDate;
-                                    // 시작일과 종료일 사이에 현재 날짜가 포함되는지 확인
-                                    return date >= start && date <= end;
+                                    const start = moment(s.startDate).format("YYYY-MM-DD");
+                                    const end = moment(s.endDate).format("YYYY-MM-DD");
+                                    // 현재 날짜가 시작일과 종료일 사이에 있는지 확인
+                                    const title = calDate >= start && calDate <= end;
+                                    return title;
                                 });
+
                                 return (
                                     <div className="text-xs mt-1">
-                                        {daySchedules.slice(0, 2).map(s => (
-                                            <div key={s.id} className={`truncate ${typeColors[s.type]}`}>{s.content}</div>
+                                        {daySchedules.map(s => (
+                                            <div key={s.snum} className={`truncate ${typeColors[s.category]}`}>
+                                                {s.content}
+                                            </div>
                                         ))}
                                         {daySchedules.length > 2 && <div>...</div>}
                                     </div>
                                 );
                             }}
+
                         />
                     </div>
                     <div className="w-2/5 pl-4">
@@ -129,7 +281,17 @@ export default function Schedule() {
                                 일정추가하기
                             </button>
                             <button
-                                onClick={handleDeleteSchedules}
+                                // onClick={handleDeleteSchedules}
+                                onClick={() => {
+                                    const selectedSchedule = schedules.find(s => s.snum === selectedScheduleId);
+                                    if (selectedSchedule && selectedSchedule.category === '전체') {
+                                        if (!canDelete) {
+                                            alert("전체 일정을 삭제할 수 있는 권한이 없습니다.");
+                                            return; // 권한이 없으면 함수 종료
+                                        }
+                                    }
+                                    handleDeleteSchedules();
+                                }}
                                 className="bg-red-500 text-white px-4 py-2 rounded"
                             >
                                 삭제하기
@@ -138,17 +300,17 @@ export default function Schedule() {
                         <div className="h-[calc(100vh-200px)] overflow-y-auto border rounded p-2">
                             <ul>
                                 {schedules.sort((a, b) => a.startDate.getTime() - b.startDate.getTime()).map(schedule => (
-                                    <li key={schedule.id}
-                                        className={`mb-2 p-2 border rounded ${typeColors[schedule.type]}`}>
+                                    <li key={schedule.snum}
+                                        className={`mb-2 p-2 border rounded ${typeColors[schedule.category]}`}>
                                         <div className="flex items-center">
                                             <input
                                                 type="checkbox"
-                                                checked={schedule.selected}
-                                                onChange={() => toggleScheduleSelection(schedule.id)}
+                                                checked={selectedScheduleId === schedule.snum}
+                                                onChange={() => toggleScheduleSelection(schedule.snum)} // 선택 토글
                                                 className="mr-2"
                                             />
                                             <span>{schedule.content}</span>
-                                            <span className="ml-auto">{schedule.type}</span>
+                                            <span className="ml-auto text-xs">{schedule.category} 일정</span>
                                             <button
                                                 onClick={() => handleEditSchedule(schedule)}
                                                 className="ml-2 bg-gray-200 px-2 py-1 rounded"
@@ -180,10 +342,10 @@ export default function Schedule() {
                             className="w-full p-2 mb-2 border rounded"
                         />
                         <div className="flex mb-2">
-                        <input
+                            <input
                                 type="date"
                                 value={newSchedule.startDate.toISOString().split('T')[0]}
-                                onChange={e => setNewSchedule(prev => ({ ...prev, startDate: new Date(e.target.value) }))}
+                                onChange={e => setNewSchedule(prev => ({...prev, startDate: new Date(e.target.value)}))}
                                 className="w-1/2 p-2 border rounded mr-2"
                             />
                             <input
@@ -194,39 +356,48 @@ export default function Schedule() {
                             />
                         </div>
                         <div className="mb-2">
-                            <label className="mr-2">
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value="개인"
-                                    checked={newSchedule.type === '개인'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '개인' }))}
-                                    className="mr-1"
-                                />
-                                개인
-                            </label>
-                            <label className="mr-2">
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value="부서"
-                                    checked={newSchedule.type === '부서'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '부서' }))}
-                                    className="mr-1"
-                                />
-                                부서
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="type"
-                                    value="전체"
-                                    checked={newSchedule.type === '전체'}
-                                    onChange={() => setNewSchedule(prev => ({ ...prev, type: '전체' }))}
-                                    className="mr-1"
-                                />
-                                전체
-                            </label>
+                            {!editingSchedule&&(
+                                <>
+                                    <label className="mr-2">
+                                        <input
+                                            type="radio"
+                                            name="type"
+                                            value="개인"
+                                            checked={newSchedule.category === '개인'}
+                                            // onChange={() => setNewSchedule(prev => ({ ...prev, type: '개인' }))}
+                                            onChange={() => handleScheduleTypeChange('개인')}
+                                            className="mr-1"
+                                        />
+                                        개인
+                                    </label>
+                                    <label className="mr-2">
+                                        <input
+                                            type="radio"
+                                            name="type"
+                                            value="부서"
+                                            checked={newSchedule.category === '부서'}
+                                            onChange={() => handleScheduleTypeChange('부서')}
+                                            className="mr-1"
+                                        />
+                                        부서
+                                    </label>
+                                    {canAdd&& (
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="type"
+                                                value="전체"
+                                                checked={newSchedule.category === '전체'}
+                                                onChange={() => handleScheduleTypeChange('전체')}
+                                                className="mr-1"
+                                            />
+                                            전체
+                                        </label>
+                                    )}
+                                </>
+                            )}
+
+
                         </div>
                         <div className="flex justify-end">
                             <button
@@ -236,7 +407,14 @@ export default function Schedule() {
                                 취소
                             </button>
                             <button
-                                onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule}
+                                // onClick={editingSchedule ? handleUpdateSchedule : handleAddSchedule}
+                                onClick={()=>{
+                                    if (editingSchedule && editingSchedule.category === '전체' && !canEdit) {
+                                        alert("전체 일정을 수정할 수 있는 권한이 없습니다.");
+                                        return; // 권한이 없으면 함수 종료
+                                    }
+                                    editingSchedule ? handleUpdateSchedule() : handleAddSchedule();
+                                }}
                                 className="bg-blue-500 text-white px-4 py-2 rounded"
                             >
                                 {editingSchedule ? '수정' : '추가'}

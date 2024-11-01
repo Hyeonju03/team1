@@ -97,74 +97,74 @@ export default function Component() {
     };
 
     return (
-        // <div className="container mx-auto p-4 max-w-3xl shadow-md" style={{ height: "900px" }}>
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
+        // <div className="container mx-auto p-4">
+            <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
+                <h1 className=" text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
 
-            <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">회사정보</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {['검색어', '대표자명', '직원수', '결제상태'].map((placeholder, index) => {
-                        const field = placeholder === '검색어' ? 'keyword' :
-                            placeholder === '대표자명' ? 'ceo' :
-                                placeholder === '직원수' ? 'employeeCount' :
-                                    'paymentStatus';
-                        return (
-                            <div className="flex items-center" key={placeholder}>
-                                <Input onChange={(e) => categoryOnchangeHandler(e, field)} placeholder={placeholder}
-                                       className="mr-2"/>
-                                <Button onClick={categorysearchButton} size="icon" variant="outline"
-                                        className="flex justify-center items-center">
-                                    검색
-                                </Button>
-                            </div>
-                        );
-                    })}
+                <div className="mb-6 container mx-auto p-4">
+                    <h2 className="text-xl font-semibold mb-4">회사정보</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {['검색어', '대표자명', '직원수', '결제상태'].map((placeholder, index) => {
+                            const field = placeholder === '검색어' ? 'keyword' :
+                                placeholder === '대표자명' ? 'ceo' :
+                                    placeholder === '직원수' ? 'employeeCount' :
+                                        'paymentStatus';
+                            return (
+                                <div className="flex items-center" key={placeholder}>
+                                    <Input onChange={(e) => categoryOnchangeHandler(e, field)} placeholder={placeholder}
+                                           className="mr-2"/>
+                                    <Button onClick={categorysearchButton} size="icon" variant="outline"
+                                            className="flex justify-center items-center">
+                                        검색
+                                    </Button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <Button className="w-full" onClick={searchButton}>전체 검색하기</Button>
                 </div>
-                <Button className="w-full" onClick={searchButton}>전체 검색하기</Button>
-            </div>
 
-            <div>
-                <h3 className="text-lg font-semibold mb-2">검색결과</h3>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>기업명</TableHead>
-                            <TableHead>대표자명</TableHead>
-                            <TableHead>직원수</TableHead>
-                            <TableHead>등록일</TableHead>
-                            <TableHead>결제상태</TableHead>
-                            <TableHead>로그정보</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {searchResults.length > 0 ? (
-                            searchResults.map((item, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{item.companyName}</TableCell>
-                                    <TableCell>{item.ceo}</TableCell>
-                                    <TableCell>{item.employeeCount}</TableCell>
-                                    <TableCell>{item.registrationDate}</TableCell>
-                                    <TableCell>{item.paymentStatus}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            onClick={() => handleLogClick(item.companyName)} // 로그 정보를 클릭했을 때의 처리 함수
-                                            className="text-blue-500 border-2 border-gray-300  p-3"
-                                            variant="outline"
-                                        >
-                                            {item.logInfo}
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+                <div className="mb-6 container mx-auto p-4">
+                    <h3 className="text-lg font-semibold mb-2">검색결과</h3>
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center">검색 결과가 없습니다.</TableCell>
+                                <TableHead>기업명</TableHead>
+                                <TableHead>대표자명</TableHead>
+                                <TableHead>직원수</TableHead>
+                                <TableHead>등록일</TableHead>
+                                <TableHead>결제상태</TableHead>
+                                <TableHead>로그정보</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {searchResults.length > 0 ? (
+                                searchResults.map((item, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{item.companyName}</TableCell>
+                                        <TableCell>{item.ceo}</TableCell>
+                                        <TableCell>{item.employeeCount}</TableCell>
+                                        <TableCell>{item.registrationDate}</TableCell>
+                                        <TableCell>{item.paymentStatus}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                onClick={() => handleLogClick(item.companyName)} // 로그 정보를 클릭했을 때의 처리 함수
+                                                className="text-blue-500 border-2 border-gray-300  p-3"
+                                                variant="outline"
+                                            >
+                                                {item.logInfo}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center">검색 결과가 없습니다.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
-        </div>
-    );
-}
+            );
+            }

@@ -170,7 +170,7 @@ public class MailController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("selectDeleteList")
+    @GetMapping("/selectDeleteList")
     public ResponseEntity<List<MailDTO>> selectDeleteList(@RequestParam String empCode) {
         try {
             List<MailDTO> mails = mailMapper.selectDeleteMail(empCode);

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,5 +31,29 @@ public class CompanyController {
             response.put("message", "사용 등록 실패");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @GetMapping("/selectComList")
+    public List<CompanyDTO> selectComList(@RequestParam String comCode) {
+        return companyService.selectComList(comCode);
+    }
+
+    @PutMapping("/updateInfo")
+    public ResponseEntity<Void> updateInfo(@RequestBody List<CompanyDTO> companyDTOs) {
+        for (CompanyDTO companyDTO : companyDTOs) {
+            companyService.updateInfo(companyDTO);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/updateStatus")
+    public ResponseEntity<Void> updateStatus(@RequestParam String comCode) {
+        companyService.updateStatus(comCode);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/selectStatus")
+    public int selectStatus(@RequestParam String comCode) {
+        return  companyService.selectStatus(comCode);
     }
 }

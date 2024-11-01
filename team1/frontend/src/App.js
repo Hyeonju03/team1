@@ -31,11 +31,11 @@ import ToMeMailSendList from "./ToMeMailSendList";
 import AttachMentMailList from "./AttachMentMailList";
 import ToTalMailSendList from "./ToTalMailSendList";
 import ReceivedMailList from "./ReceivedMailList";
+import Authority from "./Authority";
+import CompanyInfo from "./CompanyInfo";
+import PaymentCom from "./PaymentCom";
 import DepartmentManagement from "./DepartmentManagement";
 import PositionManagement from "./PositionManagement";
-import NoticeDetail from "./NoticeDetail";
-import NoticeRegister from "./NoticeRegister";
-import NoticeList from "./NoticeList";
 import { AuthProvider } from "./noticeAuth";
 import AdminNoticeList from "./AdminNoticeList";
 import UserNoticeList from "./UserNoticeList";
@@ -82,6 +82,10 @@ function App() {
             <Route path="/userInfo" element={<UserInfo />} />
             <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest />} />
 
+            <Route path="/Authority" element={<Authority/>}/>
+
+            <Route path="/CompanyInfo" element={<CompanyInfo/>}/>
+            <Route path="/PaymentCom" element={<PaymentCom/>}/>
             <Route path="/ApplyForBusiness" element={<ApplyForBusiness />} />
 
             <Route path="/MailList" element={<MailList />} />

@@ -174,7 +174,7 @@ export default function EmailSend() {
 
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
             <div className="flex md:flex-row gap-6">
 
@@ -230,7 +230,7 @@ export default function EmailSend() {
                     />
                 </div>
                 {/* Main content */}
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-1 items-center " style={{marginLeft: "200px"}}>
                     <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
                         {!showConfirmation && (
                             <div>
