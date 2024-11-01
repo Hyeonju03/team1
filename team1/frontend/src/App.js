@@ -60,10 +60,7 @@ function App() {
             <Route path="/document/register" element={<DocumentRegister />} />
             <Route path="/documents/update/:id" element={<DocumentUpdate />} />
 
-            <Route path="/notices" element={<Notice />} />
-            <Route path="/apply" element={<ApplyForBusiness />} />
-
-            <Route path="/notice/list" exact element={<NoticeList />} />
+            <Route path="/notice/list" element={<NoticeList />} />
             <Route path="/notice/register" element={<NoticeRegister />} />
             <Route path="/notice/detail" element={<NoticeDetail />} />
 
