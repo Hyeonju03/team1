@@ -9,6 +9,7 @@
     "axios": "^1.7.7",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
+    "cors": "^2.8.5",
     "lucide-react": "^0.452.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
@@ -44,5 +45,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "tailwindcss": "^3.4.10"
   }
 }

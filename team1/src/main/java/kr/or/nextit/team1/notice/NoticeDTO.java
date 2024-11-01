@@ -1,62 +1,27 @@
 package kr.or.nextit.team1.notice;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class NoticeDTO {
 
-    private Long id;
+    private int noticeNum;
     private String title;
     private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime startDate;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // admininfo 테이블에서 가져올 컬럼
+    private String adminId; // 관리자 ID
 
-    public String getTitle() {
-        return title;
-    }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date date) {
-    }
-
-    public void setUpdatedAt(Date date) {
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
+    // employ 테이블에서 가져올 컬럼
+    private String empCode; // 직원 ID
 
 }
