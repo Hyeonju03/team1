@@ -16,10 +16,15 @@ import Schedule from "./Schedule";
 import SignList from "./SignList";
 import SignRequest from "./SignRequest";
 import UserInfo from "./UserInfo";
-import NoticeDetail from "./NoticeDetail";
-import NoticeRegister from "./NoticeRegister";
-import NoticeList from "./NoticeList";
+
+
+
 import { AuthProvider } from './noticeAuth';
+import AdminNoticeList from "./AdminNoticeList";
+import UserNoticeList from "./UserNoticeList";
+import AdminNoticeDetail from "./AdminNoticeDetail";
+import AdminNoticeRegister from "./AdminNoticeRegister";
+import UserNoticeDetail from "./UserNoticeDetail";
 
 
 function App() {
@@ -44,10 +49,12 @@ function App() {
                     <Route path="/document/register" element={<DocumentRegister/>}/>
 
 
-                      <Route path="/notice/list" exact element={<NoticeList/>} />
-                      <Route path="/notice/register" element={<NoticeRegister/>} />
-                      <Route path="/notice/detail" element={<NoticeDetail/>} />
+                    <Route path="/admin/notice/list" element={<AdminNoticeList/>} />
+                    <Route path="/admin/notice/register" element={<AdminNoticeRegister/>} />
+                    <Route path="/admin/notice/detail" element={<AdminNoticeDetail/>} />
 
+                    <Route path="/user/notice/list" element={<UserNoticeList/>} />
+                    <Route path="/user/notice/detail" element={<UserNoticeDetail/>} />
 
                     <Route path="/schedule" element={<Schedule />} />
 
