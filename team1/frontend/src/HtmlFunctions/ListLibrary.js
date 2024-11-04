@@ -586,6 +586,15 @@ class ListLibrary {
       </div>
     );
   }
+
+  static async chatIn(){
+    await axios
+        .get("/chatInSelect", { params: { code } })
+        .then((response) => {
+
+        })
+        .catch((error) => console.log(error));
+  }
 }
 
 window.ListLibrary = ListLibrary;
