@@ -47,7 +47,7 @@ public class SignService {
                 String generatedFileName = UUID.randomUUID().toString();
                 sign.setFileName(generatedFileName);
 
-                sign.setFileOriginalName(attachment.getOriginalFilename());
+                sign.setFileOriginName(attachment.getOriginalFilename());
                 sign.setFileSize(attachment.getSize());
             }
             mapper.signInsert(sign);
@@ -61,9 +61,9 @@ public class SignService {
     public String saveFile(MultipartFile file) throws Exception {
         String filePath = System.getProperty("user.home") + "/upload";
 
-        String originalFilenName = file.getOriginalFilename();
+        String originFilenName = file.getOriginalFilename();
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String fileName = timestamp + "_" + originalFilenName;
+        String fileName = timestamp + "_" + originFilenName;
 
         Path path = Paths.get(filePath, fileName);
 

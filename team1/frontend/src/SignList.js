@@ -21,11 +21,11 @@ export default function SignList() {
 
     const [rejectedCount, setRejectedCount] = useState(0); // 반려 문서 수 상태 추가
 
-    const empCode = "3118115625-bbb";
+    const empCode = "3148127227-user001";
 
     useEffect(() => {
         // doc리스트 가져오기
-        const comCode = 3118115625
+        const comCode = 3148127227
 
         axios.get(`/sign/${empCode}`)
             .then(response => {
@@ -37,7 +37,7 @@ export default function SignList() {
         // code 가져오기
         axios.get(`/code/${comCode} `)
             .then(response => {
-                console.log(response.data.signCateCode)
+                console.log(response.data)
                 const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
                 console.log("uniqueCategories::",uniqueCategories)
                 setCategories(uniqueCategories);
@@ -80,7 +80,7 @@ export default function SignList() {
         const {target} = detailResponse.data;
 
         // 현재 사용자의 empCode
-        const empCode = "3118115625-bbb"; // 실제 empCode로 변경
+        const empCode = "3148127227-user001"; // 실제 empCode로 변경
 
         // 기존 TARGET 값에서 현재 사용자의 empCode가 있는지 확인
         const targetEntries = target.split(',');
@@ -157,7 +157,7 @@ export default function SignList() {
     }
 
     const mineSignDoc = () => {
-        const filtered = documents.filter((document) => document.empCode == "3118115625-bbb");
+        const filtered = documents.filter((document) => document.empCode == "3148127227-user001");
         setFilteredDocuments(filtered);
         if (filtered.length === 0) {
             alert("본인이 작성한 문서가 없습니다.");
@@ -325,7 +325,7 @@ export default function SignList() {
                                 <th className="p-2 text-center">승인현황</th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="shadow-lg">
                             {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document, docIndex) => {
                                 const target = document.target
                                 return (

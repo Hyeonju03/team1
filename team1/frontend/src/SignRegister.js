@@ -18,8 +18,9 @@ export default function SignRegister() {
   const [newWindowData, setNewWindowData] = useState([]);
   const [noticeNum, setNoticeNum] = useState("");
   const { btnCtl, setBtnCtl } = useListLibrary();
-  const [user, setUser] = useState("3118115625-bbb");
-  const [com, setCom] = useState("3118115625");
+  const [user, setUser] = useState("3148127227-user001");
+  const [com, setCom] = useState("3148127227");
+
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
   const [loadNoticeHtml, setLoadNoticeHtml] = useState("");
@@ -37,9 +38,12 @@ export default function SignRegister() {
     //ListLibrary.dataTest3('3118115625-abcc','3118115625-qwer')
     //ListLibrary.dataTest4('3118115625-abcc','3118115625-qwer')
   };
+
+
   useEffect(() => {
     fetchData();
   }, [btnCtl]);
+
   useEffect(() => {
     const elements = document.querySelectorAll(".testEvent");
 
@@ -59,6 +63,7 @@ export default function SignRegister() {
       });
     };
   }, [noticeHtml, btnCtl]);
+
   useEffect(() => {
     const elements = document.querySelectorAll(".AddBtn");
     const btnElement = document.querySelector(".BtnAddressBookAdd");
@@ -113,7 +118,11 @@ export default function SignRegister() {
     };
   }, [addressBookHtml, btnCtl]);
 
+
+  // 왼쪽 카테고리
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [rejectedCount, setRejectedCount] = useState(0); // 반려 문서 수 상태 추가
+  const [isCategoriExpanded, setIsCategoriExpanded] = useState(false);
 
   // 카테고리
   const [category, setCategory] = useState(location.state?.selectCategory || "");
@@ -127,7 +136,7 @@ export default function SignRegister() {
   const [content, setContent] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
-  const empCode = "3118115625-bbb";
+  const empCode = "3148127227-user001";
 
   // 양식 사용하면
   const [companyName, setCompanyName] = useState("");
@@ -162,7 +171,7 @@ export default function SignRegister() {
   // 카테고리 불러오기
   useEffect(() => {
     // 나중에 지금 로그인 한 사원의 코드를 받아와서 split해줘야함 <<<<<<<<<<<<<<<<<<<
-    const comCode = 3118115625;
+    const comCode = 3148127227;
 
     axios
       .get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
@@ -187,6 +196,20 @@ export default function SignRegister() {
         },
       ]);
     });
+
+    axios.get(`/sign/${empCode}`)
+        .then(response => {
+          let count = 0;
+          response.data.map((data, index) => {
+            if (data.empCode === empCode) {
+              if (data.target.includes("반려")) {
+                count += 1;
+              }
+            }
+          })
+          setRejectedCount(count)
+        })
+        .catch(error => console.log(error));
   }, []);
 
   useEffect(() => {
@@ -249,8 +272,7 @@ export default function SignRegister() {
   const goClose = (param) => {
     setOpenTarget(false);
     if (param) {
-      console.log(param);
-      setUserInfo([...userInfo, ...param]);
+      setUserInfo([userInfo[0] ,...param]);
     }
   };
 
@@ -345,6 +367,7 @@ export default function SignRegister() {
 
       if (success) {
         // 성공 시 문서 리스트로 이동
+        alert("성공적으로 저장되었습니다.")
         navigate("/sign");
       } else {
         return;
@@ -371,7 +394,7 @@ export default function SignRegister() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100" onContextMenu={windowRClick}>
+    <div className="min-h-screen flex flex-col" onContextMenu={windowRClick}>
       {/* Header with logo */}
       <header className="bg-gray-200 p-4">
         <h1 className="text-2xl font-bold text-center">로고</h1>
@@ -383,10 +406,64 @@ export default function SignRegister() {
           <ol>
             <li>
               <div>
-                <button className={`w-full flex items-center transition-colors duration-300`} onClick={handleHome}>
-                  <ChevronRight className="mr-2 h-4 w-4" />
+                <button
+                    className={`w-full flex items-center transition-colors duration-300`}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                      <ChevronRight className="mr-2 h-4 w-4"/>}
                   <span className="hover:underline">결재함</span>
+
                 </button>
+                {isExpanded && (
+                    <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                      <li>
+                        <div>
+                          <button className="w-full flex items-center">
+                            <ChevronRight className="mr-2 h-4 w-4"/>
+                            <div className="hover:underline" onClick={() => navigate("/sign")}>전체 보기</div>
+                          </button>
+                        </div>
+                      </li>
+                      <li>
+                        <div>
+                          <button className="w-full flex items-center"
+                                  onClick={() => setIsCategoriExpanded(!isCategoriExpanded)}>
+                            {isCategoriExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                <ChevronRight className="mr-2 h-4 w-4"/>}
+                            <div className="hover:underline">카테고리</div>
+                          </button>
+                          {isCategoriExpanded && (
+                              categories.map((category, index) => (
+                                  // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
+                                  category.split(',').map((item, subIndex) => (
+                                      <li className={`text-left transition-colors duration-300`}>
+                                        <div className="flex">
+                                          <ChevronRight className="ml-4 mr-2 h-4 w-4"/>
+                                          <button key={`${index}-${subIndex}`}
+                                                  className="hover:underline">
+                                            {item}
+                                          </button>
+                                        </div>
+                                      </li>
+                                  ))
+                              ))
+                          )}
+                        </div>
+                      </li>
+                      <li>
+                        <div className="flex justify-between">
+                          <button className="w-full flex items-center">
+                            <ChevronRight className="mr-2 h-4 w-4"/>
+                            <div className="hover:underline">내 결재함</div>
+                          </button>
+                          {rejectedCount > 0 &&
+                              <span
+                                  className="bg-red-700 text-white rounded-full w-6">{rejectedCount}</span>}
+                        </div>
+                      </li>
+                    </div>
+                )}
               </div>
             </li>
           </ol>
@@ -403,15 +480,15 @@ export default function SignRegister() {
             <div className="flex justify-between w-[350px] mb-4">
               <div className={`${isToggled ? "" : "font-bold"}`}>파일만 첨부하기</div>
               <p
-                className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${
-                  isToggled ? "on bg-blue-300" : "off"
-                }`}
-                onClick={handleToggle}
+                  className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${
+                      isToggled ? "on bg-blue-300" : "off"
+                  }`}
+                  onClick={handleToggle}
               >
                 <div
-                  className={`w-[25px] h-[23px] rounded-full bg-blue-600 absolute top-[1px] ${
-                    isToggled ? "right-[3px]" : "left-[3px] border-blue-600"
-                  }`}
+                    className={`w-[25px] h-[23px] rounded-full bg-blue-600 absolute top-[1px] ${
+                        isToggled ? "right-[3px]" : "left-[3px] border-blue-600"
+                    }`}
                 ></div>
               </p>
               <div className={`${isToggled ? "font-bold" : ""}`}>제공된 양식 사용하기</div>
@@ -425,68 +502,72 @@ export default function SignRegister() {
                   <fieldset className="mr-2">
                     {/*<legend>카테고리</legend>*/}
                     <div>
-                      <select name="category" value={category} onChange={(e) => setCategory(e.target.value)} className="border rounded p-2">
+                      <select name="category" value={category} onChange={(e) => setCategory(e.target.value)}
+                              className="border rounded p-2">
                         <option value="">카테고리</option>
                         {categories.map((category, index) =>
-                          category.split(",").map((item, subIndex) => (
-                            <option key={subIndex} value={item}>
-                              {item}
-                            </option>
-                          ))
+                            category.split(",").map((item, subIndex) => (
+                                <option key={subIndex} value={item}>
+                                  {item}
+                                </option>
+                            ))
                         )}
                       </select>
                     </div>
                   </fieldset>
 
                   <input
-                    type="text"
-                    className="w-[1087px] p-2 border rounded mb-2"
-                    placeholder="제목을 입력하세요"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                      type="text"
+                      className="w-[1087px] p-2 border rounded mb-2"
+                      placeholder="제목을 입력하세요"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
-                {openTarget ? <SignTarget onClose={goClose} empCode={empCode} /> : null}
+                {openTarget ? <SignTarget onClose={goClose} empCode={empCode}/> : null}
 
                 {isToggled ? (
-                  <form>
-                    <div className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
-                      {/* 내용 추가 가능 */}
-                      {/*  회사명, 결재라인  */}
-                      <table className="h-[178px]">
-                        <tr>
-                          <td className="w-[500px] text-2xl">
-                            <input
-                              name="companyName"
+                    <form>
+                      <div
+                          className="h-[1697px] w-[1200px] flex flex-col justify-center items-center border-black border-2 px-6 py-12 mb-4">
+                        {/* 내용 추가 가능 */}
+                        {/*  회사명, 결재라인  */}
+                        <table className="h-[178px]">
+                          <tr>
+                            <td className="w-[500px] text-2xl">
+                              <input
+                                  name="companyName"
+                                  type="text"
+                                  placeholder="기업명"
+                                  className="text-center h-[100px] w-[450px] text-2xl"
+                                  onChange={(e) => setCompanyName(e.target.value)}
+                              />
+                            </td>
+                            <td className="w-[500px] flex flex-row justify-center mt-5">
+                              {userInfo.map((user, index) => {
+                                return (
+                                    <div className="flex flex-col justify-center w-[80px] border-2 border-black">
+                                      <div
+                                          className="h-[30px] bg-gray-200">{user.sign == "미승인" ? "승인" : user.sign}</div>
+                                      <div
+                                          className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
+                                        <div>{user.name}</div>
+                                        <div>{user.sign}</div>
+                                      </div>
+                                      {/*  결재자 있으면 추가 작성되게 하기  */}
+                                    </div>
+                                );
+                              })}
+                            </td>
+                          </tr>
+                        </table>
+                        {/*    */}
+                        <div className="mt-[20px]">
+                          <input
+                              name="companyAddress"
                               type="text"
-                              placeholder="기업명"
-                              className="text-center h-[100px] w-[450px] text-2xl"
-                              onChange={(e) => setCompanyName(e.target.value)}
-                            />
-                          </td>
-                          <td className="w-[500px] flex flex-row justify-center mt-5">
-                            {userInfo.map((user, index) => {
-                              return (
-                                <div className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                  <div className="h-[30px] bg-gray-200">{user.sign == "미승인" ? "승인" : user.sign}</div>
-                                  <div className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
-                                    <div>{user.name}</div>
-                                    <div>{user.sign}</div>
-                                  </div>
-                                  {/*  결재자 있으면 추가 작성되게 하기  */}
-                                </div>
-                              );
-                            })}
-                          </td>
-                        </tr>
-                      </table>
-                      {/*    */}
-                      <div className="mt-[20px]">
-                        <input
-                          name="companyAddress"
-                          type="text"
-                          placeholder="주소"
-                          className="text-center h-[50px] w-[900px] text-lg"
+                              placeholder="주소"
+                              className="text-center h-[50px] w-[900px] text-lg"
                           onChange={(e) => setCompanyAddress(e.target.value)}
                         />
                       </div>
@@ -715,7 +796,7 @@ export default function SignRegister() {
                   <div className="rounded bg-amber-100 mt-2 p-3 text-left">
                     <div className="mb-2">
                       <span className="font-bold">필수 입력 요소</span>
-                      <br />- 결재선(본인 제외 최대 5명), 카테고리, 제목, 내용
+                      <br />- 결재선(본인 제외 최대 3명), 카테고리, 제목, 내용
                     </div>
                     <div>
                       <span className="font-bold">양식 사용시 필수 입력 요소</span>

@@ -19,6 +19,8 @@ export default function SignDetail() {
     const [loading, setLoading] = useState(true);
     const [userInfo, setUserInfo] = useState([]); // useState로 변경
     const [user, setUser] = useState(null);
+    const [isCategoriExpanded, setIsCategoriExpanded] = useState(false);
+    const [rejectedCount, setRejectedCount] = useState(0); // 반려 문서 수 상태 추가
     let contentType;
 
     // confirm 오류로 만든 modal 관련
@@ -26,8 +28,8 @@ export default function SignDetail() {
     const [currentAction, setCurrentAction] = useState(null);
     const [modalMessage, setModalMessage] = useState("");
 
-    const empCode = "3118115625-aaa";
-    const comCode = "3118115625";
+    const empCode = "3148127227-user001";
+    const comCode = "3148127227";
 
     // pdf제작
     const handleDownloadPdf = async () => {
@@ -68,6 +70,23 @@ export default function SignDetail() {
         fetchUserDetails();
         fetchSignContent();
     }, [sign]);
+
+    useEffect(() => {
+        axios.get(`/sign/${empCode}`)
+            .then(response => {
+                let count = 0;
+                response.data.map((data, index) => {
+                    if (data.empCode === empCode) {
+                        if (data.target.includes("반려")) {
+                            count += 1;
+                        }
+                    }
+                })
+                setRejectedCount(count)
+            })
+            .catch(error => console.log(error));
+
+    }, [empCode]);
 
     // 유저 정보 조회 (필요성 재확인 필요.)
     const fetchUserInfo = async () => {
@@ -210,7 +229,7 @@ export default function SignDetail() {
 
     // 승인버튼
     const asignButton = (signNum) => {
-        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const targetEntries = sign.target.split(',');
 
         targetEntries.map((entry, index) => {
@@ -241,7 +260,7 @@ export default function SignDetail() {
     };
 
     const handleAsign = async (signNum, targetEntries) => {
-        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const updatedTargetEntries = targetEntries.map((entry) => {
             const [code, status] = entry.split(':');
             if (code === empCode) {
@@ -256,7 +275,7 @@ export default function SignDetail() {
 
     // 반려 버튼
     const rejectButton = (signNum) => {
-        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const targetEntries = sign.target.split(',');
 
         const updatedTargetEntries = targetEntries.map((entry, index) => {
@@ -287,7 +306,7 @@ export default function SignDetail() {
     };
 
     const handleReject = async (signNum, targetEntries) => {
-        const empCode = "3118115625-aaa"; // 실제 empCode로 변경
+        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const updatedTargetEntries = targetEntries.map((entry) => {
             const [code] = entry.split(':');
             if (code === empCode) {
@@ -300,6 +319,7 @@ export default function SignDetail() {
         await handleSignUpdate(signNum, updatedTarget); // DB 업데이트
 
     };
+
 
     // 목록으로
     const handleHome = () => {
@@ -320,10 +340,62 @@ export default function SignDetail() {
                             <div>
                                 <button
                                     className={`w-full flex items-center transition-colors duration-300`}
-                                    onClick={handleHome}>
-                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                    onClick={() => setIsExpanded(!isExpanded)}
+                                >
+                                    {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                        <ChevronRight className="mr-2 h-4 w-4"/>}
                                     <span className="hover:underline">결재함</span>
+
                                 </button>
+                                {isExpanded && (
+                                    <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                        <li>
+                                            <div>
+                                                <button className="w-full flex items-center">
+                                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                                    <div className="hover:underline" onClick={() => navigate("/sign")}>전체 보기</div>
+                                                </button>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <button className="w-full flex items-center"
+                                                        onClick={() => setIsCategoriExpanded(!isCategoriExpanded)}>
+                                                    {isCategoriExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                                        <ChevronRight className="mr-2 h-4 w-4"/>}
+                                                    <div className="hover:underline">카테고리</div>
+                                                </button>
+                                                {isCategoriExpanded && (
+                                                    categories.map((category, index) => (
+                                                        // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
+                                                        category.split(',').map((item, subIndex) => (
+                                                            <li className={`text-left transition-colors duration-300`}>
+                                                                <div className="flex">
+                                                                    <ChevronRight className="ml-4 mr-2 h-4 w-4"/>
+                                                                    <button key={`${index}-${subIndex}`}
+                                                                            className="hover:underline">
+                                                                        {item}
+                                                                    </button>
+                                                                </div>
+                                                            </li>
+                                                        ))
+                                                    ))
+                                                )}
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div className="flex justify-between">
+                                                <button className="w-full flex items-center">
+                                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                                    <div className="hover:underline">내 결재함</div>
+                                                </button>
+                                                {rejectedCount > 0 &&
+                                                    <span
+                                                        className="bg-red-700 text-white rounded-full w-6">{rejectedCount}</span>}
+                                            </div>
+                                        </li>
+                                    </div>
+                                )}
                             </div>
                         </li>
                     </ol>
@@ -520,11 +592,11 @@ export default function SignDetail() {
                                                 <div>
                                                     <input name="docCeo" type='textbox'
                                                            className="text-center h-[100px] w-[300px] text-2xl"
-                                                           value={sign.content.split("_")[12].split(":")[0] == "docDate" ?
+                                                           value={sign.content.split("_")[12].split(":")[0] == "docCeo" ?
                                                                (sign.content.split("_")[12].split(":")[1]) :
-                                                               (sign.content.split("_")[13].split(":")[0] == "docDate" ?
+                                                               (sign.content.split("_")[13].split(":")[0] == "docCeo" ?
                                                                    sign.content.split("_")[13].split(":")[1] :
-                                                                   (sign.content.split("_")[14].split(":")[0] == "docDate" ?
+                                                                   (sign.content.split("_")[14].split(":")[0] == "docCeo" ?
                                                                        sign.content.split("_")[14].split(":")[1] :
                                                                        sign.content.split("_")[15].split(":")[1]))}
                                                            readOnly/>
@@ -592,7 +664,7 @@ export default function SignDetail() {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px]"
+                        <button className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px] ${empCode == sign.empCode ? "hidden": ""}`}
                                 onClick={() => asignButton(sign.signNum)}
                         >
                             결재승인
@@ -601,7 +673,7 @@ export default function SignDetail() {
                                 onClick={handleHome}>
                             목록으로
                         </button>
-                        <button className="bg-red-700 text-white px-6 py-2 rounded hover:bg-red-900 ml-[5px]"
+                        <button className={`bg-red-700 text-white px-6 py-2 rounded hover:bg-red-900 ml-[5px] ${empCode == sign.empCode ? "hidden": ""}`}
                                 onClick={() => rejectButton(sign.signNum)}>
                             결재반려
                         </button>
