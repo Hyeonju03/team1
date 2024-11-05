@@ -19,7 +19,7 @@ public class UserNoticeController {
 
 
     //  공지사항을 리스트
-    @GetMapping("/api/user/notice/list")
+    @GetMapping("/api/usernotice")
     public ResponseEntity<List<NoticeDTO>> noticeList(HttpServletRequest request) {
 
         List<NoticeDTO> notices = noticeService.noticeList();
@@ -27,7 +27,7 @@ public class UserNoticeController {
     }
 
     // 상세보기 (모든 사용자 가능)
-    @GetMapping("/api/user/notice/detail/{noticeNum}")
+    @GetMapping("/api/usernotice/detail/{noticeNum}")
     public ResponseEntity<NoticeDTO> getNotice(@PathVariable int noticeNum) {
         NoticeDTO notice = noticeService.getNotice(noticeNum);
         return ResponseEntity.ok(notice);

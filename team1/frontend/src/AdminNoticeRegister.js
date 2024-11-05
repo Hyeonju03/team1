@@ -20,8 +20,8 @@ const AdminNoticeRegister = () => {
         console.log(formData); // 추가: 전송할 데이터 확인
         try {
             // 백엔드(DB)로 데이터 저장
-            await axios.post("/api/admin/notice/register", formData);
-            navigate("/admin/notice/list"); // 등록 완료 후 리스트 페이지로 이동
+            await axios.post("/api/adminnotice/register", formData);
+            navigate("/adminnotice"); // 등록 완료 후 리스트 페이지로 이동
         } catch (error) {
             console.error("등록 중 오류 발생:", error);
         }
@@ -29,13 +29,13 @@ const AdminNoticeRegister = () => {
 
     // 등록 취소 버튼 함수
     const handleCancel = () => {
-        navigate("/admin/notice/list"); // 리스트 페이지로 이동
+        navigate("/adminnotice"); // 리스트 페이지로 이동
     };
 
     // 로그아웃 함수
     const handleLogout = () => {
         logout(); // 로그아웃 처리
-        navigate('/admin/notice/list'); // 리스트 페이지로 이동
+        navigate('/adminnotice'); // 리스트 페이지로 이동
     };
 
     return (

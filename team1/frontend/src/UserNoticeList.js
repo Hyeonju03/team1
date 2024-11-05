@@ -21,7 +21,7 @@ const UserNoticeList = () => {
     // 공지사항을 가져오는 함수
     const fetchNotices = async () => {
         try {
-            const response = await axios.get(`/api/user/notice/list`, {
+            const response = await axios.get(`/api/usernotice`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setNotices(response.data); // DB 데이터로 공지사항 목록 업데이트
@@ -51,8 +51,12 @@ const UserNoticeList = () => {
             );
 
             if (response.data.success) {
-                login(inputId, response.data.role, response.data.token); // 인증 처리
-                navigate('/user/notice/list'); // 로그인 후 공지사항 리스트 페이지로 이동
+                login(inputId, response.data.role, response.data.token); // 역할과 토큰 추가
+                localStorage.setItem('adminId', inputId); // 로그인 정보 로컬 스토리지에 저장
+                localStorage.setItem('token', response.data.token);
+                setInputId(""); // 아이디 입력 필드 초기화
+                setInputPassword(""); // 비밀번호 입력 필드 초기화
+                navigate('/usernotice'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
             } else {
                 setError("유효하지 않은 로그인 정보입니다.");
             }
@@ -65,8 +69,12 @@ const UserNoticeList = () => {
     const handleLogout = async () => {
         try {
             await axios.post('/api/employ/logout');
+            localStorage.removeItem('adminId'); // ID 제거
+            localStorage.removeItem('token'); // 토큰 제거
+            setInputId(""); // 아이디 입력 필드 초기화
+            setInputPassword(""); // 비밀번호 입력 필드 초기화
             logout(); // 로그아웃 호출
-            navigate('/user/notice/list'); // 리스트 페이지로 이동
+            navigate('/usernotice'); // 리스트 페이지로 이동
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
@@ -74,7 +82,7 @@ const UserNoticeList = () => {
 
     // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
     const handleNoticeClick = (noticeNum) => {
-        navigate('/user/notice/detail', { state: { noticeNum } });
+        navigate('/usernotice/detail', { state: { noticeNum } });
     };
 
     // 필터링된 공지사항 가져오기 (검색창)
@@ -84,6 +92,9 @@ const UserNoticeList = () => {
             : notice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             notice.content.toLowerCase().includes(searchQuery.toLowerCase());
     });
+
+    const filteredCount = filteredNotices.length; // 필터링된 공지사항 수
+    const total = Math.ceil(filteredCount / PAGE_SIZE); // 총 페이지 수를 필터링된 공지사항 수에 기반하여 계산
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -143,14 +154,18 @@ const UserNoticeList = () => {
                         </div>
 
                         <div className="flex justify-between items-center w-full mt-4 md:w-4/5 lg:w-3/4 mx-auto">
+                            {currentPage > 1 && filteredCount > 0 && ( // '이전' 버튼 숨기기 조건
                             <button
                                 onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
                                 className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
                             >
                                 이전
                             </button>
+                            )}
+
                             <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span>
+
+                            {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                             <button
                                 onClick={() => setCurrentPage(currentPage + 1)}
                                 disabled={currentPage === totalPages}
@@ -158,6 +173,7 @@ const UserNoticeList = () => {
                             >
                                 다음
                             </button>
+                            )}
                         </div>
                     </div>
                 </main>

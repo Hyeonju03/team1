@@ -17,12 +17,12 @@ const UserNoticeDetail = () => {
         const fetchNotice = async () => {
             if (!noticeNum) {
                 console.error("noticeNum이 없습니다.");
-                navigate('/user/notice/list');
+                navigate('/usernotice');
                 return;
             }
 
             try {
-                const response = await axios.get(`/api/user/notice/detail/${noticeNum}`, config);
+                const response = await axios.get(`/api/usernotice/detail/${noticeNum}`, config);
                 setNotice(response.data);
             } catch (error) {
                 console.error("공지사항을 가져오는 중 오류 발생:", error);
@@ -49,7 +49,7 @@ const UserNoticeDetail = () => {
                 login(inputId, response.data.role, response.data.token); // 로그인 상태 업데이트
                 localStorage.setItem('empCode', inputId);
                 localStorage.setItem('token', response.data.token);
-                navigate('/user/notice/list'); // 로그인 후 페이지 이동
+                navigate('/usernotice'); // 로그인 후 페이지 이동
             } else {
                 alert("유효하지 않은 로그인 정보입니다.");
             }
@@ -60,7 +60,7 @@ const UserNoticeDetail = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/user/notice/list');
+        navigate('/usernotice');
     };
 
     return (
@@ -87,7 +87,7 @@ const UserNoticeDetail = () => {
                                         작성일: <span className="font-semibold text-indigo-600">{new Date(notice.startDate).toLocaleString()}</span>
                                     </p>
                                     <div className="flex justify-end mt-4">
-                                        <button onClick={() => navigate('/user/notice/list')}
+                                        <button onClick={() => navigate('/usernotice')}
                                                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">목록
                                         </button>
                                     </div>

@@ -9,6 +9,7 @@ import LogList from "./LogList";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SignUpForm from "./SignUp";
 import DocumentList from "./DocumentList";
+
 import DocumentDetail from "./DocumentDetail";
 import DocumentRegister from "./DocumentRegister";
 import ApplyForBusiness from "./ApplyForBusiness";
@@ -44,6 +45,8 @@ import AdminNoticeRegister from "./AdminNoticeRegister";
 import UserNoticeDetail from "./UserNoticeDetail";
 import { ListLibraryProvider } from "./Context/ListLibraryContext";
 
+
+
 function App() {
   return (
     <ListLibraryProvider>
@@ -73,12 +76,13 @@ function App() {
 
               <Route path="/sign" element={<SignList />} />
               <Route path="/sign/register" element={<SignRegister />} />
-              <Route path="/admin/notice/list" element={<AdminNoticeList />} />
-              <Route path="/admin/notice/register" element={<AdminNoticeRegister />} />
-              <Route path="/admin/notice/detail" element={<AdminNoticeDetail />} />
 
-              <Route path="/user/notice/list" element={<UserNoticeList />} />
-              <Route path="/user/notice/detail" element={<UserNoticeDetail />} />
+              <Route path="/adminnotice" element={<AdminNoticeList />} />
+              <Route path="/adminnotice/register" element={<AdminNoticeRegister />} />
+              <Route path="/adminnotice/detail" element={<AdminNoticeDetail />} />
+
+              <Route path="/usernotice" element={<UserNoticeList />} />
+              <Route path="/usernotice/detail" element={<UserNoticeDetail />} />
 
               <Route path="/userInfo" element={<UserInfo />} />
               <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest />} />
@@ -87,6 +91,7 @@ function App() {
 
               <Route path="/CompanyInfo" element={<CompanyInfo />} />
               <Route path="/PaymentCom" element={<PaymentCom />} />
+
               <Route path="/ApplyForBusiness" element={<ApplyForBusiness />} />
 
               <Route path="/MailList" element={<MailList />} />
