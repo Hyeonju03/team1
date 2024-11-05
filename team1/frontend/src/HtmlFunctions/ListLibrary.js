@@ -587,11 +587,40 @@ class ListLibrary {
     );
   }
 
-  static async chatIn(){
-    await axios
-        .get("/chatInSelect", { params: { code } })
-        .then((response) => {
+  static async chatIn(code,chatNum){
 
+    return (`
+        <ul class="pb-2 flex flex-col justify-start">
+          <li>상대방이름</li>
+          <li class="ml-5 inline-block border px-3 py-2 max-w-max">대화내용</li>
+        </ul>
+        
+        <ul class="pb-2 flex flex-col justify-start items-end">
+          <li>상대방이름</li>
+          <li class="mr-5 inline-block border px-3 py-2 max-w-max">대화내용</li>
+        </ul>
+    `)
+  }
+  static async chatDataSet(chatNum){
+    await axios
+        .get("/chatInSelect1", { params: { chatNum } })
+        .then((response) => {
+          //content
+          console.log(response.data)
+        })
+        .catch((error) => console.log(error));
+    await axios
+        .get("/chatInSelect2", { params: { chatNum } })
+        .then((response) => {
+          //memList
+          console.log(response.data)
+        })
+        .catch((error) => console.log(error));
+    await axios
+        .get("/chatInSelect3", { params: { chatNum } })
+        .then((response) => {
+          //speaker
+          console.log(response.data)
         })
         .catch((error) => console.log(error));
   }

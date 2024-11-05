@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,7 @@ public class ListLibraryController {
         }
         return ResponseEntity.ok(list);
     }
+
     @GetMapping("/loadNoticeSelect")
     public ResponseEntity<List<String>[]> loadNoticeSelect(String code) {
         List<ListLibraryDTO> data = listLibraryService.loadNoticeSelect(code);
@@ -103,19 +105,12 @@ public class ListLibraryController {
         }
         return ResponseEntity.ok(list);
     }
+
     @PostMapping("/noticeUpdate")
     public ResponseEntity<Void> noticeUpdate(@RequestBody Map<String, Object> data) {
         listLibraryService.noticeUpdate(data);
         return ResponseEntity.ok().build();
     }
-
-
-
-
-
-
-
-
 
     @GetMapping("/addressBookSelect")
     public ResponseEntity<List<String>[]> addressBookSelect(String code, String keyWord) {
@@ -135,6 +130,7 @@ public class ListLibraryController {
         }
         return ResponseEntity.ok(list);
     }
+
     @GetMapping("/addressBookListSelect")
     public ResponseEntity<List<String>[]> addressBookListSelect(String code) {
         List<ListLibraryDTO> data = listLibraryService.addressBookListSelect(code);
@@ -148,14 +144,47 @@ public class ListLibraryController {
         }
         return ResponseEntity.ok(list);
     }
+
     @PostMapping("/addressBookAdd")
     public ResponseEntity<Void> addressBookAdd(@RequestBody Map<String, Object> data) {
         listLibraryService.addressBookAdd(data);
         return ResponseEntity.ok().build();
     }
+
     @PostMapping("/addressBookDelete")
     public ResponseEntity<Void> addressBookDelete(@RequestBody Map<String, Object> data) {
         listLibraryService.addressBookDelete(data);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/chatInSelect1")
+    public ResponseEntity<List<List<String>>[]> chatInSelect1(String chatNum) {
+        List<ListLibraryDTO> data = listLibraryService.chatInSelect1(chatNum);
+        List<List<String>>[] list = new ArrayList[4];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        String[] splitData1 =  data.get(0).getContent().split(",");
+        for (int i = 0; i < splitData1.length; i++) {
+            String splitData3 = splitData1[i].substring(0,splitData1[0].indexOf(':'));
+            String[] splitData4 = splitData1[i].substring(splitData1[0].indexOf(':')+1).split("_");
+            list[0].add(List.of(splitData3));
+            list[1].add(List.of(splitData4[0]));
+            list[2].add(List.of(splitData4[1]));
+            list[3].add(List.of(Arrays.copyOfRange(splitData4, 2, splitData4.length)));
+        }
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/chatInSelect2")
+    public ResponseEntity<String[]> chatInSelect2(String chatNum) {
+        List<ListLibraryDTO> data = listLibraryService.chatInSelect2(chatNum);
+        return ResponseEntity.ok(data.get(0).getMemList().split(","));
+    }
+
+    @GetMapping("/chatInSelect3")
+    public ResponseEntity<String> chatInSelect3(String chatNum) {
+        List<ListLibraryDTO> data = listLibraryService.chatInSelect3(chatNum);
+        return ResponseEntity.ok(data.get(0).getSpeaker());
     }
 }

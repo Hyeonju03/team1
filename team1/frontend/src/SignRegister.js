@@ -18,12 +18,13 @@ export default function SignRegister() {
   const [newWindowData, setNewWindowData] = useState([]);
   const [noticeNum, setNoticeNum] = useState("");
   const { btnCtl, setBtnCtl } = useListLibrary();
-  const [user, setUser] = useState("3118115625-bbb");
-  const [com, setCom] = useState("3118115625");
+  const [user, setUser] = useState("3128143575-alpha001");
+  const [com, setCom] = useState("3128143575");
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
   const [loadNoticeHtml, setLoadNoticeHtml] = useState("");
   const [addressBookHtml, setAddressBookHtml] = useState("");
+  const [chatInHTML, setChatInHTML] = useState("");
   const fetchData = async () => {
     const result1 = await ListLibrary.noticeList(user, btnCtl);
     setNoticeHtml(result1);
@@ -31,11 +32,9 @@ export default function SignRegister() {
     setLoadNoticeHtml(result2);
     const result3 = await ListLibrary.addressBook(user, "");
     setAddressBookHtml(result3);
+    const result4 = await ListLibrary.chatIn(user,'1')
+    setChatInHTML(result4);
 
-    //ListLibrary.dataTest1('3118115625-abcc')
-    //ListLibrary.dataTest2('3118115625-qwer')
-    //ListLibrary.dataTest3('3118115625-abcc','3118115625-qwer')
-    //ListLibrary.dataTest4('3118115625-abcc','3118115625-qwer')
   };
   useEffect(() => {
     fetchData();
@@ -71,7 +70,6 @@ export default function SignRegister() {
         setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
       }
     };
-
     const addBtnClick = async (e) => {
       if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value, InputAddressBookAdd[1].value)) {
         if (!(await ListLibrary.addressEmpAddSelect(user, InputAddressBookAdd[0].value))) {
@@ -84,7 +82,6 @@ export default function SignRegister() {
         alert("정보가 일치하지 않습니다");
       }
     };
-
     const handleClick = async (e) => {
       await ListLibrary.addressBookDelete(e.currentTarget.parentNode.parentNode.id.replace("Add", ""), user);
       setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
@@ -112,6 +109,12 @@ export default function SignRegister() {
       }
     };
   }, [addressBookHtml, btnCtl]);
+  useEffect(() => {
+    //채팅 내부 이벤트들
+  }, [chatInHTML, btnCtl]);
+
+
+
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -127,7 +130,7 @@ export default function SignRegister() {
   const [content, setContent] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
-  const empCode = "3118115625-bbb";
+  const empCode = "3128143575-alpha001";
 
   // 양식 사용하면
   const [companyName, setCompanyName] = useState("");
@@ -162,7 +165,7 @@ export default function SignRegister() {
   // 카테고리 불러오기
   useEffect(() => {
     // 나중에 지금 로그인 한 사원의 코드를 받아와서 split해줘야함 <<<<<<<<<<<<<<<<<<<
-    const comCode = 3118115625;
+    const comCode = 3128143575;
 
     axios
       .get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
@@ -800,7 +803,7 @@ export default function SignRegister() {
                 <>
                   <div className="h-[100%] overflow-y-auto">
                     <div className="border flex justify-between">
-                      <button>대화방</button>
+                      <button onClick={()=>setBtnCtl(4)}>대화방</button>
                       <button>나가기</button>
                     </div>
                   </div>
@@ -821,47 +824,18 @@ export default function SignRegister() {
                 </>
               ) : btnCtl === 4 ? (
                 <>
-                  <div className="h-[480px] overflow-y-auto">
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="text-right pb-2">
-                      사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
-                    <ul className="pb-2">
-                      상대방이름 <li className="pl-4">대화내용 </li>
-                    </ul>
+                  <div className="h-[383px] overflow-y-auto">
+                    <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                  </div>
+                  <div className="w-[100%] h-[50px] flex">
+                    <input className="w-[70%] border chatInput" />
+                    <button className="w-[30%] border flex justify-center items-center" onClick={()=>{
+                      console.log(document.querySelector('.chatInput').value)
+                    }}>입력</button>
                   </div>
                 </>
               ) : btnCtl === 5 ? (
-                <>
+                  <>
                   <div dangerouslySetInnerHTML={{ __html: loadNoticeHtml }} />
                   <div>
                     <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(3)}>

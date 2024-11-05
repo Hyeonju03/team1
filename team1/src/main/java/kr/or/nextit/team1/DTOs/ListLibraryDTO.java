@@ -24,4 +24,6 @@ public class ListLibraryDTO {
     private String targetState;
     private String posCode;
     private String empAdd;
+    private String speaker;
+    private String memList;
 }

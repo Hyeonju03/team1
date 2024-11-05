@@ -43,7 +43,7 @@ import AdminNoticeDetail from "./AdminNoticeDetail";
 import AdminNoticeRegister from "./AdminNoticeRegister";
 import UserNoticeDetail from "./UserNoticeDetail";
 import { ListLibraryProvider } from "./Context/ListLibraryContext";
-
+import ChatTestPage from "./HtmlFunctions/ChatTestPage";
 function App() {
   return (
     <ListLibraryProvider>
@@ -51,6 +51,8 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
+              <Route path="/chatTest" element={<ChatTestPage />}/>
+
               <Route path="/main" element={<Main />}></Route>
               <Route path="/SignUp" element={<SignUpForm />} />
               <Route path="/" element={<Main />} />

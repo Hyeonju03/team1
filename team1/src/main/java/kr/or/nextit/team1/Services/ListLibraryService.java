@@ -47,4 +47,7 @@ public class ListLibraryService {
         listLibraryMapper.addressBookDelete(data);
     }
 
+    public List<ListLibraryDTO> chatInSelect1(String chatNum){return listLibraryMapper.chatInSelect1(chatNum);}
+    public List<ListLibraryDTO> chatInSelect2(String chatNum){return listLibraryMapper.chatInSelect2(chatNum);}
+    public List<ListLibraryDTO> chatInSelect3(String chatNum){return listLibraryMapper.chatInSelect3(chatNum);}
 }

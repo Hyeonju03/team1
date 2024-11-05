@@ -18,4 +18,7 @@ public interface ListLibraryMapper {
     List<ListLibraryDTO> addressBookListSelect(String code);
     void addressBookAdd(Map<String, Object> data);
     void addressBookDelete(Map<String, Object> data);
+    List<ListLibraryDTO> chatInSelect1(String chatNum);
+    List<ListLibraryDTO> chatInSelect2(String chatNum);
+    List<ListLibraryDTO> chatInSelect3(String chatNum);
 }
