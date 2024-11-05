@@ -59,7 +59,7 @@ export default function EmailSend() {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
             const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
             console.log("->" , mailEmpCode)
             // ->2048209555dffdsfd@damail.com

@@ -33,7 +33,7 @@ export default function EmailSend() {
     // 로그인 시 empCode를 가져오는 코드
     useEffect(() => {
         const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
             const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
             console.log("->" , mailEmpCode)
             // ->2048209555dffdsfd@damail.com

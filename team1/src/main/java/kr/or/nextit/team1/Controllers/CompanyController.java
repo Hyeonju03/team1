@@ -38,6 +38,11 @@ public class CompanyController {
         return companyService.selectComList(comCode);
     }
 
+    @GetMapping("/selectAllEmpNum")
+    public int selectAllEmpNum(@RequestParam String comCode) {
+        return companyService.selectAllEmpNum(comCode);
+    }
+
     @PutMapping("/updateInfo")
     public ResponseEntity<Void> updateInfo(@RequestBody List<CompanyDTO> companyDTOs) {
         for (CompanyDTO companyDTO : companyDTOs) {
@@ -54,6 +59,6 @@ public class CompanyController {
 
     @GetMapping("/selectStatus")
     public int selectStatus(@RequestParam String comCode) {
-        return  companyService.selectStatus(comCode);
+        return companyService.selectStatus(comCode);
     }
 }

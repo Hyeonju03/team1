@@ -13,12 +13,6 @@
     </resultMap>
 
     <select id="selectSchedules" resultType="scheduleDTO">
-<!--        SELECT *-->
-<!--        FROM-->
-<!--            SCHEDULE-->
-<!--        WHERE-->
-<!--            EMP_CODE = #{empCode}-->
-<!--        AND CATEGORY != '부서'-->
         SELECT *
         FROM SCHEDULE
         WHERE EMP_CODE = #{empCode}
@@ -45,7 +39,7 @@
 
     <select id="selectAuth" parameterType="java.lang.String" resultType="java.lang.String">
         select SCHEDULE
-        from authoritytest
+        from authority
         where EMP_CODE =#{empCode}
     </select>
 
@@ -70,43 +64,5 @@
         WHERE EMP_CODE LIKE CONCAT(SUBSTRING_INDEX(#{empCode}, '-', 1), '%')
         AND CATEGORY = '전체'
     </select>
-<!--    <select id="selectSchedule" parameterType="int" resultMap="scheduleMap">-->
-<!--        SELECT-->
-<!--            ID,-->
-<!--            START_DATE,-->
-<!--            END_DATE,-->
-<!--            CONTENT,-->
-<!--            CATEGORY-->
-<!--        FROM-->
-<!--            SCHEDULE-->
-<!--        WHERE-->
-<!--            ID = #{id}-->
-<!--    </select>-->
 
-<!--    <insert id="registerSchedule" parameterType="scheduleDTO">-->
-<!--        INSERT INTO-->
-<!--            SCHEDULE-->
-<!--            (EMP_CODE, START_DATE, END_DATE, CONTENT, CATEGORY)-->
-<!--        VALUES-->
-<!--            (#{empCode}}, #{startDate}, #{endDate}, #{content}, #{category})-->
-<!--    </insert>-->
-
-<!--    <update id="modifySchedule" parameterType="scheduleDTO">-->
-<!--        UPDATE-->
-<!--            SCHEDULE-->
-<!--        SET-->
-<!--            START_DATE = #{startDate},-->
-<!--            END_DATE = #{endDate},-->
-<!--            CONTENT = #{content),-->
-<!--            CATEGORY = #{category}-->
-<!--		WHERE-->
-<!--			ID = #{id}-->
-<!--    </update>-->
-
-<!--    <delete id="removeSchedule" parameterType="int">-->
-<!--        DELETE FROM-->
-<!--            SCHEDULE-->
-<!--        WHERE-->
-<!--            ID = #{id}-->
-<!--    </delete>-->
 </mapper>

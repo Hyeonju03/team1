@@ -34,4 +34,9 @@
         where COM_CODE =#{comCode}
         and PAY_STATUS = 1
     </select>
+    <select id="selectAllEmpNum" resultType="int">
+        select count(EMP_CODE)
+        from employee e
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+    </select>
 </mapper>

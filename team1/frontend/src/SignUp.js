@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import SelectCorCodePopup from "./SelectCorCodePopup";
@@ -6,11 +6,11 @@ import SelectCorCodePopup from "./SelectCorCodePopup";
 export default function SignUpForm() {
 
 
-    const [departments,setDepartments] = useState([])
-    const [ranks,setRanks] = useState([])
+    const [departments, setDepartments] = useState([])
+    const [ranks, setRanks] = useState([])
     const [formData, setFormData] = useState({
         companyCode: '',
-        name:'',
+        name: '',
         id: '',
         password: '',
         confirmPassword: '',
@@ -24,24 +24,26 @@ export default function SignUpForm() {
         residentNumber2: '',
     });
 
-    const [idConfirm,setIdConfirm] = useState(false)
-    const [pwConfirm,setPwConfirm] = useState(false)
-    const [companyConfirm,setCompanyConfirm] = useState(false)
-    const [inputidCheck,setInputIdCheck] = useState("")
+    const [idConfirm, setIdConfirm] = useState(false)
+    const [pwConfirm, setPwConfirm] = useState(false)
+    const [companyConfirm, setCompanyConfirm] = useState(false)
+    const [inputidCheck, setInputIdCheck] = useState("")
     const [errors, setErrors] = useState({});
     const [generatedCode, setGeneratedCode] = useState(null);
     const navigate = useNavigate();
-    const [signUpResponse,setSignUpResponse] = useState("")
-    const [empCodeCheck,setEmpCodeCheck] = useState("")
+    const [signUpResponse, setSignUpResponse] = useState("")
+    const [empCodeCheck, setEmpCodeCheck] = useState("")
     const [corCode, setCorCode] = useState([]);
-    const[popUp,setPopUp] = useState(false)
-    const[checkCorCode,setCheckCorCode] = useState("")
+    const [popUp, setPopUp] = useState(false)
+    const [checkCorCode, setCheckCorCode] = useState("")
+    const [checkEmpNum, setCheckEmpNum] = useState(null)
+    const [status, setStatus] = useState(null)
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setInputIdCheck(e.target)
-        setFormData(prev => ({ ...prev, [name]: value }));
-        setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
+        setFormData(prev => ({...prev, [name]: value}));
+        setErrors(prev => ({...prev, [name]: ''})); // Clear error when user types
 
         if (name === 'department') {
             corCheck(value); // 업데이트된 부서 값 전달
@@ -55,7 +57,7 @@ export default function SignUpForm() {
         const newErrors = {};
 
         if (!formData.companyCode) newErrors.companyCode = "회사코드를 입력해주세요";
-        if(!formData.name) newErrors.name = "이름을 입력해주세요"
+        if (!formData.name) newErrors.name = "이름을 입력해주세요"
         if (!formData.id) newErrors.id = "아이디를 입력해주세요";
         if (!formData.password) newErrors.password = "비밀번호를 입력해주세요";
         if (!formData.confirmPassword) newErrors.confirmPassword = "비밀번호 확인을 입력해주세요";
@@ -85,19 +87,19 @@ export default function SignUpForm() {
         if (companyFound) {
             alert("인증완료");
             setCompanyConfirm(true)
-                //부서검색누르면 부서리스트나와서하는기능
-                //3148200040
-                try {
-                    const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`);
-                    const list = response.data
+            //부서검색누르면 부서리스트나와서하는기능
+            //3148200040
+            try {
+                const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`);
+                const list = response.data
 
-                    const newDepartments = list.map(v => v.depCode);
-                    const dede = newDepartments.join(",").split(",");
-                        setDepartments(dede);
+                const newDepartments = list.map(v => v.depCode);
+                const dede = newDepartments.join(",").split(",");
+                setDepartments(dede);
 
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         } else {
             alert("없는 회사코드임");
         }
@@ -112,10 +114,10 @@ export default function SignUpForm() {
                 const response = await axios.get(`http://localhost:8080/rankSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
                 const list = response.data
 
-                const newRanks = list.map(v=>v.posCode)
-                console.log("오잉",newRanks)
+                const newRanks = list.map(v => v.posCode)
+                console.log("오잉", newRanks)
 
-               const nene =   newRanks.join(",").split(",");
+                const nene = newRanks.join(",").split(",");
                 setRanks(nene)
 
             } catch (error) {
@@ -126,28 +128,25 @@ export default function SignUpForm() {
         }
     }
     // 상사리스트
-        const corCheck = async (param)=>{
-        console.log("formData" , param)
+    const corCheck = async (param) => {
+        console.log("formData", param)
         const response = await axios.get('/apitest');
-            const companyFonud = response.data.some(company => company[2] === formData.companyCode);
+        const companyFonud = response.data.some(company => company[2] === formData.companyCode);
 
-            if(companyFonud){
-                try {
-                    const response = await axios.get(`http://localhost:8080/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
-                    console.log(response);
-                    setCorCode(response.data)
+        if (companyFonud) {
+            try {
+                const response = await axios.get(`http://localhost:8080/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
+                console.log(response);
+                setCorCode(response.data)
 
-                } catch (error){
-                    console.error(error);
-                }
+            } catch (error) {
+                console.error(error);
             }
         }
+    }
 
 
-
-
-
-    const idCheck = async() => {
+    const idCheck = async () => {
         const companyCode = formData.companyCode;
         const id = formData.id;
         if (!id) {
@@ -155,16 +154,14 @@ export default function SignUpForm() {
             return; // ID가 비어있으면 함수 종료
         }
         try {
-            const response = await axios.post('/findAllempCode',  {empCode: `${companyCode}-${id}` });
+            const response = await axios.post('/findAllempCode', {empCode: `${companyCode}-${id}`});
 
-            if(response.data > 0) {
+            if (response.data > 0) {
                 alert("중복입니다.")
-            }else{
+            } else {
                 alert("사용가능합니다.")
                 setIdConfirm(true)
             }
-
-
 
 
         } catch (error) {
@@ -174,14 +171,14 @@ export default function SignUpForm() {
 
     };
 
-    const pwCheck =(e)=>{
+    const pwCheck = (e) => {
         const pw = formData.password
         const pwConfirm = formData.confirmPassword
 
-        if(pw == pwConfirm){
+        if (pw == pwConfirm) {
             alert("일치합니다")
             setPwConfirm(true)
-        }else{
+        } else {
             alert("재확인")
         }
     }
@@ -193,7 +190,7 @@ export default function SignUpForm() {
             return
         }
         try {
-            const response = await axios.post('/randomCode', { email });
+            const response = await axios.post('/randomCode', {email});
             const code = response.data.code; // 서버에서 받은 인증 코드를 저장
             console.log(code)
             setGeneratedCode(code); // 인증 코드를 상태에 저장
@@ -216,25 +213,57 @@ export default function SignUpForm() {
     };
 
 
-
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault(); // 기본 동작 방지
         }
     };
-    
-    const searchCorcode=(e)=>{
+
+    const searchCorcode = (e) => {
         console.log("클릭")
         setPopUp(true)
     }
 
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("/selectStatus", {params: {comCode: formData.companyCode}});
+            console.log("결제여부?", response);
+            setStatus(response.data)
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
+    useEffect(() => {
+        const selectEmpNum = async () => {
+            try {
+                const resp = await axios.get("/selectAllEmpNum", {params: {comCode: formData.companyCode}});
+                console.log("몇명?", resp);
+                setCheckEmpNum(resp.data)
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        if (idConfirm) {
+            selectEmpNum();
+            fetchData();
+        }
+    }, [idConfirm])
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         console.log("회원가입 하기");
+
+        console.log("제대로뜨는지 함보자", status, checkEmpNum);
+
+        console.log("Condition met?", status === 0 && checkEmpNum > 9);
+
+        if (status === 0 && checkEmpNum >= 9) {
+            alert("회원가입 불가 돈내세용")
+            return;
+        }
 
         const validationErrors = validateForm();
         console.log(validationErrors)
@@ -246,37 +275,37 @@ export default function SignUpForm() {
         }
         console.log("회원가입 하기2222");
 
-        if(! companyConfirm){
+        if (!companyConfirm) {
             alert("회사코드 확인하삼")
             return;
         }
         console.log("회원가입 하기33333");
 
-        if(! idConfirm){
+        if (!idConfirm) {
             alert("아이디중복확인 하삼")
             return;
         }
 
-        if(! pwConfirm){
+        if (!pwConfirm) {
             alert("비밀번호확인 제대로 하삼")
             return;
         }
-        
-        if(formData.phone.length != 11){
+
+        if (formData.phone.length != 11) {
             alert("휴대폰번호를 확인해주세용")
             return;
         }
 
-        if(formData.residentNumber1.length != 6){
+        if (formData.residentNumber1.length != 6) {
             alert("주민등록번호 앞자리 다시 확인해주삼")
             return;
         }
-        if(formData.residentNumber2.length != 7){
+        if (formData.residentNumber2.length != 7) {
             alert("주민등록번호 뒷자리 다시 확인해주삼")
             return;
         }
 
-        if ((formData.residentNumber1.length + formData.residentNumber2.length) != 13){
+        if ((formData.residentNumber1.length + formData.residentNumber2.length) != 13) {
             alert("주민등록번호 확인하삼")
         }
         // console.log('Form submitted:', formData);
@@ -299,26 +328,24 @@ export default function SignUpForm() {
         console.log('send send:', send);
 
         const config = {
-            headers: { "Content-Type": `application/json`}
+            headers: {"Content-Type": `application/json`}
         };
 
-        try{
-            const reuslt = await axios.post('/signUp' ,  send, config);
+
+        try {
+            const reuslt = await axios.post('/signUp', send, config);
             console.log(reuslt);
             alert("회원가입 완룡")
-        }catch (error){
+        } catch (error) {
             console.error(error)
         }
-        
+
     };
-
-
-
 
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-        {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
+            {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
             <style>
                 {`
                  input::placeholder {
@@ -330,259 +357,269 @@ export default function SignUpForm() {
             `}
             </style>
             <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
-            <div style={{marginLeft:"480px"}} className="max-w-4xl items-center">
-            <form onSubmit={handleSubmit} className="space-y-0.5">
-                {/* 회사코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>
-                    <input
-                        id="companyCode"
-                        name="companyCode"
-                        value={formData.companyCode}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
-                        placeholder={errors.companyCode || '회사코드 입력'}
-                        disabled={companyConfirm ? true : false}
-                        style={{color: errors.companyCode ? 'red' : 'black'}}
-                    />
-                    <button onClick={() => {
-                        companyCodeCheck();
-                        rankCheck();
-                    }} type="button" className="ml-2 border p-2">확인
-                    </button>
+            <div style={{marginLeft: "480px"}} className="max-w-4xl items-center">
+                <form onSubmit={handleSubmit} className="space-y-0.5">
+                    {/* 회사코드 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>
+                        <input
+                            id="companyCode"
+                            name="companyCode"
+                            value={formData.companyCode}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className={`border p-2 flex-grow ${errors.companyCode ? 'border-red-500' : ''}`}
+                            placeholder={errors.companyCode || '회사코드 입력'}
+                            disabled={companyConfirm ? true : false}
+                            style={{color: errors.companyCode ? 'red' : 'black'}}
+                        />
+                        <button onClick={() => {
+                            companyCodeCheck();
+                            rankCheck();
+                        }} type="button" className="ml-2 border p-2">확인
+                        </button>
 
-                </div>
+                    </div>
 
-                {/* 이름 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="name" className="flex-none w-32 text-left">이름</label>
-                    <input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.name ? 'border-red-500' : ''}`}
-                        placeholder={errors.name || '이름 입력'}
-                    />
-                </div>
+                    {/* 이름 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="name" className="flex-none w-32 text-left">이름</label>
+                        <input
+                            id="name"
+                            name="name"
+                            maxLength={3}
+                            value={formData.name}
+                            onChange={(e) => {
+                                e.target.value = e.target.value.replace(/\d/g, "")
+                                handleChange(e)
+                            }}
+                            // onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className={`border p-2 flex-grow ${errors.name ? 'border-red-500' : ''}`}
+                            placeholder={errors.name || '이름 입력'}
+                        />
+                    </div>
 
-                {/* ID */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="id" className="flex-none w-32 text-left">ID</label>
-                    <input
-                        id="id"
-                        name="id"
-                        value={formData.id}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.id ? 'border-red-500' : ''}`}
-                        placeholder={errors.id || '아이디 입력'}
-                        disabled={idConfirm ? true : false}
-                    />
-                    <button onClick={idCheck} type="button" className="ml-2 border p-2">중복확인</button>
-                </div>
+                    {/* ID */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="id" className="flex-none w-32 text-left">ID</label>
+                        <input
+                            id="id"
+                            name="id"
+                            value={formData.id}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className={`border p-2 flex-grow ${errors.id ? 'border-red-500' : ''}`}
+                            placeholder={errors.id || '아이디 입력'}
+                            disabled={idConfirm ? true : false}
+                        />
+                        <button onClick={idCheck} type="button" className="ml-2 border p-2">중복확인</button>
+                    </div>
 
-                {/* PW */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="password" className="flex-none w-32 text-left">PW</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.password ? 'border-red-500' : ''}`}
-                        placeholder={errors.password || '비밀번호 입력'}
-                    />
+                    {/* PW */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="password" className="flex-none w-32 text-left">PW</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            disabled={pwConfirm ? true : false}
+                            className={`border p-2 flex-grow ${errors.password ? 'border-red-500' : ''}`}
+                            placeholder={errors.password || '비밀번호 입력'}
+                        />
 
-                </div>
+                    </div>
 
-                {/* PW 확인 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="confirmPassword" className="flex-none w-32 text-left">PW 확인</label>
-                    <input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                        placeholder={errors.confirmPassword || '비밀번호 확인 입력'}
-                    />
-                    <button onClick={pwCheck} style={{marginLeft: "10px"}} type="button"
-                            className="mt-2 border p-2">확인
-                    </button>
-                </div>
+                    {/* PW 확인 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="confirmPassword" className="flex-none w-32 text-left">PW 확인</label>
+                        <input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            disabled={pwConfirm ? true : false}
+                            className={`border p-2 flex-grow ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                            placeholder={errors.confirmPassword || '비밀번호 확인 입력'}
+                        />
+                        <button onClick={pwCheck} style={{marginLeft: "10px"}} type="button"
+                                className="mt-2 border p-2">확인
+                        </button>
+                    </div>
 
-                {/* 휴대전화 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="phone" className="flex-none w-32 text-left">휴대전화</label>
-                    <input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onKeyDown={handleKeyDown}
-                        onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-                            setFormData(prev => ({...prev, phone: value}));
-                            setErrors(prev => ({...prev, phone: ''})); // Clear error when user types
+                    {/* 휴대전화 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="phone" className="flex-none w-32 text-left">휴대전화</label>
+                        <input
+                            id="phone"
+                            name="phone"
+                            value={formData.phone}
+                            onKeyDown={handleKeyDown}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+                                setFormData(prev => ({...prev, phone: value}));
+                                setErrors(prev => ({...prev, phone: ''})); // Clear error when user types
+                            }}
+                            className={`border p-2 flex-grow ${errors.phone ? 'border-red-500' : ''}`}
+                            placeholder={errors.phone || '휴대전화 입력'}
+                        />
+                    </div>
+
+                    {/* 이메일 주소 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="email" className="flex-none w-32 text-left">이메일 주소</label>
+                        <div className="flex items-center flex-grow space-x-2">
+                            <input
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                className={`border p-2 flex-grow ${errors.email ? 'border-red-500' : ''}`}
+                                placeholder={errors.email || '이메일 입력'}
+                            />
+                        </div>
+                        <button onClick={sendVerificationCode} style={{marginLeft: "10px"}} type="button"
+                                className="mt-2 border p-2">인증번호 발송
+                        </button>
+                    </div>
+
+                    {/* 인증번호 입력 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="verificationCode" className="flex-none w-32 text-left">인증번호 입력</label>
+                        <input
+                            id="verificationCode"
+                            name="verificationCode"
+                            value={formData.verificationCode}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className={`border p-2 flex-grow ${errors.verificationCode ? 'border-red-500' : ''}`}
+                            placeholder={errors.verificationCode || '인증번호 입력'}
+                        />
+                        <button onClick={verifyCode} style={{marginLeft: "10px"}} type="button"
+                                className="mt-2 border p-2">인증번호 확인
+                        </button>
+                    </div>
+
+
+                    {/* 부서 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
+                        <div className="flex-grow relative flex">
+                            <select
+                                id="department"
+                                name="department"
+                                // value={formData.department}
+                                onChange={handleChange}
+                                className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
+                            >
+                                <option value="department">부서 선택</option>
+                                {/* 기본 선택 옵션 */}
+                                {departments.map((dep, index) => (
+                                    <option key={index} value={dep}>
+                                        {dep}
+                                    </option>
+                                ))}
+                            </select>
+
+                        </div>
+                    </div>
+
+                    {/* 상관 코드 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="supervisorCode" className="flex-none w-32 text-left">상관 코드</label>
+                        <div className="flex-grow relative flex">
+                            <input
+                                id="supervisorCode"
+                                name="supervisorCode"
+                                // value={formData.supervisorCode}
+                                value={checkCorCode}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
+                                placeholder={errors.supervisorCode || '상관 코드 입력'}
+                            />
+                            <button onClick={searchCorcode} type="button" className="border p-2 ml-2 flex-none">검색
+                            </button>
+                        </div>
+                    </div>
+                    <SelectCorCodePopup
+                        isOpen={popUp}
+                        onClose={() => setPopUp(false)}
+                        onConfirm={(item) => {
+                            console.log("item", item.EMP_CODE)
+                            setCheckCorCode(item.EMP_CODE)
+                            setPopUp(false); // 모달 닫기
                         }}
-                        className={`border p-2 flex-grow ${errors.phone ? 'border-red-500' : ''}`}
-                        placeholder={errors.phone || '휴대전화 입력'}
+                        corCode={corCode}
                     />
-                </div>
 
-                {/* 이메일 주소 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="email" className="flex-none w-32 text-left">이메일 주소</label>
-                    <div className="flex items-center flex-grow space-x-2">
-                        <input
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            className={`border p-2 flex-grow ${errors.email ? 'border-red-500' : ''}`}
-                            placeholder={errors.email || '이메일 입력'}
-                        />
+                    {/* 직급 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="rank" className="flex-none w-32 text-left">직급</label>
+                        <div className="flex-grow relative flex">
+                            <select
+                                id="rank"
+                                name="rank"
+                                value={formData.rank}
+                                onChange={handleChange}
+                                className={`border p-2 flex-grow ${errors.rank ? 'border-red-500' : ''}`}
+                            >
+                                <option value="">직급 선택</option>
+                                {/* 기본 선택 옵션 */}
+                                {ranks.map((r, index) => (
+                                    <option key={index} value={r}>
+                                        {r}
+                                    </option>
+                                ))}
+                            </select>
+
+                        </div>
                     </div>
-                    <button onClick={sendVerificationCode} style={{marginLeft: "10px"}} type="button"
-                            className="mt-2 border p-2">인증번호 발송
-                    </button>
-                </div>
 
-                {/* 인증번호 입력 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="verificationCode" className="flex-none w-32 text-left">인증번호 입력</label>
-                    <input
-                        id="verificationCode"
-                        name="verificationCode"
-                        value={formData.verificationCode}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                        className={`border p-2 flex-grow ${errors.verificationCode ? 'border-red-500' : ''}`}
-                        placeholder={errors.verificationCode || '인증번호 입력'}
-                    />
-                    <button onClick={verifyCode} style={{marginLeft: "10px"}} type="button"
-                            className="mt-2 border p-2">인증번호 확인
-                    </button>
-                </div>
-
-
-                {/* 부서 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="department" className="flex-none w-32 text-left">부서</label>
-                    <div className="flex-grow relative flex">
-                        <select
-                            id="department"
-                            name="department"
-                            // value={formData.department}
-                            onChange={handleChange}
-                            className={`border p-2 flex-grow ${errors.department ? 'border-red-500' : ''}`}
-                        >
-                            <option value="department">부서 선택</option>
-                            {/* 기본 선택 옵션 */}
-                            {departments.map((dep, index) => (
-                                <option key={index} value={dep}>
-                                    {dep}
-                                </option>
-                            ))}
-                        </select>
-
+                    {/* 주민등록번호 */}
+                    <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
+                        <label htmlFor="residentNumber1" className="flex-none w-32 text-left">주민등록번호</label>
+                        <div className="flex items-center space-x-2 flex-grow">
+                            <input
+                                id="residentNumber1"
+                                name="residentNumber1"
+                                value={formData.residentNumber1}
+                                onKeyDown={handleKeyDown}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+                                    setFormData(prev => ({...prev, residentNumber1: value}));
+                                    setErrors(prev => ({...prev, residentNumber1: ''})); // Clear error when user types
+                                }}
+                                maxLength={6}
+                                className={`border p-2 flex-grow ${errors.residentNumber1 ? 'border-red-500' : ''}`}
+                                placeholder={errors.residentNumber1 || '앞자리'}
+                            />
+                            <span>-</span>
+                            <input
+                                id="residentNumber2"
+                                name="residentNumber2"
+                                value={formData.residentNumber2}
+                                onKeyDown={handleKeyDown}
+                                maxLength={7}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+                                    setFormData(prev => ({...prev, residentNumber2: value}));
+                                    setErrors(prev => ({...prev, residentNumber2: ''})); // Clear error when user types
+                                }}
+                                className={`border p-2 flex-grow ${errors.residentNumber2 ? 'border-red-500' : ''}`}
+                                placeholder={errors.residentNumber2 || '뒷자리'}
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* 상관 코드 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="supervisorCode" className="flex-none w-32 text-left">상관 코드</label>
-                    <div className="flex-grow relative flex">
-                        <input
-                            id="supervisorCode"
-                            name="supervisorCode"
-                            // value={formData.supervisorCode}
-                            value={checkCorCode}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            className={`border p-2 flex-grow ${errors.supervisorCode ? 'border-red-500' : ''}`}
-                            placeholder={errors.supervisorCode || '상관 코드 입력'}
-                        />
-                        <button onClick={searchCorcode}  type="button" className="border p-2 ml-2 flex-none">검색</button>
-                    </div>
-                </div>
-                <SelectCorCodePopup
-                    isOpen={popUp}
-                    onClose={() => setPopUp(false)}
-                    onConfirm={(item) => {
-                        console.log("item" ,item.EMP_CODE)
-                        setCheckCorCode(item.EMP_CODE)
-                        setPopUp(false); // 모달 닫기
-                    }}
-                    corCode={corCode}
-                />
-
-                {/* 직급 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="rank" className="flex-none w-32 text-left">직급</label>
-                    <div className="flex-grow relative flex">
-                        <select
-                            id="rank"
-                            name="rank"
-                            value={formData.rank}
-                            onChange={handleChange}
-                            className={`border p-2 flex-grow ${errors.rank ? 'border-red-500' : ''}`}
-                        >
-                            <option value="">직급 선택</option>
-                            {/* 기본 선택 옵션 */}
-                            {ranks.map((r, index) => (
-                                <option key={index} value={r}>
-                                    {r}
-                                </option>
-                            ))}
-                        </select>
-
-                    </div>
-                </div>
-
-                {/* 주민등록번호 */}
-                <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
-                    <label htmlFor="residentNumber1" className="flex-none w-32 text-left">주민등록번호</label>
-                    <div className="flex items-center space-x-2 flex-grow">
-                        <input
-                            id="residentNumber1"
-                            name="residentNumber1"
-                            value={formData.residentNumber1}
-                            onKeyDown={handleKeyDown}
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-                                setFormData(prev => ({...prev, residentNumber1: value}));
-                                setErrors(prev => ({...prev, residentNumber1: ''})); // Clear error when user types
-                            }}
-                            className={`border p-2 flex-grow ${errors.residentNumber1 ? 'border-red-500' : ''}`}
-                            placeholder={errors.residentNumber1 || '앞자리'}
-                        />
-                        <span>-</span>
-                        <input
-                            id="residentNumber2"
-                            name="residentNumber2"
-                            value={formData.residentNumber2}
-                            onKeyDown={handleKeyDown}
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-                                setFormData(prev => ({...prev, residentNumber2: value}));
-                                setErrors(prev => ({...prev, residentNumber2: ''})); // Clear error when user types
-                            }}
-                            className={`border p-2 flex-grow ${errors.residentNumber2 ? 'border-red-500' : ''}`}
-                            placeholder={errors.residentNumber2 || '뒷자리'}
-                        />
-                    </div>
-                </div>
-
-                <button type="submit" className="border bg-blue-500 text-white p-2">회원가입</button>
-            </form>
+                    <button type="submit" className="border bg-blue-500 text-white p-2">회원가입</button>
+                </form>
             </div>
         </div>
     );

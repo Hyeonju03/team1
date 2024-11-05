@@ -4,7 +4,7 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.AuthorityMapper">
     <insert id="insertAuth" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
-        INSERT into authoritytest
+        INSERT into authority
         (EMP_CODE,  emp_Name, dep_code, pos_code, permission_edit, department_management , rank_edit)
         VALUES(#{empCode}, #{empName}, #{depCode}, #{posCode},#{permissionEdit}, #{departmentManagement},#{rankEdit});
     </insert>
@@ -24,26 +24,26 @@
         a.SCHEDULE
         FROM
 <!--        employee AS e-->
-        employeetest AS e
+        employee AS e
         LEFT JOIN
-        authoritytest AS a ON e.EMP_CODE = a.EMP_CODE
+        authority AS a ON e.EMP_CODE = a.EMP_CODE
         WHERE
         e.EMP_CODE LIKE CONCAT('%', #{empCode}, '%');
     </select>
     <select id="selectAllAuth" resultType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         select EMP_CODE
-        from authoritytest
+        from authority
         where EMP_CODE  like concat('%',#{empCode},'%')
     </select>
     <update id="updateAuth">
-        UPDATE authoritytest
+        UPDATE authority
         set  NOTICE=#{notice}, DOCUMENT=#{document}, PERS_INFO=#{persInfo}, SCHEDULE=#{schedule},
         permission_edit=#{permissionEdit}, department_management=#{departmentManagement} , rank_edit=#{rankEdit}
         where  EMP_CODE= #{empCode}
     </update>
     <select id="permissionSelect" resultType="int">
         select count(*)
-        from authoritytest a
+        from authority a
         where permission_edit=1
         and EMP_CODE = #{empCode}
     </select>

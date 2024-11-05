@@ -1,10 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronRight, Paperclip, Search, Mail, Archive, Send, FileText, Trash, Settings } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Paperclip,
+    Search,
+    Mail,
+    Archive,
+    Send,
+    FileText,
+    Trash,
+    Settings
+} from 'lucide-react';
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
+// import {useAuth} from "@/noticeAuth";
 
-const Input = ({ className, ...props }) => {
+const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
 };
 
@@ -32,9 +44,9 @@ export default function EmailSend() {
     // 로그인 시 empCode를 가져오는 코드
     useEffect(() => {
         const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3148200040-jys1902"; // 로그인 후 받아온 empCode
-            //3148200040-jys1902
-            //3148200040-abcmart147
+            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
+            //3148127227-jys
+            // 3148127227-user001
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -55,7 +67,7 @@ export default function EmailSend() {
     }, [empCode]);
 
     const handleChange = (e) => {
-        const { name, value, type, files } = e.target;
+        const {name, value, type, files} = e.target;
 
         if (type === 'file') {
             const file = files[0];
@@ -67,9 +79,9 @@ export default function EmailSend() {
                 fileSize: file.size,
             }));
         } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData(prev => ({...prev, [name]: value}));
         }
-        setErrors(prev => ({ ...prev, [name]: '' }));
+        setErrors(prev => ({...prev, [name]: ''}));
     };
 
     const handleSubmit = async (e) => {
@@ -118,22 +130,22 @@ export default function EmailSend() {
     }
 
 
-    const goToMeMailSend =(e)=>{
+    const goToMeMailSend = (e) => {
         console.log("클릭")
         navigate("/ToMeMailSend");
         window.location.reload();
     }
 
-    const goMailTrashList =()=>{
+    const goMailTrashList = () => {
         navigate("/MailTrashList");
         window.location.reload();
     }
-    const goRealDelete =(e)=>{
+    const goRealDelete = (e) => {
         console.log("진짜?")
         setIsPopupOpen(true)
     }
 
-    const handleConfirmDelete = async ()=>{
+    const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
             alert("삭제완룡")
@@ -146,25 +158,25 @@ export default function EmailSend() {
         }
     }
 
-    const goToMeMailSendList =()=>{
+    const goToMeMailSendList = () => {
         //내게
         navigate("/ToMeMailSendList");
         window.location.reload();
     }
 
-    const goAttachMentMailList =()=>{
+    const goAttachMentMailList = () => {
         //첨부
         navigate("/AttachMentMailList");
         window.location.reload();
     }
 
-    const goToTalMailSendList =()=>{
+    const goToTalMailSendList = () => {
         //전부
         navigate("/ToTalMailSendList");
         window.location.reload();
     }
 
-    const goReceivedMailList =()=>{
+    const goReceivedMailList = () => {
         //받은
         navigate("/ReceivedMailList");
         window.location.reload();
@@ -229,7 +241,7 @@ export default function EmailSend() {
                 </div>
 
                 {/* Main content */}
-                <div className="flex flex-1 items-center " style={{marginLeft:"200px"}} >
+                <div className="flex flex-1 items-center " style={{marginLeft: "200px"}}>
                     <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
                         {!showConfirmation && (
                             <div>

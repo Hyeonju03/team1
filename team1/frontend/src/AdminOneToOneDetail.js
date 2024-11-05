@@ -3,8 +3,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios";
 
 
-
-function Button({ children, size, variant, onClick }) {
+function Button({children, size, variant, onClick}) {
 
 
     const baseStyle = "px-4 py-2 rounded";
@@ -19,13 +18,14 @@ function Button({ children, size, variant, onClick }) {
     );
 }
 
-function Input({ placeholder ,onChange }) {
+function Input({placeholder, onChange}) {
     return (
-        <input type="text"  onChange={onChange}  placeholder={placeholder} className="border border-gray-300 p-2 rounded w-full" />
+        <input type="text" onChange={onChange} placeholder={placeholder}
+               className="border border-gray-300 p-2 rounded w-full"/>
     );
 }
 
-function Table({ children }) {
+function Table({children}) {
     return (
         <table className="min-w-full border border-gray-300">
             {children}
@@ -33,40 +33,53 @@ function Table({ children }) {
     );
 }
 
-function TableHeader({ children }) {
+function TableHeader({children}) {
     return <thead className="bg-gray-200">{children}</thead>;
 }
 
-function TableBody({ children }) {
+function TableBody({children}) {
     return <tbody>{children}</tbody>;
 }
 
-function TableRow({ children }) {
+function TableRow({children}) {
     return <tr className="border-b">{children}</tr>;
 }
 
-function TableHead({ children }) {
+function TableHead({children}) {
     return <th className="p-2 text-center">{children}</th>;
 }
 
-function TableCell({ children , onClick }) {
+function TableCell({children, onClick}) {
     return <td className="p-2 text-center" onClick={onClick}>{children}</td>;
 }
 
 export default function Component() {
     const location = useLocation();
-    const {item} = location.state || { qNum: "없음" };
+    const {item} = location.state || {qNum: "없음"};
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const navigate = useNavigate();
 
-    const [Qlist,setQList] = useState([])
-    const [filterQlist,setFilterQlist] = useState([])
+    const [Qlist, setQList] = useState([])
+    const [filterQlist, setFilterQlist] = useState([])
+
+    const [empCode, setEmpCode] = useState("")
+
+    //로그인시 empcode를 일단 가져오는코드
+    useEffect(() => {
+        // 로그인 후 empCode를 설정하는 로직
+        const fetchEmpCode = async () => {
+            // 여기에서 실제 empCode를 설정
+            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
+            setEmpCode(loggedInEmpCode);
+        };
+        fetchEmpCode();
+    }, []);
 
 
     useEffect(() => {
-        const fetchData = async ()=>{
-            try{
-                const response = await axios.get("/QDetailList");
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("/QDetailList", {params: {empCode}});
                 const list = response.data;
 
                 // startDate 변환
@@ -85,7 +98,7 @@ export default function Component() {
 
                 setQList(updatedList);
                 setFilterQlist(updatedList)
-            }catch (error) {
+            } catch (error) {
                 console.error(error);
             }
         }
@@ -97,19 +110,23 @@ export default function Component() {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const goBack =()=>{
+    const goBack = () => {
         navigate(-1)
     }
+    
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6 ">로고</header>
 
             <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold mb-4 text-left "  style={{marginLeft:"375px"}}>{item.qNum} {item.title}</h1>
-                <button onClick={goBack} style={{ marginRight:"415px", marginTop:"-10px" , height:"50px"}} className=" border rounded-md px-4 text-lg font-bold">목록</button>
+                <h1 className="text-2xl font-bold mb-4 text-left "
+                    style={{marginLeft: "375px"}}>{item.qNum} {item.title}</h1>
+                <button onClick={goBack} style={{marginRight: "415px", marginTop: "-10px", height: "50px"}}
+                        className=" border rounded-md px-4 text-lg font-bold">목록
+                </button>
             </div>
-            <div className="flex flex-col md:flex-row gap-6" style={{marginLeft:"350px"}}>
+            <div className="flex flex-col md:flex-row gap-6" style={{marginLeft: "350px"}}>
 
 
                 {/*<main className="flex-1">*/}
@@ -128,7 +145,7 @@ export default function Component() {
                     <div className="flex space-x-8">
                         <p className="block text-xl font-medium text-gray-700 mb-1">A: 제목</p>
                         <p id="title" className="border-2 border-gray-300 p-2  h-8 text-lg"
-                           style={{width: '1000px'}}>{item.ansTitle}</p>
+                           style={{width: '1000px', height: "50px"}}>{item.ansTitle}</p>
                     </div>
                     <div className="flex space-x-8">
                         <p className="block text-xl font-medium text-gray-700 mb-1">A: 내용</p>

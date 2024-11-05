@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import {useState, useEffect} from 'react';
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import { AlertTriangle } from 'lucide-react';
+import {AlertTriangle} from 'lucide-react';
 
 export default function SignUpForm() {
     const [empNum, setEmpNum] = useState("");
@@ -9,12 +9,12 @@ export default function SignUpForm() {
     const [comInfo, setComInfo] = useState([]);
     const navigate = useNavigate();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const [showMessage,setShowMessage] = useState(false)
+    const [showMessage, setShowMessage] = useState(false)
 
     useEffect(() => {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3118115625-cjm"; // 로그인 후 받아온 empCode
+            const loggedInEmpCode = "3118115625"; // 로그인 후 받아온 empCode
             const comCode = loggedInEmpCode.split("-")[0];
             setComCode(comCode);
         };
@@ -24,10 +24,10 @@ export default function SignUpForm() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("/selectComList", { params: { comCode: comCode } });
+                const response = await axios.get("/selectComList", {params: {comCode: comCode}});
                 console.log(response);
                 setComInfo(response.data);
-                const userNum = response.data.map(v=>v.empNum)
+                const userNum = response.data.map(v => v.empNum)
                 setEmpNum(userNum)
             } catch (error) {
                 console.error(error);
@@ -39,24 +39,35 @@ export default function SignUpForm() {
     }, [comCode]);
 
     useEffect(() => {
-        const fetchData = async ()=>{
+        const fetchData = async () => {
             try {
                 const response = await axios.get("/selectStatus", {params: {comCode: comCode}});
-                console.log("우엥?",response);
+                console.log("우엥?", response);
 
                 if (response.data === 1) {
                     setShowMessage(false);
-                }else {
+                } else {
                     setShowMessage(true)
                 }
-            } catch (error){
+            } catch (error) {
                 console.error(error)
             }
         }
-        if(comCode){
+        if (comCode) {
             fetchData();
+            selectEmpNum();
         }
     }, [comCode]);
+
+    //회사직원 몇명?
+    const selectEmpNum = async () => {
+        try {
+            const resp = await axios.get("/selectAllEmpNum", {params: {comCode: comCode}});
+            console.log("몇명?", resp);
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     // 날짜 변환
     const formatDate = (dateString) => {
@@ -109,14 +120,15 @@ export default function SignUpForm() {
         try {
             await axios.put("/updateInfo", updatedData);
             console.log("업데이트 성공!");
+            alert("수정완룡")
         } catch (error) {
             console.error("업데이트 실패:", error);
         }
     };
 
     console.log(comCode)
-    const goPayMent =()=>{
-        navigate("/PaymentCom",{state:{empNum:empNum , comCode:comCode}});
+    const goPayMent = () => {
+        navigate("/PaymentCom", {state: {empNum: empNum, comCode: comCode}});
     }
     return (
         <form onSubmit={goUpdate}>
@@ -193,11 +205,11 @@ export default function SignUpForm() {
                         <div className="flex items-center mb-4">
                             <p>직원수:</p>
                             <p style={{marginLeft: "80px"}} className="ml-4">{v.empNum}</p>
-                            {v.empNum > 10 && showMessage && (
+                            {v.empNum > 9 && showMessage && (
                                 <div
                                     className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-md ml-4 flex items-center">
                                     <AlertTriangle className="h-5 w-5 mr-2"/>
-                                    <span onClick={goPayMent} className="cursor-pointer">주의: 직원 수가 10명을 초과하였습니다. 계속하려면 결제가 필요합니다.</span>
+                                    <span onClick={goPayMent} className="cursor-pointer">주의: 직원 수가 10명 이상입니다. 계속하려면 결제가 필요합니다.</span>
                                 </div>
                             )}
                         </div>

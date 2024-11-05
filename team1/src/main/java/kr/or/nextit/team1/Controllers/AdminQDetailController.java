@@ -22,8 +22,26 @@ public class AdminQDetailController {
     }
 
     @GetMapping("/QDetailList")
-    public List<AdminQDetailDTO> getQDetailList() {
-        return adminQDetailMapper.selectAdminQDetail();
+    public List<AdminQDetailDTO> getQDetailList(@RequestParam String empCode) {
+        return adminQDetailMapper.selectAdminQDetail(empCode);
+    }
+
+    //전체 답변
+    @GetMapping("/AnsQDetailList")
+    public List<AdminQDetailDTO> AnsQDetailList() {
+        return adminQDetailMapper.AnsQDetailList();
+    }
+
+    //답변완룡
+    @GetMapping("/AnsQCompleteList")
+    public List<AdminQDetailDTO> AnsQCompleteList() {
+        return adminQDetailMapper.AnsQCompleteList();
+    }
+
+    //미답변
+    @GetMapping("/noAnsList")
+    public List<AdminQDetailDTO> noAnsList() {
+        return adminQDetailMapper.noAnsList();
     }
 
     @DeleteMapping("/deleteAdminQDetail")

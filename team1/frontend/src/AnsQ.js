@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
-
-import {useAuth} from "./noticeAuth";
 
 const Input = ({className, placeholder, ...props}) => (
     <input
@@ -27,53 +25,38 @@ export default function FAQPage() {
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [adminId, setAdminId] = useState("")
+    const [permission, setPermission] = useState(false)
 
-    // 로그인
-    const {isLoggedIn, empCode, logout} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    const location = useLocation();
+    const {item} = location.state || {qNum: "없음"};
+
+    console.log(item)
+
+    const fetchData = async () => {
+        //운영자만 가능함ㅇㅇ
+        const loggedInEmpCode = "kdj";
+        //3148127227-user002 이건 권한없는 그냥 user
+        //kdj 운영자
+        setAdminId(loggedInEmpCode);
+
+        const response = await axios.get(`/selectAdmin`, {params: {adminId: loggedInEmpCode}});
+        console.log(response.data)
+        setAdminId(response.data);
+
+        if (response.data === 0) {
+            setPermission(false);
+        } else {
+            setPermission(true);
+        }
+
+    }
 
 
     useEffect(() => {
+        fetchData();
+    }, []);
 
-        // `isLoggedIn`이 처음 설정되기 전, 즉 `undefined`일 때는 아무 작업도 하지 않음
-        if (isLoggedIn === undefined) {
-            return;
-        }
-
-        // 초기 렌더링 시 이전 상태가 없으면 이전 상태를 현재 상태로 설정
-        if (prevLogin === undefined) {
-            setPrevLogin(isLoggedIn);
-            return;
-        }
-
-        console.log("prev>", prevLogin, " login>", isLoggedIn)
-
-        if (isLoggedIn === true && prevLogin === false) {
-            const fetchData = async () => {
-                if (empCode) { // empCode가 설정된 경우에만 호출
-                    try {
-                        const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
-                        console.log(response.data);
-
-
-                    } catch (error) {
-                        console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
-                    }
-                }
-            }
-            fetchData();
-        }
-
-        if (isLoggedIn === false && prevLogin === false) {
-            // 로그인하지 않은 상태일 때만 alert 띄우기
-            alert("로그인 해야함");
-            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        }
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
-        setPrevLogin(isLoggedIn);
-
-
-    }, [isLoggedIn, empCode, prevLogin]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -84,17 +67,15 @@ export default function FAQPage() {
     }
 
     const qComplete = async (e) => {
-        e.preventDefault(); // 기본 폼 제출 방지
-        const send = {empCode: empCode, title: title, content: content}
-        const config = {
-            headers: {"Content-Type": `application/json`}
-        };
+        e.preventDefault();
+        console.log(title, content, item.qnum)
+        const send = {ansTitle: title, ansContent: content, qNum: item.qnum}
 
         try {
-            const result = await axios.post('/insertQ', send, config)
+            const result = await axios.put('/updateAdminQ', send)
             console.log(result)
-            navigate("/AdminQDetail");
-            alert("문의작성완료")
+            alert("답장완료")
+            navigate("/AnsQDetail");
         } catch (error) {
             console.log(error)
         }
@@ -123,20 +104,13 @@ export default function FAQPage() {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const goQList = () => {
-        navigate("/AdminQDetail");
+    if (!permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
     }
-
-    // 로그아웃 처리 함수
-    const handleLogout = async () => {
-        try {
-            await axios.post('/api/employ/logout');
-            logout(); // 로그아웃 호출
-            navigate("/"); // 로그아웃 후 홈으로 이동
-        } catch (error) {
-            console.error("로그아웃 중 오류 발생:", error);
-        }
-    };
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
@@ -151,15 +125,14 @@ export default function FAQPage() {
                               style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2">
-                            <h2 onClick={goQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                                1:1 상담</h2>
+                            1:1 상담
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의작성
                                 </li>
-                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
@@ -174,7 +147,7 @@ export default function FAQPage() {
 
                 <div className="flex-1 p-6 mt-16" style={{marginTop: "-20px"}}>
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-bold mb-6 text-left">문의작성</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-left">AnsQ</h2>
                         <hr className="border-gray-300 my-4 w-full"/>
                         <form className="space-y-4">
                             <div className="flex space-x-8">
@@ -199,7 +172,6 @@ export default function FAQPage() {
 
             </div>
 
-
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -213,24 +185,20 @@ export default function FAQPage() {
                 </button>
 
                 <div className="p-4">
-                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
-                                <input
-                                    type="text"
-                                    placeholder="아이디"
-                                    className="w-full p-2 mb-2 border rounded"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="비밀번호"
-                                    className="w-full p-2 mb-4 border rounded"
-                                />
-                                <button
-                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                                    로그인
-                                </button>
-                            </>
-                        )}
+                    <h2 className="text-xl font-bold mb-4">로그인</h2>
+                    <input
+                        type="text"
+                        placeholder="아이디"
+                        className="w-full p-2 mb-2 border rounded"
+                    />
+                    <input
+                        type="password"
+                        placeholder="비밀번호"
+                        className="w-full p-2 mb-4 border rounded"
+                    />
+                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                        로그인
+                    </button>
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>

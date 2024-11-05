@@ -1,5 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight, Paperclip, Search, Mail ,Archive ,Send,FileText,Trash, RefreshCw} from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Paperclip,
+    Search,
+    Mail,
+    Archive,
+    Send,
+    FileText,
+    Trash,
+    RefreshCw
+} from 'lucide-react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
@@ -10,22 +21,23 @@ const Input = ({className, ...props}) => {
 
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35"/>
     </svg>
 );
 
 
 export default function EmailSend() {
-    const [empCode,setEmpCode] = useState("")
+    const [empCode, setEmpCode] = useState("")
     const navigate = useNavigate();
-    const [sendList,setSendList] = useState([])
-    const[searchList,setSearchList]=useState("")
-    const [serachResult,setSerachResult] = useState([])
+    const [sendList, setSendList] = useState([])
+    const [searchList, setSearchList] = useState("")
+    const [serachResult, setSerachResult] = useState([])
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage  = 20;
+    const itemsPerPage = 20;
     const indexOfLastMail = currentPage * itemsPerPage;
     const indexOfFirstMail = indexOfLastMail - itemsPerPage;
     const currentMails = sendList.slice(indexOfFirstMail, indexOfLastMail);
@@ -56,7 +68,7 @@ export default function EmailSend() {
         // 로그인 후 empCode를 설정하는 로직
         const fetchEmpCode = async () => {
             // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "3148200040-abcmart147"; // 로그인 후 받아온 empCode
+            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
             setEmpCode(loggedInEmpCode);
         };
         fetchEmpCode();
@@ -64,7 +76,7 @@ export default function EmailSend() {
 
 
     useEffect(() => {
-        const fetchData = async ()=> {
+        const fetchData = async () => {
             if (empCode) { // empCode가 설정된 경우에만 호출
                 try {
                     const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
@@ -81,7 +93,7 @@ export default function EmailSend() {
     }, [empCode]);
 
     useEffect(() => {
-        const mailList = async()=>{
+        const mailList = async () => {
             //  여기 가 수정되어야함
             const response = await axios.get('/selectDeleteList', {
                 params: {
@@ -112,17 +124,17 @@ export default function EmailSend() {
     //새로운 체크박스를 기존배열의길이를 복사하고 체크박스의 상태를 반전시킴
 
 
-    const goSendMail=(e)=>{
+    const goSendMail = (e) => {
         navigate("/MailSend");
         window.location.reload();
     }
 
-    const goSendMailList=(e)=>{
+    const goSendMailList = (e) => {
         navigate("/MailSendList");
         window.location.reload();
     }
 
-    const refresh =(e)=>{
+    const refresh = (e) => {
         navigate("/MailTrashList");
         window.location.reload();
     }
@@ -140,7 +152,7 @@ export default function EmailSend() {
         console.log("메일 삭제 요청할 ID:", mailNumsToDelete);
 
         try {
-            await axios.delete('/deleteMail', { data: mailNumsToDelete});
+            await axios.delete('/deleteMail', {data: mailNumsToDelete});
             // 삭제 성공 후, UI를 업데이트
             setSendList(sendList.filter((_, index) => !selectedCheckboxes[index]));
             setSelectedCheckboxes(new Array(sendList.length).fill(false)); // 체크박스 초기화
@@ -152,7 +164,7 @@ export default function EmailSend() {
     };
 
     //복구
-    const againMails = async() => {
+    const againMails = async () => {
         const mailNumsToDelete = sendList
             .filter((_, index) => selectedCheckboxes[index]) // 선택된 메일의 인덱스를 가져옴
             .map(v => v.mailNum); // 선택된 메일의 mailNum 배열 생성
@@ -171,7 +183,7 @@ export default function EmailSend() {
             setSendList(sendList.filter((_, index) => !selectedCheckboxes[index]));
             setSelectedCheckboxes(new Array(sendList.length).fill(false)); // 체크박스 초기화
             setSelectAll(false); // 전체 선택 체크 해제
-            
+
         } catch (error) {
             console.error(error);
             alert("메일 복구중 오류가 발생했습니다.");
@@ -179,7 +191,7 @@ export default function EmailSend() {
     };
 
 
-    const mailOnChangeHandler=(e)=>{
+    const mailOnChangeHandler = (e) => {
         setSearchList(e.target.value)
     }
 
@@ -191,52 +203,52 @@ export default function EmailSend() {
         setSerachResult(filterMail);
     };
 
-    const gogoDetail =(v)=>{
-        navigate("/MailDetail",{state: v});
+    const gogoDetail = (v) => {
+        navigate("/MailDetail", {state: v});
 
     }
 
-    const goToMeMailSend =()=>{
+    const goToMeMailSend = () => {
         navigate("/ToMeMailSend");
         window.location.reload();
     }
 
-    const goMailTrashList =()=>{
+    const goMailTrashList = () => {
         navigate("/MailTrashList");
         window.location.reload();
     }
 
-    const goRealDelete =(e)=>{
+    const goRealDelete = (e) => {
         console.log("진짜?")
         setIsPopupOpen(true)
     }
 
 
-    const goToMeMailSendList =()=>{
+    const goToMeMailSendList = () => {
         //내게
         navigate("/ToMeMailSendList");
         window.location.reload();
     }
 
-    const goAttachMentMailList =()=>{
+    const goAttachMentMailList = () => {
         //첨부
         navigate("/AttachMentMailList");
         window.location.reload();
     }
 
-    const goToTalMailSendList =()=>{
+    const goToTalMailSendList = () => {
         //전부
         navigate("/ToTalMailSendList");
         window.location.reload();
     }
 
-    const goReceivedMailList =()=>{
+    const goReceivedMailList = () => {
         //받은
         navigate("/ReceivedMailList");
         window.location.reload();
     }
 
-    const handleConfirmDelete = async ()=>{
+    const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
             alert("삭제완룡")

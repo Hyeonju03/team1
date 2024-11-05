@@ -1,8 +1,10 @@
 import {useEffect, useState} from 'react';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
-const Input = ({ className, placeholder, ...props }) => (
+import {useAuth} from "./noticeAuth";
+
+const Input = ({className, placeholder, ...props}) => (
     <input
         type="text"
         className={`border p-2 rounded ${className}`}
@@ -11,7 +13,7 @@ const Input = ({ className, placeholder, ...props }) => (
     />
 );
 
-const Button = ({ variant, children, className, ...props }) => (
+const Button = ({variant, children, className, ...props}) => (
     <button
         className={`px-4 py-2 rounded ${variant === 'outline' ? 'border' : 'bg-blue-500 text-white'} ${className}`}
         {...props}
@@ -22,19 +24,20 @@ const Button = ({ variant, children, className, ...props }) => (
 
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35"/>
     </svg>
 );
 
 const ChevronDownIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
     </svg>
 );
 
 const ChevronUpIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7"/>
     </svg>
 );
 
@@ -44,9 +47,17 @@ export default function FAQPage() {
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [question, setQuestion] = useState("");
     const navigate = useNavigate();
-    const[searchResult,setSearchResult] = useState([])
-    const[categoryResult,setCategoryResult] = useState([])
+    const [searchResult, setSearchResult] = useState([])
+    const [categoryResult, setCategoryResult] = useState([])
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+// 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);
+
+
+    console.log("확인", empCode);
+
 
     const toggleAnswer = (index) => {
         setExpandedIndex(expandedIndex === index ? null : index);
@@ -115,23 +126,62 @@ export default function FAQPage() {
         ? categoryResult.filter((faq) => faq.category === uniqueResults[selectedCategoryIndex].category)
         : searchResult;
 
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get("/FAQList");
-                const randomList = getRandomItems(response.data, 10);
-                setSearchResult(randomList);
-                setCategoryResult(response.data)
-                console.log(response.data)
-                // console.log(randomList);
-            } catch (error) {
-                console.error(error);
-            }
-        };
 
-        fetchData(); // 비동기 함수 호출
-    }, []);
+        // `isLoggedIn`이 처음 설정되기 전, 즉 `undefined`일 때는 아무 작업도 하지 않음
+        if (isLoggedIn === undefined) {
+            return;
+        }
+
+        // 초기 렌더링 시 이전 상태가 없으면 이전 상태를 현재 상태로 설정
+        if (prevLogin === undefined) {
+            setPrevLogin(isLoggedIn);
+            return;
+        }
+
+        console.log("prev>", prevLogin, " login>", isLoggedIn)
+
+        if (isLoggedIn === true && prevLogin === false) {
+            const fetchData = async () => {
+                try {
+                    const response = await axios.get("/FAQList");
+                    const randomList = getRandomItems(response.data, 10);
+                    setSearchResult(randomList);
+                    setCategoryResult(response.data)
+                    console.log(response.data)
+                    // console.log(randomList);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            fetchData(); // 비동기 함수 호출
+        }
+
+        if (isLoggedIn === false && prevLogin === false) {
+            // 로그인하지 않은 상태일 때만 alert 띄우기
+            alert("로그인 해야함");
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode, prevLogin]); // isLoggedIn과 empCode 변경 시에만 실행
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
 
     return (
         // <div className="container mx-auto p-4">
@@ -148,14 +198,15 @@ export default function FAQPage() {
                     </h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
+                            <h2 onClick={goQList} className="cursor-pointer">
                            <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                  style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                            1:1 상담
+                                1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의작성
                                 </li>
-                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
@@ -209,7 +260,7 @@ export default function FAQPage() {
                                             {expandedIndex === index ? <ChevronUpIcon/> : <ChevronDownIcon/>}
                                         </div>
                                         {expandedIndex === index && (
-                                            <div className="pb-3 text-gray-600">{faq.content}</div>
+                                            <div className="pb-3 text-gray-600 text-start">{faq.content}</div>
                                         )}
                                     </div>
                                 ))
@@ -233,20 +284,24 @@ export default function FAQPage() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>

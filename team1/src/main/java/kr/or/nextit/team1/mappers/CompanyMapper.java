@@ -9,11 +9,13 @@ import java.util.List;
 public interface CompanyMapper {
     void insertCompany(CompanyDTO companyDTO);
 
-   List<CompanyDTO> selectComList(String comCode);
+    List<CompanyDTO> selectComList(String comCode);
 
-   void updateInfo(CompanyDTO companyDTO);
+    void updateInfo(CompanyDTO companyDTO);
 
-   void updateStatus(String comCode);
+    void updateStatus(String comCode);
 
-   int selectStatus(String comCode);
+    int selectStatus(String comCode);
+
+    int selectAllEmpNum(String comCode);
 }
