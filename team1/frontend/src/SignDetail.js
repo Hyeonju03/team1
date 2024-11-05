@@ -5,10 +5,17 @@ import {ChevronDown, ChevronRight, Paperclip} from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import SignModal from "./SignModal";
+import {useAuth} from "./noticeAuth";
 
 export default function SignDetail() {
     // pdf
     const printRef = useRef(null); // useRef로 초기화
+
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
     const navigate = useNavigate();
     const [isToggled, setIsToggled] = useState(false);
@@ -28,8 +35,7 @@ export default function SignDetail() {
     const [currentAction, setCurrentAction] = useState(null);
     const [modalMessage, setModalMessage] = useState("");
 
-    const empCode = "3148127227-user001";
-    const comCode = "3148127227";
+    const comCode = empCode.split("-")[0];
 
     // pdf제작
     const handleDownloadPdf = async () => {
@@ -56,12 +62,23 @@ export default function SignDetail() {
         pdf.save('결재서.pdf')
     }
 
-    // 아이디 바뀔때 마다 실행(렌더링 마다로 하면 카운트 오류 발생 사람이 계속 나옴.)
     useEffect(() => {
-        fetchUserInfo();
-        fetchCategories();
-        fetchSignDetail();
-    }, [id]);
+        if (isLoggedIn) {
+            axios.get(`/code/${comCode}`)
+                .then(response => {
+                    const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map(category => category))];
+                    setCategories(uniqueCategories);
+                })
+                .catch(error => console.log(error));
+
+            fetchUserInfo();
+            fetchCategories();
+            fetchSignDetail();
+        }
+
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     useEffect(() => {
         if (!sign || !sign.target) {
@@ -87,6 +104,18 @@ export default function SignDetail() {
             .catch(error => console.log(error));
 
     }, [empCode]);
+
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 유저 정보 조회 (필요성 재확인 필요.)
     const fetchUserInfo = async () => {
@@ -211,7 +240,6 @@ export default function SignDetail() {
             } else {
                 alert("승인되었습니다."); // 확인 알림
             }
-            window.location.reload();
         } catch (error) {
             console.error("Error updating sign:", error);
             alert("결재 처리 중 오류가 발생했습니다.");
@@ -229,7 +257,6 @@ export default function SignDetail() {
 
     // 승인버튼
     const asignButton = (signNum) => {
-        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const targetEntries = sign.target.split(',');
 
         targetEntries.map((entry, index) => {
@@ -260,7 +287,6 @@ export default function SignDetail() {
     };
 
     const handleAsign = async (signNum, targetEntries) => {
-        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const updatedTargetEntries = targetEntries.map((entry) => {
             const [code, status] = entry.split(':');
             if (code === empCode) {
@@ -273,18 +299,21 @@ export default function SignDetail() {
         await handleSignUpdate(signNum, updatedTarget); // DB 업데이트
     };
 
-    // 반려 버튼
     const rejectButton = (signNum) => {
-        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const targetEntries = sign.target.split(',');
 
+        console.log(empCode);
+
+        // targetEntries를 map으로 순차적으로 처리
         const updatedTargetEntries = targetEntries.map((entry, index) => {
             const [code, status] = entry.split(':');
 
+            // "확인_미승인" 상태에서만 반려 처리 가능
             if (status === '확인_미승인' && index > 0) {
                 const previousEntry = targetEntries[index - 1].split(':');
                 const previousStatus = previousEntry[1];
 
+                // 이전 결재자가 미승인 또는 반려 상태일 경우
                 if (previousStatus.includes('미승인')) {
                     alert("앞에 있는 사람이 미승인 상태입니다. 결재를 진행할 수 없습니다.");
                     return entry;
@@ -294,19 +323,24 @@ export default function SignDetail() {
                     return entry;
                 }
 
+                // 현재 사용자가 해당 항목의 결재자이고, 반려 처리할 경우
                 if (code === empCode) {
+                    // 모달을 열어 반려 여부 확인
                     setModalMessage("반려 시 다음 결재 진행이 불가합니다. 반려하시겠습니까?");
                     setCurrentAction(() => () => handleReject(signNum, targetEntries)); // 반려 함수 설정
                     setModalOpen(true); // 모달 열기
-                    return entry; // 변경하지 않음
+                    return entry; // 해당 항목은 그대로 두기
                 }
             }
-            return entry; // 업데이트하지 않은 값
+
+            return entry; // 상태를 변경하지 않은 항목은 그대로 반환
         });
+
+        // 상태가 변경된 경우에만 target을 업데이트
+        console.log('Updated Target Entries:', updatedTargetEntries);
     };
 
     const handleReject = async (signNum, targetEntries) => {
-        const empCode = "3148127227-user001"; // 실제 empCode로 변경
         const updatedTargetEntries = targetEntries.map((entry) => {
             const [code] = entry.split(':');
             if (code === empCode) {
@@ -326,6 +360,10 @@ export default function SignDetail() {
         navigate(`/sign`);
     };
 
+    // 화면 옆 슬라이드 열림 구분
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -685,6 +723,47 @@ export default function SignDetail() {
                         />
                     </div>
                 </main>
+
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
