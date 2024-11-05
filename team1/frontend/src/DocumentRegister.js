@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import useComCode from "hooks/useComCode";
+import {useAuth} from "./noticeAuth";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -28,7 +29,35 @@ export default function DocumentRegister() {
     const [attachment, setAttachment] = useState(null);
     const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const navigate = useNavigate();
-    const [empCode, setEmpCode] = useState(process.env.REACT_APP_COM_CODE);
+    // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate("/");
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     const handleFileChange = (event) => {
         setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
@@ -70,7 +99,6 @@ export default function DocumentRegister() {
             formData.append('attachment', attachment);
         }
         formData.append('empCode', empCode);
-
         axios.post('/documents', formData)
             .then(response => {
                 console.log(response.data);
@@ -172,6 +200,46 @@ export default function DocumentRegister() {
                         </div>
                     </form>
                 </main>
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );

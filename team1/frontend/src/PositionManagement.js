@@ -3,6 +3,8 @@ import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import {FaExchangeAlt} from 'react-icons/fa'
 import axios from "axios";
 import {Pencil, Trash} from "lucide-react";
+import {useAuth} from "./noticeAuth";
+import {useNavigate} from "react-router-dom";
 
 // React 18 strict mode에서 작동하기 위한 wrapper
 const StrictModeDroppable = ({children, ...props}) => {
@@ -32,43 +34,72 @@ export default function PositionManagement() {
     //------------------------------------------------
     const [comCode, setComCode] = useState(process.env.REACT_APP_COM_TEST_CODE);
     //------------------------------------------------
+    const navigate = useNavigate();
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
 
     // 회사명 불러오기
     useEffect(() => {
-        const fetchCompanyName = async () => {
-            try {
-                const response = await axios.get('/companyName', {
-                    params: {comCode: comCode}
-                })
-                setCompanyName(response.data);
-            } catch (e) {
-                console.error(e);
-            }
-        };
+        if (isLoggedIn) {
+            const fetchCompanyName = async () => {
+                try {
+                    const response = await axios.get('/companyName', {
+                        params: {comCode: comCode}
+                    })
+                    setCompanyName(response.data);
+                } catch (e) {
+                    console.error(e);
+                }
+            };
 
-        fetchCompanyName();
-    }, []);
+            fetchCompanyName();
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]);
 
     // 조회
     useEffect(() => {
-        const fetchPositions = async () => {
-            try {
-                const response = await axios.get('/positions', {
-                    params: {comCode: comCode}
-                });
-                const positionNames = response.data.posCode.split(','); // 쉼표로 분리
-                const positionObjects = positionNames.map((name, index) => ({
-                    id: `${index + 1}`,
-                    name: name.trim(),
-                }));
-                setPositions(positionObjects);
-            } catch (e) {
-                console.error(e);
-            }
-        };
+        if (isLoggedIn) {
+            const fetchPositions = async () => {
+                try {
+                    const response = await axios.get('/positions', {
+                        params: {comCode: comCode}
+                    });
+                    const positionNames = response.data.posCode.split(','); // 쉼표로 분리
+                    const positionObjects = positionNames.map((name, index) => ({
+                        id: `${index + 1}`,
+                        name: name.trim(),
+                    }));
+                    setPositions(positionObjects);
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+            fetchPositions();
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]);
 
-        fetchPositions();
-    }, []);
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 추가
     const handleInsert = async () => {
@@ -77,16 +108,25 @@ export default function PositionManagement() {
         // posCode를 문자열로 설정
         const posCode = newPositionName.trim();
 
+        // 새로운 직급 코드가 기존 직급 목록에 있는지 확인
+        const isDuplicate = positions.some(pos => pos.name.trim() === posCode.trim());
+        if (isDuplicate) {
+            alert('해당 직급이 이미 존재합니다: ' + posCode);
+            return;
+        }
+
         try {
             await axios.put('/positions/insert', {
                 comCode: comCode,
                 posCode: posCode
             });
+
             // 상태 업데이트
             setPositions([...positions, {id: `new-${Date.now()}`, name: newPositionName}]);
             setNewPositionName('');
+            alert('직급이 성공적으로 추가되었습니다.');
         } catch (e) {
-            console.error(e);
+            alert('직급 추가 중 오류가 발생했습니다.');
         }
     }
 
@@ -111,6 +151,14 @@ export default function PositionManagement() {
     // 수정
     const handleUpdate = async (nodeId, newName) => {
         const oldName = positions.find(pos => pos.id === nodeId).name;
+
+        // 새로운 직급 코드가 기존 직급 목록에 있는지 확인
+        const isDuplicate = positions.some(pos => pos.name.trim() === newName.trim());
+        if (isDuplicate) {
+            alert('해당 직급이 이미 존재합니다: ' + newName);
+            return;
+        }
+
         try {
             const response = await axios.put('/positions/update', {
                 comCode: comCode,
@@ -122,9 +170,10 @@ export default function PositionManagement() {
                 setPositions(positions.map(pos =>
                     pos.id === nodeId ? {...pos, name: newName} : pos
                 ));
+                alert('직급이 성공적으로 수정되었습니다.');
             }
         } catch (e) {
-            console.error('직급 수정 중 오류가 발생했습니다.', e);
+            alert('직급 수정 중 오류가 발생했습니다.');
         }
     }
 
@@ -133,11 +182,18 @@ export default function PositionManagement() {
         const confirmDelete = window.confirm('직급을 삭제하시겠습니까?');
         if (confirmDelete) {
             try {
+                // 직급 사용 여부 확인
+                const response = await axios.get(`/positions/checkUsage/${comCode}/${posCode}`);
+                if (response.data.isUsed) {
+                    alert('해당 직급이 사용 중이므로 삭제할 수 없습니다.');
+                    return; // 사용 중이면 삭제하지 않음
+                }
+
                 await axios.delete(`/positions/delete/${comCode}/${posCode}`)
                 setPositions(positions.filter(pos => pos.id !== nodeId))
                 alert('직급이 성공적으로 삭제되었습니다.');
             } catch (e) {
-                console.error('직급 삭제 중 오류가 발생했습니다.', e);
+                alert('직급 삭제 중 오류가 발생했습니다.');
             }
         }
     };
@@ -166,7 +222,7 @@ export default function PositionManagement() {
         <div className="p-4 max-w-md mx-auto">
             <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">직급 관리</h1>
-                {/* Company Name */}
+                {/* 회사 이름 */}
                 <div className="flex items-center gap-2 py-2 mb-4">
                     <div className="flex items-center gap-2">
                         <span className="font-bold text-lg">{companyName}</span>
@@ -270,7 +326,46 @@ export default function PositionManagement() {
                     추가
                 </button>
             </div>
-        </div>
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
 
-    )
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
+            </div>
+        </div>
+    );
 }

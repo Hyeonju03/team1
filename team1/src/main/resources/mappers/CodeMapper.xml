@@ -79,4 +79,31 @@
             COM_CODE = #{comCode}
     </select>
 
+    <update id="updateEmployeeDepCode">
+        UPDATE EMPLOYEE
+        SET DEP_CODE = #{newDepCode}
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+        AND DEP_CODE = #{oldDepCode}
+    </update>
+
+    <select id="countEmployeesByDepCode" resultType="int">
+        SELECT COUNT(*)
+        FROM EMPLOYEE
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+        AND DEP_CODE = #{depCode}
+    </select>
+
+    <update id="updateEmployeePosCode">
+        UPDATE EMPLOYEE
+        SET POS_CODE = #{newPosCode}
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+        AND POS_CODE = #{oldPosCode}
+    </update>
+
+    <select id="countEmployeesByPosCode" resultType="int">
+        SELECT COUNT(*)
+        FROM EMPLOYEE
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+        AND POS_CODE = #{posCode}
+    </select>
 </mapper>

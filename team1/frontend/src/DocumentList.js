@@ -3,6 +3,7 @@ import {ChevronDown, ChevronRight, Paperclip, Search} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import useComCode from "hooks/useComCode";
+import {useAuth} from "./noticeAuth";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -29,18 +30,43 @@ export default function DocumentList() {
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
     const navigate = useNavigate(); // navigate 함수 사용
-    const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
+    // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    const [auth, setAuth] = useState(null);
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     useEffect(() => {
-        // documenttest 테이블에서 문서 가져오기
-        axios.get(`/company/${empCode}`)
-            .then(response => {
-                console.log(response.data);
-                setDocuments(response.data);
-                setFilteredDocuments(response.data); // 초기값은 전체 문서
-            })
-            .catch(error => console.log(error));
-    }, []);
+        if (isLoggedIn) {
+            // document 테이블에서 문서 가져오기
+            axios.get(`/company/${comCode}`)
+                .then(response => {
+                    setDocuments(response.data);
+                    setFilteredDocuments(response.data); // 초기값은 전체 문서
+                })
+                .catch(error => console.log(error));
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 문서 제목 클릭 시 상세 페이지로 이동
     const handleDocumentClick = (docNum) => {
@@ -96,25 +122,53 @@ export default function DocumentList() {
         });
     };
 
+
+    useEffect(() => {
+        const fetchAuth = async () => {
+            try {
+                // 권한 정보 가져오기
+                const response = await axios.get(`/authority/${empCode}`);
+                setAuth(response.data);
+            } catch (error) {
+                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+            }
+        };
+
+        fetchAuth();
+    }, [comCode, empCode]);
+
+    // 등록 버튼
+    const handleRegister = () => {
+        if (auth == '1' || auth == '4' || auth == '5' || auth == '7') {
+            navigate('/document/register', {state: {selectedCategory: selectedCategory}});
+        } else {
+            alert("문서를 등록할 수 있는 권한이 없습니다.");
+        }
+    }
+
+    // 삭제 버튼
     const handleDelete = () => {
-        const deletePromises = selectedDocuments.map(docNum =>
-            axios.delete(`/documents/${docNum}`) // 실제 삭제 API 호출
-        );
+        if (auth == '3' || auth == '5' || auth == '6' || auth == '7') {
+            const deletePromises = selectedDocuments.map(docNum =>
+                axios.delete(`/documents/${docNum}`)
+            );
 
-        Promise.all(deletePromises)
-            .then(() => {
-                // 삭제 후 상태 업데이트
-                setDocuments(prevDocuments =>
-                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
-                );
-                setFilteredDocuments(prevDocuments =>
-                    prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
-                );
-                setSelectedDocuments([]); // 선택된 문서 초기화
-            })
-            .catch(error => console.log(error));
+            Promise.all(deletePromises)
+                .then(() => {
+                    // 삭제 후 상태 업데이트
+                    setDocuments(prevDocuments =>
+                        prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                    );
+                    setFilteredDocuments(prevDocuments =>
+                        prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                    );
+                    setSelectedDocuments([]); // 선택된 문서 초기화
+                })
+                .catch(error => console.log(error));
+        } else {
+            alert("문서를 삭제할 수 있는 권한이 없습니다.");
+        }
     };
-
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -163,10 +217,7 @@ export default function DocumentList() {
 
                     <div className="flex justify-end space-x-2 mb-4">
                         <Button variant="outline"
-                                onClick={() => {
-                                    // 등록 페이지로 이동할 때 선택된 카테고리를 전달
-                                    navigate('/document/register', {state: {selectedCategory: selectedCategory}});
-                                }}>등록</Button>
+                                onClick={handleRegister}>등록</Button>
                         <Button variant="outline" onClick={handleDelete}>삭제</Button>
                     </div>
                     <h1 className="text-2xl font-bold mb-4">문서함</h1>
@@ -198,6 +249,46 @@ export default function DocumentList() {
                             </div>))}
                     </div>
                 </main>
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );

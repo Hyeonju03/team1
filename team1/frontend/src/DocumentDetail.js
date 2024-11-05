@@ -3,6 +3,7 @@ import {ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import useComCode from "hooks/useComCode";
+import {useAuth} from "./noticeAuth";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -26,27 +27,63 @@ export default function DocumentDetail() {
     const [codeCategory] = useComCode();
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
+    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
+    // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    const [auth, setAuth] = useState(null);
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
-    // const data = {
-    //     키:값
-    //     키:값
-    // }
-    // const response = await axios.get(`/documents/${id}`,{params:벨류})
-    
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+
     useEffect(() => {
-        async function documentDetail() {
-            try {
-                const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
-                setDoc(response.data);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false); // 로딩이 끝남
+        if (isLoggedIn) {
+            async function documentDetail() {
+                try {
+                    const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
+                    setDoc(response.data);
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    setLoading(false); // 로딩이 끝남
+                }
             }
-        }
 
-        documentDetail();
-    }, [id]);
+            documentDetail();
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [id, isLoggedIn, empCode]);
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchAuth = async () => {
+            try {
+                // 권한 정보 가져오기
+                const response = await axios.get(`/authority/${empCode}`);
+                setAuth(response.data);
+            } catch (error) {
+                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+            }
+        };
+
+        fetchAuth();
+    }, [comCode, empCode]);
 
     // 문서가 로딩 중일 때는 아무것도 표시하지 않음
     if (loading) {
@@ -94,26 +131,35 @@ export default function DocumentDetail() {
 
     // 수정
     const handleUpdateClick = () => {
-        navigate(`/documents/update/${id}`);  // 수정 버튼 클릭 시 수정 페이지로 이동
+        if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
+            navigate(`/documents/update/${id}`);
+        } else {
+            alert("문서를 수정할 수 있는 권한이 없습니다.");
+        }
     };
 
     // 삭제
     const handleDeleteClick = async () => {
-        try {
-            await axios.delete(`/documents/${id}`)
-            navigate(`/documents/`); // 삭제 후 문서 리스트로 이동
-            alert("성공적으로 삭제되었습니다.")
+        if (auth == '3' || auth == '5' || auth == '6' || auth == '7') {
+            try {
+                await axios.delete(`/documents/${id}`)
+                navigate(`/documents/`); // 삭제 후 문서 리스트로 이동
+                alert("성공적으로 삭제되었습니다.")
 
-        } catch (e) {
-            console.error(e);
-            alert("삭제에 실패했습니다.");
+            } catch (e) {
+                console.error(e);
+                alert("삭제에 실패했습니다.");
+            }
+        } else {
+            alert("문서를 삭제할 수 있는 권한이 없습니다.");
         }
-    }
+    };
 
     // 목록 버튼 클릭 시 리스트 페이지로 이동
     const handleHome = () => {
         navigate(`/documents/`);
     };
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -186,6 +232,46 @@ export default function DocumentDetail() {
                         <Button variant="outline" onClick={handleDeleteClick}>삭제</Button>
                     </div>
                 </main>
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );

@@ -88,4 +88,10 @@ public class DocumentService {
     public void documentDelete(int id) {
         documentMapper.documentDelete(id);
     }
+
+    // 권한
+    public String getAuthorityByEmpCode(String empCode){
+        return documentMapper.getAuthorityByEmpCode(empCode);
+    }
+
 }

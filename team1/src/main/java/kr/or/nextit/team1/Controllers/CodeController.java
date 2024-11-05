@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import java.util.List;
 
 @RestController
 public class CodeController {
@@ -51,7 +50,6 @@ public class CodeController {
         String comCode = params.get("comCode");
         String oldDepCode = params.get("oldDepCode");
         String newDepCode = params.get("depCode");
-
         try {
             codeService.updateDepartmentName(comCode, oldDepCode, newDepCode);
             return ResponseEntity.ok("부서가 성공적으로 수정되었습니다.");
@@ -59,6 +57,15 @@ public class CodeController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("부서 이름 수정 중 오류가 발생했습니다.");
         }
+    }
+
+    // 부서 사용 여부 확인
+    @GetMapping("/departments/checkUsage/{comCode}/{depCode}")
+    public ResponseEntity<Map<String, Boolean>> isDepartmentUsed(@PathVariable String comCode, @PathVariable String depCode) {
+        boolean isUsed = codeService.isDepartmentUsed(comCode, depCode);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isUsed", isUsed);
+        return ResponseEntity.ok(response);
     }
 
     // 부서 삭제
@@ -98,8 +105,6 @@ public class CodeController {
     // 직급 수정
     @PutMapping("/positions/update")
     public ResponseEntity<String> updatePosition(@RequestBody Map<String, String> params) {
-        System.out.println("params 값 : " + params);
-
         String comCode = params.get("comCode");
         String oldPosCode = params.get("oldPosCode");
         String newPosCode = params.get("newPosCode");
@@ -111,6 +116,15 @@ public class CodeController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("직급 이름 수정 중 오류가 발생했습니다.");
         }
+    }
+
+    // 직급 사용 여부 확인
+    @GetMapping("/positions/checkUsage/{comCode}/{posCode}")
+    public ResponseEntity<Map<String, Boolean>> isPositionUsed(@PathVariable String comCode, @PathVariable String posCode) {
+        boolean isUsed = codeService.isPositionUsed(comCode, posCode);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isUsed", isUsed);
+        return ResponseEntity.ok(response);
     }
 
     // 직급 삭제
@@ -132,6 +146,6 @@ public class CodeController {
     }
 
     public List<CodeDTO> selectCategories(@PathVariable String comCode) {
-       return codeService.selectCategories(comCode); // 모든 카테고리 반환 
+        return codeService.selectCategories(comCode); // 모든 카테고리 반환
     }
 }

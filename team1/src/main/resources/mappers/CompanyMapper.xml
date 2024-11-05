@@ -10,6 +10,12 @@
 
    </insert>
 
+    <insert id="insertCodeByDepCode" parameterType="CodeDTO">
+        INSERT INTO code
+        (COM_CODE, DEP_CODE, UPDEP_CODE)
+        VALUES(#{comCode}, #{depCode}, '');
+    </insert>
+
     <select id="selectComList" parameterType="kr.or.nextit.team1.DTOs.CompanyDTO">
         select *
         from company

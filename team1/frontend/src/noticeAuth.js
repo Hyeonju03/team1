@@ -1,16 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 
 const noticeAuth = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({children}) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [empCode, setEmpCode] = useState("");
     const [role, setRole] = useState(null); // 역할 상태 추가
     const [token, setToken] = useState(""); // 토큰 상태 추가
-
     const config = {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {Authorization: `Bearer ${token}`},
     };
 
     useEffect(() => {
@@ -47,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <noticeAuth.Provider value={{ isLoggedIn, empCode, role, login, logout, setRole }}>
+        <noticeAuth.Provider value={{isLoggedIn, empCode, role, login, logout, setRole}}>
             {children}
         </noticeAuth.Provider>
     );

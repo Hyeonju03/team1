@@ -17,4 +17,6 @@ public interface DocumentMapper {
     void documentUpdate(DocumentDTO documentDTO);
 
     void documentDelete(int id);
+
+    String getAuthorityByEmpCode(String empCode);
 }

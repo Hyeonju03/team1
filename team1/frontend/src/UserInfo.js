@@ -1,29 +1,37 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "./noticeAuth";
 
 export default function UserInfo() {
     const [empName, setEmpName] = useState(""); // 이름
     const [depCode, setDepCode] = useState(""); // 부서코드
     const [posCode, setPosCode] = useState(""); // 직급코드
     const [empRrn, setEmpRrn] = useState(""); // 주민등록번호 (변경불가)
-    const [empCode, setEmpCode] = useState(""); // 사원코드 (변경불가)
+    const [empCodeValue, setEmpCodeValue] = useState(""); // 사원코드 (변경불가)
     const [empPass, setEmpPass] = useState(""); // 비밀번호
     const [phoneNum, setPhoneNum] = useState(""); // 전화번호
     const [extNum, setExtNum] = useState(""); // 내선번호
     const [empMail, setEmpMail] = useState(""); // 메일
     const [corCode, setCorCode] = useState(""); // 상관코드 (필수아님)
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [codeCategory, setCodeCategory] = useState();
     const [userEmpCode, setUserEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    const navigate = useNavigate();
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
     // 모든 칸에 스페이스바 입력 금지
     const preventSpaceBar = (e) => {
         if (e.key === ' ') {
             e.preventDefault();
         }
-    };
-
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
     };
 
     const [userInfo, setUserInfo] = useState();
@@ -47,37 +55,50 @@ export default function UserInfo() {
 
 
     useEffect(() => {
-        axios.get(`/${userEmpCode}`)
-            .then(response => {
-                setUserInfo(response.data);
+        if (isLoggedIn) {
+            axios.get(`/${userEmpCode}`)
+                .then(response => {
+                    setUserInfo(response.data);
 
-                if (response.data) {
-                    // 상태 초기화
-                    setEmpName(response.data.empName || "");
-                    setDepCode(response.data.depCode || "");
-                    setPosCode(response.data.posCode || "");
-                    setEmpRrn(response.data.empRrn || "");
-                    setEmpCode(response.data.empCode || "");
-                    setEmpPass(response.data.empPass || "");
-                    setPhoneNum(response.data.phoneNum || "");
-                    setExtNum(response.data.extNum || "");
-                    setEmpMail(response.data.empMail || "");
-                    setCorCode(response.data.corCode || "");
+                    if (response.data) {
+                        // 상태 초기화
+                        setEmpName(response.data.empName || "");
+                        setDepCode(response.data.depCode || "");
+                        setPosCode(response.data.posCode || "");
+                        setEmpRrn(response.data.empRrn || "");
+                        setEmpCodeValue(response.data.empCode || "");
+                        setEmpPass(response.data.empPass || "");
+                        setPhoneNum(response.data.phoneNum || "");
+                        setExtNum(response.data.extNum || "");
+                        setEmpMail(response.data.empMail || "");
+                        setCorCode(response.data.corCode || "");
 
-                    // code 테이블에서 카테고리 가져오기
-                    axios.get(`/code/${userEmpCode.split('-')[0]}`)
-                        .then(response => {
-                            setCodeCategory(response.data);
-                        })
-                        .catch(error => console.log(error));
+                        // code 테이블에서 카테고리 가져오기
+                        axios.get(`/code/${userEmpCode.split('-')[0]}`)
+                            .then(response => {
+                                setCodeCategory(response.data);
+                            })
+                            .catch(error => console.log(error));
+                    }
+                })
+                .catch(e => {
+                    console.error("에러: " + e);
+                });
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]);
 
-                }
-            })
-            .catch(e => {
-                console.error("에러: " + e);
-            });
-
-    }, []);
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 유효성체크
     const validateForm = () => {
@@ -314,12 +335,24 @@ export default function UserInfo() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input type="text" placeholder="아이디" className="w-full p-2 mb-2 border rounded"/>
-                    <input type="password" placeholder="비밀번호" className="w-full p-2 mb-4 border rounded"/>
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
