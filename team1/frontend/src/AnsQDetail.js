@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
+import {useAuth} from "./noticeAuth";
+
 function Button({children, size, variant, onClick}) {
     const baseStyle = "px-4 py-2 rounded";
     const sizeStyle = size === "sm" ? "text-sm" : "text-base";
@@ -51,25 +53,30 @@ function TableCell({children, onClick}) {
 }
 
 export default function Component() {
-    const navigate = useNavigate();
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const navigate = useNavigate();
     const [Qlist, setQList] = useState([])
     const [qSearch, setQSearch] = useState("")
     const [filterQlist, setFilterQlist] = useState([])
 
-    const [empCode, setEmpCode] = useState("")
+    const [adminId, setAdminId] = useState("")
+    const [permission, setPermission] = useState(false)
 
-    //로그인시 empcode를 일단 가져오는코드
+    //로그아웃이 맨위로
     useEffect(() => {
-        // 로그인 후 empCode를 설정하는 로직
-        const fetchEmpCode = async () => {
-            // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "kdj"; // 로그인 후 받아온 empCode
-            setEmpCode(loggedInEmpCode);
-        };
-        fetchEmpCode();
-    }, []);
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
+
 
     const handleCheckboxChange = (id) => {
         setQList(prevData =>
@@ -88,36 +95,50 @@ export default function Component() {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get("/AnsQDetailList");
-                const list = response.data;
-                console.log(response.data)
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                try {
+                    //영자씨인지 확인
+                    const response = await axios.get(`/selectAdmin`, {params: {adminId: empCode}});
+                    console.log(response.data)
+                    setAdminId(response.data);
 
-                // startDate 변환
-                const updatedList = list.map(v => {
-                    const date = new Date(v.startDate);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
+                    if (response.data === 0) {
+                        setPermission(false);
+                    } else {
+                        setPermission(true);
+                    }
 
-                    return {
-                        ...v, // 기존 데이터 유지
-                        startDate: `${year}-${month}-${day}`, // 변환된 날짜
-                        checked: false
-                    };
-                });
+                    // 리스트가져오기
+                    const response2 = await axios.get("/AnsQDetailList");
+                    const list = response2.data;
+                    console.log(response2.data)
 
-                setQList(updatedList);
-                setFilterQlist(updatedList)
-            } catch (error) {
-                console.error(error);
+                    // startDate 변환
+                    const updatedList = list.map(v => {
+                        const date = new Date(v.startDate);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+
+                        return {
+                            ...v, // 기존 데이터 유지
+                            startDate: `${year}-${month}-${day}`, // 변환된 날짜
+                            checked: false
+                        };
+                    });
+
+                    setQList(updatedList);
+                    setFilterQlist(updatedList)
+                } catch (error) {
+                    console.error(error);
+                }
             }
-        }
-        if (empCode) {
             fetchData();
         }
-    }, [empCode])
+        setPrevLogin(isLoggedIn);
+
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
 
     const handleDelete = async () => {
@@ -174,10 +195,6 @@ export default function Component() {
         navigate("/AnsQ", {state: {item}});
     }
 
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
-    };
-
     const goCompleteList = () => {
         navigate("/AnsQCompleteList");
     }
@@ -188,6 +205,30 @@ export default function Component() {
 
     const goAnsQList = () => {
         navigate("/AnsQDetail")
+    }
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    if (!permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
     }
 
 
@@ -291,20 +332,24 @@ export default function Component() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
@@ -314,6 +359,7 @@ export default function Component() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

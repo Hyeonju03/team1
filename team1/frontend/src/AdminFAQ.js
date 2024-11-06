@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-
 import {useAuth} from "./noticeAuth";
 
 const Input = ({className, placeholder, ...props}) => (
@@ -42,21 +41,18 @@ const ChevronUpIcon = () => (
 );
 
 export default function FAQPage() {
+// 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const [expandedIndex, setExpandedIndex] = useState(null);
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [question, setQuestion] = useState("");
     const navigate = useNavigate();
     const [searchResult, setSearchResult] = useState([])
     const [categoryResult, setCategoryResult] = useState([])
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-
-// 로그인
-    const {isLoggedIn, empCode, logout} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);
-
-
-    console.log("확인", empCode);
 
 
     const toggleAnswer = (index) => {
@@ -126,6 +122,27 @@ export default function FAQPage() {
         ? categoryResult.filter((faq) => faq.category === uniqueResults[selectedCategoryIndex].category)
         : searchResult;
 
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("/FAQList");
+                const randomList = getRandomItems(response.data, 10);
+                setSearchResult(randomList);
+                setCategoryResult(response.data)
+                console.log(response.data)
+                // console.log(randomList);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchData(); // 비동기 함수 호출
+    }, []);
+
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
     // 로그아웃 처리 함수
     const handleLogout = async () => {
         try {
@@ -136,51 +153,6 @@ export default function FAQPage() {
             console.error("로그아웃 중 오류 발생:", error);
         }
     };
-
-
-    useEffect(() => {
-
-        // `isLoggedIn`이 처음 설정되기 전, 즉 `undefined`일 때는 아무 작업도 하지 않음
-        if (isLoggedIn === undefined) {
-            return;
-        }
-
-        // 초기 렌더링 시 이전 상태가 없으면 이전 상태를 현재 상태로 설정
-        if (prevLogin === undefined) {
-            setPrevLogin(isLoggedIn);
-            return;
-        }
-
-        console.log("prev>", prevLogin, " login>", isLoggedIn)
-
-        if (isLoggedIn === true && prevLogin === false) {
-            const fetchData = async () => {
-                try {
-                    const response = await axios.get("/FAQList");
-                    const randomList = getRandomItems(response.data, 10);
-                    setSearchResult(randomList);
-                    setCategoryResult(response.data)
-                    console.log(response.data)
-                    // console.log(randomList);
-                } catch (error) {
-                    console.error(error);
-                }
-            };
-
-            fetchData(); // 비동기 함수 호출
-        }
-
-        if (isLoggedIn === false && prevLogin === false) {
-            // 로그인하지 않은 상태일 때만 alert 띄우기
-            alert("로그인 해야함");
-            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        }
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
-        setPrevLogin(isLoggedIn);
-    }, [isLoggedIn, empCode, prevLogin]); // isLoggedIn과 empCode 변경 시에만 실행
-    const goQList = () => {
-        navigate("/AdminQDetail");
-    }
 
 
     return (
@@ -271,6 +243,7 @@ export default function FAQPage() {
                     </div>
                 </div>
             </div>
+
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -311,6 +284,7 @@ export default function FAQPage() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

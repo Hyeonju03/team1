@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios";
+import {useAuth} from "./noticeAuth";
 
 
 function Button({children, size, variant, onClick}) {
@@ -18,102 +19,83 @@ function Button({children, size, variant, onClick}) {
     );
 }
 
-function Input({placeholder, onChange}) {
-    return (
-        <input type="text" onChange={onChange} placeholder={placeholder}
-               className="border border-gray-300 p-2 rounded w-full"/>
-    );
-}
-
-function Table({children}) {
-    return (
-        <table className="min-w-full border border-gray-300">
-            {children}
-        </table>
-    );
-}
-
-function TableHeader({children}) {
-    return <thead className="bg-gray-200">{children}</thead>;
-}
-
-function TableBody({children}) {
-    return <tbody>{children}</tbody>;
-}
-
-function TableRow({children}) {
-    return <tr className="border-b">{children}</tr>;
-}
-
-function TableHead({children}) {
-    return <th className="p-2 text-center">{children}</th>;
-}
-
-function TableCell({children, onClick}) {
-    return <td className="p-2 text-center" onClick={onClick}>{children}</td>;
-}
-
 export default function Component() {
     const location = useLocation();
     const {item} = location.state || {qNum: "없음"};
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
     const navigate = useNavigate();
 
     const [Qlist, setQList] = useState([])
     const [filterQlist, setFilterQlist] = useState([])
 
-    const [empCode, setEmpCode] = useState("")
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
-    //로그인시 empcode를 일단 가져오는코드
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
     useEffect(() => {
-        // 로그인 후 empCode를 설정하는 로직
-        const fetchEmpCode = async () => {
-            // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
-            setEmpCode(loggedInEmpCode);
-        };
-        fetchEmpCode();
-    }, []);
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const response = await axios.get("/QDetailList", {params: {empCode}});
-                const list = response.data;
+            if (isLoggedIn) {
+                try {
+                    const response = await axios.get("/QDetailList", {params: {empCode}});
+                    const list = response.data;
+                    console.log(response.data);
 
-                // startDate 변환
-                const updatedList = list.map(v => {
-                    const date = new Date(v.startDate);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
+                    // startDate 변환
+                    const updatedList = list.map(v => {
+                        const date = new Date(v.startDate);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
 
-                    return {
-                        ...v, // 기존 데이터 유지
-                        startDate: `${year}-${month}-${day}`, // 변환된 날짜
-                        checked: false
-                    };
-                });
+                        return {
+                            ...v, // 기존 데이터 유지
+                            startDate: `${year}-${month}-${day}`, // 변환된 날짜
+                            checked: false
+                        };
+                    });
 
-                setQList(updatedList);
-                setFilterQlist(updatedList)
-            } catch (error) {
-                console.error(error);
+                    setQList(updatedList);
+                    setFilterQlist(updatedList)
+                } catch (error) {
+                    console.error(error);
+                }
             }
         }
         fetchData();
-    }, []);
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
-
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
-    };
 
     const goBack = () => {
         navigate(-1)
     }
-    
+
+
+// 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
@@ -170,20 +152,24 @@ export default function Component() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>

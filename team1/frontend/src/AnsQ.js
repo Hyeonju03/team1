@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
 
+import {useAuth} from "./noticeAuth";
+
 const Input = ({className, placeholder, ...props}) => (
     <input
         type="text"
@@ -24,39 +26,55 @@ export default function FAQPage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [adminId, setAdminId] = useState("")
     const [permission, setPermission] = useState(false)
+
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
     const location = useLocation();
     const {item} = location.state || {qNum: "없음"};
 
     console.log(item)
 
-    const fetchData = async () => {
-        //운영자만 가능함ㅇㅇ
-        const loggedInEmpCode = "kdj";
-        //3148127227-user002 이건 권한없는 그냥 user
-        //kdj 운영자
-        setAdminId(loggedInEmpCode);
-
-        const response = await axios.get(`/selectAdmin`, {params: {adminId: loggedInEmpCode}});
-        console.log(response.data)
-        setAdminId(response.data);
-
-        if (response.data === 0) {
-            setPermission(false);
-        } else {
-            setPermission(true);
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
         }
-
-    }
+    }, [])
 
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                //운영자만 가능함ㅇㅇ
+                // const loggedInEmpCode = "kdj";
+                // //3148127227-user002 이건 권한없는 그냥 user
+                // //kdj 운영자
+                // setAdminId(loggedInEmpCode);
 
+                const response = await axios.get(`/selectAdmin`, {params: {adminId: empCode}});
+                console.log(response.data)
+                setAdminId(response.data);
+
+                if (response.data === 0) {
+                    setPermission(false);
+                } else {
+                    setPermission(true);
+                }
+
+            }
+            fetchData();
+        }
+        setPrevLogin(isLoggedIn);
+
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -84,22 +102,34 @@ export default function FAQPage() {
 
     const qCancel = (e) => {
         e.preventDefault(); // 기본 링크 동작 방지
-        navigate("/AdminQDetail"); // 이동할 페이지로 네비게이트
+        navigate("/AnsQDetail"); // 이동할 페이지로 네비게이트
     }
 
-    const goQDetail = () => {
-        navigate("/AdminQDetail");
+    const goCompleteList = () => {
+        navigate("/AnsQCompleteList");
     }
 
-    const qRegister = () => {
-        navigate("/AdminQ");
+    const goNoAnsList = () => {
+        navigate("/NoAnsQList");
+    }
+
+    const goAnsQList = () => {
+        navigate("/AnsQDetail")
     }
 
 
-    const goFAQ = () => {
-        navigate("/AdminFAQ");
-    }
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
+//<토글>
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
@@ -118,22 +148,21 @@ export default function FAQPage() {
 
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
-                     style={{height: "900px"}}>
-                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer"
-                        style={{marginLeft: "-40px", marginTop: "-200px"}}>
-                        <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                              style={{marginRight: "15px"}}/>FAQ</h2>
+                     style={{height: "auto"}}>
                     <ul className="mb-4 text-center">
-                        <li className="text-2xl mb-2">
+                        <li className="text-2xl mb-2 ">
+                            <h2 onClick={goAnsQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                            1:1 상담
+                                1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의작성
+                                <li onClick={goNoAnsList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginTop: "10px", marginBottom: "10px"}}>-
+                                    미답변내역
                                 </li>
-                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의내역
+                                <li onClick={goCompleteList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginLeft: "10px"}}>-
+                                    답변완료내역
                                 </li>
                             </ul>
                         </li>
@@ -144,6 +173,7 @@ export default function FAQPage() {
                     <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
                     <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
                 </div>
+
 
                 <div className="flex-1 p-6 mt-16" style={{marginTop: "-20px"}}>
                     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -185,20 +215,24 @@ export default function FAQPage() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
@@ -208,6 +242,7 @@ export default function FAQPage() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

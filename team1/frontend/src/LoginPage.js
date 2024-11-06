@@ -19,12 +19,14 @@ function LoginPage() {
         <div>
             <h2 style={{marginBottom: "50px"}}>로그인</h2>
             <input
+                className="border"
                 type="text"
                 placeholder="사원 코드"
                 value={empCode}
                 onChange={(e) => setEmpCode(e.target.value)}
             />
             <input
+                className="border"
                 type="password"
                 placeholder="비밀번호"
                 value={password}

@@ -39,4 +39,11 @@
         from employee e
         WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
     </select>
+
+    <select id="permissionSelect" resultType="int">
+        select count(*)
+        from authority a
+        where company_edit=1
+        and EMP_CODE = #{empCode}
+    </select>
 </mapper>

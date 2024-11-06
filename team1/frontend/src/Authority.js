@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
-// import { ChevronDown, ChevronRight } from 'react-icons/your-icon-library';
-
+import {useAuth} from "./noticeAuth";
 
 function Table({children}) {
     return (
@@ -33,63 +32,60 @@ function TableCell({children, colSpan, className}) {
 }
 
 export default function Component() {
-    const [empCode, setEmpCode] = useState("");
     const [empList, setEmpList] = useState([]);
     const [formData, setFormData] = useState([]);
-    const [hasPermission, setHasPermission] = useState(true)
+    const [hasPermission, setHasPermission] = useState(false)
 
-    // const [isExpanded, setIsExpanded] = useState(false);
-    // const categories = [];
+    const navigate = useNavigate(); // useNavigate 훅 사용
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
-    // const handleCategorySelect = (category) => {
-    //     setSelectedCategory(category); // 별도의 선택 상태
-    //
-    //     if (category == "all") {
-    //         setFilteredDocuments(documents);
-    //     } else {
-    //         const filtered = documents.filter((document) => document.signCateCode === category);
-    //         setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
-    //         if (filtered.length === 0) {
-    //             alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
-    //         }
-    //     }
-    // }
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
-    const fetchEmpCode = async () => {
-        //1. 로그인한 emp_code로 select문 조회 -> where _edit = 1; --> cnt > 0 / cnt < 0
-        const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
-        // 3118115625-cjm
-        //3118115625-bbb 권한ㅇ
-        //2218701188-abcmart354 권한ㅇ 3218600105-aa
-        const EmpCode2 = loggedInEmpCode.split("-")[0];
-        setEmpCode(EmpCode2);
-
-
-        const response = await axios.get("/permissionSelect", {params: {empCode: loggedInEmpCode}})
-        console.log("->->", response.data);
-
-        if (response.data === 0) {
-            setHasPermission(false);
-        } else {
-            setHasPermission(true);
-            fetchData(); // 권한이 있을 경우 fetchData 호출
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
         }
-    };
+    }, [])
+
+    console.log("emp", empCode)
+
 
     useEffect(() => {
-        fetchEmpCode();
-    }, []);
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                console.log("여기는옴")
+                const response = await axios.get("/permissionSelect", {params: {empCode: empCode}})
+                console.log("->->", response.data);
 
+                if (response.data === 0) {
+                    setHasPermission(false);
+                } else {
+                    setHasPermission(true);
+                    fetchData2();
+                }
+            };
+            fetchData(); // 권한이 있을 경우 fetchData 호출
+        }
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     // 직원 데이터를 가져오는 함수
-    const fetchData = async () => {
+    const fetchData2 = async () => {
         if (empCode) {
-            const response = await axios.get("/selectEmployeeList", {params: {empCode}});
+            const EmpCode2 = empCode.split("-")[0];
+            console.log(EmpCode2)
+            const response = await axios.get("/selectEmployeeList", {params: {empCode: EmpCode2}});
             setEmpList(response.data);
             setFormData(response.data.map(item => ({
                 permissionEdit: item.permissionEdit,
                 departmentManagement: item.departmentManagement,
                 rankEdit: item.rankEdit,
+                companyEdit: item.companyEdit,
                 notice: item.notice,
                 document: item.document,
                 persInfo: item.persInfo,
@@ -97,10 +93,6 @@ export default function Component() {
             }))); // formData 초기화
         }
     };
-
-    useEffect(() => {
-        fetchData(); // empCode가 설정되면 fetchData 호출
-    }, [empCode]);
 
     const handleCheckboxChange = (index, field) => {
         const newFormData = [...formData];
@@ -130,6 +122,7 @@ export default function Component() {
                 permissionEdit: formData[index]?.permissionEdit !== undefined ? formData[index].permissionEdit : item.permissionEdit,
                 departmentManagement: formData[index]?.departmentManagement !== undefined ? formData[index].departmentManagement : item.departmentManagement,
                 rankEdit: formData[index]?.rankEdit !== undefined ? formData[index].rankEdit : item.rankEdit,
+                companyEdit: formData[index]?.companyEdit !== undefined ? formData[index].companyEdit : item.companyEdit,
                 notice: formData[index]?.notice !== undefined ? formData[index].notice : item.notice,
                 document: formData[index]?.document !== undefined ? formData[index].document : item.document,
                 persInfo: formData[index]?.persInfo !== undefined ? formData[index].persInfo : item.persInfo,
@@ -160,13 +153,30 @@ export default function Component() {
                 }
             }
             alert("저장 완료");
-            fetchData(); // 저장 후 데이터 다시 가져오기
+            // fetchData(); // 저장 후 데이터 다시 가져오기
 
         } catch (error) {
             console.error(error);
             alert("저장 중 오류가 발생했습니다.");
         }
     };
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
 
     if (!hasPermission) {
         return (
@@ -236,6 +246,7 @@ export default function Component() {
                                 <TableHead>권한수정</TableHead>
                                 <TableHead>부서관리</TableHead>
                                 <TableHead>직급관리</TableHead>
+                                <TableHead>회사관리</TableHead>
                                 <TableHead>공지사항권한</TableHead>
                                 <TableHead>문서함권한</TableHead>
                                 <TableHead>인사정보권한</TableHead>
@@ -264,6 +275,11 @@ export default function Component() {
                                             <input type="checkbox"
                                                    checked={formData[index]?.rankEdit}
                                                    onChange={() => handleCheckboxChange(index, 'rankEdit')}/>
+                                        </TableCell>
+                                        <TableCell>
+                                            <input type="checkbox"
+                                                   checked={formData[index]?.companyEdit}
+                                                   onChange={() => handleCheckboxChange(index, 'companyEdit')}/>
                                         </TableCell>
                                         <TableCell>
                                             <select className="text-center"
@@ -333,6 +349,46 @@ export default function Component() {
                     <div className="text-center mt-4">
                         <button onClick={handleSubmit} className="bg-blue-500 text-white rounded px-4 py-2">저장</button>
                     </div>
+                </div>
+            </div>
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
         </div>

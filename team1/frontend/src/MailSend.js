@@ -14,14 +14,18 @@ import {
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
-// import {useAuth} from "@/noticeAuth";
+import {useAuth} from "./noticeAuth";
 
 const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
 };
 
 export default function EmailSend() {
-    const [empCode, setEmpCode] = useState("");
+
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
     const [errors, setErrors] = useState({});
     const [attachment, setAttachment] = useState(null);
     const navigate = useNavigate();
@@ -29,6 +33,8 @@ export default function EmailSend() {
 
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+
 
     const [formData, setFormData] = useState({
         to: '',
@@ -41,20 +47,18 @@ export default function EmailSend() {
         attachment: null,
     });
 
-    // 로그인 시 empCode를 가져오는 코드
+    //로그아웃이 맨위로
     useEffect(() => {
-        const fetchEmpCode = async () => {
-            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
-            //3148127227-jys
-            // 3148127227-user001
-            setEmpCode(loggedInEmpCode);
-        };
-        fetchEmpCode();
-    }, []);
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
+
 
     useEffect(() => {
         const fetchData = async () => {
-            if (empCode) {
+            if (isLoggedIn) {
                 try {
                     const response = await axios.get(`/selectEmpCode?empCode=${empCode}`);
                     console.log(response.data);
@@ -64,7 +68,9 @@ export default function EmailSend() {
             }
         }
         fetchData();
-    }, [empCode]);
+        setPrevLogin(isLoggedIn);
+
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const handleChange = (e) => {
         const {name, value, type, files} = e.target;
@@ -181,6 +187,23 @@ export default function EmailSend() {
         navigate("/ReceivedMailList");
         window.location.reload();
     }
+
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
 
     return (
         // <div className="container mx-auto p-4">
@@ -317,7 +340,51 @@ export default function EmailSend() {
                         )}
                     </form>
                 </div>
+
             </div>
+
+
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
+            </div>
+
         </div>
     );
 }

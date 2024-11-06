@@ -78,6 +78,15 @@ export default function Component() {
         );
     };
 
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
+
+
     useEffect(() => {
         if (isLoggedIn) {
             const fetchData = async () => {
@@ -194,12 +203,6 @@ export default function Component() {
 
     const goQList = () => {
         navigate("/AdminQDetail");
-    }
-
-    if (!localStorage.getItem('empCode')) {
-        alert("로그인 해야함");
-        navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        return null;
     }
 
     return (

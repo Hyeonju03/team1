@@ -2,6 +2,7 @@ package kr.or.nextit.team1.Controllers;
 
 import kr.or.nextit.team1.DTOs.CompanyDTO;
 import kr.or.nextit.team1.Services.CompanyService;
+import kr.or.nextit.team1.mappers.CompanyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,12 @@ import java.util.Map;
 @RestController
 public class CompanyController {
     private final CompanyService companyService;
+    private final CompanyMapper companyMapper;
 
     @Autowired
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(CompanyService companyService, CompanyMapper companyMapper) {
         this.companyService = companyService;
+        this.companyMapper = companyMapper;
     }
 
     @PostMapping("/register")
@@ -60,5 +63,10 @@ public class CompanyController {
     @GetMapping("/selectStatus")
     public int selectStatus(@RequestParam String comCode) {
         return companyService.selectStatus(comCode);
+    }
+
+    @GetMapping("/selectCompanyEdit")
+    public int selectCompanyEdit(@RequestParam String empCode) {
+        return companyMapper.selectCompanyEdit(empCode);
     }
 }

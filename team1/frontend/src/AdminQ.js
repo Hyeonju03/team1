@@ -26,54 +26,39 @@ export default function FAQPage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
     useEffect(() => {
-
-        // `isLoggedIn`이 처음 설정되기 전, 즉 `undefined`일 때는 아무 작업도 하지 않음
-        if (isLoggedIn === undefined) {
-            return;
-        }
-
-        // 초기 렌더링 시 이전 상태가 없으면 이전 상태를 현재 상태로 설정
-        if (prevLogin === undefined) {
-            setPrevLogin(isLoggedIn);
-            return;
-        }
-
-        console.log("prev>", prevLogin, " login>", isLoggedIn)
-
-        if (isLoggedIn === true && prevLogin === false) {
-            const fetchData = async () => {
-                if (empCode) { // empCode가 설정된 경우에만 호출
-                    try {
-                        const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
-                        console.log(response.data);
+        const fetchData = async () => {
+            if (isLoggedIn) {
+                try {
+                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
+                    console.log(response.data);
 
 
-                    } catch (error) {
-                        console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
-                    }
+                } catch (error) {
+                    console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
                 }
             }
             fetchData();
         }
-
-        if (isLoggedIn === false && prevLogin === false) {
-            // 로그인하지 않은 상태일 때만 alert 띄우기
-            alert("로그인 해야함");
-            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        }
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
 
-
-    }, [isLoggedIn, empCode, prevLogin]); // isLoggedIn과 empCode 변경 시에만 실행
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -138,6 +123,7 @@ export default function FAQPage() {
         }
     };
 
+
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
             <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
@@ -196,10 +182,7 @@ export default function FAQPage() {
                         </form>
                     </div>
                 </div>
-
             </div>
-
-
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -240,6 +223,7 @@ export default function FAQPage() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

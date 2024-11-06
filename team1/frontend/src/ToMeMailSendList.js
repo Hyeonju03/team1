@@ -1,8 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight, Paperclip, Search, Mail ,Archive ,Send,FileText,Trash, RefreshCw} from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Paperclip,
+    Search,
+    Mail,
+    Archive,
+    Send,
+    FileText,
+    Trash,
+    RefreshCw
+} from 'lucide-react';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
+import {useAuth} from "./noticeAuth";
 
 const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
@@ -10,23 +22,28 @@ const Input = ({className, ...props}) => {
 
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35"/>
     </svg>
 );
 
 
 export default function EmailSend() {
-    const [empCode,setEmpCode] = useState("")
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const navigate = useNavigate();
-    const [sendList,setSendList] = useState([])
-    const[searchList,setSearchList]=useState("")
-    const [serachResult,setSerachResult] = useState([])
+    const [sendList, setSendList] = useState([])
+    const [searchList, setSearchList] = useState("")
+    const [serachResult, setSerachResult] = useState([])
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
-    const [mailEmpCode,setMailEmpCode] = useState("")
+    const [mailEmpCode, setMailEmpCode] = useState("")
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage  = 20;
+    const itemsPerPage = 20;
     const indexOfLastMail = currentPage * itemsPerPage;
     const indexOfFirstMail = indexOfLastMail - itemsPerPage;
     const currentMails = sendList.slice(indexOfFirstMail, indexOfLastMail);
@@ -52,57 +69,48 @@ export default function EmailSend() {
         setCurrentPage(pageNumber);
     };
 
-    //로그인시 empcode를 일단 가져오는코드
-    
-    //그리고 이메일내꺼 가져오는거 해야함
     useEffect(() => {
-        // 로그인 후 empCode를 설정하는 로직
-        const fetchEmpCode = async () => {
-            // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "3148127227-user001"; // 로그인 후 받아온 empCode
-           const  mailEmpCode = loggedInEmpCode.split("-").join("")+'@damail.com';
-            console.log("->" , mailEmpCode)
-            // ->2048209555dffdsfd@damail.com
-            setMailEmpCode(mailEmpCode)
-            setEmpCode(loggedInEmpCode);
-        };
-        fetchEmpCode();
-    }, []);
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
 
     useEffect(() => {
-        const fetchData = async ()=> {
-            if (empCode) { // empCode가 설정된 경우에만 호출
+        const fetchData = async () => {
+            if (isLoggedIn) {
                 try {
-                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
+                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`);
                     console.log(response.data);
                     setSelectedCheckboxes(new Array(response.data.length).fill(false));
                     //서버로받은길이를 가져와서 생성된배열의 모든요소를 false로 채우는것.
+                    const mailEmpCode = response.data.split("-").join("") + '@damail.com';
+                    setMailEmpCode(mailEmpCode)
+                    console.log(mailEmpCode)
+
+                    //메일가져오기
+                    const response2 = await axios.get('/selectToMeSendMail', {
+                        params: {
+                            empCode: empCode, mailTarget: mailEmpCode // 필요한 파라미터
+                        }
+                    });
+
+                    console.log(response2)
+                    setSendList(response2.data)
 
                 } catch (error) {
                     console.error(error.response ? error.response.data : error.message);
                 }
+
+
             }
+
         }
         fetchData();
-    }, [empCode]);
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
-    //여기가 메일가져오는곳임
-    useEffect(() => {
-        const mailList = async()=>{
-            const response = await axios.get('/selectToMeSendMail', {
-                params: {
-                    empCode: empCode , mailTarget:mailEmpCode // 필요한 파라미터
-                }
-            });
-
-            console.log(response)
-            setSendList(response.data)
-        }
-        if (empCode) { // empCode가 있을 때만 호출
-            mailList();
-        }
-    }, [empCode]);
 
     const handleSelectAll = (e) => {
         const checked = e.target.checked;
@@ -119,45 +127,45 @@ export default function EmailSend() {
     //새로운 체크박스를 기존배열의길이를 복사하고 체크박스의 상태를 반전시킴
 
 
-    const goSendMail=(e)=>{
+    const goSendMail = (e) => {
         navigate("/MailSend");
         window.location.reload();
     }
 
-    const goSendMailList=(e)=>{
+    const goSendMailList = (e) => {
         navigate("/MailSendList");
         window.location.reload();
     }
 
-    const refresh =(e)=>{
+    const refresh = (e) => {
         navigate("/ToMeMailSendList");
         window.location.reload();
     }
 
-    const goMailTrashList =()=>{
+    const goMailTrashList = () => {
         navigate("/MailTrashList");
         window.location.reload();
     }
 
-    const goToMeMailSendList =()=>{
+    const goToMeMailSendList = () => {
         //내게
         navigate("/ToMeMailSendList");
         window.location.reload();
     }
 
-    const goAttachMentMailList =()=>{
+    const goAttachMentMailList = () => {
         //첨부
         navigate("/AttachMentMailList");
         window.location.reload();
     }
 
-    const goToTalMailSendList =()=>{
+    const goToTalMailSendList = () => {
         //전부
         navigate("/ToTalMailSendList");
         window.location.reload();
     }
 
-    const goReceivedMailList =()=>{
+    const goReceivedMailList = () => {
         //받은
         navigate("/ReceivedMailList");
         window.location.reload();
@@ -189,7 +197,7 @@ export default function EmailSend() {
     };
 
 
-    const mailOnChangeHandler=(e)=>{
+    const mailOnChangeHandler = (e) => {
         setSearchList(e.target.value)
     }
 
@@ -201,22 +209,22 @@ export default function EmailSend() {
         setSerachResult(filterMail);
     };
 
-    const gogoDetail =(v)=>{
-        navigate("/MailDetail",{state: v});
+    const gogoDetail = (v) => {
+        navigate("/MailDetail", {state: v});
 
     }
 
-    const goToMeMailSend =()=>{
+    const goToMeMailSend = () => {
         navigate("/ToMeMailSend");
         window.location.reload();
     }
 
-    const goRealDelete =(e)=>{
+    const goRealDelete = (e) => {
         console.log("진짜?")
         setIsPopupOpen(true)
     }
 
-    const handleConfirmDelete = async ()=>{
+    const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
             alert("삭제완룡")
@@ -229,10 +237,21 @@ export default function EmailSend() {
         }
     }
 
-    const goToMeMailList =()=>{
-        navigate("/ToMeMailSendList");
-        window.location.reload();
-    }
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
 
     return (
@@ -372,6 +391,48 @@ export default function EmailSend() {
                     </div>
                 </main>
             </div>
+
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
+            </div>
+
         </div>
     );
 }

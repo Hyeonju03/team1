@@ -18,4 +18,6 @@ public interface CompanyMapper {
     int selectStatus(String comCode);
 
     int selectAllEmpNum(String comCode);
+
+    int selectCompanyEdit(String empCode);
 }

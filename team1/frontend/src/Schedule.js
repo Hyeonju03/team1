@@ -4,12 +4,13 @@ import 'react-calendar/dist/Calendar.css';
 import './Schedule.css';
 import axios from "axios";
 import moment from "moment";
+import {useNavigate} from "react-router-dom";
 
 import {useAuth} from "./noticeAuth";
 
 
 const typeColors = {
-    '개인': 'bg-blue-200', '부서': 'bg-green-200', '전체': 'bg-yellow-200',
+    '개인': 'bg-pink-200', '부서': 'bg-green-200', '전체': 'bg-yellow-200',
 };
 
 export default function Schedule() {
@@ -18,8 +19,11 @@ export default function Schedule() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSchedule, setEditingSchedule] = useState(null);
-    // const [empCode, setEmpCode] = useState("")
-    const {empCode} = useAuth();
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    const navigate = useNavigate();
+
     const [selectedScheduleId, setSelectedScheduleId] = useState(null);
     const [auth, setAuth] = useState("");
     const [newSchedule, setNewSchedule] = useState({
@@ -27,26 +31,25 @@ export default function Schedule() {
     });
 
 
+    //로그아웃이 맨위로
     useEffect(() => {
-        if (empCode) {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
+
+
+    useEffect(() => {
+        if (isLoggedIn) {
             getAuth(); // 로그인한 후 권한 조회
         }
-    }, [empCode]);
+        setPrevLogin(isLoggedIn);
+
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     console.log(empCode);
 
-    /* 로그인 후 empCode 설정 함수
-    const fetchEmpCode = async () => {
-        // 여기에서 실제 empCode를 설정
-        const loggedInEmpCode = "3148127227-user002"; // 로그인 후 받아온 empCode
-        // setEmpCode(loggedInEmpCode);
-    };
-
-    useEffect(() => {
-        fetchEmpCode();
-    }, []);
-
-     */
 
     /* 권한 조회 함수 */
     const getAuth = async () => {
@@ -110,12 +113,6 @@ export default function Schedule() {
         }
     }
 
-
-    useEffect(() => {
-        if (empCode) {
-            getAuth()
-        }
-    }, [empCode]);
 
     useEffect(() => {
         console.log(schedules)
@@ -219,6 +216,18 @@ export default function Schedule() {
         });
         setSelectedDate(null);
     };
+
+// 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
 
     const canAdd = auth == '1' || auth == '4' || auth == '5' || auth == '7';
     const canEdit = auth == '2' || auth == '4' || auth == '6' || auth == '7';
@@ -404,6 +413,8 @@ export default function Schedule() {
                 </div>
             </div>
         </div>)}
+
+
         {/* Slide-out panel with toggle button */}
         <div
             className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -417,20 +428,24 @@ export default function Schedule() {
             </button>
 
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">로그인</h2>
-                <input
-                    type="text"
-                    placeholder="아이디"
-                    className="w-full p-2 mb-2 border rounded"
-                />
-                <input
-                    type="password"
-                    placeholder="비밀번호"
-                    className="w-full p-2 mb-4 border rounded"
-                />
-                <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                    로그인
-                </button>
+                {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                    : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                            <input
+                                type="text"
+                                placeholder="아이디"
+                                className="w-full p-2 mb-2 border rounded"
+                            />
+                            <input
+                                type="password"
+                                placeholder="비밀번호"
+                                className="w-full p-2 mb-4 border rounded"
+                            />
+                            <button
+                                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                로그인
+                            </button>
+                        </>
+                    )}
                 <div className="text-sm text-center mb-4">
                     <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                     <span className="mx-1">|</span>
@@ -440,5 +455,6 @@ export default function Schedule() {
                 <p>메신저 기능은 준비 중입니다.</p>
             </div>
         </div>
+
     </div>);
 }

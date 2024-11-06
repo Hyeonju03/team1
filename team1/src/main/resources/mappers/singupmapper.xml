@@ -14,8 +14,8 @@
 
     <insert id="insertAuthData" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         INSERT INTO authority
-        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management,rank_edit)
-        VALUES(#{empCode},#{empName},#{depCode},1, 1,1);
+        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management,rank_edit,company_edit)
+        VALUES(#{empCode},#{empName},#{depCode},1, 1,1,1);
     </insert>
 
     <select id="findAllCodes" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
