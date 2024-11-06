@@ -6,10 +6,15 @@ import { ChevronDown, ChevronRight, Paperclip } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ListLibrary from "./HtmlFunctions/ListLibrary";
 import { useListLibrary } from "./Context/ListLibraryContext";
+import {useAuth} from "./noticeAuth";
 
 export default function SignRegister() {
   const navigate = useNavigate();
   const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
+
+  // 로그인
+  const {isLoggedIn, empCode, logout} = useAuth();
+  const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
   // 슬라이드 부분
   const [isRClick, setIsRClick] = useState(false);
@@ -19,7 +24,7 @@ export default function SignRegister() {
   const [noticeNum, setNoticeNum] = useState("");
   const { btnCtl, setBtnCtl } = useListLibrary();
   const [user, setUser] = useState("3148127227-user001");
-  const [com, setCom] = useState("3148127227");
+  const [com, setCom] = useState(empCode.split("-")[0]);
 
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
@@ -136,7 +141,6 @@ export default function SignRegister() {
   const [content, setContent] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [userInfo, setUserInfo] = useState([]);
-  const empCode = "3148127227-user001";
 
   // 양식 사용하면
   const [companyName, setCompanyName] = useState("");
@@ -170,47 +174,50 @@ export default function SignRegister() {
 
   // 카테고리 불러오기
   useEffect(() => {
-    // 나중에 지금 로그인 한 사원의 코드를 받아와서 split해줘야함 <<<<<<<<<<<<<<<<<<<
-    const comCode = 3148127227;
+    if(isLoggedIn) {
+      try {
+        axios
+            .get(`/code/${com}`) // API 엔드포인트를 조정하세요
+            .then((response) => {
+              console.log(response.data.signCateCode);
+              const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map((category) => category))];
+              console.log("uniqueCategories::", uniqueCategories);
+              setCategories(uniqueCategories);
+            })
+            .catch((error) => console.log(error));
 
-    axios
-      .get(`/code/${comCode}`) // API 엔드포인트를 조정하세요
-      .then((response) => {
-        console.log(response.data.signCateCode);
-        const uniqueCategories = [...new Set(response.data.signCateCode.split(",").map((category) => category))];
-        console.log("uniqueCategories::", uniqueCategories);
-        setCategories(uniqueCategories);
-      })
-      .catch((error) => console.log(error));
+        axios.get(`/${empCode}`).then((response) => {
+          console.log(response.data);
+          const user = response.data;
+          setUserInfo([
+            {
+              empCode: user.empCode,
+              name: user.empName,
+              dep: user.depCode,
+              pos: user.posCode,
+              sign: "기안",
+            },
+          ]);
+        });
 
-    axios.get(`/${empCode}`).then((response) => {
-      console.log(response.data);
-      const user = response.data;
-      setUserInfo([
-        {
-          empCode: user.empCode,
-          name: user.empName,
-          dep: user.depCode,
-          pos: user.posCode,
-          sign: "기안",
-        },
-      ]);
-    });
-
-    axios.get(`/sign/${empCode}`)
-        .then(response => {
-          let count = 0;
-          response.data.map((data, index) => {
-            if (data.empCode === empCode) {
-              if (data.target.includes("반려")) {
-                count += 1;
-              }
-            }
-          })
-          setRejectedCount(count)
-        })
-        .catch(error => console.log(error));
-  }, []);
+        axios.get(`/sign/${empCode}`)
+            .then(response => {
+              let count = 0;
+              response.data.map((data, index) => {
+                if (data.empCode === empCode) {
+                  if (data.target.includes("반려")) {
+                    count += 1;
+                  }
+                }
+              })
+              setRejectedCount(count)
+            })
+            .catch(error => console.log(error));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [isLoggedIn, empCode]);
 
   useEffect(() => {
     if (isToggled) {

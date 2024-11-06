@@ -8,8 +8,6 @@ import {useAuth} from "./noticeAuth";
 export default function SignList() {
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
-    const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate(); // 경로 navigate
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
@@ -55,8 +53,6 @@ export default function SignList() {
 
             fetchData()
         }
-            // 상태 변경 후 이전 상태를 현재 상태로 설정
-            setPrevLogin(isLoggedIn);
     },[isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
         // 반려된 문서 수 계산

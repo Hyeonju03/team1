@@ -9,10 +9,13 @@ export default function MainLayout() {
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
     const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
 
-    const [btnCtl, setBtnCtl] = useState(0)
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [isRClick, setIsRClick] = useState(false)
-    const [newWindowPosY, setNewWindowPosY] = useState(500)
+    // 로그인 후 가져와야하는 데이터들
+    const [mailList, setMailList] = useState([]) //메일
+    const [signCount, setSignCount] = useState(0); //결제
+    //일정
+    const [scheduleCount, setScheduleCount] = useState(0);
+    const [schedule, setSchedule] = useState([]);
+    // 날씨
     const weekday = ['일', '월', '화', '수', '목', '금', '토'];
     const [weathers, setWeathers] = useState([{
         feels_like: '',
@@ -25,6 +28,11 @@ export default function MainLayout() {
         icon: '',
         index: '',
     }])
+
+    const [btnCtl, setBtnCtl] = useState(0)
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isRClick, setIsRClick] = useState(false)
+    const [newWindowPosY, setNewWindowPosY] = useState(500)
 
 
     const windowRClick = async (e) => {
@@ -41,27 +49,31 @@ export default function MainLayout() {
 
 
     useEffect(() => {
+        getWeather();
+
         axios.get('/selectLog')
             .then(response => console.log(response.data))
             .catch(error => console.log(error))
 
-        getWeather();
 
     }, []);
 
     useEffect(() => {
-        console.log("login", isLoggedIn)
-    }, [isLoggedIn]);
+        console.log("login", isLoggedIn);
+        // newMail();
+        newSign();
+        todaySchedule();
+    }, [empCode, isLoggedIn]);
 
-    useEffect(() => {
-        const logData = {
-            comCode: "TEST_1", log: "메인 페이지 새로고침 테스트임", time: "TEST_TIME"
-        };
-
-        axios.post('/logInsert', logData)
-            .then(response => console.log(response.data))
-            .catch(error => console.log(error));
-    }, []);
+    // useEffect(() => {
+    //     const logData = {
+    //         comCode: "TEST_1", log: "메인 페이지 새로고침 테스트임", time: "TEST_TIME"
+    //     };
+    //
+    //     axios.post('/logInsert', logData)
+    //         .then(response => console.log(response.data))
+    //         .catch(error => console.log(error));
+    // }, []);
 
     // 로그인 처리 함수
     const handleLogin = async (e) => {
@@ -98,93 +110,207 @@ export default function MainLayout() {
     //     날씨
     const getWeather = async () => {
         const apiKey = "7223f964c797bd220d3a6ea44ca406b0";
-        const lat = "36.33";
-        const lon = "127.42";
+        const lat = "36.35";
+        const lon = "127.38";
         const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=kr`;
 
-        // 날씨 포맷
+        // 오늘 날짜 계산
         const date = new Date();
         const year = date.getFullYear();
         const month = ('0' + (date.getMonth() + 1)).slice(-2);
         const day = ('0' + (date.getDate())).slice(-2);
         const today = `${year}-${month}-${day}`;
 
-        console.log("today>", today)
+        try {
+            const responseData = await axios.get(url);
+            const data = responseData.data;
 
-        axios.get(url)
-            .then((responseData) => {
-                const data = responseData.data;
-                console.log(responseData.data)
-                // 오늘 날씨 정보 처리
-                let updatedWeathers = [];
-                let todayWeatherFound = false; // 오늘 날씨가 이미 찾았는지 여부
-                let closestWeather = null; // 가장 가까운 날씨를 저장할 변수
-                let closestWeatherIndex = -1;
+            // 날짜별 최고/최저 온도를 계산할 객체
+            const groupedWeather = {};
 
-                // 오늘의 날씨 데이터 찾기
-                for (let i = 0; i < data.list.length; i++) {
-                    const weather = data.list[i];
-                    const weatherTime = new Date(weather.dt_txt);
-                    const timeDiff = Math.abs(weatherTime - date); // 현재 시간과 날씨 시간의 차이 (밀리초)
+            // 날씨 데이터를 날짜별로 그룹핑하고, 최고/최저 온도를 계산
+            for (let i = 0; i < data.list.length; i++) {
+                const weather = data.list[i];
+                const weatherTime = new Date(weather.dt_txt);
+                const weatherDate = weatherTime.toISOString().split('T')[0]; // 날짜만 추출 (YYYY-MM-DD 형식)
 
-                    // 현재 시간과 가장 가까운 날씨를 찾음
-                    if (i === 0 || timeDiff < closestWeather.timeDiff) {
-                        closestWeather = {
-                            ...weather,
-                            timeDiff,
-                            index: i
-                        };
-                        closestWeatherIndex = i;
-                    }
+                // 날짜별로 온도 값을 갱신
+                if (!groupedWeather[weatherDate]) {
+                    groupedWeather[weatherDate] = {
+                        temp_max: weather.main.temp_max,
+                        temp_min: weather.main.temp_min,
+                    };
+                } else {
+                    groupedWeather[weatherDate].temp_max = Math.max(groupedWeather[weatherDate].temp_max, weather.main.temp_max);
+                    groupedWeather[weatherDate].temp_min = Math.min(groupedWeather[weatherDate].temp_min, weather.main.temp_min);
+                }
+            }
+
+            // 오늘의 날씨 정보 처리
+            let updatedWeathers = [];
+            let todayWeatherFound = false; // 오늘 날씨가 이미 찾았는지 여부
+            let closestWeather = null; // 가장 가까운 날씨를 저장할 변수
+            let closestWeatherIndex = -1;
+
+            // 오늘의 가장 가까운 시간의 날씨 데이터를 찾음
+            for (let i = 0; i < data.list.length; i++) {
+                const weather = data.list[i];
+                const weatherTime = new Date(weather.dt_txt);
+                const timeDiff = Math.abs(weatherTime - date); // 현재 시간과 날씨 시간의 차이 (밀리초)
+
+                // 현재 시간과 가장 가까운 날씨를 찾음
+                if (i === 0 || timeDiff < closestWeather.timeDiff) {
+                    closestWeather = {
+                        ...weather,
+                        timeDiff,
+                        index: i
+                    };
+                    closestWeatherIndex = i;
+                }
+            }
+
+            // 가장 가까운 오늘 날씨를 updatedWeathers에 추가
+            if (closestWeather) {
+                updatedWeathers.push({
+                    feels_like: closestWeather.main.feels_like,
+                    dt_txt: closestWeather.dt_txt,
+                    temp: closestWeather.main.temp,
+                    humidity: closestWeather.main.humidity,
+                    desc: closestWeather.weather[0].description,
+                    icon: closestWeather.weather[0].icon,
+                    index: closestWeatherIndex,
+                    // 오늘 날짜의 최고/최저 온도 적용
+                    temp_max: groupedWeather[today]?.temp_max,
+                    temp_min: groupedWeather[today]?.temp_min,
+                });
+            }
+
+            let nextIndex = closestWeatherIndex + 8; // 다음 날짜는 현재 index에서 8시간 후
+
+            // 나머지 날짜들에 대해서 8시간 간격으로 날씨 데이터 추가
+            for (let i = 0; i < data.list.length; i++) {
+                const weather = data.list[i];
+
+                // weathers 배열의 길이가 4이면 더 이상 처리하지 않음
+                if (updatedWeathers.length === 4) {
+                    break; // 더 이상 날씨를 추가하지 않음
                 }
 
-                // 가장 가까운 날씨를 updatedWeathers에 추가
-                if (closestWeather) {
+                // 가장 처음 넣은 index에서 +8한 값을 기준으로 날씨를 추가
+                if (i === nextIndex) {
+                    const weatherDate = new Date(weather.dt_txt).toISOString().split('T')[0]; // 날짜만 추출
+
                     updatedWeathers.push({
-                        feels_like: closestWeather.main.feels_like,
-                        dt_txt: closestWeather.dt_txt,
-                        temp: closestWeather.main.temp,
-                        temp_max: closestWeather.main.temp_max,
-                        temp_min: closestWeather.main.temp_min,
-                        humidity: closestWeather.main.humidity,
-                        desc: closestWeather.weather[0].description,
-                        icon: closestWeather.weather[0].icon,
-                        index: closestWeatherIndex,
+                        feels_like: weather.main.feels_like,
+                        dt_txt: weather.dt_txt,
+                        temp: weather.main.temp,
+                        humidity: weather.main.humidity,
+                        desc: weather.weather[0].description,
+                        icon: weather.weather[0].icon,
+                        index: i,
+                        // 해당 날짜의 최고/최저 온도 적용
+                        temp_max: groupedWeather[weatherDate]?.temp_max,
+                        temp_min: groupedWeather[weatherDate]?.temp_min,
                     });
+
+                    nextIndex = i + 8; // 8시간 간격으로 다음 데이터 처리
                 }
+            }
 
-                let nextIndex = updatedWeathers.length ? updatedWeathers[updatedWeathers.length - 1].index + 8 : 0;
+            // 상태 업데이트
+            setWeathers(updatedWeathers);
 
-                // 8시간 후 날씨 추가
-                for (let i = 0; i < data.list.length; i++) {
-                    const weather = data.list[i];
-
-                    // weathers 배열의 길이가 3이면 더 이상 처리하지 않음
-                    if (updatedWeathers.length === 4) {
-                        break; // 더 이상 날씨를 추가하지 않음
-                    }
-
-                    if (i === nextIndex) {
-                        updatedWeathers.push({
-                            feels_like: weather.main.feels_like,
-                            dt_txt: weather.dt_txt,
-                            temp: weather.main.temp,
-                            temp_max: weather.main.temp_max,
-                            temp_min: weather.main.temp_min,
-                            humidity: weather.main.humidity,
-                            desc: weather.weather[0].description,
-                            icon: weather.weather[0].icon,
-                            index: i,
-                        });
-                        nextIndex = i + 8;
-                    }
-                }
-
-                // 상태 업데이트
-                setWeathers(updatedWeathers);
-            })
-            .catch((error) => console.log(error));
+        } catch (error) {
+            console.log(error);
+        }
     };
+
+    // 메일 수량
+    // 지금 값은 나옴. 하지만 현재와 과거의 메일량 비교는 다시 생각해봐야함
+    // const newMail = async () => {
+    //     const mailEmpCode = empCode.split("-").join("")+'@damail.com';
+    //     const response = await axios.get('/receivedMailList', {
+    //         params: {
+    //             mailRef: mailEmpCode , mailTarget:mailEmpCode // 필요한 파라미터
+    //         }
+    //     });
+    //     setMailList(response.data);
+    // }
+
+    // 롹인 안된 결재 수량
+    const newSign = async () => {
+        let count = 0;
+        axios.get(`/sign/${empCode}`)
+            .then(response => {
+                response.data.map((sign) => {
+                    sign.target.split(",").map((mySign) => {
+                        if (mySign.includes(empCode) && mySign.includes("미확인")) {
+                            count = count + 1;
+                        }
+                    })
+                })
+                setSignCount(count);
+            })
+            .catch(error => console.log(error));
+    }
+
+    // 오늘자 일정 수량(기간에 끼워져 있는거 포함)
+    const todaySchedule = async () => {
+        // 오늘 날짜 계산
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + (date.getDate())).slice(-2);
+        const today = `${year}-${month}-${day}`;
+
+        let schedules = [];
+        let count = 0;
+        const ownSchedule = await axios.get(`/selectSchedule?empCode=${empCode}`);
+        const depSchedule = await axios.get("/selectDepSchedule", {params: {empCode: empCode}});
+        const comSchedule = await axios.get("/selectFullScgedule", {params: {empCode: empCode}});
+
+        ownSchedule.data.map((tSchedule) => {
+            const start = tSchedule.startDate.split("T")[0];
+            const end = tSchedule.endDate.split("T")[0];
+
+            if (start == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (end > today || end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            }
+        })
+
+        depSchedule.data.map((tSchedule) => {
+            const start = tSchedule.startDate.split("T")[0];
+            const end = tSchedule.endDate.split("T")[0];
+
+            if (start == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (end > today || end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            }
+        })
+
+        comSchedule.data.map((tSchedule) => {
+            const start = tSchedule.startDate.split("T")[0];
+            const end = tSchedule.endDate.split("T")[0];
+
+            if (start == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (end > today || end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            }
+        })
+
+        setScheduleCount(count);
+        setSchedule(schedules);
+    }
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -236,36 +362,165 @@ export default function MainLayout() {
                                 {/*        <p>여기에 회사 설명 및 홍보 내용을 추가하세요.</p>*/}
                                 {/*    </div>*/}
                                 {/*</main>*/}
-                                <div className="bg-white ml-[5%] mt-[3.5%] w-[60%] h-[750px] rounded-3xl shadow-lg p-5">
-                                    <div className="flex overflow-auto justify-around mt-20 mb-10">
-                                        <div className="w-[20%] h-[150px] rounded bg-blue-200">
-                                            <div>이미지</div>
-                                            <div className="w-[50px] h-[50px] rounded-full bg-red-800 p-3 text-white">
-                                                1
-                                                {/*각 카테고리에 대한 알림 : 없으면 hidden처리*/}
-                                            </div>
-                                        </div>
-                                        <div className="w-[20%] bg-blue-400 rounded">
-                                            버튼 2
-                                        </div>
-                                        <div className="w-[20%] bg-blue-600 rounded">
-                                            버튼 3
-                                        </div>
-                                        <div className="w-[20%] bg-blue-800 rounded">
-                                            버튼 4
-                                        </div>
+
+                                <>
+                                    <div
+                                        className="ml-[5%] mt-[3.5%] w-[60%] h-[750px] rounded-3xl border-2 border-dashed border-gray-400 p-10">
+                                        <table className="w-[100%]">
+                                            <tr className="">
+                                                <td className="w-[30px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong
+                                                            className="flex flex-col items-center justify-center h-[48px]">
+                                                            메일
+                                                            {/*<div*/}
+                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">*/}
+                                                            {/*    {mailList.length}*/}
+                                                            {/*</div>*/}
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/mail.png" alt="mail"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            문서함
+                                                            {/*<div*/}
+                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/folder-invoices--v2.png"
+                                                             alt="folder-invoices--v2"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            결재함
+                                                            <div
+                                                                className={`text-white bg-red-800 w-[32px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : ""}`}>
+                                                                {signCount}
+                                                            </div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/electronic-invoice.png"
+                                                             alt="electronic-invoice"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            일정
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl items-center">
+                                                                {scheduleCount}
+                                                            </div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/calendar-plus.png"
+                                                             alt="calendar-plus"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[30px]"></td>
+                                            </tr>
+                                            <tr className="h-[30px]">
+                                            </tr>
+                                            <tr>
+                                                <td className="w-[30px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            인사 정보
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios-glyphs/60/user--v1.png"
+                                                             alt="user--v1"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            부서 관리
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/stacked-organizational-chart.png"
+                                                             alt="stacked-organizational-chart"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            직급 관리
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/parallel-tasks.png"
+                                                             alt="parallel-tasks"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            권한 관리
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/briefcase-settings.png"
+                                                             alt="briefcase-settings"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[30px]"></td>
+                                            </tr>
+                                            <tr className="h-[30px]">
+                                            </tr>
+                                            <tr>
+                                                <td className="w-[30px]"></td>
+                                                <td className="w-[50px]">
+                                                    <div
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        <strong className="flex flex-col items-center justify-center">
+                                                            회사 정보
+                                                            <div
+                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                        </strong>
+                                                        <img width="60" height="60"
+                                                             src="https://img.icons8.com/ios/50/organization.png"
+                                                             alt="organization"/>
+                                                    </div>
+                                                </td>
+                                                <td className="w-[20px]"></td>
+                                            </tr>
+                                        </table>
                                     </div>
-                                </div>
-                                <div className="flex ml-[2%] mr-[5%] mt-[3.5%] flex-col justify-between h-[750px] w-[40%]">
+                                </>
+
+                                <div
+                                    className="flex ml-[2%] mr-[5%] mt-[3.5%] flex-col justify-between h-[750px] w-[40%]">
                                     <div className="bg-white h-[300px] rounded-3xl shadow-lg p-5">
                                         <div className="">
                                             <div className="w-full">
-                                                {/*<div className="flex items-center">*/}
-                                                {/*    <img width="35" height="35"*/}
-                                                {/*         src="https://img.icons8.com/fluency-systems-regular/50/place-marker--v1.png"*/}
-                                                {/*         alt="place-marker--v1"/>*/}
-                                                {/*    <div className="font-bold ml-1">대전</div>*/}
-                                                {/*</div>*/}
                                                 <div className="flex w-full h-[260px] justify-around">
                                                     {weathers.map((weather, index) => {
                                                             const imgSrc = `https://openweathermap.com/img/w/${weather.icon}.png`;
@@ -276,33 +531,16 @@ export default function MainLayout() {
                                                                      className="flex flex-col justify-items-center p-2 h-full w-[24%] bg-gradient-to-t to-blue-400 from-cyan-300 rounded-2xl">
                                                                     <div
                                                                         className="font-bold text-white mt-1 mb-1">{weekday[day.getDay()]}</div>
-                                                                    <div className="text-3xl text-white mb-7">{weather.temp * 2}°
+                                                                    <div className="text-3xl text-white mb-7">{weather.temp}°
                                                                     </div>
                                                                     <div className="flex justify-center">
                                                                         <img className="h-16 w-16" src={imgSrc}/>
                                                                     </div>
                                                                     <div className="text-white">{weather.desc}</div>
-                                                                    <div className="text-white">{(weather.temp_max * 3).toFixed(2)}°
+                                                                    <div className="text-white">{weather.temp_max}°
                                                                         / {weather.temp_min}°
                                                                     </div>
-                                                                    <div className="text-white">체감온도 {weather.feels_like * 2}°</div>
-                                                                    {/*<div className="flex">*/}
-                                                                    {/*    <div className="h-24 w-24">*/}
-                                                                    {/*        <img className="h-24 w-24" src={imgSrc}/>{' '}*/}
-                                                                    {/*        <div>{weathers.main}</div>*/}
-                                                                    {/*    </div>*/}
-                                                                    {/*    <div className="text-7xl text-gray-600">*/}
-                                                                    {/*        {weather.temp}°*/}
-                                                                    {/*    </div>*/}
-                                                                    {/*</div>*/}
-
-                                                                    {/*<div className="m-10">*/}
-                                                                    {/*    <div>*/}
-                                                                    {/*        <div className='h-[17px]'*/}
-                                                                    {/*             style={{marginTop: '7px', marginRight: '8px'}}/>*/}
-                                                                    {/*        {weather.humidity}*/}
-                                                                    {/*    </div>*/}
-                                                                    {/*</div>*/}
+                                                                    <div className="text-white">체감온도 {weather.feels_like}°</div>
                                                                 </div>
                                                             )
                                                         }
@@ -312,8 +550,58 @@ export default function MainLayout() {
                                         </div>
                                     </div>
                                     <div className="bg-white h-[400px] rounded-3xl shadow-lg p-5">
-                                        <div className="flex overflow-auto justify-around mt-20 mb-10">
-                                            여기에는 일정 넣을까나
+                                        <div className="text-xl font-bold">
+                                            오늘 일정
+                                        </div>
+                                        <div className="flex flex-col overflow-auto">
+                                            {schedule.map((s, i) => {
+                                                if (s.category == "개인") {
+                                                    return (
+                                                        <div
+                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                            <div>
+                                                                <div key={i} className="flex">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-blue-300">{s.category ? " " : ""}</p>
+                                                                    <div>
+                                                                        <p>{s.startDate} ~ {s.endDate}</p>
+                                                                        <p>{s.content}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                if (s.category == "부서") {
+                                                    return (
+                                                        <div
+                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                            <div>
+
+                                                                <div key={i}>
+                                                                    <p>{s.startDate} ~ {s.endDate}</p>
+                                                                    <p>{s.content}</p>
+                                                                    <p>{s.category}</p>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                if (s.category == "전체") {
+                                                    return (
+                                                        <div
+                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                            <div>
+                                                                <div key={i}>
+                                                                    <p>{s.startDate} ~ {s.endDate}</p>
+                                                                    <p>{s.content}</p>
+                                                                    <p>{s.category}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                            })}
                                         </div>
                                     </div>
                                 </div>
