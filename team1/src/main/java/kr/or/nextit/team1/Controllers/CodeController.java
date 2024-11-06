@@ -22,6 +22,14 @@ public class CodeController {
 
     }
 
+    // 부서 권한
+    @GetMapping("/authority/departmentManagement/{empCode}")
+    public ResponseEntity<String> getAuthoritydepartmentManagementByEmpCode(@PathVariable String empCode) {
+        String departmentManagement = codeService.getAuthoritydepartmentManagementByEmpCode(empCode);
+        return ResponseEntity.ok(departmentManagement);
+    }
+
+
     // 부서 조회
     @GetMapping("/departments")
     public ResponseEntity<List<CodeDTO>> getDepCode(@RequestParam String comCode) {
@@ -78,6 +86,13 @@ public class CodeController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("부서 삭제 중 오류가 발생했습니다.");
         }
+    }
+
+    // 직급 권한
+    @GetMapping("/authority/positionManagement/{empCode}")
+    public ResponseEntity<String> getAuthoritypositionManagementByEmpCode(@PathVariable String empCode) {
+        String positionManagement = codeService.getAuthoritypositionManagementByEmpCode(empCode);
+        return ResponseEntity.ok(positionManagement);
     }
 
     // 직급 조회

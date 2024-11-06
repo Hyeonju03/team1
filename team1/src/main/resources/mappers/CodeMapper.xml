@@ -19,6 +19,16 @@
         </if>
     </select>
 
+    <!-- 부서 권한 -->
+    <select id="getAuthoritydepartmentManagementByEmpCode">
+        SELECT
+            DEPARTMENT_MANAGEMENT
+        FROM
+            AUTHORITY
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
+
     <select id="getDepCode" resultType="CodeDTO">
         SELECT
             DEP_CODE, UPDEP_CODE
@@ -51,6 +61,16 @@
         WHERE
             COM_CODE = #{comCode}
     </update>
+
+    <!-- 직급 권한 -->
+    <select id="getAuthoritypositionManagementByEmpCode">
+        SELECT
+            RANK_EDIT
+        FROM
+            AUTHORITY
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
 
     <select id="selectPosition" resultType="CodeDTO">
         SELECT

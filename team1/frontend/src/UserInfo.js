@@ -15,7 +15,7 @@ export default function UserInfo() {
     const [empMail, setEmpMail] = useState(""); // 메일
     const [corCode, setCorCode] = useState(""); // 상관코드 (필수아님)
     const [codeCategory, setCodeCategory] = useState();
-    const [userEmpCode, setUserEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
+    // const [userEmpCode, setUserEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     const navigate = useNavigate();
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
@@ -56,7 +56,7 @@ export default function UserInfo() {
 
     useEffect(() => {
         if (isLoggedIn) {
-            axios.get(`/${userEmpCode}`)
+            axios.get(`/${empCode}`)
                 .then(response => {
                     setUserInfo(response.data);
 
@@ -74,7 +74,7 @@ export default function UserInfo() {
                         setCorCode(response.data.corCode || "");
 
                         // code 테이블에서 카테고리 가져오기
-                        axios.get(`/code/${userEmpCode.split('-')[0]}`)
+                        axios.get(`/code/${empCode.split('-')[0]}`)
                             .then(response => {
                                 setCodeCategory(response.data);
                             })
@@ -156,10 +156,10 @@ export default function UserInfo() {
         }
 
         // 현재 값 문자열로 결합한 것
-        const currentValue = `${empCode}:${userInfo.empName || '이름 없음'}_${depCode || '부서 없음'}_${posCode || '직급 없음'}_${userInfo.empPass || '비밀번호 없음'}_${userInfo.phoneNum || '전화번호 없음'}_${userInfo.extNum || '내선번호 없음'}_${userInfo.empMail || '메일 없음'}_${userInfo.corCode || '상관코드 없음'}`;
+        const currentValue = `${empCode}:${userInfo.empName || '이름 없음'}_${userInfo.depCode || '부서 없음'}_${userInfo.posCode || '직급 없음'}_${userInfo.empPass || '비밀번호 없음'}_${userInfo.phoneNum || '전화번호 없음'}_${userInfo.extNum || '내선번호 없음'}_${userInfo.empMail || '메일 없음'}_${userInfo.corCode || '상관코드 없음'}`;
 
         // 수정된 필드들을 하나의 modifyReq 문자열로 결합
-        const modifyReq = `${empCode}:${empName || '이름 없음'}_${userInfo.depCode || '부서 없음'}_${userInfo.posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
+        const modifyReq = `${empCode}:${empName || '이름 없음'}_${depCode || '부서 없음'}_${posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
 
         if (currentValue == modifyReq) {
             alert("수정 전 내용과 동일하여 수정 요청 할 수 없습니다.");
@@ -174,19 +174,40 @@ export default function UserInfo() {
             modifyReq // 수정 요청 정보
         };
 
-        console.log("modifyReq 값:", modifyReq);
+        const bool = Boolean(corCode)
+        console.log(bool)
 
-        axios.post(`/modifyRequest`, userInfoUpdate)
-            .then(response => {
-                console.log("수정 요청 성공: ", response.data);
-                alert("수정 요청이 완료되었습니다.");
+        if (bool) {
+            axios.post(`/modifyRequest`, userInfoUpdate)
+                .then(response => {
+                    console.log("수정 요청 성공: ", response.data);
+                    alert("수정이 요청이 완료되었습니다.");
+                })
+                .catch(error => {
+                    console.error("수정 요청 실패: ", error)
+                    alert("수정 요청이 실패되었습니다.");
+                });
+        } else {
+            axios.put(`/userSelf/${empCode}`, {
+                empName: empName,
+                depCode: depCode,
+                posCode: posCode,
+                empPass: empPass,
+                phoneNum: phoneNum,
+                extNum: extNum,
+                empMail: empMail,
+                corCode: corCode
+            }).then(response => {
+                console.log("수정 성공: ", response.data);
+                alert("수정이 완료되었습니다.");
             })
-            .catch(error => {
-                console.error("수정 요청 실패: ", error)
-                alert("수정 요청이 실패되었습니다.");
-            });
-    };
+                .catch(error => {
+                    console.error("수정 실패: ", error)
+                    alert("수정 실패되었습니다.");
+                });
+        }
 
+    };
     return (
         <div className="max-w-6xl mx-auto p-5 font-sans">
             <header className="bg-gray-100 p-3 mb-5 text-center">
@@ -218,8 +239,8 @@ export default function UserInfo() {
                             <div className="mb-2">
                                 <label className="block mb-1 text-sm text-gray-600">부서</label>
                                 <select name="userInfoDepartment"
-                                        value={userInfo.depCode}
-                                        onChange={(e) => setUserInfo({...userInfo, depCode: e.target.value})}
+                                        value={depCode}
+                                        onChange={(e) => setDepCode(e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800">
 
 
@@ -236,8 +257,8 @@ export default function UserInfo() {
                                 {userInfo && codeCategory && posCode && (
                                     <select
                                         name="userInfoPosCode"
-                                        value={userInfo.posCode}
-                                        onChange={(e) => setUserInfo({...userInfo, posCode: e.target.value})}
+                                        value={posCode}
+                                        onChange={(e) => setPosCode(e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-800"
                                     >
                                         {codeCategory.posCode.split(',').map((item, index) => (
@@ -311,7 +332,7 @@ export default function UserInfo() {
                             </div>
                         </div>
                     </>
-                ) : (<p>로딩중...</p>)}
+                ) : (<p></p>)}
             </div>
             <div className="mt-2">
                 <button

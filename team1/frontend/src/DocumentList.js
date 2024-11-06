@@ -127,7 +127,7 @@ export default function DocumentList() {
         const fetchAuth = async () => {
             try {
                 // 권한 정보 가져오기
-                const response = await axios.get(`/authority/${empCode}`);
+                const response = await axios.get(`/authority/document/${empCode}`);
                 setAuth(response.data);
             } catch (error) {
                 console.error('권한 정보를 가져오는 데 실패했습니다.', error);
@@ -137,6 +137,7 @@ export default function DocumentList() {
         fetchAuth();
     }, [comCode, empCode]);
 
+    /* 0:x, 1:작성, 2: 수정. 3: 삭제, 4:작성+수정, 5:작성+삭제, 6:수정+삭제. 7:전부  */
     // 등록 버튼
     const handleRegister = () => {
         if (auth == '1' || auth == '4' || auth == '5' || auth == '7') {

@@ -1,13 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "./noticeAuth";
 
 export default function UserInfoModifyRequest() {
 
     const [subordinates, setSubordinates] = useState([]); // 부하직원 관련 내용
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [hasModifyReq, setHasModifyReq] = useState(false);
-    const [corCode, setCorCode] = useState(process.env.REACT_APP_COR_CODE);
+    // const [corCode, setCorCode] = useState(process.env.REACT_APP_COR_CODE);
+    const [auth, setAuth] = useState(null);
+    const navigate = useNavigate();
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -21,16 +29,32 @@ export default function UserInfoModifyRequest() {
 
 
     useEffect(() => {
-        const fetchSubordinates = async () => {
-            try {
-                const response = await axios.get(`/userInfo/${corCode}`);
-                setSubordinates(response.data);
-            } catch (e) {
-                console.error(e);
-            }
-        };
-        fetchSubordinates();
-    }, []);
+        if (isLoggedIn) {
+            const fetchSubordinates = async () => {
+                try {
+                    const response = await axios.get(`/userInfo/${empCode}`);
+                    setSubordinates(response.data);
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+            fetchSubordinates();
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]);
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
 
     // 부하직원이 변경될 때마다
     useEffect(() => {
@@ -73,46 +97,70 @@ export default function UserInfoModifyRequest() {
         }
     }, [subordinates]); // subordinates가 변경될 때마다 실행
 
+    useEffect(() => {
+        const fetchAuth = async () => {
+            try {
+                // 권한 정보 가져오기
+                const response = await axios.get(`/authority/userInfo/${empCode}`);
+                setAuth(response.data);
+            } catch (error) {
+                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+            }
+        };
+
+        fetchAuth();
+    }, [empCode]);
+
+    /* 0:x, 1:조회, 2: 수정. 3: 삭제, 4:조회+수정, 5:조회+삭제, 6:수정+삭제. 7:전부 */
     // 보류 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 유지)
     const handleHold = () => {
-        alert("수정 요청이 보류되었습니다.");
+        if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
+            alert("수정 요청이 보류되었습니다.");
+        } else {
+            alert("정보를 수정할 수 있는 권한이 없습니다.");
+        }
     };
 
     // 반려 버튼 클릭 시(인사 정보 수정 x, 수정 요청 내역 삭제)
     const handleReject = async () => {
-
-        if (!modifyReqData) return;
-
-        try {
-            // modify_req 값 비우기 요청
-            await axios.put(`/userInfo/modifyDelete/${modifyReqData.corCode}`)
-            alert("수정 요청이 반려되었습니다.");
-        } catch (e) {
-            console.error("반려 실패:", e);
-            alert("반려 처리 중 오류가 발생했습니다.");
+        if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
+            if (!modifyReqData) return;
+            try {
+                // modify_req 값 비우기 요청
+                await axios.put(`/userInfo/modifyDelete/${modifyReqData.corCode}`)
+                alert("수정 요청이 반려되었습니다.");
+            } catch (e) {
+                console.error("반려 실패:", e);
+                alert("반려 처리 중 오류가 발생했습니다.");
+            }
+        } else {
+            alert("정보를 수정할 수 있는 권한이 없습니다.");
         }
     };
 
     // 승인 버튼 클릭 시(인사 정보 수정 o, 수정 요청 내역 삭제)
     const handleApprove = async () => {
-        if (!modifyReqData) return;
-
-        try {
-            // 수정 요청 데이터 전송
-            await axios.put(`/userInfo/${modifyReqData.prefix}`, {
-                empName: modifyReqData.empName,
-                depCode: modifyReqData.depCode,
-                posCode: modifyReqData.posCode,
-                empPass: modifyReqData.empPass,
-                phoneNum: modifyReqData.phoneNum,
-                extNum: modifyReqData.extNum,
-                empMail: modifyReqData.empMail,
-                corCode: modifyReqData.corCode
-            });
-            alert("수정이 완료되었습니다.");
-        } catch (e) {
-            console.error("수정 실패:", e);
-            alert("수정 중 오류가 발생했습니다.");
+        if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
+            if (!modifyReqData) return;
+            try {
+                // 수정 요청 데이터 전송
+                await axios.put(`/userInfo/${modifyReqData.prefix}`, {
+                    empName: modifyReqData.empName,
+                    depCode: modifyReqData.depCode,
+                    posCode: modifyReqData.posCode,
+                    empPass: modifyReqData.empPass,
+                    phoneNum: modifyReqData.phoneNum,
+                    extNum: modifyReqData.extNum,
+                    empMail: modifyReqData.empMail,
+                    corCode: modifyReqData.corCode
+                });
+                alert("수정이 완료되었습니다.");
+            } catch (e) {
+                console.error("수정 실패:", e);
+                alert("수정 중 오류가 발생했습니다.");
+            }
+        } else {
+            alert("정보를 수정할 수 있는 권한이 없습니다.");
         }
     };
 
@@ -220,12 +268,24 @@ export default function UserInfoModifyRequest() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input type="text" placeholder="아이디" className="w-full p-2 mb-2 border rounded"/>
-                    <input type="password" placeholder="비밀번호" className="w-full p-2 mb-4 border rounded"/>
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>

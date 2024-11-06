@@ -192,7 +192,7 @@ export default function ApplyForBusiness() {
                                 value={contectPhone}
                                 onChange={(e) => setContectPhone(e.target.value)}
                                 onKeyDown={preventSpaceBar}
-                                placeholder={"000-000-0000"}
+                                placeholder={"000-0000-0000"}
                             />
                         </div>
                         <div className="flex items-center space-x-2">
@@ -226,7 +226,7 @@ export default function ApplyForBusiness() {
                     </form>
                 </div>
             </div>
-        
+
             {showAlert && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg">

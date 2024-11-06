@@ -58,7 +58,6 @@ const DepartmentTree = ({departments, onAdd, onDelete, onUpdate}) => {
 // 부서 관리
 export default function DepartmentManagement() {
     const [departments, setDepartments] = useState([]);
-    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_TEST_CODE);
     const navigate = useNavigate();
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
@@ -66,27 +65,68 @@ export default function DepartmentManagement() {
     // slide 변수
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
+    const [auth, setAuth] = useState(null);
+
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    const [comCode, setComCode] = useState('');
+    const [permission, setPermission] = useState(false);
+
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode) {
+            const newComCode = getComCode(empCode);
+            setComCode(newComCode);  // comCode 상태 업데이트
+        }
+    }, [empCode]); // empCode가 변경될 때마다 실행
+
+    useEffect(() => {
+        const fetchAuth = async () => {
+            try {
+                // 권한 정보 가져오기
+                const response = await axios.get(`/authority/departmentManagement/${empCode}`);
+                setAuth(response.data);
+            } catch (error) {
+                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+            }
+        };
+        if (empCode) {
+            fetchAuth();
+        }
+    }, [empCode]);
+
     // 부서 데이터 가져오기
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn && auth == '1') {
             const fetchDepartments = async () => {
                 try {
                     const response = await axios.get('/departments/tree', {params: {comCode: comCode}});
                     setDepartments(response.data);
+
+                    if (response.data === 0) {
+                        setPermission(false);
+                    } else {
+                        setPermission(true);
+                    }
+
+
                 } catch (e) {
                     console.error('부서 트리를 가져오는 중 오류가 발생했습니다.', e);
                 }
             };
-
             fetchDepartments();
         }
+
         // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
-    }, [isLoggedIn, empCode]);
+    }, [isLoggedIn, auth, empCode]);
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -236,56 +276,69 @@ export default function DepartmentManagement() {
         }
     };
 
-    return (
-        <div className="max-w-6xl mx-auto p-5 font-sans department-container">
-            <header className="bg-gray-100 p-3 mb-5 text-center">
-                <div className="text-2xl font-bold">
-                    로고
-                </div>
-            </header>
-            <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">부서 관리</h1>
-            <DepartmentTree departments={departments} onAdd={insertDepartment} onDelete={deleteDepartment}
-                            onUpdate={updateDepartment}/>
-            {/* Slide-out panel with toggle button */}
-            <div
-                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-            >
-                {/* Panel toggle button */}
-                <button
-                    onClick={togglePanel}
-                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                >
-                    {isPanelOpen ? '>' : '<'}
-                </button>
+    if (departments?.length > 0 && !permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
+    }
 
-                <div className="p-4">
-                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
-                                <input
-                                    type="text"
-                                    placeholder="아이디"
-                                    className="w-full p-2 mb-2 border rounded"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="비밀번호"
-                                    className="w-full p-2 mb-4 border rounded"
-                                />
-                                <button
-                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                                    로그인
-                                </button>
-                            </>
-                        )}
-                    <div className="text-sm text-center mb-4">
-                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+    return (
+        <>
+            <div className={`flex items-center justify-center h-screen ${permission ? "hidden" : ""}`}>
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+            <div className={`max-w-6xl mx-auto p-5 font-sans department-container ${permission ? "" : "hidden"}`}>
+                <header className="bg-gray-100 p-3 mb-5 text-center">
+                    <div className="text-2xl font-bold">
+                        로고
                     </div>
-                    <h2 className="text-xl font-bold mb-2">메신저</h2>
-                    <p>메신저 기능은 준비 중입니다.</p>
+                </header>
+                <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">부서 관리</h1>
+                <DepartmentTree departments={departments} onAdd={insertDepartment} onDelete={deleteDepartment}
+                                onUpdate={updateDepartment}/>
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
+
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

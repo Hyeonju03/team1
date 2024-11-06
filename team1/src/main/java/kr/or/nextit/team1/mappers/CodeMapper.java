@@ -11,12 +11,18 @@ import java.util.List;
 public interface CodeMapper {
     CodeDTO selectCode(String comCode, String depCode); // 모든 카테고리 가져오기
 
+    // 부서 권한
+    String getAuthoritydepartmentManagementByEmpCode(String empCode);
+
     List<CodeDTO> getDepCode(String comCode);
 
 //    void insertDepartment(CodeDTO newDepartment);
 
     // 부서 추가, 수정, 삭제 모두 사용
     void updateDepartment(CodeDTO codeDTO);
+
+    // 직급 권한
+    String getAuthoritypositionManagementByEmpCode(String empCode);
 
     CodeDTO selectPosition(String comCode);
 

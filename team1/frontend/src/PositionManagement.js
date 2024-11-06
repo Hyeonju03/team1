@@ -31,9 +31,6 @@ export default function PositionManagement() {
     const [newPositionName, setNewPositionName] = useState('');
     const [isReordering, setIsReordering] = useState(false); // 순서 바꾸기
     const [originalPositions, setOriginalPositions] = useState([]);
-    //------------------------------------------------
-    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_TEST_CODE);
-    //------------------------------------------------
     const navigate = useNavigate();
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
@@ -41,14 +38,47 @@ export default function PositionManagement() {
     // slide 변수
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
+    const [auth, setAuth] = useState(null);
+
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    const [comCode, setComCode] = useState('');
+    const [permission, setPermission] = useState(false);
+
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode) {
+            const newComCode = getComCode(empCode);
+            setComCode(newComCode);  // comCode 상태 업데이트
+        }
+    }, [empCode]); // empCode가 변경될 때마다 실행
+
+    useEffect(() => {
+        const fetchAuth = async () => {
+            try {
+                // 권한 정보 가져오기
+                const response = await axios.get(`/authority/positionManagement/${empCode}`);
+                setAuth(response.data);
+            } catch (error) {
+                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+            }
+        };
+        if (empCode) {
+            fetchAuth();
+        }
+    }, [empCode]);
 
     // 회사명 불러오기
     useEffect(() => {
         if (isLoggedIn) {
+
             const fetchCompanyName = async () => {
                 try {
                     const response = await axios.get('/companyName', {
@@ -64,11 +94,11 @@ export default function PositionManagement() {
         }
         // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
-    }, [isLoggedIn, empCode]);
+    }, [isLoggedIn, empCode, comCode]);
 
     // 조회
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn && auth == '1') {
             const fetchPositions = async () => {
                 try {
                     const response = await axios.get('/positions', {
@@ -80,6 +110,15 @@ export default function PositionManagement() {
                         name: name.trim(),
                     }));
                     setPositions(positionObjects);
+                    if (response.data === 0) {
+                        setPermission(false);
+                        console.log("false 들어옴")
+                    } else {
+                        setPermission(true);
+                        console.log("true 들어옴")
+                    }
+
+
                 } catch (e) {
                     console.error(e);
                 }
@@ -88,7 +127,7 @@ export default function PositionManagement() {
         }
         // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
-    }, [isLoggedIn, empCode]);
+    }, [isLoggedIn, auth, empCode]);
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -218,154 +257,168 @@ export default function PositionManagement() {
         setIsReordering(!isReordering)
     }
 
+    if (positions?.length > 0 && !permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
+    }
+
     return (
-        <div className="p-4 max-w-md mx-auto">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">직급 관리</h1>
-                {/* 회사 이름 */}
-                <div className="flex items-center gap-2 py-2 mb-4">
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{companyName}</span>
+        <>
+            <div className={`flex items-center justify-center h-screen ${permission ? "hidden" : ""}`}>
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+            <div className={`p-4 max-w-md mx-auto ${permission ? "" : "hidden"}`}>
+                <div className="mb-8">
+                    <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">직급 관리</h1>
+                    {/* 회사 이름 */}
+                    <div className="flex items-center gap-2 py-2 mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-lg">{companyName}</span>
+                        </div>
+                        <button
+                            onClick={toggleReorderMode}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
+                                isReordering
+                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            {isReordering ? '취소' : '순서 바꾸기'}
+                        </button>
                     </div>
+
+                    {/* 직급 리스트 */}
+                    {isReordering ? (
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <StrictModeDroppable droppableId="positions">
+                                {(provided) => (
+                                    <div
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        className="ml-4 space-y-2"
+                                    >
+                                        {positions.map((position, index) => (
+                                            <Draggable key={position.id} draggableId={position.id} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className={`flex items-center gap-2 py-2 px-3 bg-white border border-gray-200 rounded-md shadow-sm
+                            ${snapshot.isDragging ? 'shadow-md bg-gray-50' : ''}`}
+                                                    >
+                                                        <FaExchangeAlt className="text-gray-400 mr-2"/>
+                                                        <span>{position.name}</span>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </StrictModeDroppable>
+                        </DragDropContext>
+                    ) : (
+                        <div className="ml-4 space-y-2">
+                            {positions.map((position) => (
+                                <div
+                                    key={position.id}
+                                    className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-200 rounded-md shadow-sm"
+                                >
+                                    <span>{position.name}</span>
+                                    <div className="ml-auto flex items-center gap-1">
+                                        <button
+                                            onClick={() => {
+                                                const newName = prompt('직급명을 입력하세요:', position.name)
+                                                if (newName) handleUpdate(position.id, newName)
+                                            }}
+                                            className="ml-2 text-yellow-500"
+                                        >
+                                            <Pencil size={16}/>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(position.id, position.name)}
+                                            className="ml-2 text-red-500"
+                                        >
+                                            <Trash size={16}/>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {isReordering && (
                     <button
-                        onClick={toggleReorderMode}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
-                            isReordering
-                                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                        onClick={handleReorderComplete}
+                        className="ml-4 w-[96.5%] px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors mb-4"
                     >
-                        {isReordering ? '취소' : '순서 바꾸기'}
+                        순서 변경 완료
+                    </button>
+                )}
+
+                {/* 새 직급 추가 */}
+                <div className="flex gap-2 w-[100%]">
+                    <input
+                        type="text"
+                        value={newPositionName}
+                        onChange={(e) => setNewPositionName(e.target.value)}
+                        placeholder="새 직급 이름"
+                        className="ml-4 w-[80%] flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                        onClick={handleInsert}
+                        className="w-[18%] px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
+                    >
+                        추가
                     </button>
                 </div>
+                {/* Slide-out panel with toggle button */}
+                <div
+                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                >
+                    {/* Panel toggle button */}
+                    <button
+                        onClick={togglePanel}
+                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                    >
+                        {isPanelOpen ? '>' : '<'}
+                    </button>
 
-                {/* 직급 리스트 */}
-                {isReordering ? (
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <StrictModeDroppable droppableId="positions">
-                            {(provided) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className="ml-4 space-y-2"
-                                >
-                                    {positions.map((position, index) => (
-                                        <Draggable key={position.id} draggableId={position.id} index={index}>
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    className={`flex items-center gap-2 py-2 px-3 bg-white border border-gray-200 rounded-md shadow-sm
-                            ${snapshot.isDragging ? 'shadow-md bg-gray-50' : ''}`}
-                                                >
-                                                    <FaExchangeAlt className="text-gray-400 mr-2"/>
-                                                    <span>{position.name}</span>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
+                    <div className="p-4">
+                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
                             )}
-                        </StrictModeDroppable>
-                    </DragDropContext>
-                ) : (
-                    <div className="ml-4 space-y-2">
-                        {positions.map((position) => (
-                            <div
-                                key={position.id}
-                                className="flex items-center gap-2 py-2 px-3 bg-white border border-gray-200 rounded-md shadow-sm"
-                            >
-                                <span>{position.name}</span>
-                                <div className="ml-auto flex items-center gap-1">
-                                    <button
-                                        onClick={() => {
-                                            const newName = prompt('직급명을 입력하세요:', position.name)
-                                            if (newName) handleUpdate(position.id, newName)
-                                        }}
-                                        className="ml-2 text-yellow-500"
-                                    >
-                                        <Pencil size={16}/>
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(position.id, position.name)}
-                                        className="ml-2 text-red-500"
-                                    >
-                                        <Trash size={16}/>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
                     </div>
-                )}
-            </div>
-
-            {isReordering && (
-                <button
-                    onClick={handleReorderComplete}
-                    className="ml-4 w-[96.5%] px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors mb-4"
-                >
-                    순서 변경 완료
-                </button>
-            )}
-
-            {/* 새 직급 추가 */}
-            <div className="flex gap-2 w-[100%]">
-                <input
-                    type="text"
-                    value={newPositionName}
-                    onChange={(e) => setNewPositionName(e.target.value)}
-                    placeholder="새 직급 이름"
-                    className="ml-4 w-[80%] flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <button
-                    onClick={handleInsert}
-                    className="w-[18%] px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
-                >
-                    추가
-                </button>
-            </div>
-            {/* Slide-out panel with toggle button */}
-            <div
-                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-            >
-                {/* Panel toggle button */}
-                <button
-                    onClick={togglePanel}
-                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                >
-                    {isPanelOpen ? '>' : '<'}
-                </button>
-
-                <div className="p-4">
-                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
-                                <input
-                                    type="text"
-                                    placeholder="아이디"
-                                    className="w-full p-2 mb-2 border rounded"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="비밀번호"
-                                    className="w-full p-2 mb-4 border rounded"
-                                />
-                                <button
-                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                                    로그인
-                                </button>
-                            </>
-                        )}
-                    <div className="text-sm text-center mb-4">
-                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
-                    </div>
-                    <h2 className="text-xl font-bold mb-2">메신저</h2>
-                    <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
-        </div>
-    );
+        </>
+
+    )
 }

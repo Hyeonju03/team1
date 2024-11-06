@@ -19,6 +19,11 @@ public class CodeService {
         return codeMapper.selectCode(comCode, null);
     }
 
+    // 부서 권한
+    public String getAuthoritydepartmentManagementByEmpCode(String empCode) {
+        return codeMapper.getAuthoritydepartmentManagementByEmpCode(empCode);
+    }
+
     // 모든 부서 가져오기
     public List<CodeDTO> getDepCode(String comCode) {
         return codeMapper.getDepCode(comCode);
@@ -200,6 +205,11 @@ public class CodeService {
             }
         }
         return tree;
+    }
+
+    // 직급 권한
+    public String getAuthoritypositionManagementByEmpCode(String empCode) {
+        return codeMapper.getAuthoritypositionManagementByEmpCode(empCode);
     }
 
     // 모든 직급 가져오기

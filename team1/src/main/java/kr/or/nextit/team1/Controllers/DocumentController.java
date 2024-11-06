@@ -154,7 +154,7 @@ public class DocumentController {
     }
 
     // 권한
-    @GetMapping("/authority/{empCode}")
+    @GetMapping("/authority/document/{empCode}")
     public ResponseEntity<String> getAuthorityByEmpCode(@PathVariable String empCode) {
         String document = documentService.getAuthorityByEmpCode(empCode);
         return ResponseEntity.ok(document);

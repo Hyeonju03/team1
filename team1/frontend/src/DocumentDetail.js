@@ -75,7 +75,7 @@ export default function DocumentDetail() {
         const fetchAuth = async () => {
             try {
                 // 권한 정보 가져오기
-                const response = await axios.get(`/authority/${empCode}`);
+                const response = await axios.get(`/authority/document/${empCode}`);
                 setAuth(response.data);
             } catch (error) {
                 console.error('권한 정보를 가져오는 데 실패했습니다.', error);

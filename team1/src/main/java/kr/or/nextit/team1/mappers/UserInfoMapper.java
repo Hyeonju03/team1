@@ -32,4 +32,7 @@ public interface UserInfoMapper {
     // 반려
     void modifyReqClear(String corCode);
 
+    // 권한
+    String getAuthorityUserInfoByEmpCode(String empCode);
+
 }
