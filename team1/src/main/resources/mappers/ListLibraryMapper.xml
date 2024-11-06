@@ -75,4 +75,13 @@
         select c.SPEAKER from chatroom c
         where c.CHAT_NUM like #{chatNum};
     </select>
+    <select id="chatInSelect4" resultType="ListLibraryDTO" parameterType="String">
+        select e.DEP_CODE, e.EMP_NAME from employee e
+        where e.EMP_CODE like #{code}
+    </select>
+    <update id="chatInUpdate1" parameterType="Map">
+        update chatroom
+        set content = CONCAT(content ,#{chatContent},',')
+        where CHAT_NUM like #{chatNum};
+    </update>
 </mapper>

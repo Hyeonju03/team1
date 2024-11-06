@@ -12,6 +12,9 @@ export default function SignRegister() {
   const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
 
   // 슬라이드 부분
+
+  const [socket,setSocket] = useState(new WebSocket('ws://localhost:3001'));
+
   const [isRClick, setIsRClick] = useState(false);
   const [newWindowPosY, setNewWindowPosY] = useState(500);
   const [newWindowPosX, setNewWindowPosX] = useState(500);
@@ -34,7 +37,6 @@ export default function SignRegister() {
     setAddressBookHtml(result3);
     const result4 = await ListLibrary.chatIn(user,'1')
     setChatInHTML(result4);
-
   };
   useEffect(() => {
     fetchData();
@@ -111,7 +113,11 @@ export default function SignRegister() {
   }, [addressBookHtml, btnCtl]);
   useEffect(() => {
     //채팅 내부 이벤트들
-  }, [chatInHTML, btnCtl]);
+    const chatUpdate = async () => {
+      setChatInHTML(await ListLibrary.chatIn(user, '1'))
+    }
+    chatUpdate();
+  }, [socket]);
 
 
 
@@ -830,7 +836,8 @@ export default function SignRegister() {
                   <div className="w-[100%] h-[50px] flex">
                     <input className="w-[70%] border chatInput" />
                     <button className="w-[30%] border flex justify-center items-center" onClick={()=>{
-                      console.log(document.querySelector('.chatInput').value)
+                      ListLibrary.chatinput(user, document.querySelector('.chatInput').value, '1');
+                      socket.send("send")
                     }}>입력</button>
                   </div>
                 </>

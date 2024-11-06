@@ -166,8 +166,8 @@ public class ListLibraryController {
         }
         String[] splitData1 =  data.get(0).getContent().split(",");
         for (int i = 0; i < splitData1.length; i++) {
-            String splitData3 = splitData1[i].substring(0,splitData1[0].indexOf(':'));
-            String[] splitData4 = splitData1[i].substring(splitData1[0].indexOf(':')+1).split("_");
+            String splitData3 = splitData1[i].substring(0,splitData1[i].indexOf(':'));
+            String[] splitData4 = splitData1[i].substring(splitData1[i].indexOf(':')+1).split("_");
             list[0].add(List.of(splitData3));
             list[1].add(List.of(splitData4[0]));
             list[2].add(List.of(splitData4[1]));
@@ -186,5 +186,19 @@ public class ListLibraryController {
     public ResponseEntity<String> chatInSelect3(String chatNum) {
         List<ListLibraryDTO> data = listLibraryService.chatInSelect3(chatNum);
         return ResponseEntity.ok(data.get(0).getSpeaker());
+    }
+
+    @GetMapping("/chatInSelect4")
+    public ResponseEntity<List<String>[]> chatInSelect4(String code) {
+        List<ListLibraryDTO> data = listLibraryService.chatInSelect4(code);
+        List<String>[] list =  new List[] {Arrays.asList(data.get(0).getDepCode(), data.get(0).getEmpName())};
+
+        return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("/chatInUpdate1")
+    public ResponseEntity<Void> chatInUpdate1(@RequestBody Map<String, Object> data) {
+        listLibraryService.chatInUpdate1(data);
+        return ResponseEntity.ok().build();
     }
 }

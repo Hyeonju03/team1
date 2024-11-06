@@ -21,4 +21,6 @@ public interface ListLibraryMapper {
     List<ListLibraryDTO> chatInSelect1(String chatNum);
     List<ListLibraryDTO> chatInSelect2(String chatNum);
     List<ListLibraryDTO> chatInSelect3(String chatNum);
+    void chatInUpdate1(Map<String, Object> data);
+    List<ListLibraryDTO> chatInSelect4(String code);
 }
