@@ -225,11 +225,11 @@ export default function SignList() {
         return (
             <div className="min-h-screen flex flex-col">
                 {/* Header with logo */}
-                <header className="bg-gray-200 p-4">
+                <header className="flex justify-end items-center border-b shadow-md bg-white h-[55.13px] p-4">
                     <h1 className="text-2xl font-bold text-center">로고</h1>
                 </header>
                 <div className="flex-1 flex">
-                    <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                    <aside className="w-64 bg-emerald-50 border-r-2 shadow-lg p-4 space-y-2">
                         <ol>
                             <li>
                                 <div>

@@ -3,8 +3,10 @@ import './App.css';
 import axios from "axios";
 import Clock from "react-live-clock";
 import {useAuth} from "./noticeAuth";
+import {useNavigate} from "react-router-dom";
 
 export default function MainLayout() {
+    const navigate = useNavigate();
     const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
     const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
@@ -15,6 +17,8 @@ export default function MainLayout() {
     //일정
     const [scheduleCount, setScheduleCount] = useState(0);
     const [schedule, setSchedule] = useState([]);
+    // 인사정보
+    const [reqCount, setReqCount] = useState(0); // 부하직원 관련 내용
     // 날씨
     const weekday = ['일', '월', '화', '수', '목', '금', '토'];
     const [weathers, setWeathers] = useState([{
@@ -62,6 +66,7 @@ export default function MainLayout() {
         console.log("login", isLoggedIn);
         // newMail();
         newSign();
+        newUserInfo();
         todaySchedule();
     }, [empCode, isLoggedIn]);
 
@@ -239,6 +244,9 @@ export default function MainLayout() {
 
     // 롹인 안된 결재 수량
     const newSign = async () => {
+        if(!empCode) {
+            return false;
+        }
         let count = 0;
         axios.get(`/sign/${empCode}`)
             .then(response => {
@@ -256,6 +264,9 @@ export default function MainLayout() {
 
     // 오늘자 일정 수량(기간에 끼워져 있는거 포함)
     const todaySchedule = async () => {
+        if(!empCode) {
+            return false;
+        }
         // 오늘 날짜 계산
         const date = new Date();
         const year = date.getFullYear();
@@ -276,7 +287,11 @@ export default function MainLayout() {
             if (start == today) {
                 schedules.push(tSchedule)
                 count += 1;
-            } else if (end > today || end == today) {
+            }
+            else if (end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (start == today && end > today){
                 schedules.push(tSchedule)
                 count += 1;
             }
@@ -311,6 +326,21 @@ export default function MainLayout() {
         setScheduleCount(count);
         setSchedule(schedules);
     }
+    
+    // 인사정보 수정 요청 들어온거 있는지 확인하기
+    const newUserInfo = async () => {
+        try {
+            let count = 0
+            const response = await axios.get(`/${empCode}`);
+            if(response.data.modifyReq) {
+                const req = response.data.modifyReq.split(",")
+                count = req.length;
+            }
+            setReqCount(count);
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -330,14 +360,14 @@ export default function MainLayout() {
                                     timezone={'Asia/Seoul'}/>
                             </div>
                             <div className="mr-5">
-                                <img width="40" height="40" src="https://img.icons8.com/windows/32/smart-home-2.png"
-                                     alt="smart-home-2"/>
+                                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                                     alt="home"/>
                             </div>
                             <div className="mr-16">
                                 <img width="45" height="45"
-                                     src="https://img.icons8.com/external-kiranshastry-solid-kiranshastry/64/external-user-interface-kiranshastry-solid-kiranshastry.png"
-                                     alt="external-user-interface-kiranshastry-solid-kiranshastry"
-                                     onClick={togglePanel}/>
+                                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                                     alt="user-male-circle" onClick={togglePanel}/>
+
                             </div>
                             {/*    <div className="container mx-auto flex justify-center items-center h-24">*/}
                             {/*        <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">*/}
@@ -352,10 +382,11 @@ export default function MainLayout() {
                             {/*        </div>*/}
                             {/*    </div>*/}
                         </header>
+                        <div className="w-full h-[5px] bg-red-400"></div>
 
                         {/* Main content area */}
-                        <div className="bg-gray-100 h-[94%] w-[100%]">
-                            <div className="flex overflow-hidden h-full shadow-inner">
+                        <div className="bg-gray-100 h-[94%] w-[100%] shadow-inner shadow-red-400/50">
+                            <div className="flex overflow-hidden h-full">
                                 {/*<main className="flex-grow p-4">*/}
                                 {/*    <div className="container mx-auto">*/}
                                 {/*        <h2 className="text-xl font-semibold mb-4">회사설명 (홍보)</h2>*/}
@@ -371,7 +402,8 @@ export default function MainLayout() {
                                                 <td className="w-[30px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/MailList')}>
                                                         <strong
                                                             className="flex flex-col items-center justify-center h-[48px]">
                                                             메일
@@ -387,11 +419,10 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/documents')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             문서함
-                                                            {/*<div*/}
-                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/folder-invoices--v2.png"
@@ -401,11 +432,12 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/sign')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             결재함
                                                             <div
-                                                                className={`text-white bg-red-800 w-[32px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : ""}`}>
+                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : "block"}`}>
                                                                 {signCount}
                                                             </div>
                                                         </strong>
@@ -417,11 +449,12 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/schedule')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             일정
                                                             <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl items-center">
+                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${scheduleCount === 0 ? "hidden" : "block"}`}>
                                                                 {scheduleCount}
                                                             </div>
                                                         </strong>
@@ -438,11 +471,14 @@ export default function MainLayout() {
                                                 <td className="w-[30px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/userInfo')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             인사 정보
                                                             <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${reqCount === 0 ? "hidden" : "block"}`}>
+                                                                {reqCount}
+                                                            </div>
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios-glyphs/60/user--v1.png"
@@ -452,11 +488,10 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/DepartmentManagement')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             부서 관리
-                                                            <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/stacked-organizational-chart.png"
@@ -466,11 +501,10 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/PositionManagement')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             직급 관리
-                                                            <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/parallel-tasks.png"
@@ -480,11 +514,13 @@ export default function MainLayout() {
                                                 <td className="w-[20px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/Authority')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             권한 관리
-                                                            <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
+                                                            {/* 본인 권한이 뭐가 바뀌었는지 보여주기 */}
+                                                            {/*<div*/}
+                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/briefcase-settings.png"
@@ -499,11 +535,10 @@ export default function MainLayout() {
                                                 <td className="w-[30px]"></td>
                                                 <td className="w-[50px]">
                                                     <div
-                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl">
+                                                        className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
+                                                        onClick={() => navigate('/CompanyInfo')}>
                                                         <strong className="flex flex-col items-center justify-center">
                                                             회사 정보
-                                                            <div
-                                                                className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/organization.png"
@@ -518,17 +553,17 @@ export default function MainLayout() {
 
                                 <div
                                     className="flex ml-[2%] mr-[5%] mt-[3.5%] flex-col justify-between h-[750px] w-[40%]">
-                                    <div className="bg-white h-[300px] rounded-3xl shadow-lg p-5">
+                                    <div className="h-[300px] rounded-3xl shadow-lg p-5 bg-gradient-to-t to-blue-400 from-cyan-300">
                                         <div className="">
                                             <div className="w-full">
-                                                <div className="flex w-full h-[260px] justify-around">
+                                                <div className="flex w-full h-[260px] justify-around ">
                                                     {weathers.map((weather, index) => {
                                                             const imgSrc = `https://openweathermap.com/img/w/${weather.icon}.png`;
                                                             const date = weather.dt_txt.split(" ")[0];
                                                             const day = new Date(date)
                                                             return (
                                                                 <div id={index}
-                                                                     className="flex flex-col justify-items-center p-2 h-full w-[24%] bg-gradient-to-t to-blue-400 from-cyan-300 rounded-2xl">
+                                                                     className="flex flex-col justify-items-center p-2 h-full w-[24%] bg-white/20 rounded-2xl">
                                                                     <div
                                                                         className="font-bold text-white mt-1 mb-1">{weekday[day.getDay()]}</div>
                                                                     <div className="text-3xl text-white mb-7">{weather.temp}°
@@ -554,54 +589,53 @@ export default function MainLayout() {
                                             오늘 일정
                                         </div>
                                         <div className="flex flex-col overflow-auto">
-                                            {schedule.map((s, i) => {
-                                                if (s.category == "개인") {
-                                                    return (
-                                                        <div
-                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                            <div>
-                                                                <div key={i} className="flex">
-                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-blue-300">{s.category ? " " : ""}</p>
+                                            {schedule.length === 0 ? (
+                                                <div>오늘의 일정이 없습니다!</div>
+                                            ) : (
+                                                schedule.map((s, i) => {
+                                                    if (s.category === "개인") {
+                                                        return (
+                                                            <div key={i}
+                                                                 className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                                <div className="flex">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-blue-300">
+                                                                        {s.category ? " " : ""}
+                                                                    </p>
                                                                     <div>
                                                                         <p>{s.startDate} ~ {s.endDate}</p>
                                                                         <p>{s.content}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    )
-                                                }
-                                                if (s.category == "부서") {
-                                                    return (
-                                                        <div
-                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                            <div>
-
-                                                                <div key={i}>
-                                                                    <p>{s.startDate} ~ {s.endDate}</p>
-                                                                    <p>{s.content}</p>
-                                                                    <p>{s.category}</p>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                }
-                                                if (s.category == "전체") {
-                                                    return (
-                                                        <div
-                                                            className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                            <div>
-                                                                <div key={i}>
+                                                        );
+                                                    }
+                                                    if (s.category === "부서") {
+                                                        return (
+                                                            <div key={i}
+                                                                 className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                                <div>
                                                                     <p>{s.startDate} ~ {s.endDate}</p>
                                                                     <p>{s.content}</p>
                                                                     <p>{s.category}</p>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    )
-                                                }
-                                            })}
+                                                        );
+                                                    }
+                                                    if (s.category === "전체") {
+                                                        return (
+                                                            <div key={i}
+                                                                 className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
+                                                                <div>
+                                                                    <p>{s.startDate} ~ {s.endDate}</p>
+                                                                    <p>{s.content}</p>
+                                                                    <p>{s.category}</p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -609,20 +643,39 @@ export default function MainLayout() {
                         </div>
 
                     </>) :
-                <div>로그인 안되어있음.
-                    <div className="mr-16">
-                        <img width="45" height="45"
-                             src="https://img.icons8.com/external-kiranshastry-solid-kiranshastry/64/external-user-interface-kiranshastry-solid-kiranshastry.png"
-                             alt="external-user-interface-kiranshastry-solid-kiranshastry"
-                             onClick={togglePanel}/>
-                    </div></div>
+                <>
+                    <header className="flex justify-end items-center h-[10%] bg-red-200">
+                        <div className="w-36 h-[50px] bg-gray-100">로고</div>
+                        <div className="flex mr-6">
+                            <div className="font-bold mr-1">{formattedDate}</div>
+                            <Clock
+                                format={'HH:mm:ss'}
+                                ticking={true}
+                                timezone={'Asia/Seoul'}/>
+                        </div>
+                        {/*<div className="mr-5">*/}
+                        {/*    <img width="40" height="40" src="https://img.icons8.com/windows/32/smart-home-2.png"*/}
+                        {/*         alt="smart-home-2"/>*/}
+                        {/*</div>*/}
+                        <div className="mr-16 flex flex-col items-center">
+                            <img width="45" height="45"
+                                 src="https://img.icons8.com/external-kiranshastry-solid-kiranshastry/64/external-user-interface-kiranshastry-solid-kiranshastry.png"
+                                 alt="external-user-interface-kiranshastry-solid-kiranshastry"
+                                 onClick={togglePanel}/>
+                            <div>로그인/회원가입</div>
+                        </div>
+                    </header>
+
+                    <div>로그인 안되어있음.
+                    </div>
+                </>
             }
             {/*/////////////////////////////////////////////////////////////////*/
             }
             {/* Sidebar */
             }
             <div
-                className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`fixed ${isLoggedIn ? "mt-[55px]" : "mt-[95px]" } top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
             >
 
                 <div className="p-4">
@@ -655,137 +708,140 @@ export default function MainLayout() {
                             문의사항
                         </a>
                     </div>
-                    <div className="h-[600px]">
-                        <h3 className="font-semibold mb-2 h-[25px]">메신저</h3>
-                        <div className="h-[138px]">
-                            <div className="flex">
-                                <div className="w-1/3 border">
-                                    <img src="/logo192.png"/>
+                    {isLoggedIn ?
+                        <div className="h-[600px]">
+                            <h3 className="font-semibold mb-2 h-[25px]">메신저</h3>
+                            <div className="h-[138px]">
+                                <div className="flex">
+                                    <div className="w-1/3 border">
+                                        <img src="/logo192.png"/>
+                                    </div>
+                                    <div className="w-2/3 text-left border">
+                                        <p>사내 이메일:</p>
+                                        <p>전화번호:</p>
+                                        <p>상태:</p>
+                                    </div>
                                 </div>
-                                <div className="w-2/3 text-left border">
-                                    <p>사내 이메일:</p>
-                                    <p>전화번호:</p>
-                                    <p>상태:</p>
-                                </div>
-                            </div>
-                            <div className="flex">
-                                <button className="border w-1/5 text-sm"
-                                        onClick={() => setBtnCtl(0)}>
-                                    조직도
-                                </button>
-                                <button className="border w-1/5 text-sm"
-                                        onClick={() => setBtnCtl(1)}>
-                                    대화방
-                                </button>
-                                <button className="border w-1/5 text-sm"
-                                        onClick={() => setBtnCtl(2)}>
-                                    주소록
-                                </button>
-                                <button className="border w-2/5 text-sm"
-                                        onClick={() => setBtnCtl(3)}>
-                                    공지사항
-                                </button>
-                            </div>
-                        </div>
-                        <div className="border text-left h-[435px] blue">
-                            {btnCtl === 0 ? (
-                                // ListLibrary.WorkerList(com)
-                                <></>
-                            ) : btnCtl === 1 ? (
-                                <>
-                                    <div className="h-[100%] overflow-y-auto">
-                                        <div className="border flex justify-between">
-                                            <button>대화방</button>
-                                            <button>나가기</button>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : btnCtl === 2 ? (
-                                <>
-                                    {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
-                                </>
-                            ) : btnCtl === 3 ? (
-                                <>
-                                    {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
-                                    <div>
-                                        <button
-                                            className="text-center border w-full h-[45px]"
-                                            onClick={() => setBtnCtl(6)}>
-                                            {" "}
-                                            공지사항 추가하기
-                                        </button>
-                                    </div>
-                                </>
-                            ) : btnCtl === 4 ? (
-                                <>
-                                    <div className="h-[480px] overflow-y-auto">
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="text-right pb-2">
-                                            사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                        <ul className="pb-2">
-                                            상대방이름 <li className="pl-4">대화내용 </li>
-                                        </ul>
-                                    </div>
-                                </>
-                            ) : btnCtl === 5 ? (
-                                <>
-                                    {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
-                                    <div>
-                                        <button
-                                            className="text-center border w-full h-[45px]"
-                                            onClick={() => setBtnCtl(3)}>
-                                            목록으로
-                                        </button>
-                                    </div>
-                                </>
-                            ) : btnCtl === 6 ? (
-                                <>
-                                    {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
-                                    <button
-                                        className="text-center border w-full h-[45px]"
-                                        onClick={() => {
-                                            setBtnCtl(3);
-                                            // ListLibrary.noticeInsert(user);
-                                        }}
-                                    >
-                                        공지사항 등록
+                                <div className="flex">
+                                    <button className="border w-1/5 text-sm"
+                                            onClick={() => setBtnCtl(0)}>
+                                        조직도
                                     </button>
-                                </>
-                            ) : (
-                                <></>
-                            )}
+                                    <button className="border w-1/5 text-sm"
+                                            onClick={() => setBtnCtl(1)}>
+                                        대화방
+                                    </button>
+                                    <button className="border w-1/5 text-sm"
+                                            onClick={() => setBtnCtl(2)}>
+                                        주소록
+                                    </button>
+                                    <button className="border w-2/5 text-sm"
+                                            onClick={() => setBtnCtl(3)}>
+                                        공지사항
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="border text-left h-[435px] blue">
+                                {btnCtl === 0 ? (
+                                    // ListLibrary.WorkerList(com)
+                                    <></>
+                                ) : btnCtl === 1 ? (
+                                    <>
+                                        <div className="h-[100%] overflow-y-auto">
+                                            <div className="border flex justify-between">
+                                                <button>대화방</button>
+                                                <button>나가기</button>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : btnCtl === 2 ? (
+                                    <>
+                                        {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                    </>
+                                ) : btnCtl === 3 ? (
+                                    <>
+                                        {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                        <div>
+                                            <button
+                                                className="text-center border w-full h-[45px]"
+                                                onClick={() => setBtnCtl(6)}>
+                                                {" "}
+                                                공지사항 추가하기
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : btnCtl === 4 ? (
+                                    <>
+                                        <div className="h-[480px] overflow-y-auto">
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="text-right pb-2">
+                                                사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                            <ul className="pb-2">
+                                                상대방이름 <li className="pl-4">대화내용 </li>
+                                            </ul>
+                                        </div>
+                                    </>
+                                ) : btnCtl === 5 ? (
+                                    <>
+                                        {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                        <div>
+                                            <button
+                                                className="text-center border w-full h-[45px]"
+                                                onClick={() => setBtnCtl(3)}>
+                                                목록으로
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : btnCtl === 6 ? (
+                                    <>
+                                        {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                        <button
+                                            className="text-center border w-full h-[45px]"
+                                            onClick={() => {
+                                                setBtnCtl(3);
+                                                // ListLibrary.noticeInsert(user);
+                                            }}
+                                        >
+                                            공지사항 등록
+                                        </button>
+                                    </>
+                                ) : (
+                                    <></>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    : <></>}
+
                     {isRClick === true ? (
                         <></>
                         // <div className={`flex absolute`}

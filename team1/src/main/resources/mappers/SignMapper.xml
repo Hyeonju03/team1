@@ -5,8 +5,7 @@
 <mapper namespace="kr.or.nextit.team1.mappers.SignMapper">
 
     <select id="signSelect" resultType="SignDTO">
-        SELECT
-            *
+        SELECT *
         FROM
             SIGN
         WHERE
