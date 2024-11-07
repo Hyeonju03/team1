@@ -7,7 +7,27 @@ import {useNavigate} from "react-router-dom";
 
 // 부서 트리
 const DepartmentTree = ({departments, onAdd, onDelete, onUpdate}) => {
+    const initializeExpandedState = (depts) => {
+        const state = {};
+        const setExpandedRecursively = (depts) => {
+            depts.forEach(dept => {
+                state[dept.depCode] = true; // 모든 부서를 확장된 상태로 설정
+                if (dept.children && dept.children.length > 0) {
+                    setExpandedRecursively(dept.children); // 자식 부서도 재귀적으로 처리
+                }
+            });
+        };
+        setExpandedRecursively(depts);
+        return state;
+    };
+
+    // 컴포넌트가 처음 렌더링될 때, `expanded` 상태를 설정
     const [expanded, setExpanded] = useState({});
+
+    useEffect(() => {
+        // 초기 `expanded` 상태를 설정 (모든 부서 확장)
+        setExpanded(initializeExpandedState(departments));
+    }, [departments]); // `departments`가 변경될 때마다 초기화
 
     // 부서 확장, 축소
     const toggleExpand = (code) => {
@@ -72,7 +92,7 @@ export default function DepartmentManagement() {
     };
 
     const [comCode, setComCode] = useState('');
-    const [permission, setPermission] = useState(false);
+    const [permission, setPermission] = useState(true);
 
     // empCode에서 comCode를 추출하는 함수
     const getComCode = (empCode) => {
@@ -93,6 +113,11 @@ export default function DepartmentManagement() {
                 // 권한 정보 가져오기
                 const response = await axios.get(`/authority/departmentManagement/${empCode}`);
                 setAuth(response.data);
+                if (response.data === 0) {
+                    setPermission(false);
+                } else {
+                    setPermission(true);
+                }
             } catch (error) {
                 console.error('권한 정보를 가져오는 데 실패했습니다.', error);
             }
@@ -109,12 +134,6 @@ export default function DepartmentManagement() {
                 try {
                     const response = await axios.get('/departments/tree', {params: {comCode: comCode}});
                     setDepartments(response.data);
-
-                    if (response.data === 0) {
-                        setPermission(false);
-                    } else {
-                        setPermission(true);
-                    }
 
 
                 } catch (e) {
@@ -275,14 +294,6 @@ export default function DepartmentManagement() {
             }
         }
     };
-
-    if (departments?.length > 0 && !permission) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
-            </div>
-        );
-    }
 
     return (
         <>

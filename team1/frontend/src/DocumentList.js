@@ -30,7 +30,7 @@ export default function DocumentList() {
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
     const navigate = useNavigate(); // navigate 함수 사용
-    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
+    const [comCode, setComCode] = useState('');
     // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     const [auth, setAuth] = useState(null);
     // 로그인
@@ -42,6 +42,20 @@ export default function DocumentList() {
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
+
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode) {
+            const newComCode = getComCode(empCode);
+            fetchAuth();
+            setComCode(newComCode);  // comCode 상태 업데이트
+        }
+    }, [empCode]); // empCode가 변경될 때마다 실행
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -55,7 +69,7 @@ export default function DocumentList() {
         }
         // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
-    }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
+    }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -121,21 +135,15 @@ export default function DocumentList() {
             }
         });
     };
-
-
-    useEffect(() => {
-        const fetchAuth = async () => {
-            try {
-                // 권한 정보 가져오기
-                const response = await axios.get(`/authority/document/${empCode}`);
-                setAuth(response.data);
-            } catch (error) {
-                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
-            }
-        };
-
-        fetchAuth();
-    }, [comCode, empCode]);
+    const fetchAuth = async () => {
+        try {
+            // 권한 정보 가져오기
+            const response = await axios.get(`/authority/document/${empCode}`);
+            setAuth(response.data);
+        } catch (error) {
+            console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+        }
+    };
 
     /* 0:x, 1:작성, 2: 수정. 3: 삭제, 4:작성+수정, 5:작성+삭제, 6:수정+삭제. 7:전부  */
     // 등록 버튼

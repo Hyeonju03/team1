@@ -8,6 +8,8 @@
             *
         FROM
             DOCUMENT
+        WHERE
+            EMP_CODE LIKE CONCAT(#{comCode}, '%')
     </select>
     <insert id="documentInsert" parameterType="DocumentDTO">
         INSERT INTO

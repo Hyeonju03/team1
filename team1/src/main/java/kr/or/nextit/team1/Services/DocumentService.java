@@ -34,7 +34,7 @@ public class DocumentService {
         documentDTO.setDocCateCode(category);
         documentDTO.setContent(content);
 
-        
+
         try {
             // 첨부파일 처리 (파일을 저장하고, 경로 등을 documentDTO에 설정)
             if (attachment != null && !attachment.isEmpty()) {
@@ -90,7 +90,7 @@ public class DocumentService {
     }
 
     // 권한
-    public String getAuthorityByEmpCode(String empCode){
+    public String getAuthorityByEmpCode(String empCode) {
         return documentMapper.getAuthorityByEmpCode(empCode);
     }
 

@@ -45,7 +45,7 @@ export default function PositionManagement() {
     };
 
     const [comCode, setComCode] = useState('');
-    const [permission, setPermission] = useState(false);
+    const [permission, setPermission] = useState(true);
 
     // empCode에서 comCode를 추출하는 함수
     const getComCode = (empCode) => {
@@ -66,6 +66,11 @@ export default function PositionManagement() {
                 // 권한 정보 가져오기
                 const response = await axios.get(`/authority/positionManagement/${empCode}`);
                 setAuth(response.data);
+                if (response.data === 0) {
+                    setPermission(false);
+                } else {
+                    setPermission(true);
+                }
             } catch (error) {
                 console.error('권한 정보를 가져오는 데 실패했습니다.', error);
             }
@@ -110,15 +115,6 @@ export default function PositionManagement() {
                         name: name.trim(),
                     }));
                     setPositions(positionObjects);
-                    if (response.data === 0) {
-                        setPermission(false);
-                        console.log("false 들어옴")
-                    } else {
-                        setPermission(true);
-                        console.log("true 들어옴")
-                    }
-
-
                 } catch (e) {
                     console.error(e);
                 }
@@ -255,14 +251,6 @@ export default function PositionManagement() {
             setOriginalPositions([])
         }
         setIsReordering(!isReordering)
-    }
-
-    if (positions?.length > 0 && !permission) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
-            </div>
-        );
     }
 
     return (
