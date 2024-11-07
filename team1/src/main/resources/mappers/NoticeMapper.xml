@@ -24,7 +24,7 @@
     <!--  일반 로그인  -->
     <select id="validateUser" parameterType="map" resultType="int">
         SELECT COUNT(*)
-        FROM employeetest
+        FROM employee
         WHERE EMP_CODE = #{empCode} AND EMP_PASS = #{empPass}
     </select>
 

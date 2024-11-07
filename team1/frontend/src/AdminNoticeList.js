@@ -48,7 +48,7 @@ const AdminNoticeList = () => {
             setIsLoggedIn(false); // 저장된 ID가 없으면 로그아웃 상태로 설정
             setUserId(""); // 사용자 ID 초기화
         }
-    }, [navigate]);
+    }, []);
 
     // 로그인 상태가 변경될 때마다 공지사항 가져오기
     useEffect(() => {
@@ -189,7 +189,7 @@ const AdminNoticeList = () => {
                                 이전
                             </button>
                             )}
-                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span>
+                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {total}</span>
                             {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                             <button
                                 onClick={() => setCurrentPage(currentPage + 1)}

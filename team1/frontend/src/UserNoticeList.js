@@ -123,7 +123,7 @@ const UserNoticeList = () => {
                                 onChange={(e) => setSearchType(e.target.value)}
                                 className="p-2 border rounded-lg mr-2"
                             >
-                                <option value="title">제목만</option>
+                                <option value="title">제목</option>
                                 <option value="content">제목 + 내용</option>
                             </select>
                             <input
@@ -163,7 +163,7 @@ const UserNoticeList = () => {
                             </button>
                             )}
 
-                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span>
+                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {total}</span>
 
                             {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                             <button
