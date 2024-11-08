@@ -171,7 +171,7 @@ export default function SignUpForm() {
 
     console.log(comCode)
     const goPayMent = () => {
-        navigate("/PaymentCom", {state: {empNum: empNum, comCode: comCode}});
+        navigate("/PaymentCom", {state: {empNum: selectEmpNumList, comCode: comCode}});
     }
 
     // 로그아웃 처리 함수

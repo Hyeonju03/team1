@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 public class UserInfoController {
 
@@ -16,7 +14,7 @@ public class UserInfoController {
     private UserInfoService userInfoService;
 
     // 조회
-    @GetMapping("/{empCode}")
+    @GetMapping("/emp/{empCode}")
     public ResponseEntity<UserInfoDTO> userInfoSelect(@PathVariable String empCode) {
         UserInfoDTO userInfoDTO = userInfoService.userInfoSelect(empCode);
 
@@ -71,9 +69,11 @@ public class UserInfoController {
     }
 
     @GetMapping("/userInfo/{corCode}")
-    public ResponseEntity<List<UserInfoDTO>> corCodeCheck(@PathVariable String corCode) {
-        List<UserInfoDTO> userInfo = userInfoService.corCodeCheck(corCode);
-        return ResponseEntity.ok(userInfo);
+    public ResponseEntity<String> corCodeCheck(@PathVariable String corCode, String index) {
+        UserInfoDTO userInfo = userInfoService.corCodeCheck(corCode);
+
+        String requestReq = userInfo.getModifyReq().split(",")[Integer.parseInt(index)];
+        return ResponseEntity.ok(requestReq);
 
     }
 

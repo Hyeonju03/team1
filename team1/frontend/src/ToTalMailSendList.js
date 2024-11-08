@@ -82,16 +82,16 @@ export default function EmailSend() {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (isLoggedIn) {
+        if (isLoggedIn && empCode) {
+            const fetchData = async () => {
                 try {
-                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
+                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`);
                     console.log(response.data);
-                    const mailEmpCode = response.data.split("-").join("") + '@damail.com';
-                    setMailEmpCode(mailEmpCode)
-                    console.log("->", mailEmpCode)
                     setSelectedCheckboxes(new Array(response.data.length).fill(false));
                     //서버로받은길이를 가져와서 생성된배열의 모든요소를 false로 채우는것.
+                    const mailEmpCode = response.data.split("-").join("") + '@damail.com';
+                    setMailEmpCode(mailEmpCode)
+                    console.log(mailEmpCode)
 
                     const response2 = await axios.get('/selectSendMail', {
                         params: {
@@ -99,16 +99,14 @@ export default function EmailSend() {
                         }
                     });
 
-                    console.log(response2)
                     setSendList(response2.data)
                 } catch (error) {
-                    console.error(error.response ? error.response.data : error.message);
+                    console.error(error);
                 }
             }
+            fetchData();
         }
-        fetchData();
         setPrevLogin(isLoggedIn);
-
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
 

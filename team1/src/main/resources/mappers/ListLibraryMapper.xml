@@ -26,7 +26,7 @@
     <select id="noticeListSelect2" resultType="ListLibraryDTO" parameterType="String">
         select n.TARGET as targets
         from notice n
-        where n.TARGET LIKE CONCAT('%', #{code}, '%');
+        where n.TARGET LIKE CONCAT('%', #{code}, ':%');
     </select>
     <select id="loadNoticeSelect" resultType="ListLibraryDTO" parameterType="String">
         select n.TITLE,n.START_DATE,n.END_DATE,n.CONTENT,n.TARGET as TARGETS
@@ -62,5 +62,26 @@
         update employee
         set EMP_ADD = trim(replace(EMP_ADD,CONCAT(#{target},','),''))
         where EMP_CODE like #{code};
+    </update>
+    <select id="chatInSelect1" resultType="ListLibraryDTO" parameterType="String">
+        select c.CONTENT from chatroom c
+        where c.CHAT_NUM like #{chatNum};
+    </select>
+    <select id="chatInSelect2" resultType="ListLibraryDTO" parameterType="String">
+        select c.MEM_LIST from chatroom c
+        where c.CHAT_NUM like #{chatNum};
+    </select>
+    <select id="chatInSelect3" resultType="ListLibraryDTO" parameterType="String">
+        select c.SPEAKER from chatroom c
+        where c.CHAT_NUM like #{chatNum};
+    </select>
+    <select id="chatInSelect4" resultType="ListLibraryDTO" parameterType="String">
+        select e.DEP_CODE, e.EMP_NAME from employee e
+        where e.EMP_CODE like #{code}
+    </select>
+    <update id="chatInUpdate1" parameterType="Map">
+        update chatroom
+        set content = CONCAT(content ,#{chatContent},',')
+        where CHAT_NUM like #{chatNum};
     </update>
 </mapper>

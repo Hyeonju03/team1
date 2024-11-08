@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
 import SignTarget from "./SignTarget";
 import axios from "axios";
@@ -18,6 +18,10 @@ export default function SignRegister() {
   const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
   // 슬라이드 부분
+
+
+  const socket = useRef(null);
+  const [sendMessage, setSendMessage] = useState(null);
   const [isRClick, setIsRClick] = useState(false);
   const [newWindowPosY, setNewWindowPosY] = useState(500);
   const [newWindowPosX, setNewWindowPosX] = useState(500);
@@ -31,6 +35,7 @@ export default function SignRegister() {
   const [noticeHtml, setNoticeHtml] = useState("");
   const [loadNoticeHtml, setLoadNoticeHtml] = useState("");
   const [addressBookHtml, setAddressBookHtml] = useState("");
+  const [chatInHTML, setChatInHTML] = useState("");
   const fetchData = async () => {
     const result1 = await ListLibrary.noticeList(user, btnCtl);
     setNoticeHtml(result1);
@@ -38,11 +43,8 @@ export default function SignRegister() {
     setLoadNoticeHtml(result2);
     const result3 = await ListLibrary.addressBook(user, "");
     setAddressBookHtml(result3);
-
-    //ListLibrary.dataTest1('3118115625-abcc')
-    //ListLibrary.dataTest2('3118115625-qwer')
-    //ListLibrary.dataTest3('3118115625-abcc','3118115625-qwer')
-    //ListLibrary.dataTest4('3118115625-abcc','3118115625-qwer')
+    const result4 = await ListLibrary.chatIn(user,'1')
+    setChatInHTML(result4);
   };
 
 
@@ -82,7 +84,6 @@ export default function SignRegister() {
         setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
       }
     };
-
     const addBtnClick = async (e) => {
       if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value, InputAddressBookAdd[1].value)) {
         if (!(await ListLibrary.addressEmpAddSelect(user, InputAddressBookAdd[0].value))) {
@@ -95,7 +96,6 @@ export default function SignRegister() {
         alert("정보가 일치하지 않습니다");
       }
     };
-
     const handleClick = async (e) => {
       await ListLibrary.addressBookDelete(e.currentTarget.parentNode.parentNode.id.replace("Add", ""), user);
       setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
@@ -123,6 +123,56 @@ export default function SignRegister() {
       }
     };
   }, [addressBookHtml, btnCtl]);
+  useEffect(() => {
+    socket.current = new WebSocket('ws://localhost:3001');
+
+    socket.current.onopen = () => {
+      console.log('WebSocket 연결 성공');
+    };
+
+    socket.current.onclose = () => {
+      console.log('WebSocket 연결 종료');
+    };
+
+    socket.current.onerror = (error) => {
+      console.error('WebSocket 오류:', error);
+    };
+
+    // 서버로부터 메시지 수신 처리
+    socket.current.onmessage = (event) => {
+      setSendMessage(event.data);
+      console.log("서버")
+    };
+
+    // cleanup: 컴포넌트 언마운트 시 WebSocket 연결 종료
+    return () => {
+      if (socket.current) {
+        socket.current.close();
+      }
+    };
+  }, []);
+  useEffect(() => {
+    //채팅 내부 이벤트들
+    const chatUpdate = async () => {
+      setChatInHTML(await ListLibrary.chatIn(user, '1'))
+      console.log("이벤트")
+    }
+    chatUpdate();
+  }, [sendMessage]);
+  const handleSendMessage = () => {
+    if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+      const message = document.querySelector('.chatInput').value;
+      ListLibrary.chatinput(user, message, '1');
+      socket.current.send(message);
+      console.log('메시지 전송:', message);
+      document.querySelector('.chatInput').value = ""
+      document.querySelector('.chatRoomDiv').scrollTop = document.querySelector('.chatRoomDiv').scrollHeight
+    } else {
+      console.error('WebSocket 연결이 열리지 않았습니다.');
+    }
+  };
+
+
 
 
   // 왼쪽 카테고리
@@ -171,7 +221,7 @@ export default function SignRegister() {
       await setNewWindowPosX(50);
       setIsRClick(true);
       ListLibrary.RClickWindow(newWindowPosX, newWindowPosY, e.target.getAttribute("data-value")).then((data) =>
-        setNewWindowData([data[0], data[1]])
+          setNewWindowData([data[0], data[1]])
       );
     }
   };
@@ -227,33 +277,33 @@ export default function SignRegister() {
     if (isToggled) {
       // 양식이 사용될 때 content 업데이트
       const newContent =
-        "양식_companyName:" +
-        companyName +
-        "_companyAddress:" +
-        companyAddress +
-        "_companyTel:" +
-        companyTel +
-        "_companyFax:" +
-        companyFax +
-        "_docNum:" +
-        docNum +
-        "_docReception:" +
-        docReception +
-        "_docReference:" +
-        docReference +
-        "_docTitle:" +
-        docTitle +
-        "_docOutline:" +
-        docOutline +
-        "_docContent:" +
-        docContent +
-        `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` +
-        `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` +
-        `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` +
-        "_docDate:" +
-        docDate +
-        "_docCeo:" +
-        docCeo;
+          "양식_companyName:" +
+          companyName +
+          "_companyAddress:" +
+          companyAddress +
+          "_companyTel:" +
+          companyTel +
+          "_companyFax:" +
+          companyFax +
+          "_docNum:" +
+          docNum +
+          "_docReception:" +
+          docReception +
+          "_docReference:" +
+          docReference +
+          "_docTitle:" +
+          docTitle +
+          "_docOutline:" +
+          docOutline +
+          "_docContent:" +
+          docContent +
+          `${docAttached1 ? "_docAttached1:" + docAttached1 : ""}` +
+          `${docAttached2 ? "_docAttached2:" + docAttached2 : ""}` +
+          `${docAttached3 ? "_docAttached3:" + docAttached3 : ""}` +
+          "_docDate:" +
+          docDate +
+          "_docCeo:" +
+          docCeo;
 
       setContent(newContent);
     }
@@ -531,7 +581,6 @@ export default function SignRegister() {
                 <div className={`${isToggled ? "font-bold" : ""}`}>제공된 양식 사용하기</div>
               </div>
             </div>
-
             <div className="border border-black rounded p-2">
               <div className="flex">
                 <div>
@@ -539,6 +588,7 @@ export default function SignRegister() {
                     <fieldset className="mr-2">
                       {/*<legend>카테고리</legend>*/}
                       <div>
+
                         <select name="category" value={category} onChange={(e) => setCategory(e.target.value)}
                                 className="border rounded p-2">
                           <option value="">카테고리</option>
@@ -934,18 +984,18 @@ export default function SignRegister() {
                     <>
                       <div className="h-[100%] overflow-y-auto">
                         <div className="border flex justify-between">
-                          <button>대화방</button>
+                          <button onClick={()=>setBtnCtl(4)}>대화방</button>
                           <button>나가기</button>
                         </div>
                       </div>
                     </>
                 ) : btnCtl === 2 ? (
                     <>
-                      <div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>
+                      <div dangerouslySetInnerHTML={{ __html: addressBookHtml }} />
                     </>
                 ) : btnCtl === 3 ? (
                     <>
-                      <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
+                      <div dangerouslySetInnerHTML={{ __html: noticeHtml }} />
                       <div>
                         <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(6)}>
                           {" "}
@@ -955,48 +1005,19 @@ export default function SignRegister() {
                     </>
                 ) : btnCtl === 4 ? (
                     <>
-                      <div className="h-[480px] overflow-y-auto">
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="text-right pb-2">
-                          사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
-                        <ul className="pb-2">
-                          상대방이름 <li className="pl-4">대화내용 </li>
-                        </ul>
+                      <div className="h-[383px] overflow-y-auto chatRoomDiv">
+                        <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                      </div>
+                      <div className="w-[100%] h-[50px] flex">
+                        <input className="w-[70%] border chatInput" />
+                        <button className="w-[30%] border flex justify-center items-center" onClick={()=>{
+                          handleSendMessage();
+                        }}>입력</button>
                       </div>
                     </>
                 ) : btnCtl === 5 ? (
                     <>
-                      <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
+                      <div dangerouslySetInnerHTML={{ __html: loadNoticeHtml }} />
                       <div>
                         <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(3)}>
                           목록으로
@@ -1022,9 +1043,9 @@ export default function SignRegister() {
               </div>
             </div>
             {isRClick === true ? (
-                <div className={`flex absolute`} style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                <div className={`flex absolute`} style={{ top: `${newWindowPosY}px`, right: `${newWindowPosX}px` }}>
                   <div className="w-1/3 border">
-                    <img src="/logo192.png"/>
+                    <img src="/logo192.png" />
                   </div>
                   <div className="w-2/3 text-left border">
                     <p>사내 이메일:{newWindowData[0]}</p>
