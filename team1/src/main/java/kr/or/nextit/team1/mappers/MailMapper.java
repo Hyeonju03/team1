@@ -29,8 +29,6 @@ public interface MailMapper {
 
     List<MailDTO> attachmentMailList(String mailTarget, String mailRef);
 
-    List<MailDTO> selectMailReception();
-
     List<MailDTO> receivedMailList(String mailTarget, String mailRef);
 
 }

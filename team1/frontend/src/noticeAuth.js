@@ -1,17 +1,20 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 
 const noticeAuth = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({children}) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [empCode, setEmpCode] = useState("");
     const [role, setRole] = useState(null); // 역할 상태 추가
     const [token, setToken] = useState(""); // 토큰 상태 추가
-
     const config = {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {Authorization: `Bearer ${token}`},
     };
+
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        return localStorage.getItem('isLoggedIn') === 'true';
+    });
 
     useEffect(() => {
         const storedEmpCode = localStorage.getItem('empCode');
@@ -22,6 +25,8 @@ export const AuthProvider = ({ children }) => {
             setEmpCode(storedEmpCode);
             setToken(storedToken);
             setRole(storedRole); // 역할 설정
+        } else {
+            setIsLoggedIn(false);
         }
     }, []);
 
@@ -29,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         console.log("Logging in with role:", userRole);
         setEmpCode(code);
         setIsLoggedIn(true);
+        localStorage.setItem('isLoggedIn', 'true');
         setToken(authToken); // 토큰 설정
         setRole(userRole); // 역할 설정
         localStorage.setItem('empCode', code);
@@ -39,15 +45,17 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setEmpCode("");
         setIsLoggedIn(false);
+        localStorage.removeItem('isLoggedIn');
         setToken(""); // 토큰 초기화
         setRole(""); // 역할 초기화
+        localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('empCode');
         localStorage.removeItem('token'); // 토큰 제거
         localStorage.removeItem('role'); // 역할 제거
     };
 
     return (
-        <noticeAuth.Provider value={{ isLoggedIn, empCode, role, login, logout, setRole }}>
+        <noticeAuth.Provider value={{isLoggedIn, empCode, role, login, logout, setRole}}>
             {children}
         </noticeAuth.Provider>
     );

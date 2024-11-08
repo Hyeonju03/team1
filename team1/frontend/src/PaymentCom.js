@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 
-export default function CloudPayment({ pricePerUser = 100 }) {
+export default function CloudPayment({pricePerUser = 500000}) {
     const navigate = useNavigate();
     const location = useLocation();
-    const { empNum , comCode } = location.state || {};
+    const {empNum, comCode} = location.state || {};
     const [paymentMethod, setPaymentMethod] = useState("kakaopay");
-    const baseUsers = 10;
+    const baseUsers = 9;
     const extraUsers = Math.max(0, empNum - baseUsers);
-    const totalCost = extraUsers * pricePerUser;
+    // const totalCost = extraUsers * pricePerUser;
+    const totalCost = pricePerUser;
 
     useEffect(() => {
         // Iamport SDK 로드하기
@@ -32,12 +33,12 @@ export default function CloudPayment({ pricePerUser = 100 }) {
     };
 
     console.log(comCode)
-    const fetchData=async ()=>{
+    const fetchData = async () => {
         try {
-            const resp = await axios.put("/updateStatus", null,{params: {comCode: comCode}});
+            const resp = await axios.put("/updateStatus", null, {params: {comCode: comCode}});
             console.log(resp);
             navigate("/CompanyInfo");
-        } catch (error){
+        } catch (error) {
             console.error(error)
         }
     }
@@ -59,7 +60,7 @@ export default function CloudPayment({ pricePerUser = 100 }) {
 
         if (resp.code != null) {
             return alert(resp.message);
-        }else{
+        } else {
             alert("결제가 완료되었습니다.")
             fetchData();
         }
@@ -69,13 +70,13 @@ export default function CloudPayment({ pricePerUser = 100 }) {
 
 
     function uuidv4() {
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
     }
 
     return (
-        <div className="w-full max-w-md mx-auto border rounded-lg shadow-lg p-6 relative" style={{marginTop:"50px"}}>
+        <div className="w-full max-w-md mx-auto border rounded-lg shadow-lg p-6 relative" style={{marginTop: "50px"}}>
             <button onClick={handleClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
                 ✖
             </button>
@@ -87,10 +88,10 @@ export default function CloudPayment({ pricePerUser = 100 }) {
                     <span>현재 사용자 수:</span>
                     <span className="font-semibold">{empNum}명</span>
                 </div>
-                <div className="flex justify-between">
-                    <span>초과 사용자 수:</span>
-                    <span className="font-semibold">{extraUsers}명</span>
-                </div>
+                {/*<div className="flex justify-between">*/}
+                {/*    <span>초과 사용자 수:</span>*/}
+                {/*    <span className="font-semibold">{extraUsers}명</span>*/}
+                {/*</div>*/}
                 <div className="flex justify-between text-lg">
                     <span>추가 비용:</span>
                     <span className="font-bold">{totalCost.toLocaleString()}원</span>

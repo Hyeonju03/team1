@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
+import Clock from "react-live-clock";
 
-const Input = ({ className, placeholder, ...props }) => (
+import {useAuth} from "./noticeAuth";
+
+const Input = ({className, placeholder, ...props}) => (
     <input
         type="text"
         className={`border p-2 rounded ${className}`}
@@ -11,7 +14,7 @@ const Input = ({ className, placeholder, ...props }) => (
     />
 );
 
-const Button = ({ variant, children, className, ...props }) => (
+const Button = ({variant, children, className, ...props}) => (
     <button
         className={`px-4 py-2 rounded ${variant === 'outline' ? 'border' : 'bg-blue-500 text-white'} ${className}`}
         {...props}
@@ -24,25 +27,28 @@ export default function FAQPage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [empCode,setEmpCode] = useState("")
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
-    //로그인시 empcode를 일단 가져오는코드
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
+
+    //로그아웃이 맨위로
     useEffect(() => {
-        // 로그인 후 empCode를 설정하는 로직
-        const fetchEmpCode = async () => {
-            // 여기에서 실제 empCode를 설정
-            const loggedInEmpCode = "2048209555-dffdsfd"; // 로그인 후 받아온 empCode
-            setEmpCode(loggedInEmpCode);
-        };
-        fetchEmpCode();
-    }, []);
-
-
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
     useEffect(() => {
-        const fetchData = async ()=> {
-            if (empCode) { // empCode가 설정된 경우에만 호출
+        const fetchData = async () => {
+            if (isLoggedIn) {
                 try {
                     const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
                     console.log(response.data);
@@ -52,9 +58,11 @@ export default function FAQPage() {
                     console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
                 }
             }
+            fetchData();
         }
-        fetchData();
-    }, [empCode]);
+        setPrevLogin(isLoggedIn);
+
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const titleOnChangeHandler = (e) => {
         setTitle(e.target.value);
@@ -66,19 +74,19 @@ export default function FAQPage() {
 
     const qComplete = async (e) => {
         e.preventDefault(); // 기본 폼 제출 방지
-        const send ={empCode:empCode,title:title, content: content}
+        const send = {empCode: empCode, title: title, content: content}
         const config = {
-            headers: { "Content-Type": `application/json`}
+            headers: {"Content-Type": `application/json`}
         };
 
-       try{
-           const result = await axios.post('/insertQ',send,config)
-           console.log(result)
-           navigate("/AdminQDetail");
-           alert("문의작성완료")
-       } catch (error) {
-           console.log(error)
-       }
+        try {
+            const result = await axios.post('/insertQ', send, config)
+            console.log(result)
+            navigate("/AdminQDetail");
+            alert("문의작성완료")
+        } catch (error) {
+            console.log(error)
+        }
 
     }
 
@@ -87,7 +95,7 @@ export default function FAQPage() {
         navigate("/AdminQDetail"); // 이동할 페이지로 네비게이트
     }
 
-    const goQDetail =()=>{
+    const goQDetail = () => {
         navigate("/AdminQDetail");
     }
 
@@ -96,7 +104,7 @@ export default function FAQPage() {
     }
 
 
-    const goFAQ =()=>{
+    const goFAQ = () => {
         navigate("/AdminFAQ");
     }
 
@@ -104,9 +112,42 @@ export default function FAQPage() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
 
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
@@ -117,14 +158,15 @@ export default function FAQPage() {
                               style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2">
+                            <h2 onClick={goQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                            1:1 상담
+                                1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의작성
                                 </li>
-                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
@@ -137,7 +179,7 @@ export default function FAQPage() {
                     <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
                 </div>
 
-                <div className="flex-1 p-6 mt-16" style={{marginTop:"-20px"}}>
+                <div className="flex-1 p-6 mt-16" style={{marginTop: "-20px"}}>
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold mb-6 text-left">문의작성</h2>
                         <hr className="border-gray-300 my-4 w-full"/>
@@ -161,9 +203,7 @@ export default function FAQPage() {
                         </form>
                     </div>
                 </div>
-
             </div>
-
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -177,20 +217,24 @@ export default function FAQPage() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
@@ -200,6 +244,7 @@ export default function FAQPage() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

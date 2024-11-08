@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class SignUpDTO {
     private String companyCode;
     private String empCode;

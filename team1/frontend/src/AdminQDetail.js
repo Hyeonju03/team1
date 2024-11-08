@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
-function Button({ children, size, variant, onClick }) {
+function Button({children, size, variant, onClick}) {
     const baseStyle = "px-4 py-2 rounded";
     const sizeStyle = size === "sm" ? "text-sm" : "text-base";
     const variantStyle = variant === "outline" ? "border border-gray-300 bg-white" : "bg-blue-500 text-white";
@@ -15,13 +17,14 @@ function Button({ children, size, variant, onClick }) {
     );
 }
 
-function Input({ placeholder ,onChange ,onKeyDown }) {
+function Input({placeholder, onChange, onKeyDown}) {
     return (
-        <input type="text"  onChange={onChange} onKeyDown={onKeyDown}  placeholder={placeholder} className="border border-gray-300 p-2 rounded w-full" />
+        <input type="text" onChange={onChange} onKeyDown={onKeyDown} placeholder={placeholder}
+               className="border border-gray-300 p-2 rounded w-full"/>
     );
 }
 
-function Table({ children }) {
+function Table({children}) {
     return (
         <table className="min-w-full border border-gray-300">
             {children}
@@ -29,23 +32,23 @@ function Table({ children }) {
     );
 }
 
-function TableHeader({ children }) {
+function TableHeader({children}) {
     return <thead className="bg-gray-200">{children}</thead>;
 }
 
-function TableBody({ children }) {
+function TableBody({children}) {
     return <tbody className="border">{children}</tbody>;
 }
 
-function TableRow({ children }) {
-    return <tr >{children}</tr>;
+function TableRow({children}) {
+    return <tr>{children}</tr>;
 }
 
-function TableHead({ children }) {
+function TableHead({children}) {
     return <th className="p-2 text-center">{children}</th>;
 }
 
-function TableCell({ children , onClick }) {
+function TableCell({children, onClick}) {
     return <td className="p-2 text-center" onClick={onClick}>{children}</td>;
 }
 
@@ -53,62 +56,95 @@ export default function Component() {
     const navigate = useNavigate();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-    const [Qlist,setQList] = useState([])
-    const [qSearch,setQSearch] = useState("")
-    const [filterQlist,setFilterQlist] = useState([])
+    const [Qlist, setQList] = useState([])
+    const [qSearch, setQSearch] = useState("")
+    const [filterQlist, setFilterQlist] = useState([])
+
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     const handleCheckboxChange = (id) => {
         setQList(prevData =>
             prevData.map(item =>
-                item.qNum === id ? { ...item, checked: !item.checked } : item
+                item.qnum === id ? {...item, checked: !item.checked} : item
             )
         );
 
         // filterQlist는 원본 Qlist의 상태를 기반으로 동적으로 업데이트
         setFilterQlist(prevFilterQlist =>
             prevFilterQlist.map(item =>
-                item.qNum === id ? { ...item, checked: !item.checked } : item
+                item.qnum === id ? {...item, checked: !item.checked} : item
             )
         );
     };
 
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
+
 
     useEffect(() => {
-        const fetchData = async ()=>{
-            try{
-                const response = await axios.get("/QDetailList");
-                const list = response.data;
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                try {
+                    const response = await axios.get("/QDetailList", {params: {empCode}});
+                    const list = response.data;
+                    console.log(response.data)
 
-                // startDate 변환
-                const updatedList = list.map(v => {
-                    const date = new Date(v.startDate);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
+                    // startDate 변환
+                    const updatedList = list.map(v => {
+                        const date = new Date(v.startDate);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
 
-                    return {
-                        ...v, // 기존 데이터 유지
-                        startDate: `${year}-${month}-${day}`, // 변환된 날짜
-                        checked: false
-                    };
-                });
+                        return {
+                            ...v, // 기존 데이터 유지
+                            startDate: `${year}-${month}-${day}`, // 변환된 날짜
+                            checked: false
+                        };
+                    });
 
-                setQList(updatedList);
-                setFilterQlist(updatedList)
-            }catch (error) {
-                console.error(error);
+                    setQList(updatedList);
+                    setFilterQlist(updatedList)
+                } catch (error) {
+                    console.error(error);
+                }
             }
+            fetchData();
         }
-        fetchData();
-    }, []);
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
+
+
+// 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
 
     const handleDelete = async () => {
         //db데이터 삭제하는 기능 구현해야됨
-        const idsToDelete = Qlist.filter(item => item.checked).map(item => item.qNum);
+        const idsToDelete = Qlist.filter(item => item.checked).map(item => item.qnum);
         console.log(idsToDelete)
         if (idsToDelete.length > 0) {
             try {
-                await axios.delete("/deleteAdminQDetail",  { data: idsToDelete });
+                await axios.delete("/deleteAdminQDetail", {data: idsToDelete});
                 // 체크된 항목 삭제 후 상태 업데이트
                 setQList(prevQList => prevQList.filter(item => !item.checked));
                 setFilterQlist(prevFilterQList => prevFilterQList.filter(item => !item.checked));
@@ -126,7 +162,7 @@ export default function Component() {
     }
 
 
-    const qListOnChangeHandler =(e)=>{
+    const qListOnChangeHandler = (e) => {
         setQSearch(e.target.value)
     }
 
@@ -137,7 +173,7 @@ export default function Component() {
         }
     };
 
-    const search =(e)=>{
+    const search = (e) => {
         console.log("클릭");
         if (qSearch.trim() === "") {
             setFilterQlist(Qlist); // 검색어가 없으면 모든 리스트를 보여줍니다.
@@ -149,19 +185,18 @@ export default function Component() {
         }
     }
 
-    const goDetail=(item)=>{
+    const goDetail = (item) => {
         // const {qNum} = item
         console.log(item)
-        navigate("/AdminOneToOneDetail",{ state : {item} });
-
+        navigate("/AdminOneToOneDetail", {state: {item}});
     }
 
-    const goQDetail =()=>{
+    const goQDetail = () => {
         navigate("/AdminQDetail");
         window.location.reload();
     }
 
-    const goFAQ =()=>{
+    const goFAQ = () => {
         navigate("/AdminFAQ");
         window.location.reload();
     }
@@ -170,12 +205,33 @@ export default function Component() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
 
             <div className="flex flex-col md:flex-row gap-6">
+
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
                      style={{height: "900px"}}>
                     <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer"
@@ -184,14 +240,15 @@ export default function Component() {
                               style={{marginRight: "15px"}}/>FAQ</h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
+                            <h2 onClick={goQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                            1:1 상담
+                                1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의작성
                                 </li>
-                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
@@ -204,7 +261,7 @@ export default function Component() {
                     <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
                 </div>
 
-                <main className="flex-1">
+                <main className="flex-1" style={{marginTop: "30px"}}>
                     <h1 className="text-xl font-bold mb-4 text-left">문의내역</h1>
                     <Table>
                         <TableHeader>
@@ -217,20 +274,22 @@ export default function Component() {
                         </TableHeader>
                         <TableBody>
                             {filterQlist.length > 0 ? (
-                                filterQlist.map((item) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell className="text-left">{item.qNum}</TableCell>
+                                filterQlist.map((item, index) => (
+                                    <TableRow key={item.qnum}>
+                                        <TableCell className="text-left">{index + 1}</TableCell>
                                         <TableCell onClick={() => goDetail(item)} className="text-left cursor-pointer">
                                             <span className="cursor-pointer">{item.title}</span></TableCell>
                                         <TableCell className="text-left">{item.startDate}</TableCell>
                                         <TableCell className="text-left flex items-center">
                                             <Button size="sm"
-                                                    variant="outline">{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
+                                                    variant={item.qstatus === false ? 'outline' : 'primary'}
+                                                    className={item.qstatus === false ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}
+                                            >{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
                                             <input
                                                 type="checkbox"
                                                 className="ml-2"
                                                 checked={item.checked || false}
-                                                onChange={() => handleCheckboxChange(item.qNum)}
+                                                onChange={() => handleCheckboxChange(item.qnum)}
                                             />
                                         </TableCell>
                                     </TableRow>
@@ -269,20 +328,24 @@ export default function Component() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
@@ -292,6 +355,7 @@ export default function Component() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

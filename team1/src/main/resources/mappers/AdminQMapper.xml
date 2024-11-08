@@ -4,12 +4,25 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.AdminQMapper">
     <insert id="insertQ" parameterType="kr.or.nextit.team1.DTOs.AdminQDTO">
-        INSERT INTO adminqtest
+        INSERT INTO adminq
         (EMP_CODE, TITLE, CONTENT, START_DATE, ANS_TITLE, ANS_CONTENT, Q_STATUS)
         VALUES(#{empCode},#{title}, #{content}, current_timestamp(), NULL, NULL, 0);
     </insert>
+
     <select id="findEmpCode" parameterType="String">
-        SELECT EMP_CODE FROM employeetest
+        SELECT EMP_CODE FROM employee
         where EMP_CODE = #{empCode}
     </select>
+
+    <select id="selectAdmin" parameterType="kr.or.nextit.team1.DTOs.AdminInfoDTO" resultType="int">
+        select count(*)
+        from admininfo
+        where ADMIN_ID = #{adminId}
+    </select>
+
+    <update id="updateAdminQ">
+        UPDATE adminq
+        SET ANS_TITLE=#{ansTitle}, ANS_CONTENT=#{ansContent}, Q_STATUS=1
+        WHERE Q_NUM=#{qNum};
+    </update>
 </mapper>

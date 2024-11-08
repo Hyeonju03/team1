@@ -7,7 +7,13 @@ import java.util.List;
 
 @Mapper
 public interface AdminQDetailMapper {
-    List<AdminQDetailDTO> selectAdminQDetail();
+    List<AdminQDetailDTO> selectAdminQDetail(String empCode);
+
+    List<AdminQDetailDTO> AnsQDetailList();
+
+    List<AdminQDetailDTO> AnsQCompleteList();
+
+    List<AdminQDetailDTO> noAnsList();
 
     void deleteAdminQDetail(Long id);
 }

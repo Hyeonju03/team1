@@ -40,6 +40,7 @@ public class DocumentController {
             @RequestParam String category,
             @RequestParam String content,
             @RequestParam(required = false) MultipartFile attachment, @RequestParam String empCode) {
+        System.out.println("empCode" + empCode);
         documentService.documentInsert(title, category, content, attachment, empCode);
         return ResponseEntity.ok("Document saved successfully");
     }
@@ -128,6 +129,7 @@ public class DocumentController {
                 documentDTO.setFilePath(existingFilePath); // 기존 파일 경로 설정
                 documentDTO.setFileOriginName(existingDocument.getFileOriginName()); // 기존 파일 이름 유지
                 documentDTO.setFileSize(existingDocument.getFileSize()); // 기존 파일 크기 유지
+                documentDTO.setFileName(existingDocument.getFileName());
             }
 
             // 로그 추가
@@ -149,6 +151,15 @@ public class DocumentController {
     public ResponseEntity<Void> documentDelete(@PathVariable int id) {
         documentService.documentDelete(id);
         return ResponseEntity.noContent().build(); // 삭제 성공시 204 No Content 반환
+    }
+
+    // 권한
+    @GetMapping("/authority/document/{empCode}")
+    public ResponseEntity<String> getAuthorityByEmpCode(@PathVariable String empCode) {
+        String document = documentService.getAuthorityByEmpCode(empCode);
+        return ResponseEntity.ok(document);
+
+
     }
 }
 

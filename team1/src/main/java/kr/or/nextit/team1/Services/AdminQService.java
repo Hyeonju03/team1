@@ -1,5 +1,6 @@
 package kr.or.nextit.team1.Services;
 
+import kr.or.nextit.team1.DTOs.AdminInfoDTO;
 import kr.or.nextit.team1.DTOs.AdminQDTO;
 import kr.or.nextit.team1.mappers.AdminQMapper;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,12 @@ public class AdminQService {
             adminQMapper.insertQ(adminQDTO);
         } catch (Exception e) {
             e.printStackTrace();
-            throw  e;
+            throw e;
         }
     }
+
+    public void updateAdminQ(AdminQDTO adminQDTO) {
+        adminQMapper.updateAdminQ(adminQDTO);
+    }
+
 }

@@ -22,6 +22,8 @@
             EMP_CODE = #{corCode}
     </update>
 
+
+
     <select id="getModifyReq" parameterType="String" resultType="String">
         SELECT
             MODIFY_REQ
@@ -65,6 +67,7 @@
             EMP_CODE = #{empCode}
     </update>
 
+
     <!-- 승인 : 수정하면서 동시에 MODIFY_REQ 비우기 -->
     <update id="modifyReqDelete" parameterType="String">
         <include refid="modifyReqDelete" />
@@ -80,4 +83,14 @@
     <update id="modifyReqClear">
         <include refid="modifyReqDelete" />
     </update>
+
+    <!-- 권한 -->
+    <select id="getAuthorityUserInfoByEmpCode">
+        SELECT
+            PERS_INFO
+        FROM
+            AUTHORITY
+        WHERE
+            EMP_CODE = #{empCode}
+    </select>
 </mapper>

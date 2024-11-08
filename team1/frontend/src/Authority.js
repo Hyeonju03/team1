@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
-// import { ChevronDown, ChevronRight } from 'react-icons/your-icon-library';
+import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
-
-function Table({ children }) {
+function Table({children}) {
     return (
         <table className="min-w-full border border-gray-300">
             {children}
@@ -12,84 +12,83 @@ function Table({ children }) {
     );
 }
 
-function TableHeader({ children }) {
+function TableHeader({children}) {
     return <thead className="bg-gray-200">{children}</thead>;
 }
 
-function TableBody({ children }) {
+function TableBody({children}) {
     return <tbody>{children}</tbody>;
 }
 
-function TableRow({ children }) {
+function TableRow({children}) {
     return <tr className="border-b text-center">{children}</tr>;
 }
 
-function TableHead({ children }) {
+function TableHead({children}) {
     return <th className="p-2 border border-gray-300 text-center">{children}</th>;
 }
 
-function TableCell({ children, colSpan, className }) {
+function TableCell({children, colSpan, className}) {
     return <td colSpan={colSpan} className={`p-2 border border-gray-300 ${className}`}>{children}</td>;
 }
 
 export default function Component() {
-    const [empCode, setEmpCode] = useState("");
     const [empList, setEmpList] = useState([]);
     const [formData, setFormData] = useState([]);
-    const [hasPermission, setHasPermission] = useState(true)
+    const [hasPermission, setHasPermission] = useState(false)
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-    // const [isExpanded, setIsExpanded] = useState(false);
-    // const categories = [];
+    const navigate = useNavigate(); // useNavigate 훅 사용
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
-    // const handleCategorySelect = (category) => {
-    //     setSelectedCategory(category); // 별도의 선택 상태
-    //
-    //     if (category == "all") {
-    //         setFilteredDocuments(documents);
-    //     } else {
-    //         const filtered = documents.filter((document) => document.signCateCode === category);
-    //         setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
-    //         if (filtered.length === 0) {
-    //             alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
-    //         }
-    //     }
-    // }
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
-    const fetchEmpCode = async () => {
-        //1. 로그인한 emp_code로 select문 조회 -> where _edit = 1; --> cnt > 0 / cnt < 0
-        const loggedInEmpCode = "3148620215-응엥"; // 로그인 후 받아온 empCode
-        // 3118115625-cjm
-        //3118115625-bbb 권한ㅇ
-        //2218701188-abcmart354 권한ㅇ 3218600105-aa
-        const EmpCode2 = loggedInEmpCode.split("-")[0];
-        setEmpCode(EmpCode2);
-
-
-        const response = await axios.get("/permissionSelect",{params: {empCode:loggedInEmpCode}})
-        console.log("->->",response.data);
-
-        if (response.data === 0) {
-            setHasPermission(false);
-        } else {
-            setHasPermission(true);
-            fetchData(); // 권한이 있을 경우 fetchData 호출
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
         }
-    };
+    }, [])
+
+    console.log("emp", empCode)
+
 
     useEffect(() => {
-        fetchEmpCode();
-    }, []);
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                console.log("여기는옴")
+                const response = await axios.get("/permissionSelect", {params: {empCode: empCode}})
+                console.log("->->", response.data);
 
+                if (response.data === 0) {
+                    setHasPermission(false);
+                } else {
+                    setHasPermission(true);
+                    fetchData2();
+                }
+            };
+            fetchData(); // 권한이 있을 경우 fetchData 호출
+        }
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     // 직원 데이터를 가져오는 함수
-    const fetchData = async () => {
+    const fetchData2 = async () => {
         if (empCode) {
-            const response = await axios.get("/selectEmployeeList", { params: { empCode } });
+            const EmpCode2 = empCode.split("-")[0];
+            console.log(EmpCode2)
+            const response = await axios.get("/selectEmployeeList", {params: {empCode: EmpCode2}});
             setEmpList(response.data);
             setFormData(response.data.map(item => ({
                 permissionEdit: item.permissionEdit,
                 departmentManagement: item.departmentManagement,
                 rankEdit: item.rankEdit,
+                companyEdit: item.companyEdit,
                 notice: item.notice,
                 document: item.document,
                 persInfo: item.persInfo,
@@ -97,10 +96,6 @@ export default function Component() {
             }))); // formData 초기화
         }
     };
-
-    useEffect(() => {
-        fetchData(); // empCode가 설정되면 fetchData 호출
-    }, [empCode]);
 
     const handleCheckboxChange = (index, field) => {
         const newFormData = [...formData];
@@ -130,6 +125,7 @@ export default function Component() {
                 permissionEdit: formData[index]?.permissionEdit !== undefined ? formData[index].permissionEdit : item.permissionEdit,
                 departmentManagement: formData[index]?.departmentManagement !== undefined ? formData[index].departmentManagement : item.departmentManagement,
                 rankEdit: formData[index]?.rankEdit !== undefined ? formData[index].rankEdit : item.rankEdit,
+                companyEdit: formData[index]?.companyEdit !== undefined ? formData[index].companyEdit : item.companyEdit,
                 notice: formData[index]?.notice !== undefined ? formData[index].notice : item.notice,
                 document: formData[index]?.document !== undefined ? formData[index].document : item.document,
                 persInfo: formData[index]?.persInfo !== undefined ? formData[index].persInfo : item.persInfo,
@@ -142,7 +138,7 @@ export default function Component() {
         try {
             for (const data of completeFormData) {
                 const existsResponse = await axios.get('/selectAllAuth', {
-                    params: { empCode: data.empCode }
+                    params: {empCode: data.empCode}
                 });
 
                 if (existsResponse.data.length > 0) {
@@ -160,7 +156,7 @@ export default function Component() {
                 }
             }
             alert("저장 완료");
-            fetchData(); // 저장 후 데이터 다시 가져오기
+            // fetchData(); // 저장 후 데이터 다시 가져오기
 
         } catch (error) {
             console.error(error);
@@ -168,172 +164,252 @@ export default function Component() {
         }
     };
 
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+
     if (!hasPermission) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <h1 className="text-center text-4xl font-bold text-red-500" >권한이 없습니다.  접근할 수 없습니다.</h1>
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
             </div>
         );
     }
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
-            <div className="flex" >
-            {/*사이드바*/}
-            <div >
-            <aside className="w-64 bg-gray-100 p-4 space-y-2" style={{height:"800px"}}>
-                <ol>
-                    <li>
-                        <div>
-                            <button
-                                className={`w-full flex items-center transition-colors duration-300`}>
-                                <span className="hover:underline">결재함</span>
-                            </button>
-                                <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                    <li>
-                                        <div>
-                                            <button className="w-full flex items-center">
-                                                <div className="hover:underline">전체 보기</div>
-                                            </button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>
-                                            <button className="w-full flex items-center">
-                                                <div className="hover:underline">카테고리</div>
-                                            </button>
-                                            <li className={`text-left transition-colors duration-300`}>
-                                                            <div className="flex">
-                                                                <button className="hover:underline">
-                                                                </button>
-                                                            </div>
-                                                        </li>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div className="flex justify-between">
-                                            <button className="w-full flex items-center">
-                                                <div className="hover:underline">내 결재함</div>
-                                            </button>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
+            <div className="flex">
+                {/*사이드바*/}
+                {/*<div>*/}
+                {/*    <aside className="w-64 bg-gray-100 p-4 space-y-2" style={{height: "auto"}}>*/}
+                {/*        <ol>*/}
+                {/*            <li>*/}
+                {/*                <div>*/}
+                {/*                    <button*/}
+                {/*                        className={`w-full flex items-center transition-colors duration-300`}>*/}
+                {/*                        <span className="hover:underline">결재함</span>*/}
+                {/*                    </button>*/}
+                {/*                    <div className="ml-8 space-y-2 pace-y-2 mt-2">*/}
+                {/*                        <li>*/}
+                {/*                            <div>*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">전체 보기</div>*/}
+                {/*                                </button>*/}
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                        <li>*/}
+                {/*                            <div>*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">카테고리</div>*/}
+                {/*                                </button>*/}
+                {/*                                <li className={`text-left transition-colors duration-300`}>*/}
+                {/*                                    <div className="flex">*/}
+                {/*                                        <button className="hover:underline">*/}
+                {/*                                        </button>*/}
+                {/*                                    </div>*/}
+                {/*                                </li>*/}
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                        <li>*/}
+                {/*                            <div className="flex justify-between">*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">내 결재함</div>*/}
+                {/*                                </button>*/}
 
-                                        </div>
-                                    </li>
-                                </div>
-                        </div>
-                    </li>
-                </ol>
-            </aside>
-            </div>
-            <div  className="flex-1" style={{marginLeft:"10px"}}>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>사원코드</TableHead>
-                            <TableHead>사원명</TableHead>
-                            <TableHead>부서명</TableHead>
-                            <TableHead>직급</TableHead>
-                            <TableHead>권한수정</TableHead>
-                            <TableHead>부서관리</TableHead>
-                            <TableHead>직급관리</TableHead>
-                            <TableHead>공지사항권한</TableHead>
-                            <TableHead>문서함권한</TableHead>
-                            <TableHead>인사정보권한</TableHead>
-                            <TableHead>전체일정권한</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {empList.length > 0 ? (
-                            empList.map((item, index) => (
-                                <TableRow key={item.empCode}>
-                                    <TableCell>{item.empCode}</TableCell>
-                                    <TableCell>{item.empName}</TableCell>
-                                    <TableCell>{item.depCode}</TableCell>
-                                    <TableCell>{item.posCode}</TableCell>
-                                    <TableCell>
-                                        <input type="checkbox"
-                                               checked={formData[index]?.permissionEdit}
-                                               onChange={() => handleCheckboxChange(index, 'permissionEdit')}/>
-                                    </TableCell>
-                                    <TableCell>
-                                        <input type="checkbox"
-                                               checked={formData[index]?.departmentManagement}
-                                               onChange={() => handleCheckboxChange(index, 'departmentManagement')}/>
-                                    </TableCell>
-                                    <TableCell>
-                                        <input type="checkbox"
-                                               checked={formData[index]?.rankEdit}
-                                               onChange={() => handleCheckboxChange(index, 'rankEdit')}/>
-                                    </TableCell>
-                                    <TableCell>
-                                        <select className="text-center"
-                                                value={formData[index]?.notice}
-                                                onChange={(e) => handleSelectChange(index, 'notice', e.target.value)}>
-                                            <option value="0">없음</option>
-                                            <option value="1">작성</option>
-                                            <option value="2">수정</option>
-                                            <option value="3">삭제</option>
-                                            <option value="4">작성+수정</option>
-                                            <option value="5">작성+삭제</option>
-                                            <option value="6">수정+삭제</option>
-                                            <option value="7">전부</option>
-                                        </select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <select className="text-center"
-                                                value={formData[index]?.document}
-                                                onChange={(e) => handleSelectChange(index, 'document', e.target.value)}>
-                                            <option value="0">없음</option>
-                                            <option value="1">작성</option>
-                                            <option value="2">수정</option>
-                                            <option value="3">삭제</option>
-                                            <option value="4">작성+수정</option>
-                                            <option value="5">작성+삭제</option>
-                                            <option value="6">수정+삭제</option>
-                                            <option value="7">전부</option>
-                                        </select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <select className="text-center"
-                                                value={formData[index]?.persInfo}
-                                                onChange={(e) => handleSelectChange(index, 'persInfo', e.target.value)}>
-                                            <option value="0">없음</option>
-                                            <option value="1">조회</option>
-                                            <option value="2">수정</option>
-                                            <option value="3">삭제</option>
-                                            <option value="4">조회+수정</option>
-                                            <option value="5">조회+삭제</option>
-                                            <option value="6">수정+삭제</option>
-                                            <option value="7">전부</option>
-                                        </select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <select className="text-center"
-                                                value={formData[index]?.schedule}
-                                                onChange={(e) => handleSelectChange(index, 'schedule', e.target.value)}>
-                                            <option value="0">없음</option>
-                                            <option value="1">작성</option>
-                                            <option value="2">수정</option>
-                                            <option value="3">삭제</option>
-                                            <option value="4">작성+수정</option>
-                                            <option value="5">작성+삭제</option>
-                                            <option value="6">수정+삭제</option>
-                                            <option value="7">전부</option>
-                                        </select>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                    </div>*/}
+                {/*                </div>*/}
+                {/*            </li>*/}
+                {/*        </ol>*/}
+                {/*    </aside>*/}
+                {/*</div>*/}
+                <div className="flex-1" style={{marginLeft: "10px", marginTop: "20px"}}>
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={10} className="text-center">검색 결과가 없습니다.</TableCell>
+                                <TableHead>사원코드</TableHead>
+                                <TableHead>사원명</TableHead>
+                                <TableHead>부서명</TableHead>
+                                <TableHead>직급</TableHead>
+                                <TableHead>권한수정</TableHead>
+                                <TableHead>부서관리</TableHead>
+                                <TableHead>직급관리</TableHead>
+                                <TableHead>회사관리</TableHead>
+                                <TableHead>공지사항권한</TableHead>
+                                <TableHead>문서함권한</TableHead>
+                                <TableHead>인사정보권한</TableHead>
+                                <TableHead>전체일정권한</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-                <div className="text-center mt-4">
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white rounded px-4 py-2">저장</button>
+                        </TableHeader>
+                        <TableBody>
+                            {empList.length > 0 ? (
+                                empList.map((item, index) => (
+                                    <TableRow key={item.empCode}>
+                                        <TableCell>{item.empCode}</TableCell>
+                                        <TableCell>{item.empName}</TableCell>
+                                        <TableCell>{item.depCode}</TableCell>
+                                        <TableCell>{item.posCode}</TableCell>
+                                        <TableCell>
+                                            <input type="checkbox"
+                                                   checked={formData[index]?.permissionEdit}
+                                                   onChange={() => handleCheckboxChange(index, 'permissionEdit')}/>
+                                        </TableCell>
+                                        <TableCell>
+                                            <input type="checkbox"
+                                                   checked={formData[index]?.departmentManagement}
+                                                   onChange={() => handleCheckboxChange(index, 'departmentManagement')}/>
+                                        </TableCell>
+                                        <TableCell>
+                                            <input type="checkbox"
+                                                   checked={formData[index]?.rankEdit}
+                                                   onChange={() => handleCheckboxChange(index, 'rankEdit')}/>
+                                        </TableCell>
+                                        <TableCell>
+                                            <input type="checkbox"
+                                                   checked={formData[index]?.companyEdit}
+                                                   onChange={() => handleCheckboxChange(index, 'companyEdit')}/>
+                                        </TableCell>
+                                        <TableCell>
+                                            <select className="text-center"
+                                                    value={formData[index]?.notice}
+                                                    onChange={(e) => handleSelectChange(index, 'notice', e.target.value)}>
+                                                <option value="0">없음</option>
+                                                <option value="1">작성</option>
+                                                <option value="2">수정</option>
+                                                <option value="3">삭제</option>
+                                                <option value="4">작성+수정</option>
+                                                <option value="5">작성+삭제</option>
+                                                <option value="6">수정+삭제</option>
+                                                <option value="7">전부</option>
+                                            </select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <select className="text-center"
+                                                    value={formData[index]?.document}
+                                                    onChange={(e) => handleSelectChange(index, 'document', e.target.value)}>
+                                                <option value="0">없음</option>
+                                                <option value="1">작성</option>
+                                                <option value="2">수정</option>
+                                                <option value="3">삭제</option>
+                                                <option value="4">작성+수정</option>
+                                                <option value="5">작성+삭제</option>
+                                                <option value="6">수정+삭제</option>
+                                                <option value="7">전부</option>
+                                            </select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <select className="text-center"
+                                                    value={formData[index]?.persInfo}
+                                                    onChange={(e) => handleSelectChange(index, 'persInfo', e.target.value)}>
+                                                <option value="0">없음</option>
+                                                <option value="1">조회</option>
+                                                <option value="2">수정</option>
+                                                <option value="3">삭제</option>
+                                                <option value="4">조회+수정</option>
+                                                <option value="5">조회+삭제</option>
+                                                <option value="6">수정+삭제</option>
+                                                <option value="7">전부</option>
+                                            </select>
+                                        </TableCell>
+                                        <TableCell>
+                                            <select className="text-center"
+                                                    value={formData[index]?.schedule}
+                                                    onChange={(e) => handleSelectChange(index, 'schedule', e.target.value)}>
+                                                <option value="0">없음</option>
+                                                <option value="1">작성</option>
+                                                <option value="2">수정</option>
+                                                <option value="3">삭제</option>
+                                                <option value="4">작성+수정</option>
+                                                <option value="5">작성+삭제</option>
+                                                <option value="6">수정+삭제</option>
+                                                <option value="7">전부</option>
+                                            </select>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={10} className="text-center">검색 결과가 없습니다.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                    <div className="text-center mt-4">
+                        <button onClick={handleSubmit} className="bg-blue-500 text-white rounded px-4 py-2">저장</button>
+                    </div>
                 </div>
             </div>
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
             </div>
         </div>
     );

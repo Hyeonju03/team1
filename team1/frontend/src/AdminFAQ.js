@@ -1,8 +1,11 @@
 import {useEffect, useState} from 'react';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
-const Input = ({ className, placeholder, ...props }) => (
+
+const Input = ({className, placeholder, ...props}) => (
     <input
         type="text"
         className={`border p-2 rounded ${className}`}
@@ -11,7 +14,7 @@ const Input = ({ className, placeholder, ...props }) => (
     />
 );
 
-const Button = ({ variant, children, className, ...props }) => (
+const Button = ({variant, children, className, ...props}) => (
     <button
         className={`px-4 py-2 rounded ${variant === 'outline' ? 'border' : 'bg-blue-500 text-white'} ${className}`}
         {...props}
@@ -22,31 +25,40 @@ const Button = ({ variant, children, className, ...props }) => (
 
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.35-4.35"/>
     </svg>
 );
 
 const ChevronDownIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
     </svg>
 );
 
 const ChevronUpIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7"/>
     </svg>
 );
 
 export default function FAQPage() {
+// 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const [expandedIndex, setExpandedIndex] = useState(null);
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [question, setQuestion] = useState("");
     const navigate = useNavigate();
-    const[searchResult,setSearchResult] = useState([])
-    const[categoryResult,setCategoryResult] = useState([])
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [searchResult, setSearchResult] = useState([])
+    const [categoryResult, setCategoryResult] = useState([])
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
 
     const toggleAnswer = (index) => {
         setExpandedIndex(expandedIndex === index ? null : index);
@@ -133,10 +145,42 @@ export default function FAQPage() {
         fetchData(); // 비동기 함수 호출
     }, []);
 
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+
     return (
         // <div className="container mx-auto p-4">
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
 
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
@@ -148,14 +192,15 @@ export default function FAQPage() {
                     </h2>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
+                            <h2 onClick={goQList} className="cursor-pointer">
                            <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                  style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                            1:1 상담
+                                1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의작성
                                 </li>
-                                <li onClick={goQDetail} className="text-lg cursor-pointer" style={{fontWeight: "400"}}>-
+                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
                                     문의내역
                                 </li>
                             </ul>
@@ -209,7 +254,7 @@ export default function FAQPage() {
                                             {expandedIndex === index ? <ChevronUpIcon/> : <ChevronDownIcon/>}
                                         </div>
                                         {expandedIndex === index && (
-                                            <div className="pb-3 text-gray-600">{faq.content}</div>
+                                            <div className="pb-3 text-gray-600 text-start">{faq.content}</div>
                                         )}
                                     </div>
                                 ))
@@ -220,6 +265,7 @@ export default function FAQPage() {
                     </div>
                 </div>
             </div>
+
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -233,20 +279,24 @@ export default function FAQPage() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
@@ -256,6 +306,7 @@ export default function FAQPage() {
                     <p>메신저 기능은 준비 중입니다.</p>
                 </div>
             </div>
+
         </div>
     );
 }

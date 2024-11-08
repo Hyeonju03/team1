@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,13 +42,13 @@ public class SignService {
 
         try {
             if(attachment != null && !attachment.isEmpty()) {
-                String filePath = saveFile(attachment);
+                String filePath = new File("src/main/resources/static/uploads").getAbsolutePath();
                 sign.setFilePath(filePath);
 
                 String generatedFileName = UUID.randomUUID().toString();
                 sign.setFileName(generatedFileName);
 
-                sign.setFileOriginalName(attachment.getOriginalFilename());
+                sign.setFileOriginName(attachment.getOriginalFilename());
                 sign.setFileSize(attachment.getSize());
             }
             mapper.signInsert(sign);
@@ -59,11 +60,11 @@ public class SignService {
     }
 
     public String saveFile(MultipartFile file) throws Exception {
-        String filePath = System.getProperty("user.home") + "/upload";
+        String filePath = new File("src/main/resources/static/uploads").getAbsolutePath();
 
-        String originalFilenName = file.getOriginalFilename();
+        String originFilenName = file.getOriginalFilename();
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String fileName = timestamp + "_" + originalFilenName;
+        String fileName = timestamp + "_" + originFilenName;
 
         Path path = Paths.get(filePath, fileName);
 

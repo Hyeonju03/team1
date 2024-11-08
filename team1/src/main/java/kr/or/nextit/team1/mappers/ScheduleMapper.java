@@ -20,6 +20,6 @@ public interface ScheduleMapper {
 
     List<ScheduleDTO> selectDepSchedule(String empCode);
 
-    List<ScheduleDTO> selectFullScgedule(String empCode);
+    List<ScheduleDTO> selectFullSchedule(String empCode);
 
 }

@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios";
+import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 
-
-function Button({ children, size, variant, onClick }) {
+function Button({children, size, variant, onClick}) {
 
 
     const baseStyle = "px-4 py-2 rounded";
@@ -19,97 +20,116 @@ function Button({ children, size, variant, onClick }) {
     );
 }
 
-function Input({ placeholder ,onChange }) {
-    return (
-        <input type="text"  onChange={onChange}  placeholder={placeholder} className="border border-gray-300 p-2 rounded w-full" />
-    );
-}
-
-function Table({ children }) {
-    return (
-        <table className="min-w-full border border-gray-300">
-            {children}
-        </table>
-    );
-}
-
-function TableHeader({ children }) {
-    return <thead className="bg-gray-200">{children}</thead>;
-}
-
-function TableBody({ children }) {
-    return <tbody>{children}</tbody>;
-}
-
-function TableRow({ children }) {
-    return <tr className="border-b">{children}</tr>;
-}
-
-function TableHead({ children }) {
-    return <th className="p-2 text-center">{children}</th>;
-}
-
-function TableCell({ children , onClick }) {
-    return <td className="p-2 text-center" onClick={onClick}>{children}</td>;
-}
-
 export default function Component() {
     const location = useLocation();
-    const {item} = location.state || { qNum: "없음" };
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const {item} = location.state || {qNum: "없음"};
     const navigate = useNavigate();
 
-    const [Qlist,setQList] = useState([])
-    const [filterQlist,setFilterQlist] = useState([])
+    const [Qlist, setQList] = useState([])
+    const [filterQlist, setFilterQlist] = useState([])
+
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
 
     useEffect(() => {
-        const fetchData = async ()=>{
-            try{
-                const response = await axios.get("/QDetailList");
-                const list = response.data;
+        const fetchData = async () => {
+            if (isLoggedIn) {
+                try {
+                    const response = await axios.get("/QDetailList", {params: {empCode}});
+                    const list = response.data;
+                    console.log(response.data);
 
-                // startDate 변환
-                const updatedList = list.map(v => {
-                    const date = new Date(v.startDate);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
+                    // startDate 변환
+                    const updatedList = list.map(v => {
+                        const date = new Date(v.startDate);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
 
-                    return {
-                        ...v, // 기존 데이터 유지
-                        startDate: `${year}-${month}-${day}`, // 변환된 날짜
-                        checked: false
-                    };
-                });
+                        return {
+                            ...v, // 기존 데이터 유지
+                            startDate: `${year}-${month}-${day}`, // 변환된 날짜
+                            checked: false
+                        };
+                    });
 
-                setQList(updatedList);
-                setFilterQlist(updatedList)
-            }catch (error) {
-                console.error(error);
+                    setQList(updatedList);
+                    setFilterQlist(updatedList)
+                } catch (error) {
+                    console.error(error);
+                }
             }
         }
         fetchData();
-    }, []);
+        setPrevLogin(isLoggedIn);
+    }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
 
+    const goBack = () => {
+        navigate(-1)
+    }
+
+
+// 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const goBack =()=>{
-        navigate(-1)
-    }
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6 ">로고</header>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
 
-            <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold mb-4 text-left "  style={{marginLeft:"375px"}}>{item.qNum} {item.title}</h1>
-                <button onClick={goBack} style={{ marginRight:"415px", marginTop:"-10px" , height:"50px"}} className=" border rounded-md px-4 text-lg font-bold">목록</button>
+            <div className="flex justify-between items-center" style={{marginTop: "20px"}}>
+                <h1 className="text-2xl font-bold mb-4 text-left "
+                    style={{marginLeft: "375px"}}>{item.qNum} {item.title}</h1>
+                <button onClick={goBack} style={{marginRight: "415px", marginTop: "-10px", height: "50px"}}
+                        className=" border rounded-md px-4 text-lg font-bold">목록
+                </button>
             </div>
-            <div className="flex flex-col md:flex-row gap-6" style={{marginLeft:"350px"}}>
+            <div className="flex flex-col md:flex-row gap-6" style={{marginLeft: "350px"}}>
 
 
                 {/*<main className="flex-1">*/}
@@ -128,7 +148,7 @@ export default function Component() {
                     <div className="flex space-x-8">
                         <p className="block text-xl font-medium text-gray-700 mb-1">A: 제목</p>
                         <p id="title" className="border-2 border-gray-300 p-2  h-8 text-lg"
-                           style={{width: '1000px'}}>{item.ansTitle}</p>
+                           style={{width: '1000px', height: "50px"}}>{item.ansTitle}</p>
                     </div>
                     <div className="flex space-x-8">
                         <p className="block text-xl font-medium text-gray-700 mb-1">A: 내용</p>
@@ -153,20 +173,24 @@ export default function Component() {
                 </button>
 
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-4">로그인</h2>
-                    <input
-                        type="text"
-                        placeholder="아이디"
-                        className="w-full p-2 mb-2 border rounded"
-                    />
-                    <input
-                        type="password"
-                        placeholder="비밀번호"
-                        className="w-full p-2 mb-4 border rounded"
-                    />
-                    <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                        로그인
-                    </button>
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
                     <div className="text-sm text-center mb-4">
                         <a href="#" className="text-blue-600 hover:underline">공지사항</a>
                         <span className="mx-1">|</span>
