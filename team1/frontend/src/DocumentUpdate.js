@@ -4,6 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import useComCode from "hooks/useComCode";
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -32,6 +33,8 @@ export default function DocumentUpdate() {
     const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
     // slide 변수
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -109,8 +112,23 @@ export default function DocumentUpdate() {
     };
 
     return (<div className="min-h-screen flex flex-col">
-        <header className="bg-gray-200 p-4">
-            <h1 className="text-2xl font-bold text-center">로고</h1>
+        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <div className="flex mr-6">
+                <div className="font-bold mr-1">{formattedDate}</div>
+                <Clock
+                    format={'HH:mm:ss'}
+                    ticking={true}
+                    timezone={'Asia/Seoul'}/>
+            </div>
+            <div className="mr-5">
+                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                     alt="home"/>
+            </div>
+            <div className="mr-16">
+                <img width="45" height="45"
+                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                     alt="user-male-circle" onClick={togglePanel}/>
+            </div>
         </header>
         <div className="flex-1 flex">
             <aside className="w-64 bg-gray-100 p-4 space-y-2">

@@ -4,6 +4,8 @@ import axios from 'axios';
 import './DepartmentManagement.css';
 import {useAuth} from "./noticeAuth";
 import {useNavigate} from "react-router-dom";
+import Clock from "react-live-clock";
+
 
 // 부서 트리
 const DepartmentTree = ({departments, onAdd, onDelete, onUpdate}) => {
@@ -84,6 +86,8 @@ export default function DepartmentManagement() {
     const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
     // slide 변수
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     const [auth, setAuth] = useState(null);
 
@@ -300,53 +304,76 @@ export default function DepartmentManagement() {
             <div className={`flex items-center justify-center h-screen ${permission ? "hidden" : ""}`}>
                 <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
             </div>
-            <div className={`max-w-6xl mx-auto p-5 font-sans department-container ${permission ? "" : "hidden"}`}>
-                <header className="bg-gray-100 p-3 mb-5 text-center">
-                    <div className="text-2xl font-bold">
-                        로고
+            <div className="min-h-screen flex flex-col">
+                <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                             alt="home"/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
                     </div>
                 </header>
-                <h1 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">부서 관리</h1>
-                <DepartmentTree departments={departments} onAdd={insertDepartment} onDelete={deleteDepartment}
-                                onUpdate={updateDepartment}/>
-                {/* Slide-out panel with toggle button */}
-                <div
-                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-                >
-                    {/* Panel toggle button */}
-                    <button
-                        onClick={togglePanel}
-                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                    >
-                        {isPanelOpen ? '>' : '<'}
-                    </button>
-
-                    <div className="p-4">
-                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
-                                    <input
-                                        type="text"
-                                        placeholder="아이디"
-                                        className="w-full p-2 mb-2 border rounded"
-                                    />
-                                    <input
-                                        type="password"
-                                        placeholder="비밀번호"
-                                        className="w-full p-2 mb-4 border rounded"
-                                    />
-                                    <button
-                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                                        로그인
-                                    </button>
-                                </>
-                            )}
-                        <div className="text-sm text-center mb-4">
-                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                            <span className="mx-1">|</span>
-                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                <div className="flex-1 flex">
+                    <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                        <div>
+                            <p>사이드 부분</p>
                         </div>
-                        <h2 className="text-xl font-bold mb-2">메신저</h2>
-                        <p>메신저 기능은 준비 중입니다.</p>
+                    </aside>
+                    <main
+                        className={`w-full mx-auto p-5 font-sans department-container ${permission ? "" : "hidden"}`}>
+                        <h1 className="text-2xl font-bold mb-4 mt-8 text-gray-800 border-b pb-8">부서 관리</h1>
+                        <DepartmentTree departments={departments} onAdd={insertDepartment} onDelete={deleteDepartment}
+                                        onUpdate={updateDepartment}/>
+                    </main>
+                    {/* Slide-out panel with toggle button */}
+                    <div
+                        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                    >
+                        {/* Panel toggle button */}
+                        <button
+                            onClick={togglePanel}
+                            className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                        >
+                            {isPanelOpen ? '>' : '<'}
+                        </button>
+
+                        <div className="p-4">
+                            {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                                : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                        <input
+                                            type="text"
+                                            placeholder="아이디"
+                                            className="w-full p-2 mb-2 border rounded"
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="비밀번호"
+                                            className="w-full p-2 mb-4 border rounded"
+                                        />
+                                        <button
+                                            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                            로그인
+                                        </button>
+                                    </>
+                                )}
+                            <div className="text-sm text-center mb-4">
+                                <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                                <span className="mx-1">|</span>
+                                <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                            </div>
+                            <h2 className="text-xl font-bold mb-2">메신저</h2>
+                            <p>메신저 기능은 준비 중입니다.</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import Clock from "react-live-clock";
 
 export default function ApplyForBusiness() {
     const [comCode, setComCode] = useState(''); // 사업자등록번호
@@ -11,6 +12,14 @@ export default function ApplyForBusiness() {
     const [comEmail, setComEmail] = useState(''); // 이메일
     const [showAlert, setShowAlert] = useState(false); // 경고창 숨김 상태
     const [alertMessage, setAlertMessage] = useState(''); // 경고창 안에
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     // 모든 칸에 스페이스바 입력 금지
     const preventSpaceBar = (e) => {
@@ -129,117 +138,136 @@ export default function ApplyForBusiness() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-200 p-4">
-                <div className="container mx-auto flex justify-center items-center h-24">
-                    <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>
-
-            <div className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative">
-                <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록
-                        신청</h2>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">사업자 등록번호</label>
-                            <div className="flex-1 flex items-center">
+            <div className="flex-1 flex">
+                <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                    <div>
+                        <p>사이드 부분</p>
+                    </div>
+                </aside>
+                <div
+                    className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative max-h-[70vh] h-auto">
+                    <div className="flex-1">
+                        <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록
+                            신청</h2>
+                        <form onSubmit={handleSubmit} className="space-y-8 text-lg">
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">사업자 등록번호</label>
+                                <div className="flex-1 flex items-center">
+                                    <input
+                                        className="w-3/5 border rounded px-2 py-1"
+                                        value={comCode}
+                                        onChange={(e) => setComCode(e.target.value)}
+                                        onKeyDown={preventSpaceBar}
+                                        placeholder={"숫자만 입력"}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded ml-3 mt-1"
+                                        onClick={handleComCodeCheck}
+                                    >
+                                        확인
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">회사 이름</label>
                                 <input
-                                    className="w-3/5 border rounded px-2 py-1"
-                                    value={comCode}
-                                    onChange={(e) => setComCode(e.target.value)}
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    value={comName}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">대표 이름</label>
+                                <input
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    value={ceoName}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">대표 연락처</label>
+                                <input
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    value={ceoPhone}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">담당자 연락처</label>
+                                <input
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    value={contectPhone}
+                                    onChange={(e) => setContectPhone(e.target.value)}
+                                    onKeyDown={preventSpaceBar}
+                                    placeholder={"000-0000-0000"}
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">직원 수</label>
+                                <input
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    value={empNum}
+                                    onChange={(e) => setEmpNum(e.target.value)}
                                     onKeyDown={preventSpaceBar}
                                     placeholder={"숫자만 입력"}
                                 />
-                                <button
-                                    type="button"
-                                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded ml-3 mt-1"
-                                    onClick={handleComCodeCheck}
-                                >
-                                    확인
-                                </button>
                             </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">회사 이름</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                value={comName}
-                                readOnly
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">대표 이름</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                value={ceoName}
-                                readOnly
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">대표 연락처</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                value={ceoPhone}
-                                readOnly
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">담당자 연락처</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                value={contectPhone}
-                                onChange={(e) => setContectPhone(e.target.value)}
-                                onKeyDown={preventSpaceBar}
-                                placeholder={"000-0000-0000"}
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">직원 수</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                value={empNum}
-                                onChange={(e) => setEmpNum(e.target.value)}
-                                onKeyDown={preventSpaceBar}
-                                placeholder={"숫자만 입력"}
-                            />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <label className="w-1/2">이메일</label>
-                            <input
-                                className="w-1/2 border rounded px-2 py-1"
-                                type="comEmail"
-                                value={comEmail}
-                                onChange={(e) => setComEmail(e.target.value)}
-                                onKeyDown={preventSpaceBar}
-                                placeholder={"xxxx@xxxx.xxx"}
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-2/3 bg-orange-400 hover:bg-orange-600 text-white mt-6 py-2 rounded"
+                            <div className="flex items-center space-x-2">
+                                <label className="w-1/2">이메일</label>
+                                <input
+                                    className="w-1/2 border rounded px-2 py-1"
+                                    type="comEmail"
+                                    value={comEmail}
+                                    onChange={(e) => setComEmail(e.target.value)}
+                                    onKeyDown={preventSpaceBar}
+                                    placeholder={"xxxx@xxxx.xxx"}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-2/3 bg-orange-400 hover:bg-orange-600 text-white mt-6 py-2 rounded"
 
-                        >
-                            신청하기
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            {showAlert && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg">
-                        <p className="text-lg mb-4">{alertMessage}</p>
-                        <button
-                            onClick={() => setShowAlert(false)}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        >
-                            확인
-                        </button>
+                            >
+                                신청하기
+                            </button>
+                        </form>
                     </div>
                 </div>
-            )}
+
+                {showAlert && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg">
+                            <p className="text-lg mb-4">{alertMessage}</p>
+                            <button
+                                onClick={() => setShowAlert(false)}
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                            >
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+            </div>
         </div>
     );
 }
