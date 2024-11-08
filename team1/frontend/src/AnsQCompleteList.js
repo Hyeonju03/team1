@@ -97,7 +97,7 @@ export default function Component() {
 
 
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn && empCode) {
             const fetchData = async () => {
                 try {
                     //영자씨인지 확인

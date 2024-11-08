@@ -6,6 +6,7 @@ import kr.or.nextit.team1.Services.EmailService;
 import kr.or.nextit.team1.Services.SignUpService;
 import kr.or.nextit.team1.mappers.SignUpMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,6 @@ public class SignUpController {
 
     @GetMapping("/selectCorcode")
     public List<SignUpDTO> selectCorcode(@RequestParam String comCode, String depCode) {
-        System.out.println(depCode);
         return signUpMapper.selectCorcode(comCode, depCode);
     }
 
