@@ -13,7 +13,7 @@ export const AuthProvider = ({children}) => {
     };
 
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
-        return localStorage.getItem('isLoggedIn') === 'true' ? 'true' : 'false'
+        return localStorage.getItem('isLoggedIn') === 'true' ? 'true' : 'false';
     });
 
     useEffect(() => {
