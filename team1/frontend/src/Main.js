@@ -278,7 +278,7 @@ export default function MainLayout() {
         let count = 0;
         const ownSchedule = await axios.get(`/selectSchedule?empCode=${empCode}`);
         const depSchedule = await axios.get("/selectDepSchedule", {params: {empCode: empCode}});
-        const comSchedule = await axios.get("/selectFullScgedule", {params: {empCode: empCode}});
+        const comSchedule = await axios.get("/selectFullSchedule", {params: {empCode: empCode}});
 
         ownSchedule.data.map((tSchedule) => {
             const start = tSchedule.startDate.split("T")[0];
@@ -390,7 +390,7 @@ export default function MainLayout() {
                                                 <td className="w-[50px]">
                                                     <div
                                                         className="flex flex-col justify-around items-center w-[100%] h-[200px] p-3 rounded-2xl bg-white shadow-md hover:shadow-xl"
-                                                        onClick={() => navigate('/MailList')}>
+                                                        onClick={() => navigate('/ReceivedMailList')}>
                                                         <strong
                                                             className="flex flex-col items-center justify-center h-[48px]">
                                                             메일

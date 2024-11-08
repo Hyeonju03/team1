@@ -27,14 +27,12 @@ export default function SignList() {
 
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+    const comCode = empCode.split("-")[0];
 
     useEffect(() => {
         if (isLoggedIn) {
             const fetchData = async () => {
                 try {
-                    // 로그인 상태일 때 문서 목록 가져오기
-                    const comCode = 3148127227;
-
                     axios.get(`/sign/${empCode}`)
                         .then(response => {
                             setDocuments(response.data);

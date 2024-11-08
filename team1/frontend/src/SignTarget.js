@@ -4,7 +4,7 @@ import axios from "axios";
 import ListLibrary from "./HtmlFunctions/ListLibrary";
 
 export default function SignTarget({onClose, empCode}) {
-    const comCode = 3148127227
+    const comCode = empCode.split("-")[0];
     const listContainerRef = useRef(null);
     const [selectedItems, setSelectedItems] = useState([]);
 
@@ -41,7 +41,7 @@ export default function SignTarget({onClose, empCode}) {
             // 비동기 요청 함수
             const fetchData = async () => {
                 try {
-                    const response = await axios.get(`/${dataValue}`);
+                    const response = await axios.get(`/emp/${dataValue}`);
                     if (response.status === 200) {
                         const user = response.data;
                         const userInfo = {

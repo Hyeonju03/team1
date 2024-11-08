@@ -24,7 +24,7 @@ export default function SignRegister() {
   const [newWindowData, setNewWindowData] = useState([]);
   const [noticeNum, setNoticeNum] = useState("");
   const { btnCtl, setBtnCtl } = useListLibrary();
-  const [user, setUser] = useState("3148127227-user001");
+  const [user, setUser] = useState(empCode);
   const [com, setCom] = useState(empCode.split("-")[0]);
 
   /* 공지사항 내용 가져오기 */
@@ -190,7 +190,7 @@ export default function SignRegister() {
             })
             .catch((error) => console.log(error));
 
-        axios.get(`/${empCode}`).then((response) => {
+        axios.get(`/emp/${empCode}`).then((response) => {
           console.log(response.data);
           const user = response.data;
           setUserInfo([
