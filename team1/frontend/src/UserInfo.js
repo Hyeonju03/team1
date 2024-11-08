@@ -3,6 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 export default function UserInfo() {
     const [empName, setEmpName] = useState(""); // 이름
@@ -25,6 +26,8 @@ export default function UserInfo() {
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+    const [isExpanded, setIsExpanded] = useState(true);
+    // const navigate = useNavigate(); // 경로 navigate
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -59,7 +62,7 @@ export default function UserInfo() {
 
     useEffect(() => {
         if (isLoggedIn) {
-            axios.get(`/${empCode}`)
+            axios.get(`/emp/${empCode}`)
                 .then(response => {
                     setUserInfo(response.data);
 
@@ -131,10 +134,7 @@ export default function UserInfo() {
             return false;
         }
         const extNumCheck = /^\d{3}-\d{3}-\d{4}$/;
-        if (!extNum) {
-            alert("내선번호를 입력해주세요.");
-            return false;
-        } else if (!extNumCheck.test(extNum)) {
+        if (!extNumCheck.test(extNum) && extNum != "") {
             alert("내선번호는 000-000-0000 형식이어야 합니다.");
             return false;
         }
@@ -162,7 +162,7 @@ export default function UserInfo() {
         const currentValue = `${empCode}:${userInfo.empName || '이름 없음'}_${userInfo.depCode || '부서 없음'}_${userInfo.posCode || '직급 없음'}_${userInfo.empPass || '비밀번호 없음'}_${userInfo.phoneNum || '전화번호 없음'}_${userInfo.extNum || '내선번호 없음'}_${userInfo.empMail || '메일 없음'}_${userInfo.corCode || '상관코드 없음'}`;
 
         // 수정된 필드들을 하나의 modifyReq 문자열로 결합
-        const modifyReq = `${empCode}:${empName || '이름 없음'}_${depCode || '부서 없음'}_${posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || '내선번호 없음'}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
+        const modifyReq = `${empCode}:${empName || '이름 없음'}_${depCode || '부서 없음'}_${posCode || '직급 없음'}_${empPass || '비밀번호 없음'}_${phoneNum || '전화번호 없음'}_${extNum || ''}_${empMail || '메일 없음'}_${corCode || '상관코드 없음'}`;
 
         if (currentValue == modifyReq) {
             alert("수정 전 내용과 동일하여 수정 요청 할 수 없습니다.");
@@ -234,9 +234,48 @@ export default function UserInfo() {
 
             <div className="flex-1 flex">
                 <aside className="w-64 bg-gray-100 p-4 space-y-2">
-                    <div>
-                        <p>사이드 부분</p>
-                    </div>
+                    <ol>
+                        <li>
+                            <div>
+                                <button
+                                    className={`w-full flex items-center transition-colors duration-300`}
+                                    onClick={() => setIsExpanded(!isExpanded)}
+                                >
+                                    {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                        <ChevronRight className="mr-2 h-4 w-4"/>}
+                                    <span className="hover:underline">인사 정보</span>
+
+                                </button>
+                                {isExpanded && (
+                                    <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                        <li>
+                                            <div className="flex justify-between">
+                                                <button className="w-full flex items-center"
+
+                                                >
+                                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                                    <div className="hover:underline">내 인사 정보</div>
+                                                </button>
+
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div className="flex justify-between">
+                                                <button className="w-full flex items-center"
+                                                    // onClick={() => {
+                                                    //     // navigate('/UserInfoModifyRequest')
+                                                    // }}
+                                                >
+                                                    <ChevronRight className="mr-2 h-4 w-4"/>
+                                                    <div className="hover:underline">정보 수정 요청</div>
+                                                </button>
+                                            </div>
+                                        </li>
+                                    </div>
+                                )}
+                            </div>
+                        </li>
+                    </ol>
                 </aside>
                 <main className="w-3/4 mx-auto">
                     <h1 className="text-2xl font-bold mb-5 pb-3 border-b border-gray-200 mt-8">
