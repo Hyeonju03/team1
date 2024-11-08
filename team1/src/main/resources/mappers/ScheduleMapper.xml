@@ -58,7 +58,7 @@
         AND s.category = '부서';
     </select>
 
-    <select id="selectFullScgedule">
+    <select id="selectFullSchedule">
         SELECT *
         FROM SCHEDULE
         WHERE EMP_CODE LIKE CONCAT(SUBSTRING_INDEX(#{empCode}, '-', 1), '%')

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 function Table({children}) {
     return (
@@ -35,6 +36,8 @@ export default function Component() {
     const [empList, setEmpList] = useState([]);
     const [formData, setFormData] = useState([]);
     const [hasPermission, setHasPermission] = useState(false)
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     const navigate = useNavigate(); // useNavigate 훅 사용
     // 로그인
@@ -188,54 +191,71 @@ export default function Component() {
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <h1 className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</h1>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
             <div className="flex">
                 {/*사이드바*/}
-                <div>
-                    <aside className="w-64 bg-gray-100 p-4 space-y-2" style={{height: "800px"}}>
-                        <ol>
-                            <li>
-                                <div>
-                                    <button
-                                        className={`w-full flex items-center transition-colors duration-300`}>
-                                        <span className="hover:underline">결재함</span>
-                                    </button>
-                                    <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                        <li>
-                                            <div>
-                                                <button className="w-full flex items-center">
-                                                    <div className="hover:underline">전체 보기</div>
-                                                </button>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div>
-                                                <button className="w-full flex items-center">
-                                                    <div className="hover:underline">카테고리</div>
-                                                </button>
-                                                <li className={`text-left transition-colors duration-300`}>
-                                                    <div className="flex">
-                                                        <button className="hover:underline">
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div className="flex justify-between">
-                                                <button className="w-full flex items-center">
-                                                    <div className="hover:underline">내 결재함</div>
-                                                </button>
+                {/*<div>*/}
+                {/*    <aside className="w-64 bg-gray-100 p-4 space-y-2" style={{height: "auto"}}>*/}
+                {/*        <ol>*/}
+                {/*            <li>*/}
+                {/*                <div>*/}
+                {/*                    <button*/}
+                {/*                        className={`w-full flex items-center transition-colors duration-300`}>*/}
+                {/*                        <span className="hover:underline">결재함</span>*/}
+                {/*                    </button>*/}
+                {/*                    <div className="ml-8 space-y-2 pace-y-2 mt-2">*/}
+                {/*                        <li>*/}
+                {/*                            <div>*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">전체 보기</div>*/}
+                {/*                                </button>*/}
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                        <li>*/}
+                {/*                            <div>*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">카테고리</div>*/}
+                {/*                                </button>*/}
+                {/*                                <li className={`text-left transition-colors duration-300`}>*/}
+                {/*                                    <div className="flex">*/}
+                {/*                                        <button className="hover:underline">*/}
+                {/*                                        </button>*/}
+                {/*                                    </div>*/}
+                {/*                                </li>*/}
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                        <li>*/}
+                {/*                            <div className="flex justify-between">*/}
+                {/*                                <button className="w-full flex items-center">*/}
+                {/*                                    <div className="hover:underline">내 결재함</div>*/}
+                {/*                                </button>*/}
 
-                                            </div>
-                                        </li>
-                                    </div>
-                                </div>
-                            </li>
-                        </ol>
-                    </aside>
-                </div>
-                <div className="flex-1" style={{marginLeft: "10px"}}>
+                {/*                            </div>*/}
+                {/*                        </li>*/}
+                {/*                    </div>*/}
+                {/*                </div>*/}
+                {/*            </li>*/}
+                {/*        </ol>*/}
+                {/*    </aside>*/}
+                {/*</div>*/}
+                <div className="flex-1" style={{marginLeft: "10px", marginTop: "20px"}}>
                     <Table>
                         <TableHeader>
                             <TableRow>

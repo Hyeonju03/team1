@@ -22,11 +22,11 @@ public class ScheduleService {
 
     @Transactional
     public void scheduleInsert(ScheduleDTO scheduleDTO) {
-        try{
+        try {
             scheduleMapper.scheduleInsert(scheduleDTO);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            throw  e;
+            throw e;
         }
     }
 
@@ -42,15 +42,15 @@ public class ScheduleService {
 
 
     public String selectAuth(String empCode) {
-      return   scheduleMapper.selectAuth(empCode);
+        return scheduleMapper.selectAuth(empCode);
     }
 
-    public List<ScheduleDTO>selectDepSchedule(String empCode) {
+    public List<ScheduleDTO> selectDepSchedule(String empCode) {
         return scheduleMapper.selectDepSchedule(empCode);
     }
 
-    public List<ScheduleDTO>selectFullScgedule(String empCode) {
-        return scheduleMapper.selectFullScgedule(empCode);
+    public List<ScheduleDTO> selectFullSchedule(String empCode) {
+        return scheduleMapper.selectFullSchedule(empCode);
     }
 
 

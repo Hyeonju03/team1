@@ -2,17 +2,21 @@ import React, {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {AlertTriangle} from 'lucide-react';
+import Clock from "react-live-clock";
 
 import {useAuth} from "./noticeAuth";
 
 export default function SignUpForm() {
     const [empNum, setEmpNum] = useState("");
+    const [selectEmpNumList, setSelectEmpNumList] = useState([]);
     const [comCode, setComCode] = useState("");
     const [comInfo, setComInfo] = useState([]);
     const navigate = useNavigate();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const [showMessage, setShowMessage] = useState(false)
     const [permission, setPermission] = useState(false)
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
@@ -101,7 +105,8 @@ export default function SignUpForm() {
     const selectEmpNum = async () => {
         try {
             const resp = await axios.get("/selectAllEmpNum", {params: {comCode: comCode}});
-            console.log("몇명?", resp);
+            setSelectEmpNumList(resp.data)
+            console.log("몇명?", resp.data);
         } catch (error) {
             console.error(error);
         }
@@ -197,92 +202,111 @@ export default function SignUpForm() {
         <div>
             <form onSubmit={goUpdate}>
                 <div className="w-full">
-                    <h2 className="text-2xl font-bold text-center bg-gray-200 py-2"
-                        style={{marginBottom: "30px"}}>로고</h2>
+                    <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                        <div className="flex mr-6">
+                            <div className="font-bold mr-1">{formattedDate}</div>
+                            <Clock
+                                format={'HH:mm:ss'}
+                                ticking={true}
+                                timezone={'Asia/Seoul'}/>
+                        </div>
+                        <div className="mr-5">
+                            <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                                 alt="home"/>
+                        </div>
+                        <div className="mr-16">
+                            <img width="45" height="45"
+                                 src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                                 alt="user-male-circle" onClick={togglePanel}/>
+                        </div>
+                    </header>
                 </div>
-                <div className=" max-w-4xl mx-auto p-4 rounded-lg">
+                <div className=" max-w-4xl mx-auto p-4 rounded-lg" style={{marginTop: "20px"}}>
                     <div style={{marginBottom: "30px"}}>
                         <p className="text-sm text-left">회사정보 관리</p>
                         <p className="text-sm text-left">회사 정보를 확인하고 수정합니다.</p>
                     </div>
-                    {comInfo.map((v, i) => (
-                        <div className="text-left" key={i} style={{marginBottom: "30px"}}>
-                            <p className="flex" style={{marginBottom: "30px"}}>회사명:
-                                <input
-                                    id="comName"
-                                    name="comName"
-                                    placeholder={v.comName}
-                                    className="border"
-                                    style={{marginLeft: "83px", width: "80%"}}
-                                    value={v.comName}
-                                    onChange={(e) => {
-                                        const newComInfo = [...comInfo];
-                                        newComInfo[i].comName = e.target.value;
-                                        setComInfo(newComInfo);
-                                    }}
-                                />
-                            </p>
-                            <div className="flex">
-                                <p style={{marginBottom: "30px"}}>사업자등록번호: </p>
-                                <p style={{marginLeft: "20px"}}>{v.comCode}</p>
-                            </div>
-                            <p style={{marginBottom: "30px"}}>대표자:
-                                <input
-                                    id="ceoName"
-                                    name="ceoName"
-                                    placeholder={v.ceoName}
-                                    className="border"
-                                    style={{marginLeft: "83px", width: "80%"}}
-                                    value={v.ceoName}
-                                    onChange={(e) => {
-                                        const newComInfo = [...comInfo];
-                                        newComInfo[i].ceoName = e.target.value;
-                                        setComInfo(newComInfo);
-                                    }}
-                                />
-                            </p>
-                            <p className="flex" style={{marginBottom: "30px"}}>대표번호:
-                                <p style={{marginLeft: "70px"}}>{v.ceoPhone}</p>
-                            </p>
-                            <p style={{marginBottom: "30px"}}>전화번호:
-                                <input
-                                    id="contectPhone"
-                                    name="contectPhone"
-                                    placeholder={v.contectPhone}
-                                    className="border"
-                                    style={{marginLeft: "65px", width: "80%"}}
-                                    onChange={(e) => handlePhoneNumberChange(i, e.target.value)}
-                                    value={v.contectPhone}
-                                />
-                            </p>
-                            <p style={{marginBottom: "30px"}}>이메일:
-                                <input
-                                    id="comEmail"
-                                    name="comEmail"
-                                    placeholder={v.comEmail}
-                                    className="border"
-                                    style={{marginLeft: "80px", width: "80%"}}
-                                    onChange={(e) => handleEmailChange(i, e.target.value)}
-                                    value={v.comEmail}
-                                />
-                            </p>
-                            <div className="flex items-center mb-4">
-                                <p>직원수:</p>
-                                <p style={{marginLeft: "80px"}} className="ml-4">{v.empNum}</p>
-                                {v.empNum > 9 && showMessage && (
-                                    <div
-                                        className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-md ml-4 flex items-center">
-                                        <AlertTriangle className="h-5 w-5 mr-2"/>
-                                        <span onClick={goPayMent} className="cursor-pointer">주의: 직원 수가 10명 이상입니다. 계속하려면 결제가 필요합니다.</span>
-                                    </div>
-                                )}
-                            </div>
+                    {comInfo.map((v, i) => {
+                        const empNum = selectEmpNumList;
+                        return (
+                            <div className="text-left" key={i} style={{marginBottom: "30px"}}>
+                                <p className="flex" style={{marginBottom: "30px"}}>회사명:
+                                    <input
+                                        id="comName"
+                                        name="comName"
+                                        placeholder={v.comName}
+                                        className="border"
+                                        style={{marginLeft: "83px", width: "80%"}}
+                                        value={v.comName}
+                                        onChange={(e) => {
+                                            const newComInfo = [...comInfo];
+                                            newComInfo[i].comName = e.target.value;
+                                            setComInfo(newComInfo);
+                                        }}
+                                    />
+                                </p>
+                                <div className="flex">
+                                    <p style={{marginBottom: "30px"}}>사업자등록번호: </p>
+                                    <p style={{marginLeft: "20px"}}>{v.comCode}</p>
+                                </div>
+                                <p style={{marginBottom: "30px"}}>대표자:
+                                    <input
+                                        id="ceoName"
+                                        name="ceoName"
+                                        placeholder={v.ceoName}
+                                        className="border"
+                                        style={{marginLeft: "83px", width: "80%"}}
+                                        value={v.ceoName}
+                                        onChange={(e) => {
+                                            const newComInfo = [...comInfo];
+                                            newComInfo[i].ceoName = e.target.value;
+                                            setComInfo(newComInfo);
+                                        }}
+                                    />
+                                </p>
+                                <p className="flex" style={{marginBottom: "30px"}}>대표번호:
+                                    <p style={{marginLeft: "70px"}}>{v.ceoPhone}</p>
+                                </p>
+                                <p style={{marginBottom: "30px"}}>전화번호:
+                                    <input
+                                        id="contectPhone"
+                                        name="contectPhone"
+                                        placeholder={v.contectPhone}
+                                        className="border"
+                                        style={{marginLeft: "65px", width: "80%"}}
+                                        onChange={(e) => handlePhoneNumberChange(i, e.target.value)}
+                                        value={v.contectPhone}
+                                    />
+                                </p>
+                                <p style={{marginBottom: "30px"}}>이메일:
+                                    <input
+                                        id="comEmail"
+                                        name="comEmail"
+                                        placeholder={v.comEmail}
+                                        className="border"
+                                        style={{marginLeft: "80px", width: "80%"}}
+                                        onChange={(e) => handleEmailChange(i, e.target.value)}
+                                        value={v.comEmail}
+                                    />
+                                </p>
+                                <div className="flex items-center mb-4">
+                                    <p>직원수:</p>
+                                    <p style={{marginLeft: "80px"}} className="ml-4">{empNum}</p>
+                                    {empNum > 9 && showMessage && (
+                                        <div
+                                            className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-md ml-4 flex items-center">
+                                            <AlertTriangle className="h-5 w-5 mr-2"/>
+                                            <span onClick={goPayMent} className="cursor-pointer">주의: 직원 수가 10명 이상입니다. 계속하려면 결제가 필요합니다.</span>
+                                        </div>
+                                    )}
+                                </div>
 
-                            <p className="flex" style={{marginBottom: "20px"}}>등록일자:
-                                <p style={{marginLeft: "65px"}}>{formatDate(v.registerDate)}</p>
-                            </p>
-                        </div>
-                    ))}
+                                <p className="flex" style={{marginBottom: "20px"}}>등록일자:
+                                    <p style={{marginLeft: "65px"}}>{formatDate(v.registerDate)}</p>
+                                </p>
+                            </div>
+                        )
+                    })}
                     <div className="flex justify-center">
                         <button type="submit" style={{marginLeft: "10px"}} className="border rounded-md px-4 py-2">저장
                         </button>

@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import SelectCorCodePopup from "./SelectCorCodePopup";
+import Clock from "react-live-clock";
 
 export default function SignUpForm() {
 
@@ -38,6 +39,8 @@ export default function SignUpForm() {
     const [checkCorCode, setCheckCorCode] = useState("")
     const [checkEmpNum, setCheckEmpNum] = useState(null)
     const [status, setStatus] = useState(null)
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     const handleChange = (e) => {
         const {name, value} = e.target;
@@ -356,8 +359,25 @@ export default function SignUpForm() {
                     }
             `}
             </style>
-            <h2 className="text-2xl font-bold text-center bg-gray-200 py-2" style={{marginBottom: "30px"}}>로고</h2>
-            <div style={{marginLeft: "480px"}} className="max-w-4xl items-center">
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle"/>
+                </div>
+            </header>
+            <div style={{marginLeft: "480px", marginTop: "30px"}} className="max-w-4xl items-center">
                 <form onSubmit={handleSubmit} className="space-y-0.5">
                     {/* 회사코드 */}
                     <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>

@@ -7,6 +7,7 @@ import moment from "moment";
 import {useNavigate} from "react-router-dom";
 
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 
 const typeColors = {
@@ -29,6 +30,8 @@ export default function Schedule() {
     const [newSchedule, setNewSchedule] = useState({
         snum: 0, content: '', startDate: new Date(), endDate: new Date(), category: '개인',
     });
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
 
     //로그아웃이 맨위로
@@ -98,7 +101,7 @@ export default function Schedule() {
     /* 전체일정 조회 */
     const fullData = async (arr) => {
         try {
-            const response = await axios.get("/selectFullScgedule", {params: {empCode: empCode}});
+            const response = await axios.get("/selectFullSchedule", {params: {empCode: empCode}});
             console.log("resp", response)
             const schedulesWithDates = response.data.map(schedule => ({
                 ...schedule, snum: schedule.snum, startDate: new Date(schedule.startDate), // 문자열을 Date 객체로 변환
@@ -234,9 +237,24 @@ export default function Schedule() {
     const canDelete = auth == '3' || auth == '5' || auth == '6' || auth == '7';
 
     return (<div className="min-h-screen flex flex-col">
-        <div className="bg-gray-200 p-4">
-            <h1 className="text-2xl font-bold">로고</h1>
-        </div>
+        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <div className="flex mr-6">
+                <div className="font-bold mr-1">{formattedDate}</div>
+                <Clock
+                    format={'HH:mm:ss'}
+                    ticking={true}
+                    timezone={'Asia/Seoul'}/>
+            </div>
+            <div className="mr-5">
+                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                     alt="home"/>
+            </div>
+            <div className="mr-16">
+                <img width="45" height="45"
+                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                     alt="user-male-circle" onClick={togglePanel}/>
+            </div>
+        </header>
         <div className="flex-1 p-4">
             <h2 className="text-xl font-semibold mb-4">일정관리</h2>
             <div className="flex">

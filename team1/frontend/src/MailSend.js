@@ -15,6 +15,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
@@ -34,6 +35,9 @@ export default function EmailSend() {
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
 
     const [formData, setFormData] = useState({
@@ -208,7 +212,24 @@ export default function EmailSend() {
     return (
         // <div className="container mx-auto p-4">
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="text-2xl font-bold text-center p-4 bg-gray-200 mb-6">로고</header>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
+            </header>
             <div className="flex flex-col md:flex-row gap-6">
 
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"

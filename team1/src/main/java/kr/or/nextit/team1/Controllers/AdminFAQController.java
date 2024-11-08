@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/api/AdminFAQ")
+@RestController
 public class AdminFAQController {
 
-   private final AdminFAQMapper adminFAQMapper;
+    private final AdminFAQMapper adminFAQMapper;
 
     @Autowired
     public AdminFAQController(AdminFAQMapper adminFAQMapper) {

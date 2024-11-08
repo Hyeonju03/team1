@@ -5,8 +5,8 @@
 <mapper namespace="kr.or.nextit.team1.mappers.AuthorityMapper">
     <insert id="insertAuth" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         INSERT into authority
-        (EMP_CODE,  emp_Name, dep_code, pos_code, permission_edit, department_management , rank_edit , company_edit)
-        VALUES(#{empCode}, #{empName}, #{depCode}, #{posCode},#{permissionEdit}, #{departmentManagement},#{rankEdit},#{companyEdit});
+        (EMP_CODE,  permission_edit, department_management , rank_edit , company_edit)
+        VALUES(#{empCode}, #{permissionEdit}, #{departmentManagement},#{rankEdit},#{companyEdit});
     </insert>
 
     <select id="selectEmployeeList" resultType="kr.or.nextit.team1.DTOs.AuthorityDTO">
@@ -29,7 +29,16 @@
         LEFT JOIN
         authority AS a ON e.EMP_CODE = a.EMP_CODE
         WHERE
-        e.EMP_CODE LIKE CONCAT('%', #{empCode}, '%');
+        e.EMP_CODE LIKE CONCAT('%', #{empCode}, '%')
+        order by e.DEP_CODE asc ,
+        CASE e.POS_CODE
+        WHEN '부장' THEN 1
+        WHEN '차장' THEN 2
+        WHEN '과장' THEN 3
+        WHEN '대리' THEN 4
+        WHEN '사원' THEN 5
+        ELSE 6
+        END;
     </select>
     <select id="selectAllAuth" resultType="kr.or.nextit.team1.DTOs.AuthorityDTO">
         select EMP_CODE
