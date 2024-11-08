@@ -2,11 +2,18 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from './noticeAuth';
+import Clock from "react-live-clock"
 
 const AdminNoticeRegister = () => {
     const [formData, setFormData] = useState({ title: "", content: "" });
     const { isLoggedIn, empCode, logout } = useAuth(); // 로그인 상태 가져오기 (각 페이지 별 로그인 연동)
     const navigate = useNavigate();
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     // 등록시 입력하는 함수
     const handleInputChange = (e) => {
@@ -38,13 +45,27 @@ const AdminNoticeRegister = () => {
         navigate('/adminnotice'); // 리스트 페이지로 이동
     };
 
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-200 p-2">
-                <div className="container mx-auto flex justify-center items-center h-24">
-                    <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>
 
@@ -103,17 +124,13 @@ const AdminNoticeRegister = () => {
                             로그아웃
                         </button>
                     </div>
-                    <div className="mb-4">
-                        <h3 className="font-semibold mb-2">공지사항</h3>
-                        <ul className="list-disc list-inside">
-                            <li>첫 번째 공지사항</li>
-                            <li>두 번째 공지사항</li>
-                        </ul>
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
                     </div>
-                    <div>
-                        <h3 className="font-semibold mb-2">메신저</h3>
-                        <p>메신저 기능은 준비 중입니다.</p>
-                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
                 </aside>
             </div>
         </div>
