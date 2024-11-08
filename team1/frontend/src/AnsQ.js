@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import axios from "axios"; // useNavigate 임포트 추가
 import Clock from "react-live-clock";
 
@@ -27,6 +27,9 @@ export default function FAQPage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const navigate = useNavigate(); // useNavigate 훅 사용
+    const [adminId, setAdminId] = useState("")
+    const [permission, setPermission] = useState(false)
+
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
@@ -34,9 +37,14 @@ export default function FAQPage() {
     // slide 변수
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
+
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
+    const location = useLocation();
+    const {item} = location.state || {qNum: "없음"};
+
+    console.log(item)
 
     //로그아웃이 맨위로
     useEffect(() => {
@@ -46,17 +54,26 @@ export default function FAQPage() {
         }
     }, [])
 
+
     useEffect(() => {
-        const fetchData = async () => {
-            if (isLoggedIn) {
-                try {
-                    const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
-                    console.log(response.data);
+        if (isLoggedIn) {
+            const fetchData = async () => {
+                //운영자만 가능함ㅇㅇ
+                // const loggedInEmpCode = "kdj";
+                // //3148127227-user002 이건 권한없는 그냥 user
+                // //kdj 운영자
+                // setAdminId(loggedInEmpCode);
 
+                const response = await axios.get(`/selectAdmin`, {params: {adminId: empCode}});
+                console.log(response.data)
+                setAdminId(response.data);
 
-                } catch (error) {
-                    console.error(error.response ? error.response.data : error.message); // 더 나은 오류 메시지 표시
+                if (response.data === 0) {
+                    setPermission(false);
+                } else {
+                    setPermission(true);
                 }
+
             }
             fetchData();
         }
@@ -73,17 +90,15 @@ export default function FAQPage() {
     }
 
     const qComplete = async (e) => {
-        e.preventDefault(); // 기본 폼 제출 방지
-        const send = {empCode: empCode, title: title, content: content}
-        const config = {
-            headers: {"Content-Type": `application/json`}
-        };
+        e.preventDefault();
+        console.log(title, content, item.qnum)
+        const send = {ansTitle: title, ansContent: content, qNum: item.qnum}
 
         try {
-            const result = await axios.post('/insertQ', send, config)
+            const result = await axios.put('/updateAdminQ', send)
             console.log(result)
-            navigate("/AdminQDetail");
-            alert("문의작성완료")
+            alert("답장완료")
+            navigate("/AnsQDetail");
         } catch (error) {
             console.log(error)
         }
@@ -92,29 +107,21 @@ export default function FAQPage() {
 
     const qCancel = (e) => {
         e.preventDefault(); // 기본 링크 동작 방지
-        navigate("/AdminQDetail"); // 이동할 페이지로 네비게이트
+        navigate("/AnsQDetail"); // 이동할 페이지로 네비게이트
     }
 
-    const goQDetail = () => {
-        navigate("/AdminQDetail");
+    const goCompleteList = () => {
+        navigate("/AnsQCompleteList");
     }
 
-    const qRegister = () => {
-        navigate("/AdminQ");
+    const goNoAnsList = () => {
+        navigate("/NoAnsQList");
     }
 
-
-    const goFAQ = () => {
-        navigate("/AdminFAQ");
+    const goAnsQList = () => {
+        navigate("/AnsQDetail")
     }
 
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
-    };
-
-    const goQList = () => {
-        navigate("/AdminQDetail");
-    }
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -127,6 +134,18 @@ export default function FAQPage() {
         }
     };
 
+//<토글>
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    if (!permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
+    }
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
@@ -151,23 +170,21 @@ export default function FAQPage() {
 
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
-                     style={{height: "900px"}}>
-                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer"
-                        style={{marginLeft: "-40px", marginTop: "-200px"}}>
-                        <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                              style={{marginRight: "15px"}}/>FAQ</h2>
+                     style={{height: "auto"}}>
                     <ul className="mb-4 text-center">
-                        <li className="text-2xl mb-2">
-                            <h2 onClick={goQList} className="cursor-pointer">
+                        <li className="text-2xl mb-2 ">
+                            <h2 onClick={goAnsQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
                                 1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의작성
+                                <li onClick={goNoAnsList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginTop: "10px", marginBottom: "10px"}}>-
+                                    미답변내역
                                 </li>
-                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의내역
+                                <li onClick={goCompleteList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginLeft: "10px"}}>-
+                                    답변완료내역
                                 </li>
                             </ul>
                         </li>
@@ -179,9 +196,10 @@ export default function FAQPage() {
                     <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
                 </div>
 
-                <div className="flex-1 p-6 mt-16" style={{marginTop: "-20px"}}>
+
+                <div className="flex-1 p-6 mt-16" style={{marginTop: "-10px"}}>
                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-2xl font-bold mb-6 text-left">문의작성</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-left">AnsQ</h2>
                         <hr className="border-gray-300 my-4 w-full"/>
                         <form className="space-y-4">
                             <div className="flex space-x-8">
@@ -203,7 +221,9 @@ export default function FAQPage() {
                         </form>
                     </div>
                 </div>
+
             </div>
+
             {/* Slide-out panel with toggle button */}
             <div
                 className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}

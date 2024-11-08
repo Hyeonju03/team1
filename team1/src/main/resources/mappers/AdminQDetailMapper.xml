@@ -3,10 +3,34 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.or.nextit.team1.mappers.AdminQDetailMapper">
-    <select id="selectAdminQDetail" parameterType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
-        select qNum, EMP_CODE,TITLE,CONTENT,START_DATE,Q_STATUS,ANS_TITLE,ANS_CONTENT FROM adminqtest
+    <select id="selectAdminQDetail" resultType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
+        select *
+        from adminq
+        where EMP_CODE =#{empCode}
+        order by Q_NUM desc
     </select>
     <delete id="deleteAdminQDetail">
-        DELETE FROM adminqtest WHERE qNum = #{qNum}
+        DELETE FROM adminq
+        WHERE Q_NUM = #{qnum}
     </delete>
+
+    <select id="AnsQDetailList" resultType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
+        select *
+        from adminq
+        order by Q_NUM desc
+    </select>
+
+    <select id="AnsQCompleteList" resultType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
+        select *
+        from adminq
+        where Q_STATUS = 1
+        order by Q_NUM desc
+    </select>
+
+    <select id="noAnsList" resultType="kr.or.nextit.team1.DTOs.AdminQDetailDTO">
+        select *
+        from adminq
+        where Q_STATUS = 0
+        order by Q_NUM desc
+    </select>
 </mapper>

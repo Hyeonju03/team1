@@ -32,19 +32,23 @@ public class CompanyService {
         companyMapper.insertCodeByDepCode(code);
     }
 
-    public List<CompanyDTO> selectComList (String comCode){
+    public List<CompanyDTO> selectComList(String comCode) {
         return companyMapper.selectComList(comCode);
     }
 
-    public  void updateInfo(CompanyDTO companyDTO) {
+    public int selectAllEmpNum(String comCode) {
+        return companyMapper.selectAllEmpNum(comCode);
+    }
+
+    public void updateInfo(CompanyDTO companyDTO) {
         companyMapper.updateInfo(companyDTO);
     }
 
-    public  void updateStatus(String comCode) {
+    public void updateStatus(String comCode) {
         companyMapper.updateStatus(comCode);
     }
 
     public int selectStatus(String comCode) {
-      return   companyMapper.selectStatus(comCode);
+        return companyMapper.selectStatus(comCode);
     }
 }

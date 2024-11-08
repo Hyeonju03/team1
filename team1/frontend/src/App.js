@@ -44,8 +44,12 @@ import AdminNoticeDetail from "./AdminNoticeDetail";
 import AdminNoticeRegister from "./AdminNoticeRegister";
 import UserNoticeDetail from "./UserNoticeDetail";
 import {ListLibraryProvider} from "./Context/ListLibraryContext";
+import AnsQ from "./AnsQ";
+import AnsQDetail from "./AnsQDetail";
+import AnsQCompleteList from "./AnsQCompleteList";
+import NoAnsQList from "./NoAnsQList";
+import LoginPage from "./LoginPage";
 import Login from "./Login";
-
 
 
 function App() {
@@ -55,6 +59,9 @@ function App() {
                 <Router>
                     <div className="App">
                         <Routes>
+
+                            <Route path="/LoginPage" element={<LoginPage/>}/>
+
                             <Route path="/main" element={<Main/>}></Route>
                             <Route path="/SignUp" element={<SignUpForm/>}/>
                             <Route path="/" element={<Main/>}/>
@@ -63,6 +70,12 @@ function App() {
                             <Route path="/AdminFAQ" element={<AdminFAQ/>}/>
                             <Route path="/AdminQDetail" element={<AdminQDetail/>}/>
                             <Route path="/AdminOneToOneDetail" element={<AdminOneToOneDetail/>}/>
+
+                            <Route path="/AnsQ" element={<AnsQ/>}/>
+                            <Route path="/AnsQDetail" element={<AnsQDetail/>}/>
+                            <Route path="/AnsQCompleteList" element={<AnsQCompleteList/>}/>
+                            <Route path="/NoAnsQList" element={<NoAnsQList/>}/>
+
                             <Route path="/Log" element={<Log/>}/>
                             <Route path="/LogList" element={<LogList/>}/>
 
@@ -109,6 +122,7 @@ function App() {
                             <Route path="/PositionManagement" element={<PositionManagement/>}/>
 
                             <Route path="/Login" element={<Login/>}/>
+                              
                         </Routes>
                     </div>
                 </Router>

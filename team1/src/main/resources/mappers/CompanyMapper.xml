@@ -40,4 +40,16 @@
         where COM_CODE =#{comCode}
         and PAY_STATUS = 1
     </select>
+    <select id="selectAllEmpNum" resultType="int">
+        select count(EMP_CODE)
+        from employee e
+        WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
+    </select>
+
+    <select id="permissionSelect" resultType="int">
+        select count(*)
+        from authority a
+        where company_edit=1
+        and EMP_CODE = #{empCode}
+    </select>
 </mapper>

@@ -16,7 +16,6 @@ import java.util.List;
 //@Slf4j
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class ScheduleController {
     private final ScheduleService service;
     private final ScheduleService scheduleService;
@@ -59,9 +58,9 @@ public class ScheduleController {
         return ResponseEntity.ok(schedules);
     }
 
-    @GetMapping("/selectFullScgedule")
-    public ResponseEntity<List<ScheduleDTO>> selectFullScgedule(@RequestParam String empCode) {
-        List<ScheduleDTO> schedules = scheduleService.selectFullScgedule(empCode);
+    @GetMapping("/selectFullSchedule")
+    public ResponseEntity<List<ScheduleDTO>> selectFullSchedule(@RequestParam String empCode) {
+        List<ScheduleDTO> schedules = scheduleService.selectFullSchedule(empCode);
         return ResponseEntity.ok(schedules);
     }
 }

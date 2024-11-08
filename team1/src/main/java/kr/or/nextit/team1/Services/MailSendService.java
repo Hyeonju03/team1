@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +27,7 @@ public class MailSendService {
     }
 
     public void sendMail(MailDTO mailDTO) {
-        try{
+        try {
             mailMapper.insertMail(mailDTO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,14 +48,15 @@ public class MailSendService {
 
         String path = mailDTO.getFilePath();
 
-        sendMail.goMail(sendMail.setting(new Properties(), user_name, password), title, content, toto ,ccc ,path);
+        sendMail.goMail(sendMail.setting(new Properties(), user_name, password), title, content, toto, ccc, path);
 
     }
 
     public String saveFile(MultipartFile file) throws IOException {
 
         // 바탕화면 경로를 가져오기
-        String filePath = System.getProperty("user.home") + "/fileFuck";
+//        String filePath = System.getProperty("user.home") + "/fileFuck";
+        String filePath = new File("src/main/resources/static/uploads").getAbsolutePath();
 
         // 파일 이름 설정 (원본 이름 + 현재 시간)
         String originalFileName = file.getOriginalFilename();
@@ -84,6 +86,7 @@ public class MailSendService {
             mailMapper.updateMail(mailNum);
         }
     }
+
     public static void updateTrashMail(List<Long> mailNums) {
         for (Long mailNum : mailNums) {
             mailMapper.updateTrashMail(mailNum);

@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
+
 
 function Button({children, size, variant, onClick}) {
     const baseStyle = "px-4 py-2 rounded";
@@ -54,8 +56,6 @@ function TableCell({children, onClick}) {
 
 export default function Component() {
     const navigate = useNavigate();
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-
     const [Qlist, setQList] = useState([])
     const [qSearch, setQSearch] = useState("")
     const [filterQlist, setFilterQlist] = useState([])
@@ -64,8 +64,21 @@ export default function Component() {
     const {isLoggedIn, empCode, logout} = useAuth();
     const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
 
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const [adminId, setAdminId] = useState("")
+    const [permission, setPermission] = useState(false)
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
+    //로그아웃이 맨위로
+    useEffect(() => {
+        if (!localStorage.getItem('empCode')) {
+            alert("로그인하세요")
+            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
+        }
+    }, [])
 
     const handleCheckboxChange = (id) => {
         setQList(prevData =>
@@ -82,22 +95,26 @@ export default function Component() {
         );
     };
 
-    //로그아웃이 맨위로
-    useEffect(() => {
-        if (!localStorage.getItem('empCode')) {
-            alert("로그인하세요")
-            navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        }
-    }, [])
-
 
     useEffect(() => {
         if (isLoggedIn) {
             const fetchData = async () => {
                 try {
-                    const response = await axios.get("/QDetailList", {params: {empCode}});
-                    const list = response.data;
+                    //영자씨인지 확인
+                    const response = await axios.get(`/selectAdmin`, {params: {adminId: empCode}});
                     console.log(response.data)
+                    setAdminId(response.data);
+
+                    if (response.data === 0) {
+                        setPermission(false);
+                    } else {
+                        setPermission(true);
+                    }
+
+                    // 리스트가져오기
+                    const response2 = await axios.get("/AnsQCompleteList");
+                    const list = response2.data;
+                    console.log(response2.data)
 
                     // startDate 변환
                     const updatedList = list.map(v => {
@@ -121,25 +138,13 @@ export default function Component() {
             }
             fetchData();
         }
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
         setPrevLogin(isLoggedIn);
+
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
 
-// 로그아웃 처리 함수
-    const handleLogout = async () => {
-        try {
-            await axios.post('/api/employ/logout');
-            logout(); // 로그아웃 호출
-            navigate("/"); // 로그아웃 후 홈으로 이동
-        } catch (error) {
-            console.error("로그아웃 중 오류 발생:", error);
-        }
-    };
-
-
     const handleDelete = async () => {
-        //db데이터 삭제하는 기능 구현해야됨
+        //db데이터 삭제하는 기능
         const idsToDelete = Qlist.filter(item => item.checked).map(item => item.qnum);
         console.log(idsToDelete)
         if (idsToDelete.length > 0) {
@@ -155,11 +160,6 @@ export default function Component() {
             alert("삭제할 항목이 선택되지 않았습니다.");
         }
     };
-
-    const qRegister = () => {
-        console.log("클릭됨");
-        navigate("/AdminQ");
-    }
 
 
     const qListOnChangeHandler = (e) => {
@@ -189,25 +189,50 @@ export default function Component() {
         // const {qNum} = item
         console.log(item)
         navigate("/AdminOneToOneDetail", {state: {item}});
+
     }
 
-    const goQDetail = () => {
-        navigate("/AdminQDetail");
-        window.location.reload();
+
+    const goAnsQ = (item) => {
+        navigate("/AnsQ", {state: {item}});
     }
 
-    const goFAQ = () => {
-        navigate("/AdminFAQ");
-        window.location.reload();
+    const goCompleteList = () => {
+        navigate("/AnsQCompleteList");
     }
 
+    const goNoAnsList = () => {
+        navigate("/NoAnsQList");
+    }
+
+    const goAnsQList = () => {
+        navigate("/AnsQDetail")
+    }
+
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
+
+//<토글>
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const goQList = () => {
-        navigate("/AdminQDetail");
+    if (!permission) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="text-center text-4xl font-bold text-red-500">권한이 없습니다. 접근할 수 없습니다.</h1>
+            </div>
+        );
     }
+
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
@@ -233,23 +258,21 @@ export default function Component() {
             <div className="flex flex-col md:flex-row gap-6">
 
                 <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
-                     style={{height: "900px"}}>
-                    <h2 onClick={goFAQ} className="text-2xl mb-2 cursor-pointer"
-                        style={{marginLeft: "-40px", marginTop: "-200px"}}>
-                        <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                              style={{marginRight: "15px"}}/>FAQ</h2>
+                     style={{height: "auto"}}>
                     <ul className="mb-4 text-center">
                         <li className="text-2xl mb-2 ">
-                            <h2 onClick={goQList} className="cursor-pointer">
+                            <h2 onClick={goAnsQList} className="cursor-pointer">
                             <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
                                   style={{marginLeft: "5px"}}/> {/* 점 추가 */}
                                 1:1 상담</h2>
                             <ul className="ml-4">
-                                <li onClick={qRegister} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의작성
+                                <li onClick={goNoAnsList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginTop: "10px", marginBottom: "10px"}}>-
+                                    미답변내역
                                 </li>
-                                <li onClick={goQDetail} className="text-sm cursor-pointer" style={{fontWeight: "400"}}>-
-                                    문의내역
+                                <li onClick={goCompleteList} className="text-sm cursor-pointer"
+                                    style={{fontWeight: "400", marginLeft: "10px"}}>-
+                                    답변완료내역
                                 </li>
                             </ul>
                         </li>
@@ -261,8 +284,9 @@ export default function Component() {
                     <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
                 </div>
 
-                <main className="flex-1" style={{marginTop: "30px"}}>
-                    <h1 className="text-xl font-bold mb-4 text-left">문의내역</h1>
+
+                <main className="flex-1" style={{marginTop: "20px"}}>
+                    <h1 className="text-xl font-bold mb-4 text-left">답변완료내역</h1>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -275,13 +299,14 @@ export default function Component() {
                         <TableBody>
                             {filterQlist.length > 0 ? (
                                 filterQlist.map((item, index) => (
-                                    <TableRow key={item.qnum}>
+                                    <TableRow key={item.id}>
                                         <TableCell className="text-left">{index + 1}</TableCell>
                                         <TableCell onClick={() => goDetail(item)} className="text-left cursor-pointer">
                                             <span className="cursor-pointer">{item.title}</span></TableCell>
                                         <TableCell className="text-left">{item.startDate}</TableCell>
                                         <TableCell className="text-left flex items-center">
-                                            <Button size="sm"
+                                            <Button onClick={() => goAnsQ(item)}
+                                                    size="sm"
                                                     variant={item.qstatus === false ? 'outline' : 'primary'}
                                                     className={item.qstatus === false ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}
                                             >{item.qstatus === false ? "답변대기" : "답변완료"}</Button>
@@ -310,7 +335,6 @@ export default function Component() {
                             <span className="material-icons">검색</span>
                         </Button>
                         <Button variant="outline" onClick={handleDelete}>삭제</Button>
-                        <Button onClick={qRegister}>문의등록</Button>
                     </div>
                 </main>
             </div>

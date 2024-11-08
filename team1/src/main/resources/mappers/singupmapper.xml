@@ -6,16 +6,16 @@
 <mapper namespace="kr.or.nextit.team1.mappers.SignUpMapper">
     <insert id="insertUserXML" parameterType="kr.or.nextit.team1.DTOs.SignUpDTO">
 
-        INSERT INTO employeetest
+        INSERT INTO employee
 
-        (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN , pos_code)
-        VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn},#{posCode});
+        (EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, PHONE_NUM, EMP_MAIL, EMP_RRN , pos_code,cor_code)
+        VALUES(#{empCode},  #{empName}, #{empPass},#{depCode},#{phoneNum}, #{empMail},#{empRrn},#{posCode},#{corCode});
     </insert>
 
     <insert id="insertAuthData" parameterType="kr.or.nextit.team1.DTOs.AuthorityDTO">
-        INSERT INTO authoritytest
-        (EMP_CODE, EMP_NAME, DEP_CODE,permission_edit, department_management,rank_edit)
-        VALUES(#{empCode},#{empName},#{depCode},1, 1,1);
+        INSERT INTO authority
+        (EMP_CODE, permission_edit, department_management,rank_edit,company_edit)
+        VALUES(#{empCode},1, 1,1,1);
     </insert>
 
     <select id="findAllCodes" resultType="kr.or.nextit.team1.DTOs.CodeDTO">
@@ -31,21 +31,21 @@
 
     <select id="findAllempCode" resultType="int">
         SELECT COUNT(*) AS CNT
-        FROM employeetest
+        FROM employee
         WHERE EMP_CODE = #{empCode}
     </select>
 
     <select id="countEmpCode" resultType="int">
         SELECT count(*)
-        FROM employeetest
+        FROM employee
         WHERE EMP_CODE LIKE CONCAT(#{comCode}, '%')
     </select>
 
     <select id="selectCorcode" resultType="hashmap">
         select EMP_CODE ,EMP_NAME , POS_CODE
         from employee
-        where EMP_CODE like '3118115625%'
-        and DEP_CODE = '개발부'
+        where EMP_CODE like CONCAT(#{comCode}, '%')
+        and DEP_CODE = #{depCode}
         order by EMP_NAME
     </select>
 </mapper>

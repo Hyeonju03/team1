@@ -21,4 +21,5 @@ public class AuthorityDTO {
     private boolean permissionEdit;
     private boolean departmentManagement;
     private boolean rankEdit;
+    private boolean companyEdit;
 }

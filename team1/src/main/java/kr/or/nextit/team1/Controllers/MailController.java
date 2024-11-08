@@ -1,4 +1,5 @@
 package kr.or.nextit.team1.Controllers;
+
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import kr.or.nextit.team1.DTOs.MailDTO;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class MailController {
 
     private final MailSendService mailSendService;
@@ -49,27 +49,19 @@ public class MailController {
         return ResponseEntity.ok("Mail sent");
     }
 
-    @GetMapping("/selectMailReception")
-    public List<MailDTO> selectMailReception() {
-        return mailMapper.selectMailReception();
-    }
 
-
-//전체메일
+    //전체메일
     @GetMapping("/selectSendMail")
-    public ResponseEntity<List<MailDTO>> selectSendMail(@RequestParam String empCode , String mailTarget , String mailRef ) {
+    public ResponseEntity<List<MailDTO>> selectSendMail(@RequestParam String empCode, String mailTarget, String mailRef) {
         try {
-            List<MailDTO> mails = mailMapper.selectSendMail(empCode,mailTarget,mailRef);
+            List<MailDTO> mails = mailMapper.selectSendMail(empCode, mailTarget, mailRef);
 
             for (MailDTO mail : mails) {
-                if (mail.getEmpCode().replace(String.valueOf("-"), "").equals(mail.getMailTarget().substring(0, mail.getEmpCode().length() - 1)) && mail.getMailTarget().charAt(mail.getEmpCode().length()-1) == '@')
-                {
+                if (mail.getEmpCode().replace(String.valueOf("-"), "").equals(mail.getMailTarget().substring(0, mail.getEmpCode().length() - 1)) && mail.getMailTarget().charAt(mail.getEmpCode().length() - 1) == '@') {
                     mail.setEmpCode("내게쓴메일함");
-                }
-                else if (mail.getEmpCode().equals(empCode)){
+                } else if (mail.getEmpCode().equals(empCode)) {
                     mail.setEmpCode("보낸메일함");
-                }
-                else if (!mail.getEmpCode().equals(empCode)){
+                } else if (!mail.getEmpCode().equals(empCode)) {
                     mail.setEmpCode("받은메일함");
                 }
             }
@@ -81,7 +73,7 @@ public class MailController {
         }
     }
 
-//    보낸메일
+    //    보낸메일
     @GetMapping("/sentMail")
     public ResponseEntity<List<MailDTO>> sentMail(@RequestParam String empCode) {
         try {
@@ -96,9 +88,9 @@ public class MailController {
 //     내게쓴
 
     @GetMapping("/selectToMeSendMail")
-    public ResponseEntity<List<MailDTO>> selectToMeSendMail(@RequestParam String empCode , String mailTarget) {
+    public ResponseEntity<List<MailDTO>> selectToMeSendMail(@RequestParam String empCode, String mailTarget) {
         try {
-            List<MailDTO> mails = mailMapper.selectToMeSendMail(empCode,mailTarget);
+            List<MailDTO> mails = mailMapper.selectToMeSendMail(empCode, mailTarget);
             return ResponseEntity.ok(mails);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -107,12 +99,11 @@ public class MailController {
     }
 
 
-
     //첨부파일메일
     @GetMapping("/attachmentMailList")
-    public ResponseEntity<List<MailDTO>> attachmentMailList(@RequestParam String mailRef , String mailTarget) {
+    public ResponseEntity<List<MailDTO>> attachmentMailList(@RequestParam String mailRef, String mailTarget) {
         try {
-            List<MailDTO> mails = mailMapper.attachmentMailList(mailRef,mailTarget);
+            List<MailDTO> mails = mailMapper.attachmentMailList(mailRef, mailTarget);
             return ResponseEntity.ok(mails);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -122,9 +113,9 @@ public class MailController {
 
     //받은메일
     @GetMapping("/receivedMailList")
-    public ResponseEntity<List<MailDTO>> receivedMailList(@RequestParam String mailRef , String mailTarget) {
+    public ResponseEntity<List<MailDTO>> receivedMailList(@RequestParam String mailRef, String mailTarget) {
         try {
-            List<MailDTO> mails = mailMapper.receivedMailList(mailRef,mailTarget);
+            List<MailDTO> mails = mailMapper.receivedMailList(mailRef, mailTarget);
             return ResponseEntity.ok(mails);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -190,19 +181,6 @@ public class MailController {
             return ResponseEntity.status(500).body("오류 발생: " + e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

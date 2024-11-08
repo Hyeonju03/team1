@@ -10,8 +10,6 @@ import java.util.List;
 public interface CompanyMapper {
     void insertCompany(CompanyDTO companyDTO);
 
-    void insertCodeByDepCode(CodeDTO code);
-
     List<CompanyDTO> selectComList(String comCode);
 
     void updateInfo(CompanyDTO companyDTO);
@@ -20,5 +18,9 @@ public interface CompanyMapper {
 
     int selectStatus(String comCode);
 
+    int selectAllEmpNum(String comCode);
 
+    int selectCompanyEdit(String empCode);
+
+    void insertCodeByDepCode(CodeDTO code);
 }
