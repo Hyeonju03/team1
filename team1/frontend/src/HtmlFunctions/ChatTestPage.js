@@ -7,7 +7,7 @@ export default function ChatTestPage() {
     const [message, setMessage] = useState('');
     const [ws, setWs] = useState(null);
 
-     const connectWebSocket = () => {
+    const connectWebSocket = () => {
         const socket = new WebSocket(socketUrl);
 
         socket.onopen = () => {

@@ -19,8 +19,13 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log('Received from client:', message);
 
-        // 클라이언트로 메시지 전송 (데이터 갱신 알림)
-        ws.send(JSON.stringify({ updatedData: 'New message added' }));
+        wss.clients.forEach((client) => {
+            // 연결된 클라이언트가 열려 있는 상태인 경우에만 메시지를 보냄
+            if (client.readyState === WebSocket.OPEN) {
+                // 클라이언트에게 메시지 전송 (데이터 갱신 알림)
+                client.send(JSON.stringify({ updatedData: message }));
+            }
+        });
     });
 
     // 연결 종료 시 처리
