@@ -1,5 +1,6 @@
 package kr.or.nextit.team1.mappers;
 
+import kr.or.nextit.team1.DTOs.CodeDTO;
 import kr.or.nextit.team1.DTOs.CompanyDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -9,11 +10,15 @@ import java.util.List;
 public interface CompanyMapper {
     void insertCompany(CompanyDTO companyDTO);
 
-   List<CompanyDTO> selectComList(String comCode);
+    void insertCodeByDepCode(CodeDTO code);
 
-   void updateInfo(CompanyDTO companyDTO);
+    List<CompanyDTO> selectComList(String comCode);
 
-   void updateStatus(String comCode);
+    void updateInfo(CompanyDTO companyDTO);
 
-   int selectStatus(String comCode);
+    void updateStatus(String comCode);
+
+    int selectStatus(String comCode);
+
+
 }

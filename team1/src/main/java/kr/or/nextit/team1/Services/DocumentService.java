@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class DocumentService {
         documentDTO.setDocCateCode(category);
         documentDTO.setContent(content);
 
-        
+
         try {
             // 첨부파일 처리 (파일을 저장하고, 경로 등을 documentDTO에 설정)
             if (attachment != null && !attachment.isEmpty()) {
@@ -57,7 +58,7 @@ public class DocumentService {
 
     public String saveFile(MultipartFile file) throws IOException {
         // 파일 경로를 가져오기
-        String filePath = System.getProperty("user.home") + "/upload";
+        String filePath = new File("src/main/resources/static/uploads").getAbsolutePath();
 
         // 파일 이름 설정 (원본 이름 + 현재 시간)
         String originalFileName = file.getOriginalFilename();
@@ -88,4 +89,10 @@ public class DocumentService {
     public void documentDelete(int id) {
         documentMapper.documentDelete(id);
     }
+
+    // 권한
+    public String getAuthorityByEmpCode(String empCode) {
+        return documentMapper.getAuthorityByEmpCode(empCode);
+    }
+
 }

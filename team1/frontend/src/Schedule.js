@@ -31,7 +31,8 @@ export default function Schedule() {
     /* 로그인 후 empCode 설정 함수 */
     const fetchEmpCode = async () => {
         // 여기에서 실제 empCode를 설정
-        const loggedInEmpCode = "2218701188-c"; // 로그인 후 받아온 empCode
+        const loggedInEmpCode = "2218701188-d" +
+            ""; // 로그인 후 받아온 empCode
         setEmpCode(loggedInEmpCode);
     };
 

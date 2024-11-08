@@ -1,25 +1,35 @@
 package kr.or.nextit.team1.Services;
 
+import kr.or.nextit.team1.DTOs.CodeDTO;
 import kr.or.nextit.team1.DTOs.CompanyDTO;
+import kr.or.nextit.team1.mappers.CodeMapper;
 import kr.or.nextit.team1.mappers.CompanyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 public class CompanyService {
     private final CompanyMapper companyMapper;
+    private final CodeMapper codeMapper;
 
     @Autowired
-    public CompanyService(CompanyMapper companyMapper) {
+    public CompanyService(CompanyMapper companyMapper, CodeMapper codeMapper) {
         this.companyMapper = companyMapper;
+        this.codeMapper = codeMapper;
     }
 
+    @Transactional
     public void insertCompany(CompanyDTO companyDTO) {
-        // 매퍼를 호출하여 DB에 삽입
-
         companyMapper.insertCompany(companyDTO);
+
+        CodeDTO code = new CodeDTO();
+        code.setComCode(companyDTO.getComCode());
+        code.setDepCode(companyDTO.getComName());
+
+        companyMapper.insertCodeByDepCode(code);
     }
 
     public List<CompanyDTO> selectComList (String comCode){

@@ -1,9 +1,12 @@
 package kr.or.nextit.team1.Services;
 
 import kr.or.nextit.team1.DTOs.CodeDTO;
+import kr.or.nextit.team1.DTOs.UpdateDepCodeDto;
+import kr.or.nextit.team1.DTOs.UpdatePosCodeDto;
 import kr.or.nextit.team1.mappers.CodeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -14,6 +17,11 @@ public class CodeService {
 
     public CodeDTO selectCategorie(String comCode) {
         return codeMapper.selectCode(comCode, null);
+    }
+
+    // 부서 권한
+    public String getAuthoritydepartmentManagementByEmpCode(String empCode) {
+        return codeMapper.getAuthoritydepartmentManagementByEmpCode(empCode);
     }
 
     // 모든 부서 가져오기
@@ -27,6 +35,15 @@ public class CodeService {
         CodeDTO existingCodes = codeMapper.selectCode(codeDTO.getComCode(), null);
 
         if (existingCodes != null) {
+            // 기존 부서 코드 목록을 쉼표로 분리
+            String[] existingDepCodes = existingCodes.getDepCode() != null ? existingCodes.getDepCode().split(",") : new String[0];
+
+            // 입력한 부서 코드가 기존 부서 코드 목록에 있는지 확인
+            for (String depCode : existingDepCodes) {
+                if (depCode.trim().equals(codeDTO.getDepCode().trim())) {
+                    throw new RuntimeException("부서 코드가 이미 존재합니다: " + codeDTO.getDepCode());
+                }
+            }
 
             // 새로운 depCode와 updepCode 값 추가
             String updatedDepCode = (existingCodes.getDepCode() != null ? existingCodes.getDepCode() + "," : "") + codeDTO.getDepCode();
@@ -43,7 +60,6 @@ public class CodeService {
         } else {
             throw new RuntimeException("부서 코드가 존재하지 않습니다: " + codeDTO.getDepCode());
         }
-
     }
 
     public List<CodeDTO> selectCategories(String comCode) {
@@ -51,14 +67,23 @@ public class CodeService {
     }
 
     // 부서 이름 수정
+    @Transactional
     public void updateDepartmentName(String comCode, String oldDepCode, String newDepCode) {
         CodeDTO code = codeMapper.selectCode(comCode, oldDepCode);
+
+        List<String> depCodeList = new ArrayList<>();
+        depCodeList.addAll(Arrays.asList(code.getDepCode().split(",")));
+
+        // 새로운 부서 코드가 기존 부서 코드 목록에 있는지 확인
+        for (String depCode : depCodeList) {
+            if (depCode.trim().equals(newDepCode.trim())) {
+                throw new RuntimeException("부서 코드가 이미 존재합니다: " + newDepCode);
+            }
+        }
 
         List<String> updepCodeList = new ArrayList<>();
         updepCodeList.addAll(Arrays.asList(code.getUpdepCode().split(",")));
 
-        List<String> depCodeList = new ArrayList<>();
-        depCodeList.addAll(Arrays.asList(code.getDepCode().split(",")));
 
         // depCodeList에서 oldDepCode의 인덱스를 찾고 해당 위치에 newDepCode로 교체
         int foundIndex = depCodeList.indexOf(oldDepCode);
@@ -79,10 +104,30 @@ public class CodeService {
                 .build();
 
         codeMapper.updateDepartment(codeDto);
+
+        UpdateDepCodeDto updateDepCodeDto = UpdateDepCodeDto.builder()
+                .newDepCode(newDepCode)
+                .oldDepCode(oldDepCode)
+                .comCode(comCode).build();
+
+        codeMapper.updateEmployeeDepCode(updateDepCodeDto);
+
+    }
+
+    // 부서 사용 여부 확인
+    public boolean isDepartmentUsed(String comCode, String posCode) {
+        int employeeCount = codeMapper.countEmployeesByDepCode(comCode, posCode);
+        return employeeCount > 0;
     }
 
     // 부서 삭제
     public void deleteDepartment(String comCode, String depCode) {
+        // 부서가 사용 중인지 확인
+        int employeeCount = codeMapper.countEmployeesByDepCode(comCode, depCode);
+        if (employeeCount > 0) {
+            throw new RuntimeException("해당 부서 코드가 사용 중이므로 삭제할 수 없습니다: " + depCode);
+        }
+
         // 모든 부서 정보 조회
         CodeDTO code = codeMapper.selectCode(comCode, depCode);
 
@@ -162,6 +207,11 @@ public class CodeService {
         return tree;
     }
 
+    // 직급 권한
+    public String getAuthoritypositionManagementByEmpCode(String empCode) {
+        return codeMapper.getAuthoritypositionManagementByEmpCode(empCode);
+    }
+
     // 모든 직급 가져오기
     public CodeDTO selectPosition(String comCode) {
         CodeDTO code = codeMapper.selectPosition(comCode);
@@ -177,8 +227,19 @@ public class CodeService {
 
     // 직급 추가
     public void insertPosition(CodeDTO codeDTO) {
+        // 현재 직급 정보 조회
         CodeDTO currentPosition = codeMapper.selectCode(codeDTO.getComCode(), null);
         if (currentPosition != null) {
+            // 기존 직급 코드 목록 가져오기
+            String[] existingPosCodes = currentPosition.getPosCode() != null ? currentPosition.getPosCode().split(",") : new String[0];
+
+            // 새로운 직급 코드가 이미 존재하는지 확인
+            for (String existingPosCode : existingPosCodes) {
+                if (existingPosCode.trim().equals(codeDTO.getPosCode().trim())) {
+                    throw new RuntimeException("직급 코드가 이미 존재합니다: " + codeDTO.getPosCode());
+                }
+            }
+
             // 새로운 값 추가
             String updatedPosCode = (currentPosition.getPosCode() != null ? currentPosition.getPosCode() + "," : "") + codeDTO.getPosCode();
             codeDTO.setPosCode(updatedPosCode);
@@ -194,33 +255,65 @@ public class CodeService {
     }
 
     // 직급 수정
+    @Transactional
     public void updatePosition(String comCode, String oldPosCode, String newPosCode) {
         CodeDTO code = codeMapper.selectCode(comCode, null);
 
-        List<String> posCodeList = new ArrayList<>();
-        posCodeList.addAll(Arrays.asList(code.getPosCode().split(",")));
+        if (code != null) {
+            String[] existingPosCodes = code.getPosCode() != null ? code.getPosCode().split(",") : new String[0];
 
-        int foundIndex = posCodeList.indexOf(oldPosCode);
-        if (foundIndex != -1) {
-            posCodeList.set(foundIndex, newPosCode);
+            for (String existingPosCode : existingPosCodes) {
+                if (!existingPosCode.trim().equals(oldPosCode.trim()) && existingPosCode.trim().equals(newPosCode.trim())) {
+                    throw new RuntimeException("직급 코드가 이미 존재합니다: " + newPosCode);
+                }
+            }
+            List<String> posCodeList = new ArrayList<>();
+            posCodeList.addAll(Arrays.asList(code.getPosCode().split(",")));
+
+            int foundIndex = posCodeList.indexOf(oldPosCode);
+            if (foundIndex != -1) {
+                posCodeList.set(foundIndex, newPosCode);
+            }
+
+            CodeDTO codeDto = CodeDTO.builder().comCode(comCode)
+                    .posCode(String.join(",", posCodeList))
+                    .build();
+
+            codeMapper.updatePosition(codeDto);
+
+            UpdatePosCodeDto updatePosCodeDto = UpdatePosCodeDto.builder()
+                    .newPosCode(newPosCode)
+                    .oldPosCode(oldPosCode)
+                    .comCode(comCode).build();
+
+            codeMapper.updateEmployeePosCode(updatePosCodeDto);
+
+
+        } else {
+            throw new RuntimeException("직급 코드가 존재하지 않습니다: " + oldPosCode);
         }
+    }
 
-        CodeDTO codeDto = CodeDTO.builder().comCode(comCode)
-                .posCode(String.join(",", posCodeList))
-                .build();
-
-        codeMapper.updatePosition(codeDto);
+    // 직급 사용 여부 확인
+    public boolean isPositionUsed(String comCode, String posCode) {
+        int employeeCount = codeMapper.countEmployeesByPosCode(comCode, posCode);
+        return employeeCount > 0;
     }
 
     // 직급 삭제
     public void deletePosition(String comCode, String posCode) {
+        // 직급이 사용 중인지 확인
+        int employeeCount = codeMapper.countEmployeesByPosCode(comCode, posCode);
+        if (employeeCount > 0) {
+            throw new RuntimeException("해당 직급 코드가 사용 중이므로 삭제할 수 없습니다: " + posCode);
+        }
+
         CodeDTO code = codeMapper.selectCode(comCode, null);
 
         List<String> posCodeList = new ArrayList<>();
         posCodeList.addAll(Arrays.asList(code.getPosCode().split(",")));
 
         int foundIndex = posCodeList.indexOf(posCode);
-        System.out.println("foundIndex 값 : " + foundIndex);
         posCodeList.remove(foundIndex);
 
         CodeDTO codeDto = CodeDTO.builder().comCode(comCode)

@@ -3,6 +3,8 @@ import {ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import useComCode from "hooks/useComCode";
+import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
@@ -26,27 +28,51 @@ export default function DocumentUpdate() {
     const [codeCategory] = useComCode();
     const [attachment, setAttachment] = useState(null); // 새로운 첨부파일 상태 추가
     const navigate = useNavigate();
+    // 로그인
+    const {isLoggedIn, empCode, logout} = useAuth();
+    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    // slide 변수
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     // 문서 정보 및 카테고리 가져오기
     useEffect(() => {
-        axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
-            .then(response => {
-                setDoc(response.data);
-            })
-            .catch(error => console.log(error));
+        if (isLoggedIn) {
+            axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
+                .then(response => {
+                    setDoc(response.data);
+                })
+                .catch(error => console.log(error));
 
-        // code 테이블에서 카테고리 가져오기
-        // axios.get(`/code`) // API 엔드포인트를 조정하세요
-        //     .then(response => {
-        //         // console.log(response.data);
-        //         // 응답이 카테고리 배열이라고 가정할 때
-        //         const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-        //         setCategories(uniqueCategories); // 카테고리 상태에 저장
-        //     })
-        //     .catch(error => console.log(error));
+            // code 테이블에서 카테고리 가져오기
+            // axios.get(`/code`) // API 엔드포인트를 조정하세요
+            //     .then(response => {
+            //         // console.log(response.data);
+            //         // 응답이 카테고리 배열이라고 가정할 때
+            //         const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
+            //         setCategories(uniqueCategories); // 카테고리 상태에 저장
+            //     })
+            //     .catch(error => console.log(error));
+        }
+        // 상태 변경 후 이전 상태를 현재 상태로 설정
+        setPrevLogin(isLoggedIn);
+    }, [id, isLoggedIn, empCode]);
 
-    }, [id]);
+    // 로그아웃 처리 함수
+    const handleLogout = async () => {
+        try {
+            await axios.post('/api/employ/logout');
+            logout(); // 로그아웃 호출
+            navigate("/"); // 로그아웃 후 홈으로 이동
+        } catch (error) {
+            console.error("로그아웃 중 오류 발생:", error);
+        }
+    };
 
     // 입력된 값 변경하는 것
     const handleInputChange = (e) => {
@@ -71,14 +97,6 @@ export default function DocumentUpdate() {
             formData.append("attachment", attachment); // 새로운 파일 추가
         }
 
-        // // doc 객체의 내용을 출력하여 확인
-        // console.log("Document to update:", {
-        //     title: doc.title,
-        //     category: doc.docCateCode,
-        //     content: doc.content,
-        //     attachment: attachment ? attachment.name : "No attachment" // 첨부파일 이름 또는 "No attachment" 출력
-        // });
-
         axios.put(`/documents/${id}`, formData, {headers: {"Content-Type": "multipart/form-data"}})
             .then((response) => {
                 // console.log("response 콘솔 찍은거: ", response)
@@ -94,8 +112,23 @@ export default function DocumentUpdate() {
     };
 
     return (<div className="min-h-screen flex flex-col">
-        <header className="bg-gray-200 p-4">
-            <h1 className="text-2xl font-bold text-center">로고</h1>
+        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <div className="flex mr-6">
+                <div className="font-bold mr-1">{formattedDate}</div>
+                <Clock
+                    format={'HH:mm:ss'}
+                    ticking={true}
+                    timezone={'Asia/Seoul'}/>
+            </div>
+            <div className="mr-5">
+                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                     alt="home"/>
+            </div>
+            <div className="mr-16">
+                <img width="45" height="45"
+                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                     alt="user-male-circle" onClick={togglePanel}/>
+            </div>
         </header>
         <div className="flex-1 flex">
             <aside className="w-64 bg-gray-100 p-4 space-y-2">
@@ -175,6 +208,46 @@ export default function DocumentUpdate() {
                     <Button variant="outline" onClick={handleUpdate}>수정</Button>
                 </div>
             </main>
+            {/* Slide-out panel with toggle button */}
+            <div
+                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                {/* Panel toggle button */}
+                <button
+                    onClick={togglePanel}
+                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
+                >
+                    {isPanelOpen ? '>' : '<'}
+                </button>
+
+                <div className="p-4">
+                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
+                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+                                <input
+                                    type="text"
+                                    placeholder="아이디"
+                                    className="w-full p-2 mb-2 border rounded"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    className="w-full p-2 mb-4 border rounded"
+                                />
+                                <button
+                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                    로그인
+                                </button>
+                            </>
+                        )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </div>
+            </div>
         </div>
     </div>);
 }
