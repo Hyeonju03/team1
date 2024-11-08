@@ -4,7 +4,7 @@ import axios from "axios";
 import ListLibrary from "./HtmlFunctions/ListLibrary";
 
 export default function SignTarget({onClose, empCode}) {
-    const comCode = 3118115625
+    const comCode = 3148127227
     const listContainerRef = useRef(null);
     const [selectedItems, setSelectedItems] = useState([]);
 
@@ -75,7 +75,13 @@ export default function SignTarget({onClose, empCode}) {
     };
 
     const goSave = () => {
-        onClose(selectedItems);
+        console.log(selectedItems)
+        if(selectedItems.length > 3) {
+            alert("결재선은 최대 3명까지 가능합니다.")
+            return;
+        } else {
+            onClose(selectedItems);
+        }
     };
 
     return (

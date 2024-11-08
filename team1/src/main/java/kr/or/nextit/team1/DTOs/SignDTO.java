@@ -14,7 +14,7 @@ public class SignDTO {
     private String title;
     private String content;
     private String fileName;
-    private String fileOriginalName;
+    private String fileOriginName;
     private float fileSize;
     private String filePath;
     private String target;

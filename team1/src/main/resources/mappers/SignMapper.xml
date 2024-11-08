@@ -5,10 +5,9 @@
 <mapper namespace="kr.or.nextit.team1.mappers.SignMapper">
 
     <select id="signSelect" resultType="SignDTO">
-        SELECT
-            *
+        SELECT *
         FROM
-            SIGN_TEST
+            SIGN
         WHERE
             EMP_CODE = #{empCode}
         OR
@@ -17,40 +16,41 @@
 
     <select id="signDetail" parameterType="int" resultType="SignDTO">
         SELECT
+            EMP_CODE,
             SIGN_NUM,
             SIGN_CATE_CODE,
             TITLE,
             CONTENT,
             FILE_NAME,
-            FILE_ORIGINAL_NAME,
+            FILE_ORIGIN_NAME,
             FILE_SIZE,
             FILE_PATH,
             TARGET,
             START_DATE,
             END_DATE
         FROM
-            SIGN_TEST
+            SIGN
         WHERE
             SIGN_NUM = #{signNum}
     </select>
 
     <insert id="signInsert" parameterType="SignDTO">
         INSERT INTO
-            SIGN_TEST
-            (EMP_CODE, SIGN_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGINAL_NAME, FILE_SIZE, FILE_PATH, TARGET)
+            SIGN
+            (EMP_CODE, SIGN_CATE_CODE, TITLE, CONTENT, FILE_NAME, FILE_ORIGIN_NAME, FILE_SIZE, FILE_PATH, TARGET)
         VALUES
-            (#{empCode}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginalName}, #{fileSize}, #{filePath}, #{target})
+            (#{empCode}, #{signCateCode}, #{title}, #{content}, #{fileName}, #{fileOriginName}, #{fileSize}, #{filePath}, #{target})
     </insert>
 
     <update id="updateSign">
-        UPDATE SIGN_TEST
+        UPDATE SIGN
         SET TARGET = #{target}, end_date = #{endDate}
         WHERE
             SIGN_NUM = #{signNum}
     </update>
 
     <update id="updateTargetOnly">
-        UPDATE SIGN_TEST
+        UPDATE SIGN
         SET
             TARGET = #{target}
         WHERE
@@ -59,7 +59,7 @@
 
     <delete id="signDelete" parameterType="int">
         DELETE FROM
-            SIGN_TEST
+            SIGN
         WHERE
             SIGN_NUM = #{id}
     </delete>

@@ -67,7 +67,7 @@
     <!--   받은-->
     <select id="receivedMailList"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
         select *
-        from mailtest
+        from mail
         where (MAIL_TARGET like concat('%',#{mailTarget},'%')
         or MAIL_REF like concat('%',#{mailRef},'%'))
         and DELETE_YN =0
