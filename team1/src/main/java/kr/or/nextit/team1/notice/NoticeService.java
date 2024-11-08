@@ -25,7 +25,7 @@ public class NoticeService {
         return noticeMapper.noticeDetail(noticeNum);
     }
 
-    // 새 공지사항 등록 (관리자 전용)
+    // 공지사항 등록 (관리자 전용)
     public NoticeDTO noticeCreate(NoticeDTO noticeDTO) {
         noticeDTO.setStartDate(LocalDateTime.now()); // 현재 시간으로 설정
         noticeMapper.noticeCreate(noticeDTO);

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import Clock from "react-live-clock"
 
 export default function ApplyForBusiness() {
   const [comCode, setComCode] = useState(''); // 사업자등록번호
@@ -11,6 +12,12 @@ export default function ApplyForBusiness() {
   const [comEmail, setComEmail] = useState(''); // 이메일
   const [showAlert, setShowAlert] = useState(false); // 경고창 숨김 상태
   const [alertMessage, setAlertMessage] = useState(''); // 경고창 안에
+
+  const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen);
+  };
 
   // 모든 칸에 스페이스바 입력 금지
   const preventSpaceBar = (e) => {
@@ -127,17 +134,31 @@ export default function ApplyForBusiness() {
     }
   };
 
+  const today = new Date();
+  const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
   return (
       <div className="min-h-screen flex flex-col">
-        <header className="bg-gray-200 p-4">
-          <div className="container mx-auto flex justify-center items-center h-24">
-            <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
-              <span className="text-gray-600">로고</span>
-            </div>
+        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+          <div className="flex mr-6">
+            <div className="font-bold mr-1">{formattedDate}</div>
+            <Clock
+                format={'HH:mm:ss'}
+                ticking={true}
+                timezone={'Asia/Seoul'}/>
+          </div>
+          <div className="mr-5">
+            <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                 alt="home"/>
+          </div>
+          <div className="mr-16">
+            <img width="45" height="45"
+                 src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                 alt="user-male-circle" onClick={togglePanel}/>
           </div>
         </header>
 
-        <div className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative">
+        <div className="flex max-w-screen-xl mx-auto mt-10 p-14 bg-blue-200 rounded-lg shadow-md relative">
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록
               신청</h2>
@@ -218,8 +239,7 @@ export default function ApplyForBusiness() {
               </div>
               <button
                   type="submit"
-                  className="w-2/3 bg-orange-400 hover:bg-orange-600 text-white mt-6 py-2 rounded"
-
+                  className="w-2/3 bg-orange-500 hover:bg-orange-700 text-white mt-6 py-2 rounded"
               >
                 신청하기
               </button>
@@ -227,28 +247,34 @@ export default function ApplyForBusiness() {
           </div>
         </div>
 
-        <aside className="w-64 p-4 border-l bg-white h-full fixed right-0 top-32">
-          <div className="mb-4">
-            <input type="text" placeholder="아이디" className="w-full p-2 border mb-2"/>
-            <input type="password" placeholder="비밀번호" className="w-full p-2 border mb-2"/>
-            <button className="w-full bg-blue-500 text-white p-2 mb-2">로그인</button>
-            <div className="text-sm text-center">
-              <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-              <span className="mx-1">|</span>
-              <a href="#" className="text-blue-600 hover:underline">문의사항</a>
-            </div>
+        <aside className="w-64 p-4 border-l bg-white h-full fixed right-0 top-12">
+          <form className="mb-4">
+            <input
+                type="text"
+                placeholder="ID"
+                className="w-full p-2 border mb-2"
+                required
+            />
+            <input
+                type="password"
+                placeholder="비밀번호"
+                className="w-full p-2 border mb-2"
+                required
+            />
+            <button
+                type="submit"
+                className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
+            >
+              로그인
+            </button>
+          </form>
+          <div className="text-sm text-center mb-4">
+            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+            <span className="mx-1">|</span>
+            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
           </div>
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">공지사항</h3>
-            <ul className="list-disc list-inside">
-              <li>첫 번째 공지사항</li>
-              <li>두 번째 공지사항</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">메신저</h3>
-            <p>메신저 기능은 준비 중입니다.</p>
-          </div>
+          <h2 className="text-xl font-bold mb-2">메신저</h2>
+          <p>메신저 기능은 준비 중입니다.</p>
         </aside>
 
         {showAlert && (
@@ -259,7 +285,7 @@ export default function ApplyForBusiness() {
                     onClick={() => setShowAlert(false)}
                     className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 >
-                  확인
+                확인
                 </button>
               </div>
             </div>
