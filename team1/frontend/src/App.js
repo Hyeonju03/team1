@@ -9,6 +9,7 @@ import LogList from "./LogList";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import SignUpForm from "./SignUp";
 import DocumentList from "./DocumentList";
+
 import DocumentDetail from "./DocumentDetail";
 import DocumentRegister from "./DocumentRegister";
 import ApplyForBusiness from "./ApplyForBusiness";
@@ -48,6 +49,8 @@ import AnsQDetail from "./AnsQDetail";
 import AnsQCompleteList from "./AnsQCompleteList";
 import NoAnsQList from "./NoAnsQList";
 import LoginPage from "./LoginPage";
+import Login from "./Login";
+
 
 function App() {
     return (
@@ -67,6 +70,7 @@ function App() {
                             <Route path="/AdminFAQ" element={<AdminFAQ/>}/>
                             <Route path="/AdminQDetail" element={<AdminQDetail/>}/>
                             <Route path="/AdminOneToOneDetail" element={<AdminOneToOneDetail/>}/>
+
                             <Route path="/AnsQ" element={<AnsQ/>}/>
                             <Route path="/AnsQDetail" element={<AnsQDetail/>}/>
                             <Route path="/AnsQCompleteList" element={<AnsQCompleteList/>}/>
@@ -116,6 +120,9 @@ function App() {
 
                             <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
                             <Route path="/PositionManagement" element={<PositionManagement/>}/>
+
+                            <Route path="/Login" element={<Login/>}/>
+                              
                         </Routes>
                     </div>
                 </Router>

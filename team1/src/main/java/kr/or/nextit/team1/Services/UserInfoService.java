@@ -53,6 +53,7 @@ public class UserInfoService {
     public void userInfoUpdate(String empCode, UserInfoDTO userInfoDTO) {
         // 정보 변경
         userInfoMapper.userInfoUpdate(empCode, userInfoDTO);
+        System.out.println(userInfoDTO);
 
         // MODIFY_REQ 비우기
         userInfoMapper.modifyReqDelete(userInfoDTO.getCorCode());
@@ -62,5 +63,10 @@ public class UserInfoService {
     @Transactional
     public void modifyReqClear(String corCode) {
         userInfoMapper.modifyReqClear(corCode);
+    }
+
+    // 권한
+    public String getAuthorityUserInfoByEmpCode(String empCode) {
+        return userInfoMapper.getAuthorityUserInfoByEmpCode(empCode);
     }
 }

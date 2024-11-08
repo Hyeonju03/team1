@@ -1,5 +1,6 @@
 package kr.or.nextit.team1.mappers;
 
+import kr.or.nextit.team1.DTOs.CodeDTO;
 import kr.or.nextit.team1.DTOs.CompanyDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -20,4 +21,6 @@ public interface CompanyMapper {
     int selectAllEmpNum(String comCode);
 
     int selectCompanyEdit(String empCode);
+
+    void insertCodeByDepCode(CodeDTO code);
 }
