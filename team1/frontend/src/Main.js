@@ -644,7 +644,7 @@ export default function MainLayout() {
                             <div className="w-full h-12 bg-red-100">
                                 <div
                                     className="flex items-center text-white font-bold px-4 py-2">
-                                    <div className="mr-8">로그인 / 회원가입</div>
+                                    <div className="mr-8"  onClick={togglePanel}>로그인 / 회원가입</div>
                                 </div>
                             </div>
                         </div>
