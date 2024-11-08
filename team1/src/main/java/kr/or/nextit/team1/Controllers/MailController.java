@@ -1,33 +1,31 @@
 package kr.or.nextit.team1.Controllers;
 
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
 import kr.or.nextit.team1.DTOs.MailDTO;
-import kr.or.nextit.team1.Services.EmailService;
 import kr.or.nextit.team1.Services.MailSendService;
 import kr.or.nextit.team1.mappers.MailMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class MailController {
 
     private final MailSendService mailSendService;
     private final MailMapper mailMapper;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     public MailController(MailSendService mailSendService, MailMapper mailMapper) {
@@ -68,6 +66,7 @@ public class MailController {
 
             return ResponseEntity.ok(mails);
         } catch (Exception e) {
+            logger.debug(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         }

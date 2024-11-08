@@ -82,8 +82,8 @@ export default function EmailSend() {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (isLoggedIn) {
+        if (isLoggedIn && empCode) {
+            const fetchData = async () => {
                 try {
                     const response = await axios.get(`/selectEmpCode?empCode=${empCode}`); // 공백 제거
                     console.log(response.data);
@@ -107,8 +107,8 @@ export default function EmailSend() {
                     console.error(error.response ? error.response.data : error.message);
                 }
             }
+            fetchData();
         }
-        fetchData();
         setPrevLogin(isLoggedIn);
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
