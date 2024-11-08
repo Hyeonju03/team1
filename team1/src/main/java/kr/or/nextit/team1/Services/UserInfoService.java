@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class UserInfoService {
 
@@ -44,7 +42,7 @@ public class UserInfoService {
         return userInfoMapper.getPosCode(empCode);
     }
 
-    public List<UserInfoDTO> corCodeCheck(String corCode) {
+    public UserInfoDTO corCodeCheck(String corCode) {
         return userInfoMapper.corCodeCheck(corCode);
     }
 

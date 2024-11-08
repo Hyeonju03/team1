@@ -4,7 +4,7 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 const noticeAuth = createContext();
 
 export const AuthProvider = ({children}) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [empCode, setEmpCode] = useState("");
     const [role, setRole] = useState(null); // 역할 상태 추가
     const [token, setToken] = useState(""); // 토큰 상태 추가
@@ -13,7 +13,7 @@ export const AuthProvider = ({children}) => {
     };
 
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
-        return localStorage.getItem('isLoggedIn') === 'true';
+        return localStorage.getItem('isLoggedIn') === 'true' ? 'true' : 'false'
     });
 
     useEffect(() => {

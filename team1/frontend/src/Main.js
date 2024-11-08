@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import axios from "axios";
 import Clock from "react-live-clock";
@@ -278,7 +278,7 @@ export default function MainLayout() {
         let count = 0;
         const ownSchedule = await axios.get(`/selectSchedule?empCode=${empCode}`);
         const depSchedule = await axios.get("/selectDepSchedule", {params: {empCode: empCode}});
-        const comSchedule = await axios.get("/selectFullScgedule", {params: {empCode: empCode}});
+        const comSchedule = await axios.get("/selectFullSchedule", {params: {empCode: empCode}});
 
         ownSchedule.data.map((tSchedule) => {
             const start = tSchedule.startDate.split("T")[0];
@@ -644,7 +644,7 @@ export default function MainLayout() {
                             <div className="w-full h-12 bg-red-100">
                                 <div
                                     className="flex items-center text-white font-bold px-4 py-2">
-                                    <div className="mr-8"  onClick={togglePanel}>로그인 / 회원가입</div>
+                                    <div className="mr-8" onClick={togglePanel}>로그인 / 회원가입</div>
                                 </div>
                             </div>
                         </div>
@@ -664,11 +664,11 @@ export default function MainLayout() {
                             </div>
                         </div>
                         <div className="w-[600px] bg-violet-200 flex">
-                                <div className="w-full flex flex-col">
-                                    <div className="bg-white h-1/5 w-full"></div>
-                                    <div className="bg-white h-1/5 w-full"></div>
-                                    <div className="bg-white h-1/5 w-full"></div>
-                                </div>
+                            <div className="w-full flex flex-col">
+                                <div className="bg-white h-1/5 w-full"></div>
+                                <div className="bg-white h-1/5 w-full"></div>
+                                <div className="bg-white h-1/5 w-full"></div>
+                            </div>
                             <div className="flex flex-col w-full">
                                 <div className="bg-white h-1/5 w-full"></div>
                                 <div className="bg-white h-1/5 w-full"></div>
