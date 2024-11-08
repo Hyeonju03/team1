@@ -6,6 +6,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import SignModal from "./SignModal";
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 export default function SignDetail() {
     // pdf
@@ -36,6 +37,9 @@ export default function SignDetail() {
     const [modalMessage, setModalMessage] = useState("");
 
     const comCode = empCode.split("-")[0];
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     // pdf제작
     const handleDownloadPdf = async () => {
@@ -102,7 +106,6 @@ export default function SignDetail() {
                 setRejectedCount(count)
             })
             .catch(error => console.log(error));
-
     }, [empCode]);
 
 
@@ -220,7 +223,7 @@ export default function SignDetail() {
                 url: `/sign/download/${sign.signNum}`,
                 responseType: "blob"
             });
-            fileDownload(response.data, sign.fileOriginalName);
+            fileDownload(response.data, sign.fileOriginName);
         } catch (e) {
             console.error(e);
         }
@@ -367,12 +370,27 @@ export default function SignDetail() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-200 p-4">
-                <h1 className="text-2xl font-bold text-center">로고</h1>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home" onClick={()=>navigate("/main")}/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
+                </div>
             </header>
 
             <div className="flex-1 flex">
-                <aside className="w-64 bg-gray-100 p-4 space-y-2">
+                <aside className="w-64 bg-red-200 p-4 space-y-2">
                     <ol>
                         <li>
                             <div>
@@ -391,7 +409,9 @@ export default function SignDetail() {
                                             <div>
                                                 <button className="w-full flex items-center">
                                                     <ChevronRight className="mr-2 h-4 w-4"/>
-                                                    <div className="hover:underline" onClick={() => navigate("/sign")}>전체 보기</div>
+                                                    <div className="hover:underline"
+                                                         onClick={() => navigate("/sign")}>전체 보기
+                                                    </div>
                                                 </button>
                                             </div>
                                         </li>
@@ -653,7 +673,7 @@ export default function SignDetail() {
                                             <span className="whitespace-nowrap mr-1">첨부파일: </span>
                                             <span onClick={() => handleDocumentDownload(sign)}
                                                   className={'cursor-pointer text-indigo-600 hover:text-indigo-500 hover:underline hover:underline-offset-1'}>
-                                                  {sign.fileOriginalName}
+                                                  {sign.fileOriginName}
                                             </span>
                                         </div>
                                     </div>
@@ -702,8 +722,9 @@ export default function SignDetail() {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <button className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px] ${empCode == sign.empCode ? "hidden": ""}`}
-                                onClick={() => asignButton(sign.signNum)}
+                        <button
+                            className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-[5px] ${empCode == sign.empCode ? "hidden" : ""}`}
+                            onClick={() => asignButton(sign.signNum)}
                         >
                             결재승인
                         </button>
@@ -711,8 +732,9 @@ export default function SignDetail() {
                                 onClick={handleHome}>
                             목록으로
                         </button>
-                        <button className={`bg-red-700 text-white px-6 py-2 rounded hover:bg-red-900 ml-[5px] ${empCode == sign.empCode ? "hidden": ""}`}
-                                onClick={() => rejectButton(sign.signNum)}>
+                        <button
+                            className={`bg-red-700 text-white px-6 py-2 rounded hover:bg-red-900 ml-[5px] ${empCode == sign.empCode ? "hidden" : ""}`}
+                            onClick={() => rejectButton(sign.signNum)}>
                             결재반려
                         </button>
                         <SignModal

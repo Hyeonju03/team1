@@ -244,7 +244,7 @@ export default function MainLayout() {
 
     // 롹인 안된 결재 수량
     const newSign = async () => {
-        if(!empCode) {
+        if (!empCode) {
             return false;
         }
         let count = 0;
@@ -264,7 +264,7 @@ export default function MainLayout() {
 
     // 오늘자 일정 수량(기간에 끼워져 있는거 포함)
     const todaySchedule = async () => {
-        if(!empCode) {
+        if (!empCode) {
             return false;
         }
         // 오늘 날짜 계산
@@ -287,11 +287,10 @@ export default function MainLayout() {
             if (start == today) {
                 schedules.push(tSchedule)
                 count += 1;
-            }
-            else if (end == today) {
+            } else if (end == today) {
                 schedules.push(tSchedule)
                 count += 1;
-            } else if (start == today && end > today){
+            } else if (start == today && end > today) {
                 schedules.push(tSchedule)
                 count += 1;
             }
@@ -326,13 +325,13 @@ export default function MainLayout() {
         setScheduleCount(count);
         setSchedule(schedules);
     }
-    
+
     // 인사정보 수정 요청 들어온거 있는지 확인하기
     const newUserInfo = async () => {
         try {
             let count = 0
             const response = await axios.get(`/${empCode}`);
-            if(response.data.modifyReq) {
+            if (response.data.modifyReq) {
                 const req = response.data.modifyReq.split(",")
                 count = req.length;
             }
@@ -369,18 +368,6 @@ export default function MainLayout() {
                                      alt="user-male-circle" onClick={togglePanel}/>
 
                             </div>
-                            {/*    <div className="container mx-auto flex justify-center items-center h-24">*/}
-                            {/*        <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">*/}
-                            {/*            /!* Placeholder for logo image *!/*/}
-                            {/*            <span className="text-gray-600">로고</span>*/}
-                            {/*            /!* Uncomment below and replace with your actual logo image *!/*/}
-                            {/*            /!* <img*/}
-                            {/*  src="/path-to-your-logo.png"*/}
-                            {/*  alt="로고"*/}
-                            {/*  className="max-w-full max-h-full object-contain"*/}
-                            {/*/> *!/*/}
-                            {/*        </div>*/}
-                            {/*    </div>*/}
                         </header>
                         <div className="w-full h-[5px] bg-red-400"></div>
 
@@ -553,7 +540,8 @@ export default function MainLayout() {
 
                                 <div
                                     className="flex ml-[2%] mr-[5%] mt-[3.5%] flex-col justify-between h-[750px] w-[40%]">
-                                    <div className="h-[300px] rounded-3xl shadow-lg p-5 bg-gradient-to-t to-blue-400 from-cyan-300">
+                                    <div
+                                        className="h-[300px] rounded-3xl shadow-lg p-5 bg-gradient-to-t to-blue-400 from-cyan-300">
                                         <div className="">
                                             <div className="w-full">
                                                 <div className="flex w-full h-[260px] justify-around ">
@@ -644,8 +632,7 @@ export default function MainLayout() {
 
                     </>) :
                 <>
-                    <header className="flex justify-end items-center h-[10%] bg-red-200">
-                        <div className="w-36 h-[50px] bg-gray-100">로고</div>
+                    <header className="flex justify-end items-center h-[6%] bg-white">
                         <div className="flex mr-6">
                             <div className="font-bold mr-1">{formattedDate}</div>
                             <Clock
@@ -653,20 +640,41 @@ export default function MainLayout() {
                                 ticking={true}
                                 timezone={'Asia/Seoul'}/>
                         </div>
-                        {/*<div className="mr-5">*/}
-                        {/*    <img width="40" height="40" src="https://img.icons8.com/windows/32/smart-home-2.png"*/}
-                        {/*         alt="smart-home-2"/>*/}
-                        {/*</div>*/}
-                        <div className="mr-16 flex flex-col items-center">
-                            <img width="45" height="45"
-                                 src="https://img.icons8.com/external-kiranshastry-solid-kiranshastry/64/external-user-interface-kiranshastry-solid-kiranshastry.png"
-                                 alt="external-user-interface-kiranshastry-solid-kiranshastry"
-                                 onClick={togglePanel}/>
-                            <div>로그인/회원가입</div>
+                        <div className="mr-16 w-36 flex flex-col items-center">
+                            <div className="w-full h-12 bg-red-100">
+                                <div
+                                    className="flex items-center text-white font-bold px-4 py-2">
+                                    <div className="mr-8">로그인 / 회원가입</div>
+                                </div>
+                            </div>
                         </div>
                     </header>
 
-                    <div>로그인 안되어있음.
+                    <div className="bg-gray-100 h-80 flex justify-center">
+                        <div className="flex items-center w-96 bg-red-200">
+                            <div className="ml-24">
+                                <div className="text-left font-bold text-3xl">
+                                    큰 주제
+                                    <br/>
+                                    이름
+                                </div>
+                                <div className="text-left">
+                                    내용
+                                </div>
+                            </div>
+                        </div>
+                        <div className="w-[600px] bg-violet-200 flex">
+                                <div className="w-full flex flex-col">
+                                    <div className="bg-white h-1/5 w-full"></div>
+                                    <div className="bg-white h-1/5 w-full"></div>
+                                    <div className="bg-white h-1/5 w-full"></div>
+                                </div>
+                            <div className="flex flex-col w-full">
+                                <div className="bg-white h-1/5 w-full"></div>
+                                <div className="bg-white h-1/5 w-full"></div>
+                                <div className="bg-white h-1/5 w-full"></div>
+                            </div>
+                        </div>
                     </div>
                 </>
             }
@@ -675,7 +683,7 @@ export default function MainLayout() {
             {/* Sidebar */
             }
             <div
-                className={`fixed ${isLoggedIn ? "mt-[55px]" : "mt-[95px]" } top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
             >
 
                 <div className="p-4">
@@ -840,7 +848,7 @@ export default function MainLayout() {
                                 )}
                             </div>
                         </div>
-                    : <></>}
+                        : <></>}
 
                     {isRClick === true ? (
                         <></>

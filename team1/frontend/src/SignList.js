@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import axios from "axios";
 import {ChevronDown, ChevronRight} from "lucide-react";
 import {useAuth} from "./noticeAuth";
+import Clock from "react-live-clock";
 
 
 export default function SignList() {
@@ -23,6 +24,9 @@ export default function SignList() {
     const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
     const [checkDoc, setCheckDoc] = useState([]);
     const [rejectedCount, setRejectedCount] = useState(0); // 반려 문서 수 상태 추가
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -69,6 +73,8 @@ export default function SignList() {
                 })
                 .catch(error => console.log(error));
         }, [empCode]);
+
+
 
         // 로그아웃 처리 함수
         const handleLogout = async () => {
@@ -225,11 +231,26 @@ export default function SignList() {
         return (
             <div className="min-h-screen flex flex-col">
                 {/* Header with logo */}
-                <header className="flex justify-end items-center border-b shadow-md bg-white h-[55.13px] p-4">
-                    <h1 className="text-2xl font-bold text-center">로고</h1>
+                <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                             alt="home" onClick={()=>navigate("/main")}/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
+                    </div>
                 </header>
                 <div className="flex-1 flex">
-                    <aside className="w-64 bg-emerald-50 border-r-2 shadow-lg p-4 space-y-2">
+                    <aside className="w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
                         <ol>
                             <li>
                                 <div>
@@ -329,7 +350,7 @@ export default function SignList() {
                         <h1 className="text-2xl font-bold mb-4">문서결재</h1>
                         <div className="space-y-2">
                             {/* Document table */}
-                            <table className="w-full mb-6">
+                            <table className="w-full mb-6 rounded shadow-lg">
                                 <thead>
                                 <tr className="bg-gray-200">
                                     <th></th>
@@ -341,7 +362,7 @@ export default function SignList() {
                                     <th className="p-2 text-center">승인현황</th>
                                 </tr>
                                 </thead>
-                                <tbody className="shadow-lg">
+                                <tbody className="">
                                 {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document, docIndex) => {
                                     const target = document.target
                                     return (
@@ -378,7 +399,7 @@ export default function SignList() {
 
                         {/* Create document button */}
                         <button
-                            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+                            className="text-white bg-gray-300 px-6 py-2 rounded hover:bg-gray-400"
                             onClick={goSignRequest}
                         >
                             문서 만들기
@@ -387,15 +408,15 @@ export default function SignList() {
 
                     {/* Slide-out panel with toggle button */}
                     <div
-                        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                        className={`fixed top-0 right-0 mt-[50px] h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
                     >
                         {/* Panel toggle button */}
-                        <button
-                            onClick={togglePanel}
-                            className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                        >
-                            {isPanelOpen ? '>' : '<'}
-                        </button>
+                        {/*<button*/}
+                        {/*    onClick={togglePanel}*/}
+                        {/*    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"*/}
+                        {/*>*/}
+                        {/*    {isPanelOpen ? '>' : '<'}*/}
+                        {/*</button>*/}
 
                         <div className="p-4">
                             {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
@@ -429,4 +450,4 @@ export default function SignList() {
             </div>
         );
 
-    }
+}
