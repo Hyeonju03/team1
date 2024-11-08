@@ -30,12 +30,16 @@ export default function UserInfoModifyRequest() {
     //     setHasModifyReq(hasRequest);
     // }, [subordinates]);
 
+    const [index, setIndex] = useState('');
+
+    // 수정 요청 목록 페이지에 버튼의 id에 있는 숫자를 잘라서
+    // setIndex(세팅)
 
     useEffect(() => {
         if (isLoggedIn) {
             const fetchSubordinates = async () => {
                 try {
-                    const response = await axios.get(`/userInfo/${empCode}`);
+                    const response = await axios.get(`/userInfo/${empCode}`, index);
                     setSubordinates(response.data);
                 } catch (e) {
                     console.error(e);
@@ -235,7 +239,6 @@ export default function UserInfoModifyRequest() {
                                            className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none sm:text-lg"/>
                                 </div>
                             </div>
-
                             <div className="grid grid-cols-2 gap-4 mt-14">
                                 <div className="mx-10">
                                     <label htmlFor="phoneNum"
@@ -246,7 +249,8 @@ export default function UserInfoModifyRequest() {
                                 <div className="mx-10">
                                     <label htmlFor="extNum"
                                            className="block text-lg font-medium text-gray-700">내선번호</label>
-                                    <input id="extNum" type="text" value={modifyReqData.extNum} readOnly
+                                    <input id="extNum" type="text"
+                                           value={modifyReqData.extNum ? modifyReqData.extNum : "내선번호 없음"} readOnly
                                            className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none sm:text-lg"/>
                                 </div>
                             </div>

@@ -4,8 +4,6 @@ import kr.or.nextit.team1.DTOs.UserInfoDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
-
 @Mapper
 public interface UserInfoMapper {
     UserInfoDTO userInfoSelect(String empCode);
@@ -21,7 +19,7 @@ public interface UserInfoMapper {
     String getPosCode(@Param("empCode") String empCode);
 
     // corCodeCheck
-    List<UserInfoDTO> corCodeCheck(String corCode);
+    UserInfoDTO corCodeCheck(String corCode);
 
     // 수정
     void userInfoUpdate(@Param("empCode") String empCode, @Param("userInfo") UserInfoDTO userInfoDTO);

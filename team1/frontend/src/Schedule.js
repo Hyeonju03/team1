@@ -33,7 +33,6 @@ export default function Schedule() {
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-
     //로그아웃이 맨위로
     useEffect(() => {
         if (!localStorage.getItem('empCode')) {
