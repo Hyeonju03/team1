@@ -17,9 +17,9 @@ export default function ApplyForBusiness() {
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
-    };
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen);
+  };
 
     // 모든 칸에 스페이스바 입력 금지
     const preventSpaceBar = (e) => {
@@ -119,7 +119,7 @@ export default function ApplyForBusiness() {
                 body: JSON.stringify(businessData),
                 credentials: 'include'
             });
-
+          
             if (!response.ok) {
                 const errorData = await response.text();
                 throw new Error(errorData || '신청에 실패했습니다.');
@@ -266,7 +266,6 @@ export default function ApplyForBusiness() {
                         </div>
                     </div>
                 )}
-
             </div>
         </div>
     );

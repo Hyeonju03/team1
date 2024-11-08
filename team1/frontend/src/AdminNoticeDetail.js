@@ -2,42 +2,46 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from './noticeAuth';
+import Clock from "react-live-clock"
 
 const AdminNoticeDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const {isLoggedIn, adminId, logout, config } = useAuth();
+    const { isLoggedIn, empCode, logout, config, login } = useAuth();
 
     const [notice, setNotice] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ title: "", content: "" });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
+    const [inputId, setInputId] = useState(""); // 로그인 ID 상태
+    const [inputPassword, setInputPassword] = useState(""); // 로그인 비밀번호 상태
 
     const noticeNum = location.state?.noticeNum;
-    console.log("noticeNum:", noticeNum); // 추가
+
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
 
     useEffect(() => {
-        console.log("Location:", location); // location 확인
-        console.log("Location state:", location.state); // 추가
-
-
         if (!noticeNum) {
             console.error("noticeNum이 없습니다.");
-            console.log("현재 위치:", location); // 추가
-            navigate('/admin/notice/list');
+            navigate('/adminnotice');
             return;
         }
-        const fetchNotice = async () => {
 
+        const fetchNotice = async () => {
             try {
-                const response = await axios.get(`/api/admin/notice/detail/${noticeNum}`, config);
+                const response = await axios.get(`/api/adminnotice/detail/${noticeNum}`, config);
                 setNotice(response.data);
                 setFormData({ title: response.data.title, content: response.data.content });
             } catch (error) {
                 console.error("공지사항을 가져오는 중 오류 발생:", error);
             }
         };
+
         fetchNotice();
     }, [noticeNum, navigate, config]);
 
@@ -56,12 +60,10 @@ const AdminNoticeDetail = () => {
     };
 
     const submitEdit = async (e) => {
-        e.preventDefault(); // 기본 동작 방지
-        console.log(formData); // formData 출력
+        e.preventDefault();
         try {
-            const response = await axios.put(`/api/admin/notice/detail/${noticeNum}`, formData, config);
-            console.log("Response:", response); // 서버 응답 출력
-            setNotice({ ...notice, ...formData }); // 공지 상태 업데이트
+            await axios.put(`/api/adminnotice/detail/${noticeNum}`, formData, config);
+            setNotice({ ...notice, ...formData });
             setIsEditing(false);
         } catch (error) {
             console.error("오류 발생:", error.response ? error.response.data : error.message);
@@ -73,7 +75,7 @@ const AdminNoticeDetail = () => {
     const confirmDelete = async () => {
         try {
             await axios.delete(`/api/notice/detail/admin/${noticeNum}`, config);
-            navigate('/admin/notice/list');
+            navigate('/adminnotice');
         } catch (error) {
             console.error("공지사항 삭제 중 오류 발생:", error);
         }
@@ -83,16 +85,41 @@ const AdminNoticeDetail = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/admin/notice/list');
+        localStorage.removeItem('adminId'); // localStorage에서 ID 제거
+        localStorage.removeItem('token'); // localStorage에서 토큰 제거
+        navigate('/adminnotice');
     };
+
+    const handleLogin = async (e) => {
+        e.preventDefault(); // 폼 제출 기본 동작 방지
+        const success = await login(inputId, inputPassword); // login 함수에 ID와 비밀번호 전달
+        if (success) {
+            // 로그인 성공 후, 현재 페이지로 리디렉션
+            navigate(`/adminnotice/detail/${noticeNum}`, { state: { noticeNum } });
+        }
+    };
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-200 p-2">
-                <div className="container mx-auto flex justify-center items-center h-24">
-                    <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>
 
@@ -101,17 +128,28 @@ const AdminNoticeDetail = () => {
                     <div className="max-w-4xl mx-auto">
                         {isEditing ? (
                             <form onSubmit={submitEdit} className="p-6">
-                                <h2 className="text-3xl font-bold mb-6 text-indigo-800 border-b-2 border-indigo-200 pb-2">공지사항 수정</h2>
+                                <h2 className="text-3xl font-bold mb-6 text-indigo-800 border-b-2 border-indigo-200 pb-2">공지사항
+                                    수정</h2>
                                 <div className="mb-4">
-                                    <label className="block text-indigo-700 mb-2 font-semibold" htmlFor="title">제목</label>
-                                    <input type="text" id="title" name="title" value={formData.title} onChange={handleInputChange} required className="border-2 border-indigo-200 rounded p-2 w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition duration-200"/>
+                                    <label className="block text-indigo-700 mb-2 font-semibold"
+                                           htmlFor="title">제목</label>
+                                    <input type="text" id="title" name="title" value={formData.title}
+                                           onChange={handleInputChange} required
+                                           className="border-2 border-indigo-200 rounded p-2 w-full focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition duration-200"/>
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-indigo-700 mb-2 font-semibold" htmlFor="content">내용</label>
-                                    <textarea id="content" name="content" value={formData.content} onChange={handleInputChange} required className="border-2 border-indigo-200 rounded p-2 w-full h-48 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition duration-200"/>
+                                    <label className="block text-indigo-700 mb-2 font-semibold"
+                                           htmlFor="content">내용</label>
+                                    <textarea id="content" name="content" value={formData.content}
+                                              onChange={handleInputChange} required
+                                              className="border-2 border-indigo-200 rounded p-2 w-full h-48 focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition duration-200"/>
                                 </div>
-                                <button type="submit" className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">수정하기</button>
-                                <button type="button" onClick={handleCancelEdit} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 ml-4">취소</button>
+                                <button type="submit"
+                                        className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">수정하기
+                                </button>
+                                <button type="button" onClick={handleCancelEdit}
+                                        className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 ml-4">취소
+                                </button>
                             </form>
                         ) : notice ? (
                             <div className="p-6">
@@ -120,36 +158,50 @@ const AdminNoticeDetail = () => {
                                 </div>
                                 <div className="bg-white p-4 rounded-lg shadow-md">
                                     <div className="text-gray-700 text-lg whitespace-pre-line">{notice.content}</div>
-                                    <p className="text-sm text-gray-500 text-right mb-6">작성일: <span className="font-semibold text-indigo-600">{new Date(notice.startDate).toLocaleString()}</span></p>
+                                    <p className="text-sm text-gray-500 text-right mb-6">작성일: <span
+                                        className="font-semibold text-indigo-600">{new Date(notice.startDate).toLocaleString()}</span>
+                                    </p>
                                     <div className="flex justify-end space-x-3 mt-6">
-                                        {isLoggedIn ? ( // 로그인 상태일 때만 버튼 보여주기
+                                        {isLoggedIn ? (
                                             <>
-                                                <button onClick={handleEdit} className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">수정</button>
-                                                <button onClick={handleDelete} className="bg-red-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">삭제</button>
+                                                <button onClick={handleEdit}
+                                                        className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">수정
+                                                </button>
+                                                <button onClick={handleDelete}
+                                                        className="bg-red-600 text-white font-bold py-2 px-6 rounded-full transition duration-200 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">삭제
+                                                </button>
                                             </>
                                         ) : (
-                                            <p className="text-gray-600">로그인 후 수정 및 삭제가 가능합니다.</p> // 비로그인 상태 메시지
+                                            <div className="flex flex-col">
+                                                {/* 비로그인 상태에서는 수정 및 삭제 버튼을 숨깁니다. */}
+                                            </div>
                                         )}
-                                        <button onClick={() => navigate('/admin/notice/list')} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">목록</button>
+                                        <button onClick={() => navigate('/adminnotice')}
+                                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">목록
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex justify-center items-center h-64">
-                                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+                                <div
+                                    className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
                             </div>
                         )}
-
-
                     </div>
 
                     {showDeleteConfirm && (
-                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+                        <div
+                            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
                             <div className="bg-white p-5 rounded-lg shadow-xl">
                                 <h3 className="text-lg font-bold mb-4">정말 삭제하시겠습니까?</h3>
                                 <div className="flex justify-end">
-                                    <button onClick={confirmDelete} className="bg-red-500 text-white font-bold py-2 px-4 rounded mr-2">확인</button>
-                                    <button onClick={cancelDelete} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">취소</button>
+                                    <button onClick={confirmDelete}
+                                            className="bg-red-500 text-white font-bold py-2 px-4 rounded mr-2">확인
+                                    </button>
+                                    <button onClick={cancelDelete}
+                                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">취소
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -158,8 +210,48 @@ const AdminNoticeDetail = () => {
 
                 <aside className="w-64 p-4 border-l border-gray-300">
                     <div className="mb-4">
-                        <p className="mb-2">{adminId}님<br />반갑습니다.</p>
-                        <button onClick={handleLogout} className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200">로그아웃</button>
+                        {isLoggedIn ? (
+                            <>
+                                <p className="mb-2">{empCode}님<br/>반갑습니다.</p>
+                                <button onClick={handleLogout}
+                                        className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200">로그아웃
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <form onSubmit={handleLogin}>
+                                    <input
+                                        type="text"
+                                        value={inputId}
+                                        onChange={(e) => setInputId(e.target.value)}
+                                        placeholder="관리자 ID"
+                                        className="w-full p-2 border mb-2"
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        value={inputPassword}
+                                        onChange={(e) => setInputPassword(e.target.value)}
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 border mb-2"
+                                        required
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
+                                    >
+                                        로그인
+                                    </button>
+                                </form>
+                            </>
+                        )}
+                        <div className="text-sm text-center mb-4">
+                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                            <span className="mx-1">|</span>
+                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">메신저</h2>
+                        <p>메신저 기능은 준비 중입니다.</p>
                     </div>
                 </aside>
             </div>

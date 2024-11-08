@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"; // React 및 Hook 가져오�
 import axios from "axios"; // axios 가져오기
 import { useNavigate } from "react-router-dom"; // useNavigate 훅 가져오기
 import { useAuth } from "./noticeAuth"; // 인증 훅 가져오기
+import Clock from "react-live-clock"
 
 const UserNoticeList = () => {
     const [notices, setNotices] = useState([]); // 공지사항 목록 상태 초기화
@@ -18,10 +19,16 @@ const UserNoticeList = () => {
     const PAGE_SIZE = 6; // 페이지당 공지사항 수
     const navigate = useNavigate(); // navigate 훅
 
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
     // 공지사항을 가져오는 함수
     const fetchNotices = async () => {
         try {
-            const response = await axios.get(`/api/user/notice/list`, {
+            const response = await axios.get(`/api/usernotice`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setNotices(response.data); // DB 데이터로 공지사항 목록 업데이트
@@ -51,8 +58,12 @@ const UserNoticeList = () => {
             );
 
             if (response.data.success) {
-                login(inputId, response.data.role, response.data.token); // 인증 처리
-                navigate('/user/notice/list'); // 로그인 후 공지사항 리스트 페이지로 이동
+                login(inputId, response.data.role, response.data.token); // 역할과 토큰 추가
+                localStorage.setItem('adminId', inputId); // 로그인 정보 로컬 스토리지에 저장
+                localStorage.setItem('token', response.data.token);
+                setInputId(""); // 아이디 입력 필드 초기화
+                setInputPassword(""); // 비밀번호 입력 필드 초기화
+                navigate('/usernotice'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
             } else {
                 setError("유효하지 않은 로그인 정보입니다.");
             }
@@ -65,8 +76,12 @@ const UserNoticeList = () => {
     const handleLogout = async () => {
         try {
             await axios.post('/api/employ/logout');
+            localStorage.removeItem('adminId'); // ID 제거
+            localStorage.removeItem('token'); // 토큰 제거
+            setInputId(""); // 아이디 입력 필드 초기화
+            setInputPassword(""); // 비밀번호 입력 필드 초기화
             logout(); // 로그아웃 호출
-            navigate('/user/notice/list'); // 리스트 페이지로 이동
+            navigate('/usernotice'); // 리스트 페이지로 이동
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
@@ -74,7 +89,7 @@ const UserNoticeList = () => {
 
     // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
     const handleNoticeClick = (noticeNum) => {
-        navigate('/user/notice/detail', { state: { noticeNum } });
+        navigate('/usernotice/detail', { state: { noticeNum } });
     };
 
     // 필터링된 공지사항 가져오기 (검색창)
@@ -85,13 +100,30 @@ const UserNoticeList = () => {
             notice.content.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
+    const filteredCount = filteredNotices.length; // 필터링된 공지사항 수
+    const total = Math.ceil(filteredCount / PAGE_SIZE); // 총 페이지 수를 필터링된 공지사항 수에 기반하여 계산
+
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="bg-gray-200 p-2">
-                <div className="container mx-auto flex justify-center items-center h-24">
-                    <div className="w-48 h-24 bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600">로고</span>
-                    </div>
+            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                <div className="flex mr-6">
+                    <div className="font-bold mr-1">{formattedDate}</div>
+                    <Clock
+                        format={'HH:mm:ss'}
+                        ticking={true}
+                        timezone={'Asia/Seoul'}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                         alt="home"/>
+                </div>
+                <div className="mr-16">
+                    <img width="45" height="45"
+                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>
 
@@ -101,7 +133,9 @@ const UserNoticeList = () => {
                         <h1 className="text-3xl font-bold text-center mb-6 text-indigo-800">공지사항</h1>
 
                         {error && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <div
+                                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                                role="alert">
                                 <span className="block sm:inline">{error}</span>
                             </div>
                         )}
@@ -112,7 +146,7 @@ const UserNoticeList = () => {
                                 onChange={(e) => setSearchType(e.target.value)}
                                 className="p-2 border rounded-lg mr-2"
                             >
-                                <option value="title">제목만</option>
+                                <option value="title">제목</option>
                                 <option value="content">제목 + 내용</option>
                             </select>
                             <input
@@ -127,7 +161,8 @@ const UserNoticeList = () => {
                         <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full md:w-4/5 lg:w-3/4 mx-auto">
                             <ul className="divide-y divide-gray-200">
                                 {filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
-                                    <li key={notice.noticeNum} className="p-3 hover:bg-indigo-50 transition duration-200">
+                                    <li key={notice.noticeNum}
+                                        className="p-3 hover:bg-indigo-50 transition duration-200">
                                         <h3
                                             className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
                                             onClick={() => handleNoticeClick(notice.noticeNum)}
@@ -143,21 +178,26 @@ const UserNoticeList = () => {
                         </div>
 
                         <div className="flex justify-between items-center w-full mt-4 md:w-4/5 lg:w-3/4 mx-auto">
-                            <button
-                                onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
-                            >
-                                이전
-                            </button>
-                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {totalPages}</span>
-                            <button
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
-                            >
-                                다음
-                            </button>
+                            {currentPage > 1 && filteredCount > 0 && ( // '이전' 버튼 숨기기 조건
+                                <button
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
+                                >
+                                    이전
+                                </button>
+                            )}
+
+                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {total}</span>
+
+                            {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
+                                <button
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
+                                >
+                                    다음
+                                </button>
+                            )}
                         </div>
                     </div>
                 </main>
@@ -165,7 +205,7 @@ const UserNoticeList = () => {
                 <aside className="w-64 p-4 border-l border-gray-300">
                     {isLoggedIn ? (
                         <div className="mb-4">
-                            <p className="mb-2">{empCode}님<br />반갑습니다.</p>
+                            <p className="mb-2">{empCode}님<br/>반갑습니다.</p>
                             <button
                                 onClick={handleLogout}
                                 className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200"
@@ -199,6 +239,13 @@ const UserNoticeList = () => {
                             </button>
                         </form>
                     )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
                 </aside>
             </div>
         </div>
