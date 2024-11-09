@@ -13,10 +13,14 @@ export default function SignDetail() {
     const printRef = useRef(null); // useRef로 초기화
 
     // 로그인
-    const {isLoggedIn, empCode, logout} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    const {isLoggedIn, empCode, logout, login} = useAuth();
+    const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
+    const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
 
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+    const [btnCtl, setBtnCtl] = useState(0)
+    const [isRClick, setIsRClick] = useState(false)
+    const [newWindowPosY, setNewWindowPosY] = useState(500)
 
     const navigate = useNavigate();
     const [isToggled, setIsToggled] = useState(false);
@@ -79,9 +83,6 @@ export default function SignDetail() {
             fetchCategories();
             fetchSignDetail();
         }
-
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
-        setPrevLogin(isLoggedIn);
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     useEffect(() => {
@@ -106,8 +107,7 @@ export default function SignDetail() {
                 setRejectedCount(count)
             })
             .catch(error => console.log(error));
-    }, [empCode]);
-
+    }, [empCode, sign]);
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -123,7 +123,7 @@ export default function SignDetail() {
     // 유저 정보 조회 (필요성 재확인 필요.)
     const fetchUserInfo = async () => {
         try {
-            const response = await axios.get(`/${empCode}`);
+            const response = await axios.get(`/emp/${empCode}`);
             if (!response.data) {
                 return;
             }
@@ -161,7 +161,7 @@ export default function SignDetail() {
             const signList = signUser.split(":")[1].split("_")[1];
 
             try {
-                const response = await axios.get(`/${empUser}`);
+                const response = await axios.get(`/emp/${empUser}`);
                 const newUser = {
                     empCode: response.data.empCode,
                     name: response.data.empName,
@@ -370,354 +370,360 @@ export default function SignDetail() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
-                <div className="flex mr-6">
-                    <div className="font-bold mr-1">{formattedDate}</div>
-                    <Clock
-                        format={'HH:mm:ss'}
-                        ticking={true}
-                        timezone={'Asia/Seoul'}/>
-                </div>
-                <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home" onClick={()=>navigate("/main")}/>
-                </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle" onClick={togglePanel}/>
-                </div>
-            </header>
-
+            <div className="fixed w-full">
+                <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                             alt="home" onClick={() => navigate("/main")}/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
+                    </div>
+                </header>
+            </div>
             <div className="flex-1 flex">
-                <aside className="w-64 bg-red-200 p-4 space-y-2">
-                    <ol>
-                        <li>
-                            <div>
-                                <button
-                                    className={`w-full flex items-center transition-colors duration-300`}
-                                    onClick={() => setIsExpanded(!isExpanded)}
-                                >
-                                    {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
-                                        <ChevronRight className="mr-2 h-4 w-4"/>}
-                                    <span className="hover:underline">결재함</span>
+                <div className="fixed h-full">
+                    <aside className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
+                        <ol>
+                            <li>
+                                <div>
+                                    <button
+                                        className={`w-full flex items-center transition-colors duration-300`}
+                                        onClick={() => setIsExpanded(!isExpanded)}
+                                    >
+                                        {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                            <ChevronRight className="mr-2 h-4 w-4"/>}
+                                        <span className="hover:underline">결재함</span>
 
-                                </button>
-                                {isExpanded && (
-                                    <div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                        <li>
-                                            <div>
-                                                <button className="w-full flex items-center">
-                                                    <ChevronRight className="mr-2 h-4 w-4"/>
-                                                    <div className="hover:underline"
-                                                         onClick={() => navigate("/sign")}>전체 보기
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div>
-                                                <button className="w-full flex items-center"
-                                                        onClick={() => setIsCategoriExpanded(!isCategoriExpanded)}>
-                                                    {isCategoriExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
-                                                        <ChevronRight className="mr-2 h-4 w-4"/>}
-                                                    <div className="hover:underline">카테고리</div>
-                                                </button>
-                                                {isCategoriExpanded && (
-                                                    categories.map((category, index) => (
-                                                        // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
-                                                        category.split(',').map((item, subIndex) => (
-                                                            <li className={`text-left transition-colors duration-300`}>
-                                                                <div className="flex">
-                                                                    <ChevronRight className="ml-4 mr-2 h-4 w-4"/>
-                                                                    <button key={`${index}-${subIndex}`}
-                                                                            className="hover:underline">
-                                                                        {item}
-                                                                    </button>
-                                                                </div>
-                                                            </li>
+                                    </button>
+                                    {isExpanded && (
+                                        <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                            <li>
+                                                <div>
+                                                    <button className="w-full flex items-center">
+                                                        <ChevronRight className="mr-2 h-4 w-4"/>
+                                                        <div className="hover:underline"
+                                                             onClick={() => navigate("/sign")}>전체 보기
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div>
+                                                    <button className="w-full flex items-center"
+                                                            onClick={() => setIsCategoriExpanded(!isCategoriExpanded)}>
+                                                        {isCategoriExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                                            <ChevronRight className="mr-2 h-4 w-4"/>}
+                                                        <div className="hover:underline">카테고리</div>
+                                                    </button>
+                                                    {isCategoriExpanded && (
+                                                        categories.map((category, index) => (
+                                                            // 각 카테고리를 ','로 나누고 각 항목을 한 줄씩 출력
+                                                            category.split(',').map((item, subIndex) => (
+                                                                <li className={`text-left transition-colors duration-300`}>
+                                                                    <div className="flex">
+                                                                        <ChevronRight className="ml-4 mr-2 h-4 w-4"/>
+                                                                        <button key={`${index}-${subIndex}`}
+                                                                                className="hover:underline">
+                                                                            {item}
+                                                                        </button>
+                                                                    </div>
+                                                                </li>
+                                                            ))
                                                         ))
-                                                    ))
-                                                )}
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div className="flex justify-between">
-                                                <button className="w-full flex items-center">
-                                                    <ChevronRight className="mr-2 h-4 w-4"/>
-                                                    <div className="hover:underline">내 결재함</div>
-                                                </button>
-                                                {rejectedCount > 0 &&
-                                                    <span
-                                                        className="bg-red-700 text-white rounded-full w-6">{rejectedCount}</span>}
-                                            </div>
-                                        </li>
-                                    </div>
-                                )}
-                            </div>
-                        </li>
-                    </ol>
-                </aside>
-                <main className="flex-1 p-4">
-                    <div className="flex justify-start space-x-2 mb-4">
+                                                    )}
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div className="flex justify-between">
+                                                    <button className="w-full flex items-center">
+                                                        <ChevronRight className="mr-2 h-4 w-4"/>
+                                                        <div className="hover:underline">내 결재함</div>
+                                                    </button>
+                                                    {rejectedCount > 0 &&
+                                                        <span
+                                                            className="bg-red-700 text-white rounded-full w-6">{rejectedCount}</span>}
+                                                </div>
+                                            </li>
+                                        </div>
+                                    )}
+                                </div>
+                            </li>
+                        </ol>
+                    </aside>
+                </div>
+                <main className="ml-64 mt-14 flex-1 p-4 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
+                    <div className="flex items-center space-x-2 mb-4">
                         <button className="w-[80px] h-[40px] bg-gray-200 hover:bg-gray-400 rounded"
                                 onClick={handleHome}>목록
                         </button>
                     </div>
                     <h1 className="text-2xl font-bold mb-4">결재 문서 상세</h1>
-
-                    <div className="border border-black rounded p-2 mt-[63px]">
-                        <div className="flex">
-                            <div>
-                                <div className="flex">
-                                    <div
-                                        className="border rounded text-center p-2 mr-2 mb-2 w-[70px] text-sm font-bold text-gray-600 text-left">{sign.signCateCode}</div>
-                                    <input type="text" className="w-[1122px] p-2 border rounded mb-2"
-                                           value={sign.title} readOnly/>
-                                </div>
-                                {isToggled ?
-                                    <form>
+                    <div className="space-y-2">
+                        <div className="border border-black rounded p-2">
+                            <div className="flex w-full">
+                                <div className="w-2/3">
+                                    <div className="flex w-full">
                                         <div
-                                            className="h-[1697px] w-[1200px]  border-black border-2 mb-4"
-                                        >
-                                            <div className="flex flex-col justify-center items-center px-6 py-12"
-                                                 ref={printRef}>
-                                                {/* 내용 추가 가능 */}
-                                                {/*  회사명, 결재라인  */}
-                                                <table className="h-[178px]">
+                                            className="border rounded text-center p-2 mr-2 mb-2 w-[70px] text-sm font-bold text-gray-600 text-left">{sign.signCateCode}</div>
+                                        <input type="text" className="w-full p-2 border rounded mb-2"
+                                               value={sign.title} readOnly/>
+                                    </div>
+                                    {isToggled ?
+                                        <form>
+                                            <div
+                                                className="h-auto w-full border-black border-2 mb-4"
+                                            >
+                                                <div className="flex flex-col justify-center items-center px-8 py-12"
+                                                     ref={printRef}>
+                                                    {/* 내용 추가 가능 */}
+                                                    {/*  회사명, 결재라인  */}
+                                                    <table className="h-1/5 w-full">
 
-                                                    <tr>
-                                                        <td className="w-[500px] text-2xl">
-                                                            <input name="companyName" type="text"
-                                                                   className="text-center h-[100px] w-[450px] text-2xl"
-                                                                   value={sign.content.split("_")[1].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                        <td className="w-[500px] flex flex-row justify-center mt-5">
-                                                            {userInfo.map((user, index) => {
-                                                                return (
-                                                                    <div
-                                                                        className="flex flex-col justify-center w-[80px] border-2 border-black">
-                                                                        <div className="h-[30px] bg-gray-200">
-                                                                            {user.sign == "미승인" ? "승인" : user.sign}
-                                                                        </div>
+                                                        <tr className="w-full">
+                                                            <td className="w-2/4 text-2xl">
+                                                                <input name="companyName" type="text"
+                                                                       className="text-center h-full w-full text-2xl"
+                                                                       value={sign.content.split("_")[1].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                            <td className="w-full flex flex-row justify-center mt-1">
+                                                                {userInfo.map((user, index) => {
+                                                                    return (
                                                                         <div
-                                                                            className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
-                                                                            <div>{user.name}</div>
-                                                                            <div>{user.sign}</div>
+                                                                            className="flex flex-col justify-center w-1/5 border-2 border-black">
+                                                                            <div className="h-[30px] bg-gray-200">
+                                                                                {user.sign == "미승인" ? "승인" : user.sign}
+                                                                            </div>
+                                                                            <div
+                                                                                className="h-[90px] border-t-2 border-black p-2 flex flex-col justify-around">
+                                                                                <div>{user.name}</div>
+                                                                                <div>{user.sign}</div>
+                                                                            </div>
+                                                                            {/*  결재자 있으면 추가 작성되게 하기  */}
                                                                         </div>
-                                                                        {/*  결재자 있으면 추가 작성되게 하기  */}
-                                                                    </div>
-                                                                )
-                                                            })}
-                                                        </td>
-                                                    </tr>
+                                                                    )
+                                                                })}
+                                                            </td>
+                                                        </tr>
 
-                                                < /table>
-                                                {/*    */}
-                                                <div className="mt-[20px]">
-                                                    <input name="companyAddress" type="text"
-                                                           className="text-center h-[50px] w-[900px] text-lg"
-                                                           value={sign.content.split("_")[2].split(":")[1]} readOnly/>
-                                                </div>
-                                                {/*    */}
-                                                <table className="mb-[40px] border-t-2 border-b-4 border-black">
-                                                    <tr>
-                                                        <td className="w-[500px] border-r-2 border-black">
-                                                            <input name="companyTel" type="tel"
-                                                                   className="text-center h-[50px] w-[400px] text-lg"
-                                                                   value={sign.content.split("_")[3].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                        <td className="w-[500px] border-l-2 border-black">
-                                                            <input name="companyFax" type="tel"
-                                                                   className="text-center h-[50px] w-[400px] text-lg"
-                                                                   value={sign.content.split("_")[4].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                                {/*    */}
-                                                <table className="border-t-4 border-b-4 border-black mb-[20px]">
-                                                    <tr className="border-b-2 border-black">
-                                                        <td className="w-[200px] border-r-2 border-black">
-                                                            <div>문 서 번 호</div>
-                                                        </td>
-                                                        <td className="w-[800px]">
-                                                            <input name="docNum" type="text"
-                                                                   className="text-center h-[50px] w-[700px] text-lg"
-                                                                   value={sign.content.split("_")[5].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                    <tr className="border-b-2 border-black">
-                                                        <td className="w-[200px] border-r-2 border-black">
-                                                            <div>수 신</div>
-                                                        </td>
-                                                        <td className="w-[800px]">
-                                                            <input name="docReception" type="text"
-                                                                   className="text-center h-[50px] w-[700px] text-lg"
-                                                                   value={sign.content.split("_")[6].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                    <tr className="border-b-2 border-black">
-                                                        <td className="w-[200px] border-r-2 border-black">
-                                                            <div>참 조</div>
-                                                        </td>
-                                                        <td className="w-[800px]">
-                                                            <input name="docReference" type="text"
-                                                                   className="text-center h-[50px] w-[700px] text-lg"
-                                                                   value={sign.content.split("_")[7].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="w-[200px] border-r-2 border-black">
-                                                            <div>제 목</div>
-                                                        </td>
-                                                        <td className="w-[800px]">
-                                                            <input name="docTitle" type="text"
-                                                                   className="text-center h-[50px] w-[700px] text-lg"
-                                                                   value={sign.content.split("_")[8].split(":")[1]}
-                                                                   readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                                {/*    */}
-                                                <div>
-                                            <textarea name="docOutline" className="w-[950px] h-[300px]"
+                                                    < /table>
+                                                    {/*    */}
+                                                    <div className="mt-1 w-full">
+                                                        <input name="companyAddress" type="text"
+                                                               className="text-center h-[50px] w-full text-lg"
+                                                               value={sign.content.split("_")[2].split(":")[1]}
+                                                               readOnly/>
+                                                    </div>
+                                                    {/*    */}
+                                                    <table className="w-full mb-3 border-t-2 border-b-4 border-black">
+                                                        <tr>
+                                                            <td className="w-1/2 border-r-2 border-black">
+                                                                <input name="companyTel" type="tel"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[3].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                            <td className="w-full border-l-2 border-black">
+                                                                <input name="companyFax" type="tel"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[4].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    {/*    */}
+                                                    <table className="w-full border-t-4 border-b-4 border-black mb-5">
+                                                        <tr className="border-b-2 border-black">
+                                                            <td className="w-1/4 border-r-2 border-black">
+                                                                <div>문 서 번 호</div>
+                                                            </td>
+                                                            <td className="w-full">
+                                                                <input name="docNum" type="text"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[5].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr className="border-b-2 border-black">
+                                                            <td className="w-w-1/4 border-r-2 border-black">
+                                                                <div>수 신</div>
+                                                            </td>
+                                                            <td className="w-full">
+                                                                <input name="docReception" type="text"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[6].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr className="border-b-2 border-black">
+                                                            <td className="w-1/4 border-r-2 border-black">
+                                                                <div>참 조</div>
+                                                            </td>
+                                                            <td className="w-full">
+                                                                <input name="docReference" type="text"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[7].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="w-1/4 border-r-2 border-black">
+                                                                <div>제 목</div>
+                                                            </td>
+                                                            <td className="w-full">
+                                                                <input name="docTitle" type="text"
+                                                                       className="text-center h-10 w-full text-lg"
+                                                                       value={sign.content.split("_")[8].split(":")[1]}
+                                                                       readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    {/*    */}
+                                                    <div className="w-full">
+                                            <textarea name="docOutline" className="w-full h-36"
                                                       value={sign.content.split("_")[9].split(":")[1]} readOnly/>
-                                                </div>
-                                                {/*    */}
-                                                <table>
-                                                    <tr>
-                                                        <td className="h-[50px]">
-                                                            <div>- 아 래 -</div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <div>
-                                                    <textarea name="docContent" className="w-[950px] h-[400px]"
+                                                    </div>
+                                                    {/*    */}
+                                                    <table className="w-full">
+                                                        <tr className="w-full">
+                                                            <td className="h-10">
+                                                                <div>- 아 래 -</div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div className="w-full">
+                                                    <textarea name="docContent" className="w-full min-h-40"
                                                               value={sign.content.split("_")[10].split(":")[1]}
                                                               readOnly/>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                                {/*    */}
-                                                <table className="w-[950px]">
-                                                    <tr className={`${sign.content.split("_")[11].split(":")[0] != "docAttached1" ? "hidden" : ""}`}>
-                                                        <td rowSpan="3">
-                                                            <div>※ 붙임</div>
-                                                        </td>
-                                                        <td>
-                                                            1. <input name="docAttached1" type="text"
-                                                                      className="w-[700px] h-[50px]"
-                                                                      value={sign.content.split("_")[11].split(":")[0] == "docAttached1" ? sign.content.split("_")[11].split(":")[1] : ""}
-                                                                      readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                    <tr className={`${sign.content.split("_")[12].split(":")[0] != "docAttached2" ? "hidden" : ""}`}>
-                                                        <td>
-                                                            2. <input name="docAttached2" type="text"
-                                                                      className="w-[700px] h-[50px]"
-                                                                      value={sign.content.split("_")[12].split(":")[0] == "docAttached2" ? sign.content.split("_")[12].split(":")[1] : ""}
-                                                                      readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                    <tr className={`${sign.content.split("_")[13].split(":")[0] != "docAttached3" ? "hidden" : ""}`}>
-                                                        <td>
-                                                            3. <input name="docAttached3" type="text"
-                                                                      className="w-[700px] h-[50px]"
-                                                                      value={sign.content.split("_")[13].split(":")[0] == "docAttached3" ? sign.content.split("_")[13].split(":")[1] : ""}
-                                                                      readOnly/>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                                <div>
-                                                    <input name="docDate" className="text-center h-[50px] w-[200px]"
-                                                           value={sign.content.split("_")[11].split(":")[0] == "docDate" ?
-                                                               (sign.content.split("_")[11].split(":")[1]) :
-                                                               (sign.content.split("_")[12].split(":")[0] == "docDate" ?
-                                                                   sign.content.split("_")[12].split(":")[1] :
-                                                                   (sign.content.split("_")[13].split(":")[0] == "docDate" ?
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    {/*    */}
+                                                    <table className="w-full">
+                                                        <tr className={`${sign.content.split("_")[11].split(":")[0] != "docAttached1" ? "hidden" : ""}`}>
+                                                            <td rowSpan="3" className="w-1/6">
+                                                                <div>※ 붙임</div>
+                                                            </td>
+                                                            <td>
+                                                                1. <input name="docAttached1" type="text"
+                                                                          className="w-9/12 h-[50px]"
+                                                                          value={sign.content.split("_")[11].split(":")[0] == "docAttached1" ? sign.content.split("_")[11].split(":")[1] : ""}
+                                                                          readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr className={`${sign.content.split("_")[12].split(":")[0] != "docAttached2" ? "hidden" : ""}`}>
+                                                            <td>
+                                                                2. <input name="docAttached2" type="text"
+                                                                          className="w-9/12 h-[50px]"
+                                                                          value={sign.content.split("_")[12].split(":")[0] == "docAttached2" ? sign.content.split("_")[12].split(":")[1] : ""}
+                                                                          readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                        <tr className={`${sign.content.split("_")[13].split(":")[0] != "docAttached3" ? "hidden" : ""}`}>
+                                                            <td>
+                                                                3. <input name="docAttached3" type="text"
+                                                                          className="w-9/12 h-[50px]"
+                                                                          value={sign.content.split("_")[13].split(":")[0] == "docAttached3" ? sign.content.split("_")[13].split(":")[1] : ""}
+                                                                          readOnly/>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <div>
+                                                        <input name="docDate" className="text-center h-[50px] w-full"
+                                                               value={sign.content.split("_")[11].split(":")[0] == "docDate" ?
+                                                                   (sign.content.split("_")[11].split(":")[1]) :
+                                                                   (sign.content.split("_")[12].split(":")[0] == "docDate" ?
+                                                                       sign.content.split("_")[12].split(":")[1] :
+                                                                       (sign.content.split("_")[13].split(":")[0] == "docDate" ?
+                                                                           sign.content.split("_")[13].split(":")[1] :
+                                                                           sign.content.split("_")[14].split(":")[1]))}
+                                                               readOnly/>
+                                                    </div>
+                                                    <div>
+                                                        <input name="docCeo" type='textbox'
+                                                               className="text-center h-[100px] w-full text-2xl"
+                                                               value={sign.content.split("_")[12].split(":")[0] == "docCeo" ?
+                                                                   (sign.content.split("_")[12].split(":")[1]) :
+                                                                   (sign.content.split("_")[13].split(":")[0] == "docCeo" ?
                                                                        sign.content.split("_")[13].split(":")[1] :
-                                                                       sign.content.split("_")[14].split(":")[1]))}
-                                                           readOnly/>
-                                                </div>
-                                                <div>
-                                                    <input name="docCeo" type='textbox'
-                                                           className="text-center h-[100px] w-[300px] text-2xl"
-                                                           value={sign.content.split("_")[12].split(":")[0] == "docCeo" ?
-                                                               (sign.content.split("_")[12].split(":")[1]) :
-                                                               (sign.content.split("_")[13].split(":")[0] == "docCeo" ?
-                                                                   sign.content.split("_")[13].split(":")[1] :
-                                                                   (sign.content.split("_")[14].split(":")[0] == "docCeo" ?
-                                                                       sign.content.split("_")[14].split(":")[1] :
-                                                                       sign.content.split("_")[15].split(":")[1]))}
-                                                           readOnly/>
+                                                                       (sign.content.split("_")[14].split(":")[0] == "docCeo" ?
+                                                                           sign.content.split("_")[14].split(":")[1] :
+                                                                           sign.content.split("_")[15].split(":")[1]))}
+                                                               readOnly/>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </form> : <div className="flex mb-2">
-                                        <textarea className="p-1 w-[1200px] h-[400px] border border-black rounded"
+                                        </form> : <div className="flex mb-2">
+                                        <textarea className="p-1 w-full h-full min-h-60 border border-black rounded"
                                                   value={sign.content} readOnly/>
-                                    </div>
-                                }
-                                <div>
-                                    <div className="flex justify-between mb-4 w-[1200px] p-2 border rounded">
-                                        <div className="flex items-center">
-                                            <Paperclip className="h-5 w-5 mr-2"/>
-                                            <span className="whitespace-nowrap mr-1">첨부파일: </span>
-                                            <span onClick={() => handleDocumentDownload(sign)}
-                                                  className={'cursor-pointer text-indigo-600 hover:text-indigo-500 hover:underline hover:underline-offset-1'}>
+                                        </div>
+                                    }
+                                    <div>
+                                        <div className="flex justify-between mb-4 w-full p-2 border rounded">
+                                            <div className="flex items-center">
+                                                <Paperclip className="h-5 w-5 mr-2"/>
+                                                <span className="whitespace-nowrap mr-1">첨부파일: </span>
+                                                <span onClick={() => handleDocumentDownload(sign)}
+                                                      className={'cursor-pointer text-indigo-600 hover:text-indigo-500 hover:underline hover:underline-offset-1'}>
                                                   {sign.fileOriginName}
                                             </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex flex-col ml-2">
-                                {isToggled ?
-                                    <button className="group" onClick={handleDownloadPdf}>
-                                        <div className="flex">
-                                            <div
-                                                className="w-[352px] h-[42px] bg-rose-400 group-hover:bg-rose-500 text-white p-2.5 rounded-l-lg font-bold">PDF
-                                                다운로드
+                                <div className="flex flex-col ml-2 w-1/3">
+                                    {isToggled ?
+                                        <button className="w-full group" onClick={handleDownloadPdf}>
+                                            <div className="flex h-11">
+                                                <div
+                                                    className="w-5/6 bg-rose-400 group-hover:bg-rose-500 text-white p-2.5 rounded-l-lg font-bold">PDF
+                                                    다운로드
+                                                </div>
+                                                <div
+                                                    className="w-1/6 bg-rose-500 text-white items-center rounded-r-lg flex justify-center items-center">
+                                                    <img
+                                                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAU0lEQVR4nO3QsQqAMAxF0ffXHdM/v+KgQ0qtaCxIc6BLh3ch0jJwMtAgTzRCnsgDij/LBdOHEXs0fjNir8YHkZjxTiR2/ADU/Z0fKRTBND2gv9oAVZTQEh7ZErUAAAAASUVORK5CYII="/>
+                                                </div>
                                             </div>
-                                            <div className="w-12 h-[42px] bg-rose-500 text-white p-2.5 rounded-r-lg">
-                                                <img
-                                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAU0lEQVR4nO3QsQqAMAxF0ffXHdM/v+KgQ0qtaCxIc6BLh3ch0jJwMtAgTzRCnsgDij/LBdOHEXs0fjNir8YHkZjxTiR2/ADU/Z0fKRTBND2gv9oAVZTQEh7ZErUAAAAASUVORK5CYII="/>
-                                            </div>
-                                        </div>
-                                    </button> : ""}
-                                <table className="table-auto mt-2 border rounded w-[400px]">
-                                    <thead>
-                                    <tr className="bg-gray-200">
-                                        <td>순서</td>
-                                        <td>성명</td>
-                                        <td>부서</td>
-                                        <td>직급</td>
-                                        <td>승인</td>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {userInfo.map((user, index) => {
-                                        return (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{user.name}</td>
-                                                <td>{user.dep}</td>
-                                                <td>{user.pos}</td>
-                                                <td>{user.sign}</td>
-                                            </tr>
-                                        )
+                                        </button> : ""}
+                                    <table className="table-auto border rounded w-full">
+                                        <thead>
+                                        <tr className="bg-gray-200">
+                                            <td>순서</td>
+                                            <td>성명</td>
+                                            <td>부서</td>
+                                            <td>직급</td>
+                                            <td>승인</td>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {userInfo.map((user, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{user.name}</td>
+                                                    <td>{user.dep}</td>
+                                                    <td>{user.pos}</td>
+                                                    <td>{user.sign}</td>
+                                                </tr>
+                                            )
 
-                                    })}
-                                    </tbody>
-                                </table>
+                                        })}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -745,22 +751,169 @@ export default function SignDetail() {
                         />
                     </div>
                 </main>
+            </div>
 
-                {/* Slide-out panel with toggle button */}
+            {/* Slide-out panel with toggle button */}
+            <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
-                    className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-                >
-                    {/* Panel toggle button */}
-                    <button
-                        onClick={togglePanel}
-                        className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                    >
-                        {isPanelOpen ? '>' : '<'}
-                    </button>
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
+                    {/* 내용 부분 */}
+                    {/*<div*/}
+                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
+                    {/*>*/}
+                    <div className="p-1 h-full">
+                        {/*<div className="text-sm text-center">*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        공지사항*/}
+                        {/*    </a>*/}
+                        {/*    <span className="mx-1">|</span>*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        문의사항*/}
+                        {/*    </a>*/}
+                        {/*</div>*/}
+                        {isLoggedIn ?
+                            <div className="h-full">
+                                <div className="h-1/4">
+                                    <div className="flex h-3/6">
+                                        <div className="w-1/3 ">
+                                            <img width="75px" height="75px" src="/logo192.png"/>
+                                        </div>
+                                        <div className="w-2/3 text-left">
+                                            <p className="">이름:</p>
+                                            <p className="">직급:</p>
+                                            <p className="">부서:</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col text-left mb-1">
+                                        <p className="">사내 이메일:</p>
+                                        <p className="">전화번호:</p>
+                                    </div>
 
-                    <div className="p-4">
-                        {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                            : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
+
+                                    <div className="flex">
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(0)}>
+                                            조직도
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(1)}>
+                                            대화방
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(2)}>
+                                            주소록
+                                        </button>
+                                        <button className="border w-2/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(3)}>
+                                            공지사항
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <div className="border text-left h-[435px] blue">
+                                        {btnCtl === 0 ? (
+                                            // ListLibrary.WorkerList(com)
+                                            <></>
+                                        ) : btnCtl === 1 ? (
+                                            <>
+                                                <div className="h-[100%] overflow-y-auto">
+                                                    <div className="border flex justify-between">
+                                                        <button>대화방</button>
+                                                        <button>나가기</button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 2 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                            </>
+                                        ) : btnCtl === 3 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(6)}>
+                                                        {" "}
+                                                        공지사항 추가하기
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 4 ? (
+                                            <>
+                                                <div className="h-[480px] overflow-y-auto">
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="text-right pb-2">
+                                                        사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 5 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(3)}>
+                                                        목록으로
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 6 ? (
+                                            <>
+                                                {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                                <button
+                                                    className="text-center border w-full h-[45px]"
+                                                    onClick={() => {
+                                                        setBtnCtl(3);
+                                                        // ListLibrary.noticeInsert(user);
+                                                    }}
+                                                >
+                                                    공지사항 등록
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
+                                    onClick={handleLogout}>로그아웃</button>
+                            </div>
+                            : (<><h2 className="mt-2">로그인</h2>
                                     <input
                                         type="text"
                                         placeholder="아이디"
@@ -777,16 +930,40 @@ export default function SignDetail() {
                                     </button>
                                 </>
                             )}
-                        <div className="text-sm text-center mb-4">
-                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                            <span className="mx-1">|</span>
-                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
-                        </div>
-                        <h2 className="text-xl font-bold mb-2">메신저</h2>
-                        <p>메신저 기능은 준비 중입니다.</p>
+
+
+                        {isRClick === true ? (
+                            <></>
+                            // <div className={`flex absolute`}
+                            //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            //     <div className="w-1/3 border">
+                            //         <img src="/logo192.png"/>
+                            //     </div>
+                            //     <div className="w-2/3 text-left border">
+                            //         <p>사내 이메일:{newWindowData[0]}</p>
+                            //         <p>전화번호:{newWindowData[1]}</p>
+                            //         <p>상태:</p>
+                            //         <button
+                            //             onClick={() => {
+                            //                 setIsRClick(false);
+                            //                 setNewWindowData([]);
+                            //             }}
+                            //         >
+                            //             닫기
+                            //         </button>
+                            //     </div>
+                            // </div>
+                        ) : (
+                            <></>
+                        )}
+
+
                     </div>
                 </div>
+                <div
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
             </div>
         </div>
-    );
+    )
+        ;
 }

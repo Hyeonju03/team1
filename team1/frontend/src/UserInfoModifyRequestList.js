@@ -1,124 +1,95 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
-import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
-import useComCode from "hooks/useComCode";
+import {ChevronDown, ChevronRight} from "lucide-react";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
+import {useNavigate} from "react-router-dom";
+import {useUserContext} from "./UserContext";
 
-const Button = ({variant, className, children, ...props}) => {
-    const baseClass = "px-4 py-2 rounded text-left";
-    const variantClass = variant === "outline" ? "border border-gray-300" : "text-gray-700";
-    return (
-        <button className={`${baseClass} ${variantClass} ${className}`} {...props}>
-            {children}
-        </button>
-    );
-};
-
-const Input = ({className, ...props}) => {
-    return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
-};
-
-export default function DocumentRegister() {
-    const [isExpanded, setIsExpanded] = useState(true);
-    const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
-    const [title, setTitle] = useState('');
-    const [category, setCategory] = useState(location.state?.selectedCategory || ''); // location.state : 이전페이지에서 전달된 상태 객체
-    const [codeCategory] = useComCode();
-    const [content, setContent] = useState('');
-    const [attachment, setAttachment] = useState(null);
-    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
-    const navigate = useNavigate();
-    // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
-    // 로그인
+export default function UserInfoModifyRequestList() {
     const {isLoggedIn, empCode, logout} = useAuth();
-    // slide 변수
-    // slide 변수
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
-    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
+
+    const [subordinates, setSubordinates] = useState([]);
+    const [modifyReqData, setModifyReqData] = useState([]);
+    const {setSelectedUser} = useUserContext();
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const navigate = useNavigate();
+
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-    const togglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
+    useEffect(() => {
+        console.log("Authentication state:", {isLoggedIn, empCode});
+        if (isLoggedIn && empCode) {
+            fetchSubordinates();
+        }
+    }, [isLoggedIn, empCode]);
+
+    const fetchSubordinates = async () => {
+        try {
+            const response = await axios.get(`/emp/${empCode}`);
+            console.log("Subordinates data:", response.data);
+            // parseModifyReqData(response.data);
+        } catch (error) {
+            console.error("Error fetching subordinates:", error);
+        }
     };
 
-    useEffect(() => {
-        if (!isLoggedIn) {
-            navigate("/");
-        }
-    }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
+    const parseModifyReqData = (data) => {
+        if (data.length > 0 && data[0].modifyReq) {
+            const modifyReq = data[0].modifyReq;
 
-    // 로그아웃 처리 함수
+            if (modifyReq.includes(",")) {
+                const modifyReqList = modifyReq.split(","); // Split by comma first
+
+                const parsedData = modifyReqList.map(req => {
+                    if (req.includes(":")) {
+                        const [prefix, dataString] = req.split(":");
+                        if (dataString && dataString.includes("_")) {
+                            const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = dataString.split("_");
+                            return {prefix, empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode};
+                        }
+                    }
+                    return null;
+                }).filter(item => item !== null); // Filter out any null values
+
+                setModifyReqData(parsedData);
+            } else if (modifyReq.includes(":")) {
+                const [prefix, dataString] = modifyReq.split(":");
+                if (dataString && dataString.includes("_")) {
+                    const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = dataString.split("_");
+                    setModifyReqData([{
+                        prefix, empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode
+                    }]);
+                }
+            }
+        } else {
+            setModifyReqData([]);
+        }
+    };
+
     const handleLogout = async () => {
         try {
             await axios.post('/api/employ/logout');
-            logout(); // 로그아웃 호출
-            navigate("/"); // 로그아웃 후 홈으로 이동
+            logout();
+            navigate("/");
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
     };
 
-    const handleFileChange = (event) => {
-        setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
-    }
+    const togglePanel = () => setIsPanelOpen(!isPanelOpen);
 
-    // 유효성체크
-    const validateForm = () => {
-        if (!category) {
-            alert("카테고리를 선택해주세요.");
-            return false;
-        }
-        if (!title) {
-            alert("제목을 입력해주세요.");
-            return false;
-        }
-        if (!attachment) {
-            alert("첨부파일을 선택해주세요.");
-            return false;
-        }
-        if (!content) {
-            alert("설명을 입력해주세요.");
-            return false;
-        }
-        return true;
-    }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('category', category);
-        formData.append('content', content);
-        if (attachment) {
-            formData.append('attachment', attachment);
-        }
-        formData.append('empCode', empCode);
-        axios.post('/documents', formData)
-            .then(response => {
-                console.log(response.data);
-                // 성공시 문서 리스트로 이동
-                navigate('/documents');
-            })
-            .catch(error => {
-                console.error('Error fetching documents:', error);
-            });
+    // 사용자 클릭 시 상세 페이지로 이동하는 함수
+    const handleUserClick = (index) => {
+        setSelectedUser(index);  // UserContext에 선택된 사용자 저장
+        navigate(`/UserInfoModifyRequest/${index}`);  // UserInfoModifyRequest로 이동
     };
-
-    // 목록 버튼 클릭 시 리스트 페이지로 이동
-    const handleHome = () => {
-        navigate(`/documents/`);
-    };
-
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -133,7 +104,7 @@ export default function DocumentRegister() {
                     </div>
                     <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                             alt="home"/>
+                             alt="home" onClick={() => navigate("/main")}/>
                     </div>
                     <div className="mr-16">
                         <img width="45" height="45"
@@ -145,83 +116,77 @@ export default function DocumentRegister() {
             <div className="flex-1 flex">
                 <div className="fixed h-full">
                     <aside className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
+                        <ol>
+                            <li>
+                                <div>
+                                    <button
+                                        className={`w-full flex items-center transition-colors duration-300`}
+                                        onClick={() => setIsExpanded(!isExpanded)}
+                                    >
+                                        {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
+                                            <ChevronRight className="mr-2 h-4 w-4"/>}
+                                        <span className="hover:underline">인사 정보</span>
 
-                        <div>
-                            <Button
-                                variant="ghost"
-                                className="w-full flex items-center"
-                                onClick={() => setIsExpanded(!isExpanded)}
-                            >
-                                {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
-                                    <ChevronRight className="mr-2 h-4 w-4"/>}
-                                문서함
-                            </Button>
-                            {isExpanded && (
-                                <div className="ml-8 shandleDelete pace-y-2 mt-2">
-                                    {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                            <Button variant="ghost" className="w-full" key={`${item}`}
-                                                    onClick={() => setCategory(item)}>
-                                                {item}
-                                            </Button>
-                                        )
+                                    </button>
+                                    {isExpanded && (
+                                        <div className="ml-8 space-y-2 pace-y-2 mt-2">
+                                            <li>
+                                                <div className="flex justify-between">
+                                                    <button className="w-full flex items-center"
+
+                                                    >
+                                                        <ChevronRight className="mr-2 h-4 w-4"/>
+                                                        <div className="hover:underline">내 인사 정보</div>
+                                                    </button>
+
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div className="flex justify-between">
+                                                    <button className="w-full flex items-center"
+                                                            onClick={() => {
+                                                                navigate('/UserInfoRequestList')
+                                                            }}
+                                                    >
+                                                        <ChevronRight className="mr-2 h-4 w-4"/>
+                                                        <div className="hover:underline">정보 수정 요청</div>
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-
+                            </li>
+                        </ol>
                     </aside>
                 </div>
+                {/* Main content */}
                 <main className="ml-64 mt-14 flex-1 p-4 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
-                    <div className="flex justify-start space-x-2 mb-4">
-                        <Button variant="outline" onClick={handleHome}>목록</Button>
+                    <h1 className="text-left text-2xl font-bold mb-2 pb-3 border-b border-gray-200 mt-2">
+                        인사정보 > 승인 요청 목록
+                    </h1>
+                    <div className="space-y-2">
+                        <table className="w-full mb-6 rounded shadow-lg">
+                            <thead>
+                            <tr className="bg-gray-200">
+                                <th className="p-2 text-center w-1/4">번호</th>
+                                <th className="p-2 text-center w-3/4">목록</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {modifyReqData.map((item, index) => (
+                                <tr
+                                    className="cursor-pointer hover:bg-gray-100"
+                                    key={index}
+                                    onClick={() => handleUserClick(item)}
+                                >
+                                    <td className="p-2 text-center w-1/4" >{index + 1}</td>
+                                    <td className="p-2 text-center w-3/4">{item.depCode} {item.empName} {item.posCode}님의 정보 수정 승인 요청입니다.</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
                     </div>
-                    <h1 className="text-2xl font-bold mb-4">문서 등록</h1>
-                    <form onSubmit={handleSubmit}>
-                        <div key={document.id} className="border rounded-lg p-4">
-                            <div className="flex items-center space-x-4 mb-4">
-                                <fieldset>
-                                    {/*<legend>카테고리</legend>*/}
-                                    <div>
-                                        <select name="category" value={category}
-                                                onChange={(e) => setCategory(e.target.value)}
-                                                className="border rounded p-2">
-                                            <option value="">카테고리</option>
-                                            {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                                <option key={`${item}`} value={item}>
-                                                    {item}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </fieldset>
-
-                                <input type="text" className="w-full p-2 border rounded mb-2"
-                                       placeholder="제목을 입력하세요" value={title}
-                                       onChange={(e) => setTitle(e.target.value)}/>
-                            </div>
-                            <div className="flex justify-between mb-4 w-full p-2 border rounded">
-                                <div className="flex items-center">
-                                    <Paperclip className="h-5 w-5 mr-2"/>
-                                    <span className="whitespace-nowrap">첨부파일</span>
-                                    <input type="file" className="m-1" onChange={handleFileChange}/>
-                                </div>
-                                <div> {attachment ?
-                                    `${(attachment.size / 1024).toFixed(2)} KB / 10 MB` :
-                                    '0 KB / 10 MB'}</div>
-                            </div>
-                            <textarea
-
-                                className="w-full h-64 p-2 border rounded"
-                                placeholder="설명을 입력하세요"
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex justify-end space-x-2 mt-4">
-                            <Button variant="outline" onClick={handleHome}>취소</Button>
-                            <Button variant="outline" type="submit">등록</Button>
-                        </div>
-                    </form>
                 </main>
             </div>
 

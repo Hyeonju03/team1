@@ -3,8 +3,10 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
+import {useUserContext} from "./UserContext";
 
 export default function UserInfoModifyRequest() {
+    const {selectedUser} = useUserContext();
 
     const [subordinates, setSubordinates] = useState([]); // 부하직원 관련 내용
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
@@ -30,8 +32,6 @@ export default function UserInfoModifyRequest() {
     //     setHasModifyReq(hasRequest);
     // }, [subordinates]);
 
-    const [index, setIndex] = useState('');
-
     // 수정 요청 목록 페이지에 버튼의 id에 있는 숫자를 잘라서
     // setIndex(세팅)
 
@@ -39,8 +39,8 @@ export default function UserInfoModifyRequest() {
         if (isLoggedIn) {
             const fetchSubordinates = async () => {
                 try {
-                    const response = await axios.get(`/userInfo/${empCode}`, index);
-                    setSubordinates(response.data);
+                    const response = await axios.get(`/emp/${empCode}`);
+                    console.log("res>",response.data)
                 } catch (e) {
                     console.error(e);
                 }

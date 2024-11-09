@@ -19,7 +19,7 @@ import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
 
 const Input = ({className, ...props}) => {
-    return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
+    return <input className={`rounded px-3 py-2 ${className}`} {...props} />;
 };
 
 const SearchIcon = () => (
@@ -33,7 +33,9 @@ const SearchIcon = () => (
 export default function EmailSend() {
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    const [btnCtl, setBtnCtl] = useState(0)
+    const [isRClick, setIsRClick] = useState(false)
+    const [newWindowPosY, setNewWindowPosY] = useState(500)
 
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const navigate = useNavigate();
@@ -109,7 +111,6 @@ export default function EmailSend() {
             }
             fetchData();
         }
-        setPrevLogin(isLoggedIn);
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
 
@@ -255,101 +256,108 @@ export default function EmailSend() {
 
 
     return (
-        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
-                <div className="flex mr-6">
-                    <div className="font-bold mr-1">{formattedDate}</div>
-                    <Clock
-                        format={'HH:mm:ss'}
-                        ticking={true}
-                        timezone={'Asia/Seoul'}/>
-                </div>
-                <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
-                </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle" onClick={togglePanel}/>
-                </div>
-            </header>
-            <div className="flex flex-col md:flex-row gap-6">
-
-                <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
-                     style={{height: "900px"}}>
-                    <div className="flex" style={{marginTop: "-350px", marginBottom: "30px"}}>
-                        <button onClick={goSendMail} className="border rounded-md px-4 py-2">메일쓰기</button>
-                        <button onClick={goToMeMailSend} className="border rounded-md px-4 py-2"
-                                style={{marginLeft: "10px"}}>내게쓰기
-                        </button>
+        <div className="flex flex-col min-h-screen">
+            <div className="fixed w-full">
+                <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
                     </div>
-
-                    <button onClick={goToTalMailSendList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
-                        <Mail className="mr-2 h-4 w-4"/>전체메일함
-                    </button>
-
-                    <button onClick={goReceivedMailList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
-                        <Mail className="mr-2 h-4 w-4"/>받은메일함
-                    </button>
-
-                    <button onClick={goAttachMentMailList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
-                        <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
-                    </button>
-
-                    <button onClick={goToMeMailSendList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
-                        <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
-                    </button>
-
-                    <button onClick={goSendMailList} className="w-full flex items-center text-lg"
-                            style={{marginBottom: "30px", marginLeft: "50px"}}>
-                        <Send className="mr-2 h-4 w-4"/>
-                        보낸메일함
-                    </button>
-
-                    <div className="flex">
-                        <button onClick={goMailTrashList} className="w-full flex items-center text-lg"
-                                style={{marginBottom: "30px"}}>
-                            <Trash className="mr-2 h-4 w-4"/>휴지통
-                        </button>
-                        <button onClick={goRealDelete} style={{width: "80px", height: "30px"}}
-                                className="text-xs border rounded-md px-2 py-2">비우기
-                        </button>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
+                             alt="home"/>
                     </div>
-                    {/*<Settings className="h-4 w-4" />*/}
-                    <DeletePopup
-                        isOpen={isPopupOpen}
-                        onClose={() => setIsPopupOpen(false)}
-                        onConfirm={handleConfirmDelete}
-                    />
-                </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
+                    </div>
+                </header>
+            </div>
+            <div className="flex-1 flex">
+                <div className="fixed h-full">
+                    <aside
+                        className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2 flex flex-col justify-items-start items-center"
+                    >
+                        <div className="flex mb-8 mt-4">
+                            <button onClick={goSendMail} className="border rounded-md px-4 py-2">메일쓰기</button>
+                            <button onClick={goToMeMailSend} className="border rounded-md px-4 py-2"
+                                    style={{marginLeft: "10px"}}>내게쓰기
+                            </button>
+                        </div>
 
-                {/* Main content */}
-                <main className="flex-1" style={{marginTop: "20px"}}>
-                    <h1 className="text-xl font-bold mb-4 text-left">첨부파일메일함</h1>
-                    <div className="flex items-center mb-6 justify-end"
-                         style={{marginRight: "10px", justifyContent: "flex-end"}}>
-                        <Input
-                            style={{width: "500px"}}
-                            className="flex-grow mr-2"
-                            placeholder="메일 검색"
-                            onChange={mailOnChangeHandler}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    mailSearch();
-                                }
-                            }}
+                        <button onClick={goToTalMailSendList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            <Mail className="mr-2 h-4 w-4"/>전체메일함
+                        </button>
 
+                        <button onClick={goReceivedMailList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            <Mail className="mr-2 h-4 w-4"/>받은메일함
+                        </button>
+
+                        <button onClick={goAttachMentMailList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            <Archive className="mr-2 h-4 w-4"/>첨부파일메일함
+                        </button>
+
+                        <button onClick={goToMeMailSendList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            <FileText className="mr-2 h-4 w-4"/>내게쓴메일함
+                        </button>
+
+                        <button onClick={goSendMailList} className="w-full flex items-center text-lg"
+                                style={{marginBottom: "30px", marginLeft: "50px"}}>
+                            <Send className="mr-2 h-4 w-4"/>
+                            보낸메일함
+                        </button>
+
+                        <div className="flex">
+                            <button onClick={goMailTrashList} className="w-full flex items-center text-lg"
+                                    style={{marginBottom: "30px"}}>
+                                <Trash className="mr-2 h-4 w-4"/>휴지통
+                            </button>
+                            <button onClick={goRealDelete} style={{width: "80px", height: "30px"}}
+                                    className="text-xs border rounded-md px-2 py-2">비우기
+                            </button>
+                        </div>
+                        {/*<Settings className="h-4 w-4" />*/}
+                        <DeletePopup
+                            isOpen={isPopupOpen}
+                            onClose={() => setIsPopupOpen(false)}
+                            onConfirm={handleConfirmDelete}
                         />
-                        <button onClick={mailSearch} variant="outline">
-                            <SearchIcon/>
+                    </aside>
+                </div>
+                {/* Main content */}
+                <main className="ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
+                    <div className="flex items-center space-x-2 mb-7">
+                        <div className="p-1 border rounded relative flex flex-1 max-w-xl">
+                            <img width="30" height="10" src="https://img.icons8.com/ios/50/search--v1.png"
+                                 alt="search--v1"
+                                 className="ml-2 mr-4"/>
+                            <Input
+                                className="pr-4 w-full"
+                                placeholder="메일 검색"
+                                onChange={mailOnChangeHandler}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        mailSearch();
+                                    }
+                                }}
+
+                            />
+                        </div>
+                        <button onClick={mailSearch} className="w-20 h-14 text-xl border-2 rounded hover:bg-gray-100">
+                            검색
                         </button>
                     </div>
-                    <div className="flex" style={{marginBottom: "20px"}}>
+                    <div className="text-2xl w-full font-bold mb-4 text-left">첨부파일메일함</div>
+
+                    <div className="flex bg-gray-200 p-3">
                         <input type="checkbox" checked={selectAll}
                                onChange={handleSelectAll}
                         />
@@ -361,25 +369,17 @@ export default function EmailSend() {
                                 style={{marginLeft: "30px"}}>새로고침<RefreshCw
                             className="h-4 w-4"/></button>
                     </div>
-                    <div style={{marginBottom: "20px"}}>
+                    <div className="mb-20">
                         {(searchList ? serachResult : currentMails).map((v, i) => (
-                            <div className="flex" key={i} style={{marginBottom: "10px", alignItems: "center"}}>
+                            <div className="flex border-b-2 items-center pt-2 pb-2 hover:bg-gray-50" key={i}>
                                 <input type="checkbox" checked={selectedCheckboxes[i] || false}
                                        onChange={() => handleCheckboxChange(i)}/>
                                 <button onClick={deleteSelectedMails} style={{marginLeft: "40px"}}>
                                     <Trash className="mr-2 h-4 w-4"/>
                                 </button>
-                                <div className="flex"
-                                     style={{marginLeft: "20px", width: "100%", justifyContent: "space-between"}}>
-                                    <p style={{
-                                        width: "30%", textAlign: "left", overflow: "hidden",
-                                        whiteSpace: "nowrap", textOverflow: "ellipsis"
-                                    }}>{v.empCode}</p>
-                                    <div className="flex items-center" style={{
-                                        width: "30%",
-                                        textAlign: "left",
-                                        minWidth: "150px"
-                                    }}> {/* minWidth 추가 */}
+                                <div className="flex ml-5 w-[100%] justify-between">
+                                    <p className="w-1/6 text-left overflow-hidden whitespace-nowrap text-ellipsis">{v.empCode}</p>
+                                    <div className="flex items-center w-2/6 text-left min-w-[150px]"> {/* minWidth 추가 */}
                                         {v.fileName && (  // 파일이 있을 경우에만 아이콘 표시
                                             <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨"/>
                                         )}
@@ -410,46 +410,215 @@ export default function EmailSend() {
             </div>
 
             {/* Slide-out panel with toggle button */}
-            <div
-                className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}
-            >
-                {/* Panel toggle button */}
-                <button
-                    onClick={togglePanel}
-                    className="absolute top-1/2 -left-6 transform -translate-y-1/2 bg-blue-500 text-white w-6 h-12 flex items-center justify-center rounded-l-md hover:bg-blue-600"
-                >
-                    {isPanelOpen ? '>' : '<'}
-                </button>
+            <div className={`${isPanelOpen ? "" : "hidden"}`}>
+                <div
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
+                    {/* 내용 부분 */}
+                    {/*<div*/}
+                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
+                    {/*>*/}
+                    <div className="p-1 h-full">
+                        {/*<div className="text-sm text-center">*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        공지사항*/}
+                        {/*    </a>*/}
+                        {/*    <span className="mx-1">|</span>*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        문의사항*/}
+                        {/*    </a>*/}
+                        {/*</div>*/}
+                        {isLoggedIn ?
+                            <div className="h-full">
+                                <div className="h-1/4">
+                                    <div className="flex h-3/6">
+                                        <div className="w-1/3 ">
+                                            <img width="75px" height="75px" src="/logo192.png"/>
+                                        </div>
+                                        <div className="w-2/3 text-left">
+                                            <p className="">이름:</p>
+                                            <p className="">직급:</p>
+                                            <p className="">부서:</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col text-left mb-1">
+                                        <p className="">사내 이메일:</p>
+                                        <p className="">전화번호:</p>
+                                    </div>
 
-                <div className="p-4">
-                    {isLoggedIn ? <button onClick={handleLogout}>로그아웃</button>
-                        : (<><h2 className="text-xl font-bold mb-4">로그인</h2>
-                                <input
-                                    type="text"
-                                    placeholder="아이디"
-                                    className="w-full p-2 mb-2 border rounded"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="비밀번호"
-                                    className="w-full p-2 mb-4 border rounded"
-                                />
+
+                                    <div className="flex">
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(0)}>
+                                            조직도
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(1)}>
+                                            대화방
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(2)}>
+                                            주소록
+                                        </button>
+                                        <button className="border w-2/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(3)}>
+                                            공지사항
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <div className="border text-left h-[435px] blue">
+                                        {btnCtl === 0 ? (
+                                            // ListLibrary.WorkerList(com)
+                                            <></>
+                                        ) : btnCtl === 1 ? (
+                                            <>
+                                                <div className="h-[100%] overflow-y-auto">
+                                                    <div className="border flex justify-between">
+                                                        <button>대화방</button>
+                                                        <button>나가기</button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 2 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                            </>
+                                        ) : btnCtl === 3 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(6)}>
+                                                        {" "}
+                                                        공지사항 추가하기
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 4 ? (
+                                            <>
+                                                <div className="h-[480px] overflow-y-auto">
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="text-right pb-2">
+                                                        사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 5 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(3)}>
+                                                        목록으로
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 6 ? (
+                                            <>
+                                                {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                                <button
+                                                    className="text-center border w-full h-[45px]"
+                                                    onClick={() => {
+                                                        setBtnCtl(3);
+                                                        // ListLibrary.noticeInsert(user);
+                                                    }}
+                                                >
+                                                    공지사항 등록
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                </div>
                                 <button
-                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
-                                    로그인
-                                </button>
-                            </>
-                        )}
-                    <div className="text-sm text-center mb-4">
-                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
-                    </div>
-                    <h2 className="text-xl font-bold mb-2">메신저</h2>
-                    <p>메신저 기능은 준비 중입니다.</p>
-                </div>
-            </div>
+                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
+                                    onClick={handleLogout}>로그아웃</button>
+                            </div>
+                            : (<><h2 className="mt-2">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
 
+
+                        {isRClick === true ? (
+                            <></>
+                            // <div className={`flex absolute`}
+                            //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            //     <div className="w-1/3 border">
+                            //         <img src="/logo192.png"/>
+                            //     </div>
+                            //     <div className="w-2/3 text-left border">
+                            //         <p>사내 이메일:{newWindowData[0]}</p>
+                            //         <p>전화번호:{newWindowData[1]}</p>
+                            //         <p>상태:</p>
+                            //         <button
+                            //             onClick={() => {
+                            //                 setIsRClick(false);
+                            //                 setNewWindowData([]);
+                            //             }}
+                            //         >
+                            //             닫기
+                            //         </button>
+                            //     </div>
+                            // </div>
+                        ) : (
+                            <></>
+                        )}
+
+
+                    </div>
+                </div>
+                <div
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
+            </div>
         </div>
     );
 }
