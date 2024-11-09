@@ -35,6 +35,7 @@ export default function SignRegister() {
   const [noticeHtml, setNoticeHtml] = useState("");
   const [loadNoticeHtml, setLoadNoticeHtml] = useState("");
   const [addressBookHtml, setAddressBookHtml] = useState("");
+  const [chatListLoad, setChatListLoad] = useState("");
   const [chatInHTML, setChatInHTML] = useState("");
   const fetchData = async () => {
     const result1 = await ListLibrary.noticeList(user, btnCtl);
@@ -43,15 +44,18 @@ export default function SignRegister() {
     setLoadNoticeHtml(result2);
     const result3 = await ListLibrary.addressBook(user, "");
     setAddressBookHtml(result3);
-    const result4 = await ListLibrary.chatIn(user,'1')
-    setChatInHTML(result4);
+    const result4 = await ListLibrary.chatListLoad(user)
+    setChatListLoad(result4);
+
+
+    const result5 = await ListLibrary.chatIn(user,'1') //이거 제일 마지막에 들어가야함 부하 심함
+    setChatInHTML(result5);
   };
 
 
   useEffect(() => {
     fetchData();
   }, [btnCtl]);
-
   useEffect(() => {
     const elements = document.querySelectorAll(".testEvent");
 
@@ -71,7 +75,6 @@ export default function SignRegister() {
       });
     };
   }, [noticeHtml, btnCtl]);
-
   useEffect(() => {
     const elements = document.querySelectorAll(".AddBtn");
     const btnElement = document.querySelector(".BtnAddressBookAdd");
@@ -124,7 +127,7 @@ export default function SignRegister() {
     };
   }, [addressBookHtml, btnCtl]);
   useEffect(() => {
-    socket.current = new WebSocket('ws://localhost:3001');
+    socket.current = new WebSocket('ws://localhost:3002');
 
     socket.current.onopen = () => {
       console.log('WebSocket 연결 성공');
@@ -155,7 +158,6 @@ export default function SignRegister() {
     //채팅 내부 이벤트들
     const chatUpdate = async () => {
       setChatInHTML(await ListLibrary.chatIn(user, '1'))
-      console.log("이벤트")
     }
     chatUpdate();
   }, [sendMessage]);
@@ -172,7 +174,51 @@ export default function SignRegister() {
     }
   };
 
+  useEffect(() => {
+    const chatInBtn =  document.querySelector(".chatInBtn");
+    const chatDeleteBtn = document.querySelector(".chatDeleteBtn");
+    const chatListAddBtn = document.querySelector(".chatListAddBtn");
+    const chatInviteListDiv = document.querySelector(".chatInviteListDiv");
+    const chatListDiv = document.querySelector(".chatListDiv");
+    const chatListFrameDiv =  document.querySelector(".chatListFrameDiv");
+    const chatInviteListInput =  document.querySelector(".chatInviteListInput");
 
+    const handleClick1 = (event) => {
+      setBtnCtl(4);
+    };
+    const handleClick2 = (event) => {
+      console.log("")
+    };
+    const handleClick3 = (event) => {
+      chatInviteListDiv.style.display = "block"
+      chatInviteListInput.style.display = "block"
+      chatListFrameDiv.style.display = "none"
+      chatListAddBtn.textContent = "초대하기"
+    };
+
+    if (chatInBtn) {
+      chatInBtn.addEventListener("click", handleClick1);
+    }
+    if (chatDeleteBtn) {
+      chatDeleteBtn.addEventListener("click", handleClick2);
+    }
+    if (chatListAddBtn) {
+      chatListAddBtn.addEventListener("click", handleClick3);
+    }
+
+    return () => {
+      if (chatInBtn) {
+        chatInBtn.removeEventListener("click", handleClick1);
+      }
+      if (chatDeleteBtn) {
+        chatDeleteBtn.removeEventListener("click",handleClick2);
+      }
+      if (chatListAddBtn) {
+        chatListAddBtn.removeEventListener("click",handleClick3);
+      }
+    };
+
+  }, [chatListLoad, btnCtl]);
 
 
   // 왼쪽 카테고리
@@ -982,16 +1028,11 @@ export default function SignRegister() {
                     ListLibrary.WorkerList(com)
                 ) : btnCtl === 1 ? (
                     <>
-                      <div className="h-[100%] overflow-y-auto">
-                        <div className="border flex justify-between">
-                          <button onClick={()=>setBtnCtl(4)}>대화방</button>
-                          <button>나가기</button>
-                        </div>
-                      </div>
+                      <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>
                     </>
                 ) : btnCtl === 2 ? (
                     <>
-                      <div dangerouslySetInnerHTML={{ __html: addressBookHtml }} />
+                    <div dangerouslySetInnerHTML={{ __html: addressBookHtml }} />
                     </>
                 ) : btnCtl === 3 ? (
                     <>

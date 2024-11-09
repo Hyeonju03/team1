@@ -84,4 +84,8 @@
         set content = CONCAT(content ,#{chatContent},',')
         where CHAT_NUM like #{chatNum};
     </update>
+    <insert id="chatAdd" parameterType="ListLibraryDTO">
+        insert into chatroom (mem_list, speaker, content)
+        values (#{members}, #{code}, "")
+    </insert>
 </mapper>

@@ -468,50 +468,6 @@ class ListLibrary {
         return isTrue;
     }
 
-    static async dataTest1(code) {
-        await axios
-            .get("/addressBookSelect", {params: {code}})
-            .then((response) => {
-            })
-            .catch((error) => console.log(error));
-        return "";
-    }
-
-    static async dataTest2(code) {
-        await axios
-            .get("/addressBookListSelect", {params: {code}})
-            .then((response) => {
-            })
-            .catch((error) => console.log(error));
-        return "";
-    }
-
-    static async dataTest3(target, code) {
-        const jsonData = {
-            target: target, code: code,
-        };
-        await axios
-            .post("/addressBookAdd", jsonData)
-            .then((response) => {
-            })
-            .catch((error) => {
-            });
-        return "";
-    }
-
-    static async dataTest4(target, code) {
-        const jsonData = {
-            target: target, code: code,
-        };
-        await axios
-            .post("/addressBookDelete", jsonData)
-            .then((response) => {
-            })
-            .catch((error) => {
-            });
-        return "";
-    }
-
     static WorkerList3(code) {
         const depLayout = () => {
             let htmlList = {};
@@ -561,6 +517,27 @@ class ListLibrary {
             <ul className="list-disc pl-5">{<div
                 dangerouslySetInnerHTML={{__html: this.returnList.outerHTML}}/>}</ul>
         </div>);
+    }
+
+    static async chatListLoad(code){
+        const chatInviteList = await ListLibrary.chatAdd(code);
+
+        const chatInviteListHtml = chatInviteList.outerHTML;
+        return `
+            <div class="h-[100%]">
+                <div class="h-[390px] overflow-y-auto chatListFrameDiv">
+                    <div class="border flex justify-between chatListDiv">
+                        <button class="chatInBtn">대화방</button>
+                        <button class="chatDeleteBtn">나가기</button>
+                    </div>
+                </div>
+                <div class="h-[359px] overflow-y-auto chatInviteListDiv hidden">
+                   ${chatInviteListHtml}
+                </div>
+                <div class="flex h-[31px] w-[100%] chatInviteListInput hidden"><input class="border h-[100%] w-[70%]"><button class="border h-[100%] w-[30%]">id로초대</button></div>
+                <button class="border w-[100%] h-[45px] chatListAddBtn">대화방 추가</button>
+            </div>
+        `;
     }
 
     static async chatIn(code, chatNum) {
@@ -633,6 +610,100 @@ class ListLibrary {
         await chatAdd();
     }
 
+    static async chatAdd(code){
+        let memList = new Map();
+        const memListSet = async () => {
+            await axios
+                .get("/chatInSelect2", {params: {chatNum:"1"}})
+                .then((response) => {
+                    //memList
+                    memList = new Map(response.data.map(item => [item, ""]));
+                })
+                .catch((error) => console.log(error));
+        }
+        await memListSet()
+        const depLayout = () => {
+            let htmlList = {};
+            const htmlTags = new DOMParser().parseFromString(`
+                    <div class="border h-[360px] here overflow-y-auto"><ul class="list-disc pl-5"></ul></div>
+            `, "text/html").body;
+
+            this.depCode.forEach((v1, i1) => {
+                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange="
+                    let getParentId = document.getElementById('${v1}');
+                    let getChildList = document.getElementById('${v1}');
+                    ListLibrary.findChildren(getChildList,getParentId.children[0].checked);
+                    
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                    }
+                    "><ul class="list-disc pl-5"></ul></li>`, "text/html").body.firstChild;
+                htmlList[htmlTag.id] = htmlTag;
+            });
+
+            this.empDepCode.forEach((v1, i1) => {
+                htmlList[v1].children[1].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[65px]" data-value=${this.empCode[i1]}>${this.empName[i1]}<input ${memList.get(this.empCode[i1]) === "" ? 'checked="checked"' : ''}
+                ${memList.get(this.empCode[i1])=== ""  ? 'disabled="disabled"' : ''}  type="checkbox" onchange="
+                    let getParentId = document.getElementById('${v1}')
+                    const getChilds = Array.from(getParentId.getElementsByClassName('${v1}'));
+                    let isTrueCount = [0];
+                    getChilds.forEach(child => {
+                          if (child.children[0].checked) isTrueCount[0]++;
+                    });
+                    if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true
+                    else getParentId.children[0].checked = false
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0,0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                    }
+                    "></li>`, "text/html").body.firstChild);
+            });
+            this.depCode.forEach((v1, i1) => {
+                this.depCode.forEach((v2, i2) => {
+                    if (htmlList[v1].id !== htmlList[v2].id) {
+                        if (htmlList[v1].id === htmlList[v2].className) {
+                            htmlList[v1].children[1].appendChild(htmlList[v2]);
+                        }
+                    }
+                });
+                if (this.upDepCode[i1] === "") {
+                    this.top = v1;
+                }
+            });
+            htmlTags.children[0].appendChild(htmlList[this.top]);
+            return htmlTags;
+        };
+
+
+        const listCheck = async () => {
+            await axios.get("/chartSelect", { params: { code } })
+                .then((response) => {
+                    this.depCode = response.data[0];
+                    this.upDepCode = response.data[1];
+                    this.empCode = response.data[2];
+                    this.empName = response.data[3];
+                    this.empDepCode = response.data[4];
+                })
+                .catch((error) => console.log(error));
+            return depLayout();
+        };
+
+        return await listCheck();
+    }
+
     static async chatDataSet(chatNum) {
         await axios
             .get("/chatInSelect1", {params: {chatNum}})
@@ -655,6 +726,50 @@ class ListLibrary {
                 console.log(response.data)
             })
             .catch((error) => console.log(error));
+    }
+
+    static async dataTest1(code) {
+        await axios
+            .get("/addressBookSelect", {params: {code}})
+            .then((response) => {
+            })
+            .catch((error) => console.log(error));
+        return "";
+    }
+
+    static async dataTest2(code) {
+        await axios
+            .get("/addressBookListSelect", {params: {code}})
+            .then((response) => {
+            })
+            .catch((error) => console.log(error));
+        return "";
+    }
+
+    static async dataTest3(target, code) {
+        const jsonData = {
+            target: target, code: code,
+        };
+        await axios
+            .post("/addressBookAdd", jsonData)
+            .then((response) => {
+            })
+            .catch((error) => {
+            });
+        return "";
+    }
+
+    static async dataTest4(target, code) {
+        const jsonData = {
+            target: target, code: code,
+        };
+        await axios
+            .post("/addressBookDelete", jsonData)
+            .then((response) => {
+            })
+            .catch((error) => {
+            });
+        return "";
     }
 }
 
