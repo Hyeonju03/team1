@@ -5,10 +5,7 @@ import kr.or.nextit.team1.Services.ListLibraryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class ListLibraryController {
@@ -200,5 +197,34 @@ public class ListLibraryController {
     public ResponseEntity<Void> chatInUpdate1(@RequestBody Map<String, Object> data) {
         listLibraryService.chatInUpdate1(data);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/chatAdd")
+    public ResponseEntity<Void> chatAdd(@RequestBody Map<String, Object> data) {
+        listLibraryService.chatAdd(data);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/myChatList")
+    public ResponseEntity<List<String>[]> myChatList(String code) {
+        List<ListLibraryDTO> data = listLibraryService.myChatList(code);
+        List<String>[] list = new ArrayList[2];
+        for (int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < data.size(); i++) {
+            if (!Objects.equals(data.get(i).getContent(), "")){
+                String[] splitData1 = data.get(i).getContent().split(",");
+                splitData1 = splitData1[splitData1.length - 1].split(":");
+                splitData1 = splitData1[1].split("_");
+                list[1].add(splitData1[0]);
+            }
+            else {
+                list[1].add("대화내용이 없습니다");
+            }
+            list[0].add(data.get(i).getChatNum());
+        }
+        return ResponseEntity.ok(list);
     }
 }

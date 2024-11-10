@@ -523,22 +523,37 @@ class ListLibrary {
     }
 
     static async chatListLoad(code){
-        const chatInviteList = await ListLibrary.chatAdd(code);
+        let chatNum = []
+        let lastChat = []
+        let chatList = []
+        await axios
+            .get("/myChatList", {params: {code}})
+            .then((response) => {
+                chatNum = response.data[0]
+                lastChat = response.data[1]
+            })
+            .catch((error) => console.log(error));
+
+
+        chatNum.forEach((v1,i1)=>{
+            chatList += `<div class="border flex justify-between chatListDiv"><button class="chatInBtn" data-value=${v1}>${lastChat[i1]}</button><button class="chatDeleteBtn">나가기</button></div>`
+            console.log(chatNum)
+        })
+
+        const chatInviteList = await ListLibrary.chatMemList1(code);
 
         const chatInviteListHtml = chatInviteList.outerHTML;
         return `
             <div class="h-[100%]">
                 <div class="h-[390px] overflow-y-auto chatListFrameDiv">
-                    <div class="border flex justify-between chatListDiv">
-                        <button class="chatInBtn">대화방</button>
-                        <button class="chatDeleteBtn">나가기</button>
-                    </div>
+                   ${chatList}
                 </div>
-                <div class="h-[359px] overflow-y-auto chatInviteListDiv hidden">
+                <div class="h-[390px] overflow-y-auto chatInviteListDiv hidden">
                    ${chatInviteListHtml}
                 </div>
-                <div class="flex h-[31px] w-[100%] chatInviteListInput hidden"><input class="border h-[100%] w-[70%]"><button class="border h-[100%] w-[30%]">id로초대</button></div>
-                <button class="border w-[100%] h-[45px] chatListAddBtn">대화방 추가</button>
+                <div class="flex h-[30px] w-[100%] chatInviteListInput hidden"><input class="border h-[100%] w-[70%]"><button class="border h-[100%] w-[30%]">id로초대</button></div>
+                <button class="border w-[100%] h-[45px] chatListAddBtn1">대화방 추가</button>
+                <button class="border w-[100%] h-[45px] chatListAddBtn2 hidden">대화인원 추가</button>
             </div>
         `;
     }
@@ -613,7 +628,89 @@ class ListLibrary {
         await chatAdd();
     }
 
-    static async chatAdd(code){
+    static async chatMemList1(code){
+        const depLayout = () => {
+            let htmlList = {};
+            const htmlTags = new DOMParser().parseFromString(`
+                    <div class="border h-[390px] here overflow-y-auto"><ul class="list-disc pl-5"></ul></div>
+            `, "text/html").body;
+
+            this.depCode.forEach((v1, i1) => {
+                const htmlTag = new DOMParser().parseFromString(`<li id=${v1} class=${this.upDepCode[i1]} style="list-style-type: none">${v1}<input id="${v1}Btn" type="checkbox" onchange="
+                    let getParentId = document.getElementById('${v1}');
+                    let getChildList = document.getElementById('${v1}');
+                    ListLibrary.findChildren(getChildList,getParentId.children[0].checked);
+                    
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                    }
+                    "><ul class="list-disc pl-5"></ul></li>`, "text/html").body.firstChild;
+                htmlList[htmlTag.id] = htmlTag;
+            });
+
+            this.empDepCode.forEach((v1, i1) => {
+                htmlList[v1].children[1].appendChild(new DOMParser().parseFromString(`<li class="${this.empDepCode[i1]} worker w-[65px]" data-value=${this.empCode[i1]}>${this.empName[i1]}<input type="checkbox"${this.empCode[i1] === code ? 'checked="checked"' : ''} ${this.empCode[i1] === code ? 'disabled="disabled"' : ''} onchange="
+                    let getParentId = document.getElementById('${v1}')
+                    const getChilds = Array.from(getParentId.getElementsByClassName('${v1}'));
+                    let isTrueCount = [0];
+                    getChilds.forEach(child => {
+                          if (child.children[0].checked) isTrueCount[0]++;
+                    });
+                    if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true
+                    else getParentId.children[0].checked = false
+                    while (!!getParentId.parentNode.parentNode.id){
+                        getParentId = getParentId.parentNode.parentNode
+                        const getChilds =  Array.from(getParentId.children[1].children);
+                        let isTrueCount = [0];
+                        getChilds.forEach(child => {
+                              if (child.children[0].checked) isTrueCount[0]++;
+                        });
+                        if(isTrueCount[0] === getChilds.length) getParentId.children[0].checked = true;
+                        else getParentId.children[0].checked = false
+                    }
+                    "></li>`, "text/html").body.firstChild);
+            });
+            this.depCode.forEach((v1, i1) => {
+                this.depCode.forEach((v2, i2) => {
+                    if (htmlList[v1].id !== htmlList[v2].id) {
+                        if (htmlList[v1].id === htmlList[v2].className) {
+                            htmlList[v1].children[1].appendChild(htmlList[v2]);
+                        }
+                    }
+                });
+                if (this.upDepCode[i1] === "") {
+                    this.top = v1;
+                }
+            });
+            htmlTags.children[0].appendChild(htmlList[this.top]);
+            return htmlTags;
+        };
+
+
+        const listCheck = async () => {
+            await axios.get("/chartSelect", { params: { code } })
+                .then((response) => {
+                    this.depCode = response.data[0];
+                    this.upDepCode = response.data[1];
+                    this.empCode = response.data[2];
+                    this.empName = response.data[3];
+                    this.empDepCode = response.data[4];
+                })
+                .catch((error) => console.log());
+            return depLayout();
+        };
+
+        return await listCheck();
+    }
+
+    static async chatMemList2(code){
         let memList = new Map();
         const memListSet = async () => {
             await axios
@@ -705,6 +802,19 @@ class ListLibrary {
         };
 
         return await listCheck();
+    }
+
+    static async chatAdd(code,members){
+        const chatData = {
+            members : members,
+            code: code,
+        }
+
+        await axios
+            .post("/chatAdd", chatData)
+            .then((response) => {
+            })
+            .catch((error) => console.log(error));
     }
 
     static async chatDataSet(chatNum) {

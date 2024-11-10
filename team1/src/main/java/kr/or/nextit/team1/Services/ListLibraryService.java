@@ -55,4 +55,9 @@ public class ListLibraryService {
     public void chatInUpdate1(Map<String, Object> data){
         listLibraryMapper.chatInUpdate1(data);
     }
+
+    public void chatAdd(Map<String, Object> data){
+        listLibraryMapper.chatAdd(data);
+    }
+    public List<ListLibraryDTO> myChatList(String code){return listLibraryMapper.myChatList(code);}
 }

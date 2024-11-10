@@ -177,7 +177,8 @@ export default function SignRegister() {
   useEffect(() => {
     const chatInBtn =  document.querySelector(".chatInBtn");
     const chatDeleteBtn = document.querySelector(".chatDeleteBtn");
-    const chatListAddBtn = document.querySelector(".chatListAddBtn");
+    const chatListAddBtn1 = document.querySelector(".chatListAddBtn1");
+    const chatListAddBtn2 = document.querySelector(".chatListAddBtn2");
     const chatInviteListDiv = document.querySelector(".chatInviteListDiv");
     const chatListDiv = document.querySelector(".chatListDiv");
     const chatListFrameDiv =  document.querySelector(".chatListFrameDiv");
@@ -191,9 +192,37 @@ export default function SignRegister() {
     };
     const handleClick3 = (event) => {
       chatInviteListDiv.style.display = "block"
-      chatInviteListInput.style.display = "block"
+      //chatInviteListInput.style.display = "block"
       chatListFrameDiv.style.display = "none"
-      chatListAddBtn.textContent = "초대하기"
+      chatListAddBtn1.style.display = "none"
+      chatListAddBtn2.style.display = "block"
+    };
+    const handleClick4 = async (event) => {
+      chatInviteListDiv.style.display = "none"
+      //chatInviteListInput.style.display = "none"
+      chatListFrameDiv.style.display = "block"
+      chatListAddBtn1.style.display = "block"
+      chatListAddBtn2.style.display = "none"
+
+      let members = ""
+      let memberCount= 0
+      chatInviteListDiv.querySelectorAll(".worker").forEach((e, i1) => {
+        if (e.children[0].checked) {
+          members += e.dataset.value + ","
+          memberCount++;
+        }
+      });
+      if (memberCount > 1){
+        await ListLibrary.chatAdd(user, members)
+      }else {
+        alert("인원이 너무 적습니다")
+        chatInviteListDiv.querySelectorAll(".worker").forEach((e, i1) => {
+          if (!e.children[0].disabled) {
+            e.children[0].checked = false
+          }
+        });
+      }
+      setChatListLoad(await ListLibrary.chatListLoad(user));
     };
 
     if (chatInBtn) {
@@ -202,8 +231,11 @@ export default function SignRegister() {
     if (chatDeleteBtn) {
       chatDeleteBtn.addEventListener("click", handleClick2);
     }
-    if (chatListAddBtn) {
-      chatListAddBtn.addEventListener("click", handleClick3);
+    if (chatListAddBtn1) {
+      chatListAddBtn1.addEventListener("click", handleClick3);
+    }
+    if (chatListAddBtn2) {
+      chatListAddBtn2.addEventListener("click", handleClick4);
     }
 
     return () => {
@@ -213,8 +245,11 @@ export default function SignRegister() {
       if (chatDeleteBtn) {
         chatDeleteBtn.removeEventListener("click",handleClick2);
       }
-      if (chatListAddBtn) {
-        chatListAddBtn.removeEventListener("click",handleClick3);
+      if (chatListAddBtn1) {
+        chatListAddBtn1.removeEventListener("click",handleClick3);
+      }
+      if (chatListAddBtn2) {
+        chatListAddBtn2.removeEventListener("click",handleClick4);
       }
     };
 

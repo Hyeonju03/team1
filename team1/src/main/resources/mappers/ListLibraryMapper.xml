@@ -84,8 +84,12 @@
         set content = CONCAT(content ,#{chatContent},',')
         where CHAT_NUM like #{chatNum};
     </update>
-    <insert id="chatAdd" parameterType="ListLibraryDTO">
+    <insert id="chatAdd" parameterType="Map">
         insert into chatroom (mem_list, speaker, content)
         values (#{members}, #{code}, "")
     </insert>
+    <select id="myChatList" resultType="ListLibraryDTO" parameterType="String">
+        select CHAT_NUM, CONTENT from chatroom
+        where MEM_LIST like CONCAT('%',#{code},',%')
+    </select>
 </mapper>
