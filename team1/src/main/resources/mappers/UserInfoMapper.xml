@@ -5,7 +5,7 @@
 <mapper namespace="kr.or.nextit.team1.mappers.UserInfoMapper">
     <select id="userInfoSelect" resultType="UserInfoDTO">
         SELECT
-            EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, POS_CODE, PHONE_NUM, EXT_NUM, EMP_MAIL, COR_CODE, EMP_RRN
+            EMP_CODE, EMP_NAME, EMP_PASS, DEP_CODE, POS_CODE, PHONE_NUM, EXT_NUM, EMP_MAIL, COR_CODE, EMP_RRN, MODIFY_REQ
         FROM
             EMPLOYEE
         WHERE
@@ -75,7 +75,7 @@
 
     <sql id="modifyReqDelete">
         UPDATE EMPLOYEE SET
-        MODIFY_REQ = ''
+        MODIFY_REQ = #{modifyRequest}
         WHERE EMP_CODE = #{corCode}
     </sql>
 

@@ -36,7 +36,7 @@ export default function DocumentList() {
     const [auth, setAuth] = useState(null);
     // 로그인
     const {empCode, logout, isLoggedIn} = useAuth();
-    const [prevLogin, setPrevLogin] = useState(undefined);   // 이전 로그인 상태를 추적할 변수
+    const [userInfo, setUserInfo] = useState([])
     // slide 변수
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
@@ -61,6 +61,7 @@ export default function DocumentList() {
             const newComCode = getComCode(empCode);
             fetchAuth();
             setComCode(newComCode);  // comCode 상태 업데이트
+            empInfo();
         }
     }, [empCode]); // empCode가 변경될 때마다 실행
 
@@ -74,9 +75,16 @@ export default function DocumentList() {
                 })
                 .catch(error => console.log(error));
         }
-        // 상태 변경 후 이전 상태를 현재 상태로 설정
-        setPrevLogin(isLoggedIn);
     }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
+
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -198,19 +206,29 @@ export default function DocumentList() {
                             timezone={'Asia/Seoul'}/>
                     </div>
                     <div className="mr-5">
-                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                             alt="home"/>
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
                     </div>
                     <div className="mr-16">
                         <img width="45" height="45"
-                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                              alt="user-male-circle" onClick={togglePanel}/>
                     </div>
                 </header>
             </div>
             <div className="flex-1 flex">
                 <div className="fixed h-full">
-                    <aside className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
+                    <aside className="mt-14 h-full w-64 bg-gray-200 border-r-2 shadow-lg p-4 space-y-2">
 
                         <div>
                             <Button
@@ -220,13 +238,13 @@ export default function DocumentList() {
                             >
                                 {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
                                     <ChevronRight className="mr-2 h-4 w-4"/>}
+                                {/*<Mail className="mr-2 h-4 w-4"/>*/}
                                 문서함
                             </Button>
                             {isExpanded && (
                                 <div className="ml-8 space-y-2 pace-y-2 mt-2">
                                     {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                            <Button variant="ghost" className="w-full" key={`${item}`}
-                                                    onClick={() => handleCategorySelect(item)}>
+                                            <Button variant="ghost" className="w-full" key={`${item}`}>
                                                 {item}
                                             </Button>
                                         )
@@ -289,11 +307,7 @@ export default function DocumentList() {
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
-                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
-                    {/* 내용 부분 */}
-                    {/*<div*/}
-                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
-                    {/*>*/}
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
                         {/*<div className="text-sm text-center">*/}
                         {/*    <a href="#" className="text-blue-600 hover:underline">*/}
@@ -312,14 +326,14 @@ export default function DocumentList() {
                                             <img width="75px" height="75px" src="/logo192.png"/>
                                         </div>
                                         <div className="w-2/3 text-left">
-                                            <p className="">이름:</p>
-                                            <p className="">직급:</p>
-                                            <p className="">부서:</p>
+                                            <p className="">이름: {userInfo.empName}</p>
+                                            <p className="">직급: {userInfo.posCode}</p>
+                                            <p className="">부서: {userInfo.depCode}</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col text-left mb-1">
-                                        <p className="">사내 이메일:</p>
-                                        <p className="">전화번호:</p>
+                                        <p className="">사내 이메일: {userInfo.empMail}</p>
+                                        <p className="">전화번호: {userInfo.phoneNum}</p>
                                     </div>
 
 
@@ -443,8 +457,9 @@ export default function DocumentList() {
                                     </div>
                                 </div>
                                 <button
-                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
-                                    onClick={handleLogout}>로그아웃</button>
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
                             </div>
                             : (<><h2 className="mt-2">로그인</h2>
                                     <input
@@ -458,7 +473,7 @@ export default function DocumentList() {
                                         className="w-full p-2 mb-4 border rounded"
                                     />
                                     <button
-                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
                                         로그인
                                     </button>
                                 </>
@@ -494,7 +509,7 @@ export default function DocumentList() {
                     </div>
                 </div>
                 <div
-                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
     );

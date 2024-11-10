@@ -8,6 +8,7 @@ import {useUserContext} from "./UserContext";
 
 export default function UserInfoModifyRequestList() {
     const {isLoggedIn, empCode, logout} = useAuth();
+    const [userInfo, setUserInfo] = useState([])
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
@@ -26,45 +27,50 @@ export default function UserInfoModifyRequestList() {
         console.log("Authentication state:", {isLoggedIn, empCode});
         if (isLoggedIn && empCode) {
             fetchSubordinates();
+            empInfo();
         }
     }, [isLoggedIn, empCode]);
+
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
 
     const fetchSubordinates = async () => {
         try {
             const response = await axios.get(`/emp/${empCode}`);
-            console.log("Subordinates data:", response.data);
-            // parseModifyReqData(response.data);
+            console.log("Subordinates data:", response.data.modifyReq);
+            parseModifyReqData(response.data.modifyReq);
         } catch (error) {
             console.error("Error fetching subordinates:", error);
         }
     };
 
-    const parseModifyReqData = (data) => {
-        if (data.length > 0 && data[0].modifyReq) {
-            const modifyReq = data[0].modifyReq;
-
+    const parseModifyReqData = async (modifyReq) => {
+        if (modifyReq.length > 0) {
             if (modifyReq.includes(",")) {
-                const modifyReqList = modifyReq.split(","); // Split by comma first
+                const modifyList = modifyReq.split(","); // Split by comma first
 
-                const parsedData = modifyReqList.map(req => {
-                    if (req.includes(":")) {
-                        const [prefix, dataString] = req.split(":");
-                        if (dataString && dataString.includes("_")) {
-                            const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = dataString.split("_");
-                            return {prefix, empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode};
-                        }
+                for (const req of modifyList) {
+                    const emp = req.split(":")[0];
+                    try {
+                        const response = await axios.get(`/emp/${emp}`);
+                        setModifyReqData(prevData => [...prevData, response.data]); // 수정된 배열 업데이트
+                    } catch (error) {
+                        console.error(`Error fetching data for employee ${emp}:`, error);
                     }
-                    return null;
-                }).filter(item => item !== null); // Filter out any null values
-
-                setModifyReqData(parsedData);
-            } else if (modifyReq.includes(":")) {
-                const [prefix, dataString] = modifyReq.split(":");
-                if (dataString && dataString.includes("_")) {
-                    const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = dataString.split("_");
-                    setModifyReqData([{
-                        prefix, empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode
-                    }]);
+                }
+            }else {
+                const modifyList = modifyReq.split(":")[0];
+                try {
+                    const response = await axios.get(`/emp/${modifyList}`);
+                    setModifyReqData(prevData => [...prevData, response.data]); // 수정된 배열 업데이트
+                } catch (error) {
+                    console.error(`Error fetching data for employee ${modifyList}:`, error);
                 }
             }
         } else {
@@ -88,7 +94,7 @@ export default function UserInfoModifyRequestList() {
     // 사용자 클릭 시 상세 페이지로 이동하는 함수
     const handleUserClick = (index) => {
         setSelectedUser(index);  // UserContext에 선택된 사용자 저장
-        navigate(`/UserInfoModifyRequest/${index}`);  // UserInfoModifyRequest로 이동
+        navigate(`/UserInfoModifyRequest`);  // UserInfoModifyRequest로 이동
     };
 
     return (
@@ -103,19 +109,29 @@ export default function UserInfoModifyRequestList() {
                             timezone={'Asia/Seoul'}/>
                     </div>
                     <div className="mr-5">
-                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                             alt="home" onClick={() => navigate("/main")}/>
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
                     </div>
                     <div className="mr-16">
                         <img width="45" height="45"
-                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                              alt="user-male-circle" onClick={togglePanel}/>
                     </div>
                 </header>
             </div>
             <div className="flex-1 flex">
                 <div className="fixed h-full">
-                    <aside className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
+                    <aside className="mt-14 h-full w-64 bg-gray-200 border-r-2 shadow-lg p-4 space-y-2">
                         <ol>
                             <li>
                                 <div>
@@ -136,7 +152,10 @@ export default function UserInfoModifyRequestList() {
 
                                                     >
                                                         <ChevronRight className="mr-2 h-4 w-4"/>
-                                                        <div className="hover:underline">내 인사 정보</div>
+                                                        <div className="hover:underline"
+                                                             onClick={() => {
+                                                                 navigate("/userInfo")
+                                                             }}>내 인사 정보</div>
                                                     </button>
 
                                                 </div>
@@ -174,16 +193,19 @@ export default function UserInfoModifyRequestList() {
                             </tr>
                             </thead>
                             <tbody>
-                            {modifyReqData.map((item, index) => (
-                                <tr
-                                    className="cursor-pointer hover:bg-gray-100"
-                                    key={index}
-                                    onClick={() => handleUserClick(item)}
-                                >
-                                    <td className="p-2 text-center w-1/4" >{index + 1}</td>
-                                    <td className="p-2 text-center w-3/4">{item.depCode} {item.empName} {item.posCode}님의 정보 수정 승인 요청입니다.</td>
-                                </tr>
-                            ))}
+                            {modifyReqData.map((item, index) => {
+                                console.log("modifyReqData >>>", modifyReqData)
+                                    return(
+                                        <tr
+                                            className="cursor-pointer hover:bg-gray-100"
+                                            key={index}
+                                            onClick={() => handleUserClick(item)}
+                                        >
+                                            <td className="p-2 text-center w-1/4" >{index + 1}</td>
+                                            <td className="p-2 text-center w-3/4">{item.depCode} {item.empName} {item.posCode} 의 정보 수정 승인 요청입니다.</td>
+                                        </tr>
+                                    )
+                            })}
                             </tbody>
                         </table>
                     </div>
@@ -193,11 +215,7 @@ export default function UserInfoModifyRequestList() {
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
-                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
-                    {/* 내용 부분 */}
-                    {/*<div*/}
-                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
-                    {/*>*/}
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
                         {/*<div className="text-sm text-center">*/}
                         {/*    <a href="#" className="text-blue-600 hover:underline">*/}
@@ -216,14 +234,14 @@ export default function UserInfoModifyRequestList() {
                                             <img width="75px" height="75px" src="/logo192.png"/>
                                         </div>
                                         <div className="w-2/3 text-left">
-                                            <p className="">이름:</p>
-                                            <p className="">직급:</p>
-                                            <p className="">부서:</p>
+                                            <p className="">이름: {userInfo.empName}</p>
+                                            <p className="">직급: {userInfo.posCode}</p>
+                                            <p className="">부서: {userInfo.depCode}</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col text-left mb-1">
-                                        <p className="">사내 이메일:</p>
-                                        <p className="">전화번호:</p>
+                                        <p className="">사내 이메일: {userInfo.empMail}</p>
+                                        <p className="">전화번호: {userInfo.phoneNum}</p>
                                     </div>
 
 
@@ -347,8 +365,9 @@ export default function UserInfoModifyRequestList() {
                                     </div>
                                 </div>
                                 <button
-                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
-                                    onClick={handleLogout}>로그아웃</button>
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
                             </div>
                             : (<><h2 className="mt-2">로그인</h2>
                                     <input
@@ -362,7 +381,7 @@ export default function UserInfoModifyRequestList() {
                                         className="w-full p-2 mb-4 border rounded"
                                     />
                                     <button
-                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
                                         로그인
                                     </button>
                                 </>
@@ -398,7 +417,7 @@ export default function UserInfoModifyRequestList() {
                     </div>
                 </div>
                 <div
-                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
     );

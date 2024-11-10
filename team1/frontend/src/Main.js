@@ -10,6 +10,7 @@ export default function MainLayout() {
     const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
     const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
+    const [userInfo, setUserInfo] = useState([])
 
     // 로그인 후 가져와야하는 데이터들
     const [mailList, setMailList] = useState([]) //메일
@@ -54,6 +55,7 @@ export default function MainLayout() {
 
     useEffect(() => {
         getWeather();
+        empInfo();
 
         axios.get('/selectLog')
             .then(response => console.log(response.data))
@@ -79,6 +81,15 @@ export default function MainLayout() {
     //         .then(response => console.log(response.data))
     //         .catch(error => console.log(error));
     // }, []);
+
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
 
     // 로그인 처리 함수
     const handleLogin = async (e) => {
@@ -347,10 +358,10 @@ export default function MainLayout() {
 
     return (
         <div className="min-h-screen flex flex-col h-[919px]" onContextMenu={windowRClick}>
-            {/* Header with centered logo */}
+            {/* Header with centegray logo */}
             {isLoggedIn ? (
                     <>
-                        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                        <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                             <div className="flex mr-6">
                                 <div className="font-bold mr-1">{formattedDate}</div>
                                 <Clock
@@ -359,20 +370,29 @@ export default function MainLayout() {
                                     timezone={'Asia/Seoul'}/>
                             </div>
                             <div className="mr-5">
-                                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                                     alt="home"/>
+                                <img width="40" height="40"
+                                     src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                                     alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                                     onClick={() => {
+                                         navigate(`/user/notice/list`)
+                                     }}/>
+                            </div>
+                            <div className="mr-5">
+                                <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                                     alt="home" onClick={() => {
+                                    navigate("/")
+                                }}/>
                             </div>
                             <div className="mr-16">
                                 <img width="45" height="45"
-                                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                                     src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                                      alt="user-male-circle" onClick={togglePanel}/>
-
                             </div>
                         </header>
-                        <div className="w-full h-[5px] bg-red-400"></div>
+                        <div className="w-full h-[5px] bg-gray-400"></div>
 
                         {/* Main content area */}
-                        <div className="bg-gray-100 h-[94%] w-[100%] shadow-inner shadow-red-400/50">
+                        <div className="bg-gray-100 h-[94%] w-[100%] shadow-inner shadow-gray-400/50">
                             <div className="flex overflow-hidden h-full">
                                 {/*<main className="flex-grow p-4">*/}
                                 {/*    <div className="container mx-auto">*/}
@@ -395,7 +415,7 @@ export default function MainLayout() {
                                                             className="flex flex-col items-center justify-center h-[48px]">
                                                             메일
                                                             {/*<div*/}
-                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">*/}
+                                                            {/*    className="text-white bg-gray-800 w-[32px] h-[24px] rounded-3xl">*/}
                                                             {/*    {mailList.length}*/}
                                                             {/*</div>*/}
                                                         </strong>
@@ -424,7 +444,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             결재함
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : "block"}`}>
                                                                 {signCount}
                                                             </div>
                                                         </strong>
@@ -441,7 +461,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             일정
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${scheduleCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${scheduleCount === 0 ? "hidden" : "block"}`}>
                                                                 {scheduleCount}
                                                             </div>
                                                         </strong>
@@ -463,7 +483,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             인사 정보
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${reqCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${reqCount === 0 ? "hidden" : "block"}`}>
                                                                 {reqCount}
                                                             </div>
                                                         </strong>
@@ -507,7 +527,7 @@ export default function MainLayout() {
                                                             권한 관리
                                                             {/* 본인 권한이 뭐가 바뀌었는지 보여주기 */}
                                                             {/*<div*/}
-                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
+                                                            {/*    className="text-white bg-gray-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/briefcase-settings.png"
@@ -632,7 +652,7 @@ export default function MainLayout() {
 
                     </>) :
                 <>
-                    <header className="flex justify-end items-center h-[6%] bg-white">
+                    <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                         <div className="flex mr-6">
                             <div className="font-bold mr-1">{formattedDate}</div>
                             <Clock
@@ -640,18 +660,30 @@ export default function MainLayout() {
                                 ticking={true}
                                 timezone={'Asia/Seoul'}/>
                         </div>
-                        <div className="mr-16 w-36 flex flex-col items-center">
-                            <div className="w-full h-12 bg-red-100">
-                                <div
-                                    className="flex items-center text-white font-bold px-4 py-2">
-                                    <div className="mr-8" onClick={togglePanel}>로그인 / 회원가입</div>
-                                </div>
-                            </div>
+                        <div className="mr-5">
+                            <img width="40" height="40"
+                                 src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                                 alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                                 onClick={() => {
+                                     navigate(`/user/notice/list`)
+                                 }}/>
+                        </div>
+                        <div className="mr-5">
+                            <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                                 alt="home" onClick={() => {
+                                navigate("/")
+                            }}/>
+                        </div>
+                        <div className="mr-16" onClick={togglePanel}>
+                            <img width="45" height="45"
+                                 src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
+                                 alt="user-male-circle"/>
+                            <div className="" >로그인 / 회원가입</div>
                         </div>
                     </header>
 
                     <div className="bg-gray-100 h-80 flex justify-center">
-                        <div className="flex items-center w-96 bg-red-200">
+                        <div className="flex items-center w-96 bg-gray-200">
                             <div className="ml-24">
                                 <div className="text-left font-bold text-3xl">
                                     큰 주제
@@ -683,11 +715,7 @@ export default function MainLayout() {
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
-                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
-                    {/* 내용 부분 */}
-                    {/*<div*/}
-                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
-                    {/*>*/}
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
                         {/*<div className="text-sm text-center">*/}
                         {/*    <a href="#" className="text-blue-600 hover:underline">*/}
@@ -706,14 +734,14 @@ export default function MainLayout() {
                                             <img width="75px" height="75px" src="/logo192.png"/>
                                         </div>
                                         <div className="w-2/3 text-left">
-                                            <p className="">이름:</p>
-                                            <p className="">직급:</p>
-                                            <p className="">부서:</p>
+                                            <p className="">이름: {userInfo.empName}</p>
+                                            <p className="">직급: {userInfo.posCode}</p>
+                                            <p className="">부서: {userInfo.depCode}</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col text-left mb-1">
-                                        <p className="">사내 이메일:</p>
-                                        <p className="">전화번호:</p>
+                                        <p className="">사내 이메일: {userInfo.empMail}</p>
+                                        <p className="">전화번호: {userInfo.phoneNum}</p>
                                     </div>
 
 
@@ -837,25 +865,23 @@ export default function MainLayout() {
                                     </div>
                                 </div>
                                 <button
-                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
-                                    onClick={handleLogout}>로그아웃</button>
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
                             </div>
                             : (<><h2 className="mt-2">로그인</h2>
                                     <input
                                         type="text"
                                         placeholder="아이디"
                                         className="w-full p-2 mb-2 border rounded"
-                                        onChange={(e)=>setInputId(e.target.value)}
                                     />
                                     <input
                                         type="password"
                                         placeholder="비밀번호"
                                         className="w-full p-2 mb-4 border rounded"
-                                        onChange={(e)=>setInputPassword(e.target.value)}
                                     />
                                     <button
-                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4"
-                                    onClick={handleLogin}>
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
                                         로그인
                                     </button>
                                 </>
@@ -891,7 +917,7 @@ export default function MainLayout() {
                     </div>
                 </div>
                 <div
-                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
     )

@@ -30,7 +30,7 @@ public interface UserInfoMapper {
     void modifyReqDelete(String userInfoDTO);
 
     // 반려
-    void modifyReqClear(String corCode);
+    void modifyReqClear(String corCode, String modifyRequest);
 
     // 권한
     String getAuthorityUserInfoByEmpCode(String empCode);

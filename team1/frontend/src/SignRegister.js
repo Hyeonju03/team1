@@ -158,6 +158,8 @@ export default function SignRegister() {
         }
         chatUpdate();
     }, [sendMessage]);
+
+
     const handleSendMessage = () => {
         if (socket.current && socket.current.readyState === WebSocket.OPEN) {
             const message = document.querySelector('.chatInput').value;
@@ -189,6 +191,7 @@ export default function SignRegister() {
     const [content, setContent] = useState("");
     const [attachment, setAttachment] = useState(null);
     const [userInfo, setUserInfo] = useState([]);
+    const [userEmpInfo, setUserEmpInfo] = useState([])
 
     // 양식 사용하면
     const [companyName, setCompanyName] = useState("");
@@ -210,6 +213,15 @@ export default function SignRegister() {
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserEmpInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
+
     // 오른쪽 슬라이드 관련
     const windowRClick = async (e) => {
         e.preventDefault();
@@ -226,6 +238,7 @@ export default function SignRegister() {
     // 카테고리 불러오기
     useEffect(() => {
         if (isLoggedIn) {
+            empInfo();
             try {
                 axios
                     .get(`/code/${com}`) // API 엔드포인트를 조정하세요
@@ -475,12 +488,22 @@ export default function SignRegister() {
                             timezone={'Asia/Seoul'}/>
                     </div>
                     <div className="mr-5">
-                        <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                             alt="home" onClick={() => navigate("/main")}/>
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
                     </div>
                     <div className="mr-16">
                         <img width="45" height="45"
-                             src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                              alt="user-male-circle" onClick={togglePanel}/>
                     </div>
                 </header>
@@ -488,7 +511,7 @@ export default function SignRegister() {
             {/* Main content */}
             <div className="flex-1 flex">
                 <div className="fixed h-full">
-                    <aside className="mt-14 h-full w-64 bg-red-200 border-r-2 shadow-lg p-4 space-y-2">
+                    <aside className="mt-14 h-full w-64 bg-gray-200 border-r-2 shadow-lg p-4 space-y-2">
                         <ol>
                             <li>
                                 <div>
@@ -570,14 +593,14 @@ export default function SignRegister() {
                         <div className="flex justify-center w-full mb-4">
                             <div className={`${isToggled ? "" : "font-bold"} mr-2`}>파일만 첨부하기</div>
                             <p
-                                className={`w-[60px] h-[30px] rounded-[30px] border-blue-600 border-2 flex items-center cursor-pointer relative ${
-                                    isToggled ? "on bg-blue-300" : "off"
+                                className={`w-[60px] h-[30px] rounded-[30px] border-gray-600 border-2 flex items-center cursor-pointer relative ${
+                                    isToggled ? "on bg-gray-300" : "off"
                                 }`}
                                 onClick={handleToggle}
                             >
                                 <div
-                                    className={`w-[25px] h-[23px] rounded-full bg-blue-600 absolute top-[1px] ${
-                                        isToggled ? "right-[3px]" : "left-[3px] border-blue-600"
+                                    className={`w-[25px] h-[23px] rounded-full bg-gray-600 absolute top-[1px] ${
+                                        isToggled ? "right-[3px]" : "left-[3px] border-gray-600"
                                     }`}
                                 ></div>
                             </p>
@@ -915,11 +938,7 @@ export default function SignRegister() {
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
-                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-red-300">
-                    {/* 내용 부분 */}
-                    {/*<div*/}
-                    {/*    className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}*/}
-                    {/*>*/}
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
                         {/*<div className="text-sm text-center">*/}
                         {/*    <a href="#" className="text-blue-600 hover:underline">*/}
@@ -938,14 +957,14 @@ export default function SignRegister() {
                                             <img width="75px" height="75px" src="/logo192.png"/>
                                         </div>
                                         <div className="w-2/3 text-left">
-                                            <p className="">이름:</p>
-                                            <p className="">직급:</p>
-                                            <p className="">부서:</p>
+                                            <p className="">이름: {userEmpInfo.empName}</p>
+                                            <p className="">직급: {userEmpInfo.posCode}</p>
+                                            <p className="">부서: {userEmpInfo.depCode}</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col text-left mb-1">
-                                        <p className="">사내 이메일:</p>
-                                        <p className="">전화번호:</p>
+                                        <p className="">사내 이메일: {userEmpInfo.empMail}</p>
+                                        <p className="">전화번호: {userEmpInfo.phoneNum}</p>
                                     </div>
 
 
@@ -971,8 +990,8 @@ export default function SignRegister() {
                                 <div className="mt-2">
                                     <div className="border text-left h-[435px] blue">
                                         {btnCtl === 0 ? (
-                                            // ListLibrary.WorkerList(com)
-                                            <></>
+                                            ListLibrary.WorkerList(com)
+                                            // <></>
                                         ) : btnCtl === 1 ? (
                                             <>
                                                 <div className="h-[100%] overflow-y-auto">
@@ -1069,8 +1088,9 @@ export default function SignRegister() {
                                     </div>
                                 </div>
                                 <button
-                                    className="mt-2 w-full h-10 text-white bg-red-400 hover:bg-red-500 rounded"
-                                    onClick={handleLogout}>로그아웃</button>
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
                             </div>
                             : (<><h2 className="mt-2">로그인</h2>
                                     <input
@@ -1084,7 +1104,7 @@ export default function SignRegister() {
                                         className="w-full p-2 mb-4 border rounded"
                                     />
                                     <button
-                                        className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4">
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
                                         로그인
                                     </button>
                                 </>
@@ -1120,7 +1140,7 @@ export default function SignRegister() {
                     </div>
                 </div>
                 <div
-                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-red-300"></div>
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
     );

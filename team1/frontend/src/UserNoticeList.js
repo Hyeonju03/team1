@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react"; // React 및 Hook 가져오기
+import React, {useState, useEffect} from "react"; // React 및 Hook 가져오기
 import axios from "axios"; // axios 가져오기
-import { useNavigate } from "react-router-dom"; // useNavigate 훅 가져오기
-import { useAuth } from "./noticeAuth"; // 인증 훅 가져오기
+import {useNavigate} from "react-router-dom"; // useNavigate 훅 가져오기
+import {useAuth} from "./noticeAuth"; // 인증 훅 가져오기
 import Clock from "react-live-clock"
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 const UserNoticeList = () => {
     const [notices, setNotices] = useState([]); // 공지사항 목록 상태 초기화
@@ -11,7 +12,11 @@ const UserNoticeList = () => {
     const [error, setError] = useState(null); // 오류 상태 초기화
     const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
-    const { login, empCode, logout, isLoggedIn } = useAuth(); // 인증 훅에서 가져오기
+    const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
+    const [btnCtl, setBtnCtl] = useState(0)
+    const [isRClick, setIsRClick] = useState(false)
+    const [newWindowPosY, setNewWindowPosY] = useState(500)
+    const [userInfo, setUserInfo] = useState([])
 
     const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태 추가
     const [searchType, setSearchType] = useState("title"); // 검색 기준 상태 추가
@@ -29,7 +34,7 @@ const UserNoticeList = () => {
     const fetchNotices = async () => {
         try {
             const response = await axios.get(`/api/usernotice`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: {Authorization: `Bearer ${localStorage.getItem('token')}`}
             });
             setNotices(response.data); // DB 데이터로 공지사항 목록 업데이트
             setTotalPages(Math.ceil(response.data.length / PAGE_SIZE)); // 총 페이지 수 계산
@@ -41,9 +46,19 @@ const UserNoticeList = () => {
     };
 
     // 공지사항을 가져오는 useEffect
-    useEffect(() => {
+    useEffect( () => {
+        empInfo();
         fetchNotices(); // 로그인 상태와 관계없이 공지사항 가져오기
     }, []);
+
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
 
     // 로그인 처리 함수
     const handleLogin = async (e) => {
@@ -89,7 +104,7 @@ const UserNoticeList = () => {
 
     // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
     const handleNoticeClick = (noticeNum) => {
-        navigate('/usernotice/detail', { state: { noticeNum } });
+        navigate('/user/notice/detail', {state: {noticeNum}});
     };
 
     // 필터링된 공지사항 가져오기 (검색창)
@@ -108,29 +123,30 @@ const UserNoticeList = () => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
-                <div className="flex mr-6">
-                    <div className="font-bold mr-1">{formattedDate}</div>
-                    <Clock
-                        format={'HH:mm:ss'}
-                        ticking={true}
-                        timezone={'Asia/Seoul'}/>
-                </div>
-                <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
-                </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle" onClick={togglePanel}/>
-                </div>
-            </header>
-
-            <div className="flex flex-grow">
-                <main className="flex-grow w-full bg-gradient-to-br from-blue-200 to-indigo-200 p-4">
+            <div className="fixed w-full">
+                <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => navigate("/main")}/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
+                    </div>
+                </header>
+            </div>
+            <div className="mt-14 flex-1 flex">
+                <main className="flex-grow w-full p-4 bg-gray-200">
                     <div className="max-w-4xl mx-auto">
-                        <h1 className="text-3xl font-bold text-center mb-6 text-indigo-800">공지사항</h1>
+                        <h1 className="text-3xl font-bold text-center mb-6">공지사항</h1>
 
                         {error && (
                             <div
@@ -154,7 +170,7 @@ const UserNoticeList = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="검색어 입력"
-                                className="border rounded-lg w-72 pl-2.5 shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
+                                className="border rounded-lg w-72 pl-2.5 shadow-sm focus:outline-none"
                             />
                         </div>
 
@@ -162,9 +178,9 @@ const UserNoticeList = () => {
                             <ul className="divide-y divide-gray-200">
                                 {filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
                                     <li key={notice.noticeNum}
-                                        className="p-3 hover:bg-indigo-50 transition duration-200">
+                                        className="p-3 hover:bg-gray-50 transition duration-200">
                                         <h3
-                                            className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
+                                            className="text-lg font-semibold text-gray-700 cursor-pointer transition duration-200"
                                             onClick={() => handleNoticeClick(notice.noticeNum)}
                                         >
                                             {notice.title}
@@ -181,19 +197,19 @@ const UserNoticeList = () => {
                             {currentPage > 1 && filteredCount > 0 && ( // '이전' 버튼 숨기기 조건
                                 <button
                                     onClick={() => setCurrentPage(currentPage - 1)}
-                                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
+                                    className="px-3 py-1 bg-gray-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition duration-200 focus:outline-none"
                                 >
                                     이전
                                 </button>
                             )}
 
-                            <span className="text-indigo-800 font-semibold text-sm">{currentPage} / {total}</span>
+                            <span className="text-gray-800 font-semibold text-sm">{currentPage} / {total}</span>
 
                             {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                                 <button
                                     onClick={() => setCurrentPage(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className="px-3 py-1 bg-indigo-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-500 transition duration-200 focus:outline-none"
+                                    className="px-3 py-1 bg-gray-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition duration-200 focus:outline-none"
                                 >
                                     다음
                                 </button>
@@ -201,55 +217,218 @@ const UserNoticeList = () => {
                         </div>
                     </div>
                 </main>
+            </div>
 
-                <aside className="w-64 p-4 border-l border-gray-300">
-                    {isLoggedIn ? (
-                        <div className="mb-4">
-                            <p className="mb-2">{empCode}님<br/>반갑습니다.</p>
-                            <button
-                                onClick={handleLogout}
-                                className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200"
-                            >
-                                로그아웃
-                            </button>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleLogin} className="mb-4">
-                            <input
-                                type="text"
-                                value={inputId}
-                                onChange={(e) => setInputId(e.target.value)}
-                                placeholder="사용자 ID"
-                                className="w-full p-2 border mb-2"
-                                required
-                            />
-                            <input
-                                type="password"
-                                value={inputPassword}
-                                onChange={(e) => setInputPassword(e.target.value)}
-                                placeholder="비밀번호"
-                                className="w-full p-2 border mb-2"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
-                            >
-                                로그인
-                            </button>
-                        </form>
-                    )}
-                    <div className="text-sm text-center mb-4">
-                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+            {/* Slide-out panel with toggle button */}
+            <div className={`${isPanelOpen ? "" : "hidden"}`}>
+                <div
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
+                    <div className="p-1 h-full">
+                        {/*<div className="text-sm text-center">*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        공지사항*/}
+                        {/*    </a>*/}
+                        {/*    <span className="mx-1">|</span>*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        문의사항*/}
+                        {/*    </a>*/}
+                        {/*</div>*/}
+                        {isLoggedIn ?
+                            <div className="h-full">
+                                <div className="h-1/4">
+                                    <div className="flex h-3/6">
+                                        <div className="w-1/3 ">
+                                            <img width="75px" height="75px" src="/logo192.png"/>
+                                        </div>
+                                        <div className="w-2/3 text-left">
+                                            <p className="">이름: {userInfo.empName}</p>
+                                            <p className="">직급: {userInfo.posCode}</p>
+                                            <p className="">부서: {userInfo.depCode}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col text-left mb-1">
+                                        <p className="">사내 이메일: {userInfo.empMail}</p>
+                                        <p className="">전화번호: {userInfo.phoneNum}</p>
+                                    </div>
+
+
+                                    <div className="flex">
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(0)}>
+                                            조직도
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(1)}>
+                                            대화방
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(2)}>
+                                            주소록
+                                        </button>
+                                        <button className="border w-2/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(3)}>
+                                            공지사항
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <div className="border text-left h-[435px] blue">
+                                        {btnCtl === 0 ? (
+                                            // ListLibrary.WorkerList(com)
+                                            <></>
+                                        ) : btnCtl === 1 ? (
+                                            <>
+                                                <div className="h-[100%] overflow-y-auto">
+                                                    <div className="border flex justify-between">
+                                                        <button>대화방</button>
+                                                        <button>나가기</button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 2 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                            </>
+                                        ) : btnCtl === 3 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(6)}>
+                                                        {" "}
+                                                        공지사항 추가하기
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 4 ? (
+                                            <>
+                                                <div className="h-[480px] overflow-y-auto">
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="text-right pb-2">
+                                                        사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 5 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(3)}>
+                                                        목록으로
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 6 ? (
+                                            <>
+                                                {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                                <button
+                                                    className="text-center border w-full h-[45px]"
+                                                    onClick={() => {
+                                                        setBtnCtl(3);
+                                                        // ListLibrary.noticeInsert(user);
+                                                    }}
+                                                >
+                                                    공지사항 등록
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
+                            </div>
+                            : (<><h2 className="mt-2">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                    />
+                                    <button
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
+                                        로그인
+                                    </button>
+                                </>
+                            )}
+
+
+                        {isRClick === true ? (
+                            <></>
+                            // <div className={`flex absolute`}
+                            //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            //     <div className="w-1/3 border">
+                            //         <img src="/logo192.png"/>
+                            //     </div>
+                            //     <div className="w-2/3 text-left border">
+                            //         <p>사내 이메일:{newWindowData[0]}</p>
+                            //         <p>전화번호:{newWindowData[1]}</p>
+                            //         <p>상태:</p>
+                            //         <button
+                            //             onClick={() => {
+                            //                 setIsRClick(false);
+                            //                 setNewWindowData([]);
+                            //             }}
+                            //         >
+                            //             닫기
+                            //         </button>
+                            //     </div>
+                            // </div>
+                        ) : (
+                            <></>
+                        )}
+
+
                     </div>
-                    <h2 className="text-xl font-bold mb-2">메신저</h2>
-                    <p>메신저 기능은 준비 중입니다.</p>
-                </aside>
+                </div>
+                <div
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
-    );
-};
+    )
+        ;
+}
 
 export default UserNoticeList;

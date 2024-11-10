@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import SelectCorCodePopup from "./SelectCorCodePopup";
@@ -345,9 +345,8 @@ export default function SignUpForm() {
 
     };
 
-
     return (
-        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
+        <div className="min-h-screen flex flex-col">
             {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
             <style>
                 {`
@@ -359,26 +358,39 @@ export default function SignUpForm() {
                     }
             `}
             </style>
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
-                <div className="flex mr-6">
-                    <div className="font-bold mr-1">{formattedDate}</div>
-                    <Clock
-                        format={'HH:mm:ss'}
-                        ticking={true}
-                        timezone={'Asia/Seoul'}/>
-                </div>
-                <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
-                </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle"/>
-                </div>
-            </header>
-            <div style={{marginLeft: "480px", marginTop: "30px"}} className="max-w-4xl items-center">
-                <form onSubmit={handleSubmit} className="space-y-0.5">
+            <div className="fixed w-full">
+                <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/FFFFFF/user-male-circle.png"
+                             alt="user-male-circle"/>
+                    </div>
+                </header>
+            </div>
+
+            <div className="mt-14 flex-1 flex justify-center">
+                <form onSubmit={handleSubmit} className="p-10 space-y-0.5">
                     {/* 회사코드 */}
                     <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                         <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>

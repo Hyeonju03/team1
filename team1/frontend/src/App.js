@@ -63,7 +63,7 @@ function App() {
                         <div className="App">
                             <Routes>
 
-                                <Route path="/LoginPage" element={<LoginPage/>}/>
+                                {/*<Route path="/LoginPage" element={<LoginPage/>}/>*/}
 
                                 <Route path="/main" element={<Main/>}></Route>
                                 <Route path="/SignUp" element={<SignUpForm/>}/>
@@ -89,10 +89,10 @@ function App() {
 
                                 <Route path="/schedule" element={<Schedule/>}/>
 
-                                <Route path="/sign/detail/:id" element={<SignDetail/>}/>
-
                                 <Route path="/sign" element={<SignList/>}/>
+                                <Route path="/sign/detail/:id" element={<SignDetail/>}/>
                                 <Route path="/sign/register" element={<SignRegister/>}/>
+
                                 <Route path="/admin/notice/list" element={<AdminNoticeList/>}/>
                                 <Route path="/admin/notice/register" element={<AdminNoticeRegister/>}/>
                                 <Route path="/admin/notice/detail" element={<AdminNoticeDetail/>}/>
@@ -101,7 +101,7 @@ function App() {
                                 <Route path="/user/notice/detail" element={<UserNoticeDetail/>}/>
 
                                 <Route path="/userInfo" element={<UserInfo/>}/>
-                                <Route path="/UserInfoModifyRequest/:id" element={<UserInfoModifyRequest/>}/>
+                                <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
 
                                 <Route path="/UserInfoRequestList" element={<UserInfoModifyRequestList/>}/>
 
