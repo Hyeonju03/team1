@@ -78,11 +78,14 @@ class ListLibrary {
 
     static findChildren(getChildList, isCheck) {
         getChildList = getChildList.children[1].children;
+        const getChilds = Array.from(getChildList);
         for (let i = 0; i < getChildList.length; i++) {
-            const getChilds = Array.from(getChildList);
-            getChilds[i].children[0].checked = isCheck;
+            //getChilds[i].children[0].checked = isCheck; //하위 부서가 없을 경우만 정상작동
             getChilds[i].querySelectorAll("input").forEach((tag) => {
-                tag.checked = isCheck;
+                //하위부서가 있어도 정상작동
+                if (!tag.disabled){
+                    tag.checked = isCheck;
+                }
             });
         }
     }
@@ -662,7 +665,7 @@ class ListLibrary {
                     while (!!getParentId.parentNode.parentNode.id){
                         getParentId = getParentId.parentNode.parentNode
                         const getChilds =  Array.from(getParentId.children[1].children);
-                        let isTrueCount = [0,0];
+                        let isTrueCount = [0];
                         getChilds.forEach(child => {
                               if (child.children[0].checked) isTrueCount[0]++;
                         });
