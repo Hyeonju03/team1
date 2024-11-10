@@ -31,6 +31,7 @@ export default function SignRegister() {
   const [user, setUser] = useState(empCode);
   const [com, setCom] = useState(empCode.split("-")[0]);
   const [chatNum, setChatNum] = useState("")
+  const [inviteChatCtl, setInviteChatCtl] = useState(0)
 
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
@@ -1084,19 +1085,35 @@ export default function SignRegister() {
                     </>
                 ) : btnCtl === 4 ? (
                     <>
-                      <div className="h-[383px] overflow-y-auto chatRoomDiv">
+                    {inviteChatCtl === 0 ? <>
+                      <div className="h-[353px] overflow-y-auto chatRoomDiv">
                         <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
                       </div>
                       <div className="w-[100%] h-[50px] flex">
-                        <input className="w-[70%] border chatInput" />
-                        <button className="w-[30%] border flex justify-center items-center" onClick={()=>{
+                        <input className="w-[70%] border chatInput"/>
+                        <button className="w-[30%] border flex justify-center items-center" onClick={() => {
                           handleSendMessage();
-                        }}>입력</button>
+                        }}>입력
+                        </button>
                       </div>
+                      <div className="flex">
+                        <button className="w-[50%] h-[30px] border flex justify-center items-center" onClick={() => {
+                          setInviteChatCtl(1)
+                        }}>조직도로 초대하기
+                        </button>
+                        <button className="w-[50%] h-[30px] border flex justify-center items-center" onClick={() => {
+                          setInviteChatCtl(2)
+                        }}>아이디로 초대하기
+                        </button>
+                      </div>
+                    </> :
+                        inviteChatCtl === 1 ? <>{ListLibrary.chatMemList2(user)}</>:
+                            inviteChatCtl === 2 ? <></> : <></>}
+
                     </>
                 ) : btnCtl === 5 ? (
                     <>
-                      <div dangerouslySetInnerHTML={{ __html: loadNoticeHtml }} />
+                      <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
                       <div>
                         <button className="text-center border w-full h-[45px]" onClick={() => setBtnCtl(3)}>
                           목록으로

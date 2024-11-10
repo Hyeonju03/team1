@@ -706,11 +706,11 @@ class ListLibrary {
         return await listCheck();
     }
 
-    static async chatMemList2(code){
+    static async chatMemList2(code,chatNum){
         let memList = new Map();
         const memListSet = async () => {
             await axios
-                .get("/chatInSelect2", {params: {chatNum:"1"}})
+                .get("/chatInSelect2", {params: {chatNum}})
                 .then((response) => {
                     //memList
                     memList = new Map(response.data.map(item => [item, ""]));
