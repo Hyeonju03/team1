@@ -536,8 +536,7 @@ class ListLibrary {
 
 
         chatNum.forEach((v1,i1)=>{
-            chatList += `<div class="border flex justify-between chatListDiv"><button class="chatInBtn" data-value=${v1}>${lastChat[i1]}</button><button class="chatDeleteBtn">나가기</button></div>`
-            console.log(chatNum)
+            chatList += `<div class="border flex justify-between chatListDiv"><button class="chatInBtn" data-value=${v1}>${lastChat[i1]}</button><button class="chatDeleteBtn" data-value=${v1}>나가기</button></div>`
         })
 
         const chatInviteList = await ListLibrary.chatMemList1(code);
@@ -559,19 +558,16 @@ class ListLibrary {
     }
 
     static async chatIn(code, chatNum) {
-        let htmlList = ""
-        //--------------------------------------------------------------
-        // const socket = new WebSocket('ws://localhost:3001');
-        // socket.onmessage = async (event) => {
-        //
-        //     htmlList = await this.chatLoad(code, chatNum)
-        // };
+        if (chatNum !== "") {
 
-        //--------------------------------------------------------------
-        if (htmlList === "") {
-            return await this.chatLoad(code, chatNum)
-        } else {
-            return htmlList
+            let htmlList = ""
+            if (htmlList === "") {
+                return await this.chatLoad(code, chatNum)
+            } else {
+                return htmlList
+            }
+        }else{
+            console.log("stop")
         }
     }
 
@@ -581,7 +577,7 @@ class ListLibrary {
         let writerInfo = []
         const dataSet1 = async () => {
             await axios
-                .get("/chatInSelect1", {params: {chatNum: "1"}})
+                .get("/chatInSelect1", {params: {chatNum: chatNum}})
                 .then((response) => {
                     //content
                     writer = response.data[0]

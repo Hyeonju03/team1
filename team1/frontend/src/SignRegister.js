@@ -30,6 +30,7 @@ export default function SignRegister() {
   const { btnCtl, setBtnCtl } = useListLibrary();
   const [user, setUser] = useState(empCode);
   const [com, setCom] = useState(empCode.split("-")[0]);
+  const [chatNum, setChatNum] = useState("")
 
   /* 공지사항 내용 가져오기 */
   const [noticeHtml, setNoticeHtml] = useState("");
@@ -48,7 +49,7 @@ export default function SignRegister() {
     setChatListLoad(result4);
 
 
-    const result5 = await ListLibrary.chatIn(user,'1') //이거 제일 마지막에 들어가야함 부하 심함
+    const result5 = await ListLibrary.chatIn(user,chatNum) //이거 제일 마지막에 들어가야함 부하 심함
     setChatInHTML(result5);
   };
 
@@ -157,14 +158,15 @@ export default function SignRegister() {
   useEffect(() => {
     //채팅 내부 이벤트들
     const chatUpdate = async () => {
-      setChatInHTML(await ListLibrary.chatIn(user, '1'))
+      setChatInHTML(await ListLibrary.chatIn(user, chatNum))
     }
     chatUpdate();
   }, [sendMessage]);
+
   const handleSendMessage = () => {
     if (socket.current && socket.current.readyState === WebSocket.OPEN) {
       const message = document.querySelector('.chatInput').value;
-      ListLibrary.chatinput(user, message, '1');
+      ListLibrary.chatinput(user, message, chatNum);
       socket.current.send(message);
       console.log('메시지 전송:', message);
       document.querySelector('.chatInput').value = ""
@@ -175,16 +177,17 @@ export default function SignRegister() {
   };
 
   useEffect(() => {
-    const chatInBtn =  document.querySelector(".chatInBtn");
-    const chatDeleteBtn = document.querySelector(".chatDeleteBtn");
+    const chatInBtn =  document.querySelectorAll(".chatInBtn");
+    const chatDeleteBtn = document.querySelectorAll(".chatDeleteBtn");
     const chatListAddBtn1 = document.querySelector(".chatListAddBtn1");
     const chatListAddBtn2 = document.querySelector(".chatListAddBtn2");
     const chatInviteListDiv = document.querySelector(".chatInviteListDiv");
-    const chatListDiv = document.querySelector(".chatListDiv");
+    const chatListDiv = document.querySelectorAll(".chatListDiv");
     const chatListFrameDiv =  document.querySelector(".chatListFrameDiv");
     const chatInviteListInput =  document.querySelector(".chatInviteListInput");
 
-    const handleClick1 = (event) => {
+    const handleClick1 = (e) => {
+      setChatNum(e.target.dataset.value)
       setBtnCtl(4);
     };
     const handleClick2 = (event) => {
@@ -225,12 +228,12 @@ export default function SignRegister() {
       setChatListLoad(await ListLibrary.chatListLoad(user));
     };
 
-    if (chatInBtn) {
-      chatInBtn.addEventListener("click", handleClick1);
-    }
-    if (chatDeleteBtn) {
-      chatDeleteBtn.addEventListener("click", handleClick2);
-    }
+    chatInBtn.forEach((e)=>{
+      e.addEventListener("click", handleClick1);
+    })
+    chatDeleteBtn.forEach((e)=>{
+      e.addEventListener("click", handleClick2);
+    })
     if (chatListAddBtn1) {
       chatListAddBtn1.addEventListener("click", handleClick3);
     }
@@ -239,12 +242,12 @@ export default function SignRegister() {
     }
 
     return () => {
-      if (chatInBtn) {
-        chatInBtn.removeEventListener("click", handleClick1);
-      }
-      if (chatDeleteBtn) {
-        chatDeleteBtn.removeEventListener("click",handleClick2);
-      }
+      chatInBtn.forEach((e)=>{
+        e.removeEventListener("click", handleClick1);
+      })
+      chatDeleteBtn.forEach((e)=>{
+        e.removeEventListener("click", handleClick2);
+      })
       if (chatListAddBtn1) {
         chatListAddBtn1.removeEventListener("click",handleClick3);
       }
