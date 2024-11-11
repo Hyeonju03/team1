@@ -133,8 +133,24 @@ const UserNoticeList = () => {
                             timezone={'Asia/Seoul'}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
-                             alt="home" onClick={() => navigate("/main")}/>
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
                     </div>
                     <div className="mr-16">
                         <img width="45" height="45"
@@ -381,14 +397,21 @@ const UserNoticeList = () => {
                                         type="text"
                                         placeholder="아이디"
                                         className="w-full p-2 mb-2 border rounded"
+                                        onChange={(e) => {
+                                            setInputId(e.target.value)
+                                        }}
                                     />
                                     <input
                                         type="password"
                                         placeholder="비밀번호"
                                         className="w-full p-2 mb-4 border rounded"
+                                        onChange={(e) => {
+                                            setInputPassword(e.target.value)
+                                        }}
                                     />
                                     <button
-                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4"
+                                        onClick={handleLogin}>
                                         로그인
                                     </button>
                                 </>

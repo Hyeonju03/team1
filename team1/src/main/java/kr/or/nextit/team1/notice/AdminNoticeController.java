@@ -69,7 +69,7 @@ public class AdminNoticeController {
     }
 
     // 공지사항 등록 (관리자만 가능)
-    @PostMapping("/api/adminnotice/register")
+    @PostMapping("/api/admin/notice/register")
     public ResponseEntity<NoticeDTO> noticeCreate(@RequestBody NoticeDTO noticeDTO, HttpServletRequest request) {
         if (!isAdmin(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -79,7 +79,7 @@ public class AdminNoticeController {
     }
 
     // 공지사항 수정 (관리자만 가능)
-    @PutMapping("/api/adminnotice/detail/{noticeNum}")
+    @PutMapping("/api/admin/notice/detail/{noticeNum}")
     public ResponseEntity<NoticeDTO> noticeUpdate(@PathVariable int noticeNum, @RequestBody NoticeDTO noticeDTO, HttpServletRequest request) {
         if (!isAdmin(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

@@ -83,10 +83,10 @@ export default function MainLayout() {
     // }, []);
 
     const empInfo = async () => {
-        try{
+        try {
             const response = await axios.get(`/emp/${empCode}`);
             setUserInfo(response.data);
-        }catch (e){
+        } catch (e) {
             console.log(e)
         }
     }
@@ -241,18 +241,6 @@ export default function MainLayout() {
         }
     };
 
-    // 메일 수량
-    // 지금 값은 나옴. 하지만 현재와 과거의 메일량 비교는 다시 생각해봐야함
-    // const newMail = async () => {
-    //     const mailEmpCode = empCode.split("-").join("")+'@damail.com';
-    //     const response = await axios.get('/receivedMailList', {
-    //         params: {
-    //             mailRef: mailEmpCode , mailTarget:mailEmpCode // 필요한 파라미터
-    //         }
-    //     });
-    //     setMailList(response.data);
-    // }
-
     // 롹인 안된 결재 수량
     const newSign = async () => {
         if (!empCode) {
@@ -357,7 +345,8 @@ export default function MainLayout() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col h-[919px]" onContextMenu={windowRClick}>
+        <div className={`min-h-screen flex flex-col ${isLoggedIn ? "h-[919px]" : "h-[1100px]"}`}
+             onContextMenu={windowRClick}>
             {/* Header with centegray logo */}
             {isLoggedIn ? (
                     <>
@@ -376,6 +365,12 @@ export default function MainLayout() {
                                      onClick={() => {
                                          navigate(`/user/notice/list`)
                                      }}/>
+                            </div>
+                            <div className="mr-5">
+                                <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                                     alt="help" onClick={() => {
+                                    navigate(`/AdminFAQ`)
+                                }}/>
                             </div>
                             <div className="mr-5">
                                 <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
@@ -605,14 +600,15 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div className="flex">
-                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-blue-300">
+                                                                <div className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#fbc2eb]">
                                                                         {s.category ? " " : ""}
                                                                     </p>
-                                                                    <div>
-                                                                        <p>{s.startDate} ~ {s.endDate}</p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
                                                                         <p>{s.content}</p>
                                                                     </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -621,10 +617,16 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div>
-                                                                    <p>{s.startDate} ~ {s.endDate}</p>
-                                                                    <p>{s.content}</p>
-                                                                    <p>{s.category}</p>
+                                                                <div
+                                                                    className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#BEA4EE]">
+                                                                        {s.category ? " " : ""}
+                                                                    </p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
+                                                                        <p>{s.content}</p>
+                                                                    </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -633,10 +635,16 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div>
-                                                                    <p>{s.startDate} ~ {s.endDate}</p>
-                                                                    <p>{s.content}</p>
-                                                                    <p>{s.category}</p>
+                                                                <div
+                                                                    className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#a6c1ee]">
+                                                                        {s.category ? " " : ""}
+                                                                    </p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
+                                                                        <p>{s.content}</p>
+                                                                    </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -669,42 +677,130 @@ export default function MainLayout() {
                                  }}/>
                         </div>
                         <div className="mr-5">
+                            <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                                 alt="help" onClick={() => {
+                                navigate(`/AdminFAQ`)
+                            }}/>
+                        </div>
+                        <div className="mr-5">
                             <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                                  alt="home" onClick={() => {
                                 navigate("/")
                             }}/>
                         </div>
                         <div className="mr-16" onClick={togglePanel}>
-                            <img width="45" height="45"
-                                 src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
-                                 alt="user-male-circle"/>
-                            <div className="" >로그인 / 회원가입</div>
+                            <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
+                            </div>
                         </div>
                     </header>
 
-                    <div className="bg-gray-100 h-80 flex justify-center">
-                        <div className="flex items-center w-96 bg-gray-200">
-                            <div className="ml-24">
-                                <div className="text-left font-bold text-3xl">
-                                    큰 주제
-                                    <br/>
-                                    이름
+                    <div className="bg-gray-100 flex justify-center">
+                        <div className="w-[60%] h-full flex">
+                            <div className="flex items-center w-2/5 bg-gray-200">
+                                <div className="ml-[20%] py-10">
+                                    <div className="text-left font-bold text-3xl">
+                                        사내 관리 플랫폼
+                                        <br/>
+                                        Business Clip
+                                    </div>
+                                    <div className="text-left mt-2">
+                                        business Clip을 사용중인 회사라면 <br/> 그 회사끼리 대화 및 연락이 가능하도록 <br/> B2B형식을 갖추었습니다!
+                                    </div>
                                 </div>
-                                <div className="text-left">
-                                    내용
+                            </div>
+                            <div className="w-3/5 bg-violet-200 flex">
+                                <div className="w-full flex flex-col">
+                                    <div className="bg-white rounded-b-lg h-1/5 w-2/5 mb-4"></div>
+                                    <div className="bg-green-200 rounded-lg h-2/5 w-2/5 mt-4"></div>
+                                    {/*<div className="bg-gray-200 h-1/5 w-full"></div>*/}
+                                </div>
+                                {/*<div className="flex flex-col w-full">*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*</div>*/}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-center items-center w-full h-full mt-[2%]">
+                        <div className="w-[60%] h-full flex flex-col">
+                            <div className="w-full h-1/3 flex justify-around">
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/ApplyForBusiness`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/FF7979/idea--v1.png"
+                                         alt="idea--v1" className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">10인 이하는 무료!</div>
+                                        <div className="font-bold">무료로 사용하기</div>
+                                    </div>
+                                </div>
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/AdminFAQ`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/36DADB/faq.png" alt="faq"
+                                         className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">질문 사항이 있나요?</div>
+                                        <div className="font-bold">FAQ & 1대1 질문하러 가기</div>
+                                    </div>
+                                </div>
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/user/notice/list`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/FFB951/noticeboard.png"
+                                         alt="noticeboard"
+                                         className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">사이트의 공지사항은 이곳!</div>
+                                        <div className="font-bold">공지사항 보러가기</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-full mt-10 mb-10 flex justify-between">
+                                <div className="w-3/5 h-full rounded-2xl">
+                                    <img className="rounded-2xl" src="/mainService.PNG" alt="mainService"/>
+                                </div>
+                                <div className="pt-20 bg-amber-100 shadow-lg rounded-full h-64 w-1/4 mr-20 mt-14">
+                                    <div className="font-bold text-2xl">
+                                        통합 기능 제공!
+                                    </div>
+                                    <div className="text-gray-500 text-left ml-16 mt-2">
+                                        <div className="text-gray-500">
+                                            # 전자결재, 메일 연동
+                                        </div>
+                                        <div className="text-gray-500">
+                                            # 인사, 조직도 연동
+                                        </div>
+                                        <div className="text-gray-500">
+                                            # 캘린더 연동
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="w-[600px] bg-violet-200 flex">
-                            <div className="w-full flex flex-col">
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
+                    </div>
+                    {/* footer */}
+                    <div className="bg-gray-400 h-full w-full text-white flex pl-96">
+                        <div>
+                            <div className="font-bold text-2xl mt-5 text-left">
+                                042-719-8850
                             </div>
-                            <div className="flex flex-col w-full">
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
+                            <div className="mt-5">
+                                (34856) 대전광역시 중구 계룡로 825 (용두동, 희영빌딩 2층)
+                            </div>
+                            <div className="flex">
+                                <div>Email: nextit_center@naver.com</div>
+                                <div className="ml-7">Fax: 042-719-8851</div>
                             </div>
                         </div>
                     </div>
@@ -717,15 +813,6 @@ export default function MainLayout() {
                 <div
                     className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
-                        {/*<div className="text-sm text-center">*/}
-                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
-                        {/*        공지사항*/}
-                        {/*    </a>*/}
-                        {/*    <span className="mx-1">|</span>*/}
-                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
-                        {/*        문의사항*/}
-                        {/*    </a>*/}
-                        {/*</div>*/}
                         {isLoggedIn ?
                             <div className="h-full">
                                 <div className="h-1/4">
@@ -874,16 +961,27 @@ export default function MainLayout() {
                                         type="text"
                                         placeholder="아이디"
                                         className="w-full p-2 mb-2 border rounded"
+                                        onChange={(e) => {
+                                            setInputId(e.target.value)
+                                        }}
                                     />
                                     <input
                                         type="password"
                                         placeholder="비밀번호"
                                         className="w-full p-2 mb-4 border rounded"
+                                        onChange={(e) => {
+                                            setInputPassword(e.target.value)
+                                        }}
                                     />
                                     <button
-                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4"
+                                        onClick={handleLogin}>
                                         로그인
                                     </button>
+                                    <div className="border-t-2 p-2 mx-16 cursor-pointer"
+                                         onClick={() => navigate(`/SignUp`)}>
+                                        <p className="text-gray-900 mb-2">회원가입</p>
+                                    </div>
                                 </>
                             )}
 

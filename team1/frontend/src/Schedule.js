@@ -12,7 +12,7 @@ import {ChevronRight} from "lucide-react";
 
 
 const typeColors = {
-    '개인': 'bg-pink-200', '부서': 'bg-green-200', '전체': 'bg-yellow-200',
+    '개인': 'bg-[#fbc2eb]', '부서': 'bg-[#BEA4EE]', '전체': 'bg-[#a6c1ee]',
 };
 
 export default function Schedule() {
@@ -265,6 +265,12 @@ export default function Schedule() {
                              onClick={() => {
                                  navigate(`/user/notice/list`)
                              }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
                     </div>
                     <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"

@@ -397,6 +397,12 @@ export default function SignDetail() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -704,7 +710,7 @@ export default function SignDetail() {
                                 </div>
                                 <div className="flex flex-col ml-2 w-1/3">
                                     {isToggled ?
-                                        <button className="w-full group" onClick={handleDownloadPdf}>
+                                        <button className="w-full group mb-2" onClick={handleDownloadPdf}>
                                             <div className="flex h-11">
                                                 <div
                                                     className="w-5/6 bg-rose-400 group-hover:bg-rose-500 text-white p-2.5 rounded-l-lg font-bold">PDF

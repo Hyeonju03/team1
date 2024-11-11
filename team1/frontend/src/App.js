@@ -21,7 +21,6 @@ import UserInfoModifyRequest from "./UserInfoModifyRequest";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail";
 import SignDetail from "./SignDetail";
-import MailList from "./MailList";
 import MailSend from "./MailSend";
 import MailSendList from "./MailSendList";
 import MailSendResult from "./MailSendResult";
@@ -48,8 +47,6 @@ import AnsQ from "./AnsQ";
 import AnsQDetail from "./AnsQDetail";
 import AnsQCompleteList from "./AnsQCompleteList";
 import NoAnsQList from "./NoAnsQList";
-import LoginPage from "./LoginPage";
-import Login from "./Login";
 import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import {UserProvider} from "./UserContext";
 
@@ -112,7 +109,6 @@ function App() {
                                 <Route path="/PaymentCom" element={<PaymentCom/>}/>
                                 <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
 
-                                <Route path="/MailList" element={<MailList/>}/>
                                 <Route path="/MailSend" element={<MailSend/>}/>
                                 <Route path="/MailSendList" element={<MailSendList/>}/>
                                 <Route path="/MailSendResult" element={<MailSendResult/>}/>
@@ -127,7 +123,7 @@ function App() {
                                 <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
                                 <Route path="/PositionManagement" element={<PositionManagement/>}/>
 
-                                <Route path="/Login" element={<Login/>}/>
+                                {/*<Route path="/Login" element={<Login/>}/>*/}
 
                             </Routes>
                         </div>

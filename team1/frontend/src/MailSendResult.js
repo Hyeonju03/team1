@@ -191,6 +191,12 @@ export default function EmailSend() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")

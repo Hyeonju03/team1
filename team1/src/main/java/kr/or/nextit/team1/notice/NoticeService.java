@@ -43,10 +43,10 @@ public class NoticeService {
     }
 
     // 관리자 인증
-    public boolean validateAdmin(String adminId, String adminPw) {
+    public boolean validateAdmin(String empCode, String empPass) {
         Map<String, String> params = new HashMap<>();
-        params.put("adminId", adminId);
-        params.put("adminPw", adminPw);
+        params.put("empCode", empCode);
+        params.put("empPass", empPass);
         return noticeMapper.validateAdmin(params) > 0;
     }
 

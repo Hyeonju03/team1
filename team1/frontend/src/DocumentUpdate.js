@@ -141,15 +141,20 @@ export default function DocumentUpdate() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
                         }}/>
                     </div>
-                    <div className="mr-16">
-                        <img width="45" height="45"
-                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
-                             alt="user-male-circle" onClick={togglePanel}/>
+                    <div className="mr-16" onClick={togglePanel}>
+                        <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
+                        </div>
                     </div>
                 </header>
             </div>

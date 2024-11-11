@@ -80,7 +80,7 @@ export default function EmailSend() {
         if (!localStorage.getItem('empCode')) {
             alert("로그인하세요")
             navigate("/"); // 로그인하지 않으면 홈페이지로 이동
-        }else {
+        } else {
             empInfo();
         }
     }, [])
@@ -117,10 +117,10 @@ export default function EmailSend() {
     }, [isLoggedIn, empCode]); // isLoggedIn과 empCode 변경 시에만 실행
 
     const empInfo = async () => {
-        try{
+        try {
             const response = await axios.get(`/emp/${empCode}`);
             setUserInfo(response.data);
-        }catch (e){
+        } catch (e) {
             console.log(e)
         }
     }
@@ -286,6 +286,12 @@ export default function EmailSend() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -400,7 +406,8 @@ export default function EmailSend() {
                                 </button>
                                 <div className="flex ml-5 w-[100%] justify-between">
                                     <p className="w-1/6 text-left overflow-hidden whitespace-nowrap text-ellipsis">{v.empCode}</p>
-                                    <div className="flex items-center w-2/6 text-left min-w-[150px]"> {/* minWidth 추가 */}
+                                    <div
+                                        className="flex items-center w-2/6 text-left min-w-[150px]"> {/* minWidth 추가 */}
                                         {v.fileName && (  // 파일이 있을 경우에만 아이콘 표시
                                             <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨"/>
                                         )}

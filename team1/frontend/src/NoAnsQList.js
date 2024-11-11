@@ -239,7 +239,7 @@ export default function Component() {
 
     return (
         <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                 <div className="flex mr-6">
                     <div className="font-bold mr-1">{formattedDate}</div>
                     <Clock
@@ -248,12 +248,28 @@ export default function Component() {
                         timezone={'Asia/Seoul'}/>
                 </div>
                 <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
+                    <img width="40" height="40"
+                         src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                         alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                         onClick={() => {
+                             navigate(`/user/notice/list`)
+                         }}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                         alt="help" onClick={() => {
+                        navigate(`/AdminFAQ`)
+                    }}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                         alt="home" onClick={() => {
+                        navigate("/")
+                    }}/>
                 </div>
                 <div className="mr-16">
                     <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                         src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                          alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>

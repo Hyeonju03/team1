@@ -285,6 +285,12 @@ export default function PositionManagement() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -315,9 +321,9 @@ export default function PositionManagement() {
                         </ol>
                     </aside>
                 </div>
-                <main className="ml-64 mt-14 flex-1 p-4 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
+                <main className="ml-64 mt-14 flex-1 p-4 w-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
                     <h1 className="text-2xl font-bold mb-4">직급관리</h1>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mb-8">
                         <div className="space-y-2 w-4/6 flex flex-col justify-center">
                             {/* 회사 이름 */}
                             <div className="flex items-center gap-2 py-2 mb-4">
@@ -330,13 +336,13 @@ export default function PositionManagement() {
                                         isReordering
                                             ? 'bg-red-500 text-white hover:bg-red-600'
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                {isReordering ? '취소' : '순서 바꾸기'}
-                            </button>
-                        </div>
+                                    }`}
+                                >
+                                    {isReordering ? '취소' : '순서 바꾸기'}
+                                </button>
+                            </div>
 
-                        {/* 직급 리스트 */}
+                            {/* 직급 리스트 */}
                         {isReordering ? (
                             <DragDropContext onDragEnd={handleDragEnd}>
                                 <StrictModeDroppable droppableId="positions">
@@ -415,11 +421,11 @@ export default function PositionManagement() {
                                 value={newPositionName}
                                 onChange={(e) => setNewPositionName(e.target.value)}
                                 placeholder="새 직급 이름"
-                                className="ml-4 w-[80%] flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                                className="ml-4 mt-4 w-[80%] h-4/5 flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                             />
                             <button
                                 onClick={handleInsert}
-                                className="w-[18%] px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition-colors"
+                                className="w-[18%] mt-4 h-4/5 px-4 py-2 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 transition-colors"
                             >
                                 추가
                             </button>

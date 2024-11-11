@@ -18,7 +18,7 @@
     <select id="validateAdmin" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM admininfo
-        WHERE ADMIN_ID = #{adminId} AND ADMIN_PW = #{adminPw}
+        WHERE ADMIN_ID = #{empCode} AND ADMIN_PW = #{empPass}
     </select>
 
     <!--  일반 로그인  -->
@@ -26,6 +26,15 @@
         SELECT COUNT(*)
         FROM employee
         WHERE EMP_CODE = #{empCode} AND EMP_PASS = #{empPass}
+
+--             SELECT COUNT(*) FROM(
+--                 SELECT emp_code AS id, emp_pass AS pwd
+--                 FROM employee
+--                 UNION ALL
+--                 SELECT admin_id AS id, admin_pw AS pwd
+--                 FROM admininfo
+--             )a
+--             WHERE id = #{empCode} AND pwd = #{empPass}
     </select>
 
     <!--  List  -->

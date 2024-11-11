@@ -214,6 +214,12 @@ export default function DocumentList() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -229,7 +235,6 @@ export default function DocumentList() {
             <div className="flex-1 flex">
                 <div className="fixed h-full">
                     <aside className="mt-14 h-full w-64 bg-gray-200 border-r-2 shadow-lg p-4 space-y-2">
-
                         <div>
                             <Button
                                 variant="ghost"
@@ -244,7 +249,8 @@ export default function DocumentList() {
                             {isExpanded && (
                                 <div className="ml-8 space-y-2 pace-y-2 mt-2">
                                     {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                            <Button variant="ghost" className="w-full" key={`${item}`}>
+                                            <Button variant="ghost" className="w-full" key={`${item}`}
+                                                    onClick={() => handleCategorySelect(item)}>
                                                 {item}
                                             </Button>
                                         )

@@ -168,7 +168,7 @@ export default function UserInfoModifyRequest() {
                     })
 
                 } else {
-                    modifyRequest = modifyReqList;
+                    modifyRequest = "";
                 }
                 // modifyReqList.split()
                 // modify_req 값 비우기 요청
@@ -236,6 +236,12 @@ export default function UserInfoModifyRequest() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -274,7 +280,8 @@ export default function UserInfoModifyRequest() {
                                                         <div className="hover:underline"
                                                              onClick={() => {
                                                                  navigate("/userInfo")
-                                                             }}>내 인사 정보</div>
+                                                             }}>내 인사 정보
+                                                        </div>
                                                     </button>
 
                                                 </div>
@@ -330,7 +337,7 @@ export default function UserInfoModifyRequest() {
                                                 <input id="empName" type="text" value={selectedUser.empName} readOnly
                                                        className="text-lg font-bold px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
                                             </div>
-                                            <div className="mt-2 ">{selectedUser.empCode}</div>
+                                            <div id="empCode" className="mt-2">{selectedUser.empCode}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -357,7 +364,7 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">상관코드</div>
                                                 <div className="flex ml-16">
-                                                    <input id="empPass" type="password" value={selectedUser.corCode}
+                                                    <input id="corCode" type="text" value={selectedUser.corCode}
                                                            readOnly
                                                            className="ml-2 px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
                                                 </div>
@@ -365,7 +372,7 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">주민등록번호</div>
                                                 <div className="flex ml-10">
-                                                    <input id="phoneNum" type="text"
+                                                    <input id="empRrn" type="text"
                                                            value={selectedUser.empRrn} readOnly
                                                            className="px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
                                                     <p className="text-red-700 mt-2">* 수정불가 </p>
@@ -374,8 +381,8 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">비밀번호</div>
                                                 <div className="flex ml-16">
-                                                    <input id="extNum" type="text"
-                                                           value={selectedUser.empPass}
+                                                    <input id="empPass" type="text"
+                                                           value={viewPassword ? selectedUser.empPass : selectedUser.empPass.replaceAll(/[a-zA-Z0-9]/g, "*")}
                                                            readOnly
                                                            className="ml-2 px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
                                                     <p className="mt-2" onClick={viewPasswordHandler}>
@@ -391,7 +398,7 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">전화번호</div>
                                                 <div className="flex ml-16">
-                                                    <input id="empMail" type="email"
+                                                    <input id="phoneNum" type="email"
                                                            value={selectedUser.phoneNum} readOnly
                                                            className="ml-2 px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
                                                 </div>
@@ -399,7 +406,7 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">내선번호</div>
                                                 <div className="flex ml-16">
-                                                    <input id="corCode" type="text"
+                                                    <input id="extNum" type="text"
                                                            value={selectedUser.extNum ? selectedUser.extNum : "내선번호 없음"}
                                                            readOnly
                                                            className="ml-2 px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"/>
@@ -409,7 +416,7 @@ export default function UserInfoModifyRequest() {
                                             <div className="flex mb-2">
                                                 <div className="mt-2">메일</div>
                                                 <div className="flex ml-24">
-                                                    <input type="text"
+                                                    <input id="empMail" type="text"
                                                            className="ml-2 px-3 py-2 border-b-2 border-gray-800 bg-gray-200 text-gray-800"
                                                            value={selectedUser.empMail}
                                                            placeholder={"xxxx@xxxx.xxx"}

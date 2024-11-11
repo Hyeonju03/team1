@@ -231,6 +231,12 @@ export default function SignUpForm() {
                              }}/>
                     </div>
                     <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
                         <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                              alt="home" onClick={() => {
                             navigate("/")
@@ -274,7 +280,7 @@ export default function SignUpForm() {
                                     const empNum = selectEmpNumList;
                                     return (
                                         <div className="text-left" key={i} style={{marginBottom: "30px"}}>
-                                        <p className="flex" style={{marginBottom: "30px"}}>회사명:
+                                            <p className="flex" style={{marginBottom: "30px"}}>회사명:
                                                 <input
                                                     id="comName"
                                                     name="comName"

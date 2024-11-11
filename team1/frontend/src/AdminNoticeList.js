@@ -72,10 +72,10 @@ const AdminNoticeList = () => {
 
         try {
             const response = await axios.post(
-                '/api/admin/login', // 관리자 로그인 API 호출
+                '/api/employ/login', // 관리자 로그인 API 호출
                 {
-                    adminId: inputId,
-                    adminPw: inputPassword
+                    empCode: inputId,
+                    empPass: inputPassword
                 }
             );
 
@@ -87,7 +87,7 @@ const AdminNoticeList = () => {
                 localStorage.setItem('token', response.data.token);
                 setInputId(""); // 아이디 입력 필드 초기화
                 setInputPassword(""); // 비밀번호 입력 필드 초기화
-                navigate('/adminnotice'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
+                navigate('/admin/notice/list'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
             } else {
                 setError("유효하지 않은 로그인 정보입니다.");
             }
@@ -106,7 +106,7 @@ const AdminNoticeList = () => {
             setInputPassword(""); // 비밀번호 입력 필드 초기화
             setIsLoggedIn(false); // 로그인 상태 업데이트
             setUserId(""); // 사용자 ID 초기화
-            navigate('/adminnotice'); // 리스트 페이지로 이동
+            navigate('/admin/notice'); // 리스트 페이지로 이동
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
@@ -114,7 +114,7 @@ const AdminNoticeList = () => {
 
     // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
     const handleNoticeClick = (noticeNum) => {
-        navigate('/adminnotice/detail', { state: { noticeNum } }); // 모든 경우에 adminnotice/detail로 이동
+        navigate('/admin/notice/detail', { state: { noticeNum } }); // 모든 경우에 adminnotice/detail로 이동
     };
 
     // 필터링된 공지사항 가져오기 (검색창)
@@ -134,7 +134,7 @@ const AdminNoticeList = () => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                 <div className="flex mr-6">
                     <div className="font-bold mr-1">{formattedDate}</div>
                     <Clock
@@ -143,13 +143,28 @@ const AdminNoticeList = () => {
                         timezone={'Asia/Seoul'}/>
                 </div>
                 <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
+                    <img width="40" height="40"
+                         src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                         alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                         onClick={() => {
+                             navigate(`/user/notice/list`)
+                         }}/>
                 </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle"  onClick={togglePanel}/>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                         alt="help" onClick={() => {
+                        navigate(`/AdminFAQ`)
+                    }}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                         alt="home" onClick={() => {
+                        navigate("/")
+                    }}/>
+                </div>
+                <div className="mr-16" onClick={togglePanel}>
+                    <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
+                    </div>
                 </div>
             </header>
 
@@ -237,51 +252,51 @@ const AdminNoticeList = () => {
                 </main>
 
 
-                    <aside className="w-64 p-4 border-l border-gray-300">
-                        {isLoggedIn ? (
-                            <div className="mb-4">
-                                <p className="mb-2">{userId}님<br/>반갑습니다.</p>
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200"
-                                >
-                                    로그아웃
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleLogin} className="mb-4">
-                                <input
-                                    type="text"
-                                    value={inputId}
-                                    onChange={(e) => setInputId(e.target.value)}
-                                    placeholder="관리자 ID"
-                                    className="w-full p-2 border mb-2"
-                                    required
-                                />
-                                <input
-                                    type="password"
-                                    value={inputPassword}
-                                    onChange={(e) => setInputPassword(e.target.value)}
-                                    placeholder="비밀번호"
-                                    className="w-full p-2 border mb-2"
-                                    required
-                                />
-                                <button
-                                    type="submit"
-                                    className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
-                                >
-                                    로그인
-                                </button>
-                            </form>
-                        )}
-                        <div className="text-sm text-center mb-4">
-                            <a href="#" className="text-blue-600 hover:underline">공지사항</a>
-                            <span className="mx-1">|</span>
-                            <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                <aside className="w-64 p-4 border-l border-gray-300">
+                    {isLoggedIn ? (
+                        <div className="mb-4">
+                            <p className="mb-2">{userId}님<br/>반갑습니다.</p>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full bg-red-500 text-white p-2 mb-2 hover:bg-red-600 transition duration-200"
+                            >
+                                로그아웃
+                            </button>
                         </div>
-                        <h2 className="text-xl font-bold mb-2">메신저</h2>
-                        <p>메신저 기능은 준비 중입니다.</p>
-                    </aside>
+                    ) : (
+                        <form onSubmit={handleLogin} className="mb-4">
+                            <input
+                                type="text"
+                                value={inputId}
+                                onChange={(e) => setInputId(e.target.value)}
+                                placeholder="관리자 ID"
+                                className="w-full p-2 border mb-2"
+                                required
+                            />
+                            <input
+                                type="password"
+                                value={inputPassword}
+                                onChange={(e) => setInputPassword(e.target.value)}
+                                placeholder="비밀번호"
+                                className="w-full p-2 border mb-2"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-500 text-white p-2 mb-2 hover:bg-blue-600 transition duration-200"
+                            >
+                                로그인
+                            </button>
+                        </form>
+                    )}
+                    <div className="text-sm text-center mb-4">
+                        <a href="#" className="text-blue-600 hover:underline">공지사항</a>
+                        <span className="mx-1">|</span>
+                        <a href="#" className="text-blue-600 hover:underline">문의사항</a>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">메신저</h2>
+                    <p>메신저 기능은 준비 중입니다.</p>
+                </aside>
             </div>
         </div>
     );
