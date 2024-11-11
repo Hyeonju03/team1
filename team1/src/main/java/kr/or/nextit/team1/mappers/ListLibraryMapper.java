@@ -23,6 +23,10 @@ public interface ListLibraryMapper {
     List<ListLibraryDTO> chatInSelect3(String chatNum);
     void chatInUpdate1(Map<String, Object> data);
     List<ListLibraryDTO> chatInSelect4(String code);
-    void chatAdd(Map<String, Object> data);
+    void chatAdd1(Map<String, Object> data);
+    void chatAdd2(Map<String, Object> data);
     List<ListLibraryDTO> myChatList(String code);
+    String empCodeCheck(String code);
+    List<ListLibraryDTO> empCodeCheck2(String code);
+    void chatOut(Map<String, Object> data);
 }

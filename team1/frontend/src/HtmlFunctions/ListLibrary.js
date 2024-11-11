@@ -536,7 +536,7 @@ class ListLibrary {
 
 
         chatNum.forEach((v1,i1)=>{
-            chatList += `<div class="border flex justify-between chatListDiv"><button class="chatInBtn" data-value=${v1}>${lastChat[i1]}</button><button class="chatDeleteBtn" data-value=${v1}>나가기</button></div>`
+            chatList += `<div class="border flex justify-between chatListDiv"><button class="chatInBtn w-[300px]" data-value=${v1}>${lastChat[i1]}</button><button class="chatDeleteBtn w-[50px]" data-value=${v1}>나가기</button></div>`
         })
 
         const chatInviteList = await ListLibrary.chatMemList1(code);
@@ -721,7 +721,7 @@ class ListLibrary {
         const depLayout = () => {
             let htmlList = {};
             const htmlTags = new DOMParser().parseFromString(`
-                    <div class="border h-[360px] here overflow-y-auto"><ul class="list-disc pl-5"></ul></div>
+                    <div class="border h-[390px] here overflow-y-auto chatMemList2Div"><ul class="list-disc pl-5"></ul></div>
             `, "text/html").body;
 
             this.depCode.forEach((v1, i1) => {
@@ -780,7 +780,7 @@ class ListLibrary {
                 }
             });
             htmlTags.children[0].appendChild(htmlList[this.top]);
-            return htmlTags;
+            return htmlTags.outerHTML;
         };
 
 
@@ -800,17 +800,71 @@ class ListLibrary {
         return await listCheck();
     }
 
-    static async chatAdd(code,members){
+    static async chatAdd1(code,members){
         const chatData = {
             members : members,
             code: code,
         }
 
         await axios
-            .post("/chatAdd", chatData)
+            .post("/chatAdd1", chatData)
             .then((response) => {
             })
             .catch((error) => console.log(error));
+    }
+    static async chatAdd2(chatNum,members){
+        const chatData = {
+            members : members,
+            chatNum: chatNum,
+        }
+
+        await axios
+            .post("/chatAdd2", chatData)
+            .then((response) => {
+            })
+            .catch((error) => console.log(error));
+    }
+    static async chatOut(code,chatNum){
+        const chatData = {
+            code : code,
+            chatNum: chatNum,
+        }
+
+        await axios
+            .post("/chatOut", chatData)
+            .then((response) => {
+            })
+            .catch((error) => console.log(error));
+    }
+
+    static async empCodeCheck(code){
+        let empCode = "";
+        const dataSet = async () => {
+            await axios
+                .get("/empCodeCheck", { params: { code } })
+                .then((response) => {
+                    empCode = response.data
+                    console.log(response.data)
+                })
+                .catch((error) => console.log(error));
+        }
+        await dataSet();
+
+        return empCode;
+    }
+    static async empCodeCheck2(code,chatNum){
+        let isTrue = false;
+        const dataSet = async () => {
+            await axios
+                .get("/empCodeCheck2", { params: { code: code, chatNum: chatNum} })
+                .then((response) => {
+                    isTrue = response.data
+                    console.log(response.data)
+                })
+                .catch((error) => console.log(error));
+        }
+        await dataSet();
+        return isTrue;
     }
 
     static async chatDataSet(chatNum) {

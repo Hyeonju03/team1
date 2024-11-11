@@ -199,9 +199,14 @@ public class ListLibraryController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/chatAdd")
-    public ResponseEntity<Void> chatAdd(@RequestBody Map<String, Object> data) {
-        listLibraryService.chatAdd(data);
+    @PostMapping("/chatAdd1")
+    public ResponseEntity<Void> chatAdd1(@RequestBody Map<String, Object> data) {
+        listLibraryService.chatAdd1(data);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/chatAdd2")
+    public ResponseEntity<Void> chatAdd2(@RequestBody Map<String, Object> data) {
+        listLibraryService.chatAdd2(data);
         return ResponseEntity.ok().build();
     }
 
@@ -226,5 +231,33 @@ public class ListLibraryController {
             list[0].add(data.get(i).getChatNum());
         }
         return ResponseEntity.ok(list);
+    }
+
+
+    @GetMapping("/empCodeCheck")
+    public ResponseEntity<String> empCodeCheck(String code) {
+        return ResponseEntity.ok(listLibraryService.empCodeCheck(code));
+    }
+    @GetMapping("/empCodeCheck2")
+    public ResponseEntity<Boolean> empCodeCheck2(String code,String chatNum) {
+        List<ListLibraryDTO> data2 = listLibraryService.empCodeCheck2(chatNum);
+        String data = data2.get(0).getMemList();
+        String[] dataSplit;
+        boolean isTrue = false;
+        int count = 0;
+        dataSplit = data.split(",");
+        for (String s : dataSplit) {
+            if (s.equals(code)) {
+                count++;
+            }
+        }
+        if (count == 0) isTrue = true;
+
+        return ResponseEntity.ok(isTrue);
+    }
+    @PostMapping("/chatOut")
+    public ResponseEntity<Void> chatOut(@RequestBody Map<String, Object> data) {
+        listLibraryService.chatOut(data);
+        return ResponseEntity.ok().build();
     }
 }

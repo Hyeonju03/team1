@@ -84,12 +84,30 @@
         set content = CONCAT(content ,#{chatContent},',')
         where CHAT_NUM like #{chatNum};
     </update>
-    <insert id="chatAdd" parameterType="Map">
+    <insert id="chatAdd1" parameterType="Map">
         insert into chatroom (mem_list, speaker, content)
         values (#{members}, #{code}, "")
     </insert>
+    <update id="chatAdd2" parameterType="Map">
+        update chatroom
+        set mem_list = CONCAT(mem_list,#{members})
+        where CHAT_NUM like #{chatNum}
+    </update>
     <select id="myChatList" resultType="ListLibraryDTO" parameterType="String">
         select CHAT_NUM, CONTENT from chatroom
         where MEM_LIST like CONCAT('%',#{code},',%')
     </select>
+    <select id="empCodeCheck" resultType="String" parameterType="String">
+        select EMP_CODE from employee
+        where EMP_CODE like #{code}
+    </select>
+    <select id="empCodeCheck2" resultType="ListLibraryDTO" parameterType="String">
+        select mem_list from chatroom
+        where CHAT_NUM like #{chatNum}
+    </select>
+    <update id="chatOut" parameterType="Map">
+        update chatroom
+        set mem_list = REPLACE(mem_list, CONCAT(#{code}, ',') , '')
+        where CHAT_NUM like #{chatNum}
+    </update>
 </mapper>

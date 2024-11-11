@@ -39,6 +39,7 @@ export default function SignRegister() {
   const [addressBookHtml, setAddressBookHtml] = useState("");
   const [chatListLoad, setChatListLoad] = useState("");
   const [chatInHTML, setChatInHTML] = useState("");
+  const [chatMemList2, setChatMemList2] = useState("")
   const fetchData = async () => {
     const result1 = await ListLibrary.noticeList(user, btnCtl);
     setNoticeHtml(result1);
@@ -48,10 +49,11 @@ export default function SignRegister() {
     setAddressBookHtml(result3);
     const result4 = await ListLibrary.chatListLoad(user)
     setChatListLoad(result4);
+    const result5 = await ListLibrary.chatMemList2(user,chatNum)
+    setChatMemList2(result5);
 
-
-    const result5 = await ListLibrary.chatIn(user,chatNum) //이거 제일 마지막에 들어가야함 부하 심함
-    setChatInHTML(result5);
+    const result6 = await ListLibrary.chatIn(user,chatNum) //이거 제일 마지막에 들어가야함 부하 심함
+    setChatInHTML(result6);
   };
 
 
@@ -191,8 +193,9 @@ export default function SignRegister() {
       setChatNum(e.target.dataset.value)
       setBtnCtl(4);
     };
-    const handleClick2 = (event) => {
-      console.log("")
+    const handleClick2 = async (e) => {
+      await ListLibrary.chatOut(user, e.target.dataset.value)
+      setChatListLoad(await ListLibrary.chatListLoad(user));
     };
     const handleClick3 = (event) => {
       chatInviteListDiv.style.display = "block"
@@ -217,7 +220,7 @@ export default function SignRegister() {
         }
       });
       if (memberCount > 1){
-        await ListLibrary.chatAdd(user, members)
+        await ListLibrary.chatAdd1(user, members)
       }else {
         alert("인원이 너무 적습니다")
         chatInviteListDiv.querySelectorAll(".worker").forEach((e, i1) => {
@@ -228,6 +231,7 @@ export default function SignRegister() {
       }
       setChatListLoad(await ListLibrary.chatListLoad(user));
     };
+
 
     chatInBtn.forEach((e)=>{
       e.addEventListener("click", handleClick1);
@@ -258,6 +262,45 @@ export default function SignRegister() {
     };
 
   }, [chatListLoad, btnCtl]);
+
+  const chatInviteList = async () => {
+    const chatMemList2Div = document.querySelector(".chatMemList2Div");
+    let members = ""
+    let memberCount = 0
+    chatMemList2Div.querySelectorAll(".worker").forEach((e, i1) => {
+      if (e.children[0].checked && !e.children[0].disabled) {
+        members += e.dataset.value + ","
+        memberCount++;
+      }
+    });
+    if (memberCount > 0) {
+      await ListLibrary.chatAdd2(chatNum, members)
+    } else {
+      alert("인원이 너무 적습니다")
+      chatMemList2Div.querySelectorAll(".worker").forEach((e, i1) => {
+        if (!e.children[0].disabled) {
+          e.children[0].checked = false
+        }
+      });
+    }
+  };
+  const chatInviteList2 = async (e) => {
+    let member = await ListLibrary.empCodeCheck(e)
+    const empCodeIsTrue = await ListLibrary.empCodeCheck2(e,chatNum)
+    console.log(member,empCodeIsTrue)
+    if (member !== "" && empCodeIsTrue) {
+      member += ","
+      await ListLibrary.chatAdd2(chatNum, member)
+    }else if(!empCodeIsTrue){
+      alert("이미 존재하는 참가자 입니다.")
+    }else{
+      alert("존재하지 않는 아이디 입니다.")
+    }
+  };
+
+  const setChatMemList2Set = async () => {
+    setChatMemList2(await ListLibrary.chatMemList2(user, chatNum));
+  }
 
 
   // 왼쪽 카테고리
@@ -1099,17 +1142,41 @@ export default function SignRegister() {
                       <div className="flex">
                         <button className="w-[50%] h-[30px] border flex justify-center items-center" onClick={() => {
                           setInviteChatCtl(1)
+                          setChatMemList2Set()
                         }}>조직도로 초대하기
                         </button>
                         <button className="w-[50%] h-[30px] border flex justify-center items-center" onClick={() => {
+                          document.querySelector(".chatInput").value = ""
                           setInviteChatCtl(2)
                         }}>아이디로 초대하기
                         </button>
                       </div>
                     </> :
-                        inviteChatCtl === 1 ? <>{ListLibrary.chatMemList2(user)}</>:
-                            inviteChatCtl === 2 ? <></> : <></>}
-
+                        inviteChatCtl === 1 ? <>
+                              <div dangerouslySetInnerHTML={{__html: chatMemList2}}/>
+                              <button className="border w-[100%] h-[45px] chatListAddBtn3" onClick={()=>{
+                                chatInviteList().then(r => setInviteChatCtl(0))
+                                setChatMemList2Set()
+                              }}>초대하기</button>
+                            </> :
+                      inviteChatCtl === 2 ?
+                          <>
+                            <div className="h-[383px] overflow-y-auto chatRoomDiv">
+                              <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                            </div>
+                            <div className="flex">
+                              <input className="border w-[70%] h-[50px]"/>
+                              <button className="w-[30%] h-[50px] border flex justify-center items-center" onClick={(e)=>{
+                                setInviteChatCtl(0)
+                                chatInviteList2(e.currentTarget.parentNode.children[0].value).then(e.currentTarget.parentNode.children[0].value = "")
+                                setChatMemList2Set()
+                              }}>
+                                아이디로<br/>초대하기
+                              </button>
+                            </div>
+                          </>
+                          : <></>
+                    }
                     </>
                 ) : btnCtl === 5 ? (
                     <>
