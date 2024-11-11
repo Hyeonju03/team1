@@ -18,7 +18,6 @@ import SignList from "./SignList";
 import SignRegister from "./SignRegister";
 import UserInfo from "./UserInfo";
 import UserInfoModifyRequest from "./UserInfoModifyRequest";
-import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail";
 import SignDetail from "./SignDetail";
@@ -48,6 +47,7 @@ import AnsQ from "./AnsQ";
 import AnsQDetail from "./AnsQDetail";
 import AnsQCompleteList from "./AnsQCompleteList";
 import NoAnsQList from "./NoAnsQList";
+import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import {UserProvider} from "./UserContext";
 
 function App() {

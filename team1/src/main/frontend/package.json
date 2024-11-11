@@ -7,13 +7,16 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "lucide-react": "^0.456.0",
     "react": "^18.3.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-calendar": "^5.1.0",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
     "react-live-clock": "^6.1.24",
     "react-router-dom": "^6.26.2",
-    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -22,6 +25,7 @@
     "test": "npx react-scripts test",
     "eject": "npx react-scripts eject"
   },
+  "proxy": "http://localhost:8080",
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -41,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "react-scripts": "^5.0.1",
     "tailwindcss": "^3.4.10"
   }
 }

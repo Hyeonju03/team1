@@ -19,7 +19,6 @@ export default function ApplyForBusiness() {
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
-    const navigate = useNavigate();
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);

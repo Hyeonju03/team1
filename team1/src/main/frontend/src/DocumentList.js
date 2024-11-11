@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, Paperclip, Search} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import useComCode from "frontend/src/hooks/useComCode";
+import useComCode from "hooks/useComCode";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
 

@@ -22,6 +22,10 @@ export default function MainLayout() {
     const [reqCount, setReqCount] = useState(0); // 부하직원 관련 내용
     // 날씨
     const weekday = ['일', '월', '화', '수', '목', '금', '토'];
+
+    useEffect(()=>{
+        console.log(empCode)
+    },[])
     const [weathers, setWeathers] = useState([{
         feels_like: '',
         dt_txt: '',
