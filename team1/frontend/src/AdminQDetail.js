@@ -92,7 +92,7 @@ export default function Component() {
 
 
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn && empCode) {
             const fetchData = async () => {
                 try {
                     const response = await axios.get("/QDetailList", {params: {empCode}});

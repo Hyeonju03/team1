@@ -181,5 +181,15 @@ public class MailController {
         }
     }
 
-
+    //메일 타겟 가져오기
+    @GetMapping("/selectMailTarget")
+    public ResponseEntity<List<MailDTO>> selectMailTarget(@RequestParam String comCode) {
+        try {
+            List<MailDTO> mailTargets = mailMapper.selectMailTarget(comCode);
+            return ResponseEntity.ok(mailTargets);
+        } catch (Exception e) {
+            logger.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

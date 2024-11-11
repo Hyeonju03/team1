@@ -72,4 +72,6 @@ public class SignUpController {
 
         return ResponseEntity.ok(response);
     }
+
+
 }
