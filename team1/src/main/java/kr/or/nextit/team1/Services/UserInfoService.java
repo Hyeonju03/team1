@@ -60,8 +60,8 @@ public class UserInfoService {
 
     // 반려
     @Transactional
-    public void modifyReqClear(String corCode) {
-        userInfoMapper.modifyReqClear(corCode);
+    public void modifyReqClear(String corCode, String modifyRequest) {
+        userInfoMapper.modifyReqClear(corCode, modifyRequest);
     }
 
     // 권한

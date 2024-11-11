@@ -22,7 +22,6 @@ import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail";
 import SignDetail from "./SignDetail";
-import MailList from "./MailList";
 import MailSend from "./MailSend";
 import MailSendList from "./MailSendList";
 import MailSendResult from "./MailSendResult";
@@ -49,10 +48,8 @@ import AnsQ from "./AnsQ";
 import AnsQDetail from "./AnsQDetail";
 import AnsQCompleteList from "./AnsQCompleteList";
 import NoAnsQList from "./NoAnsQList";
-import LoginPage from "./LoginPage";
-import Login from "./Login";
-import UserInfoDetail from './UserInfoDetail';
-import {UserProvider} from './UserContext';
+import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
+import {UserProvider} from "./UserContext";
 
 function App() {
     return (
@@ -62,9 +59,6 @@ function App() {
                     <Router>
                         <div className="App">
                             <Routes>
-
-                                <Route path="/LoginPage" element={<LoginPage/>}/>
-
                                 <Route path="/main" element={<Main/>}></Route>
                                 <Route path="/SignUp" element={<SignUpForm/>}/>
                                 <Route path="/" element={<Main/>}/>
@@ -88,10 +82,8 @@ function App() {
                                 <Route path="/documents/update/:id" element={<DocumentUpdate/>}/>
 
                                 <Route path="/schedule" element={<Schedule/>}/>
-
-                                <Route path="/sign/detail/:id" element={<SignDetail/>}/>
-
                                 <Route path="/sign" element={<SignList/>}/>
+                                <Route path="/sign/detail/:id" element={<SignDetail/>}/>
                                 <Route path="/sign/register" element={<SignRegister/>}/>
 
                                 <Route path="/admin/notice/list" element={<AdminNoticeList/>}/>
@@ -104,7 +96,7 @@ function App() {
                                 <Route path="/userInfo" element={<UserInfo/>}/>
                                 <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
 
-                                <Route path="/UserInfoModifyRequestList" element={<UserInfoModifyRequestList/>}/>
+                                <Route path="/UserInfoRequestList" element={<UserInfoModifyRequestList/>}/>
 
                                 <Route path="/Authority" element={<Authority/>}/>
 
@@ -112,7 +104,6 @@ function App() {
                                 <Route path="/PaymentCom" element={<PaymentCom/>}/>
                                 <Route path="/ApplyForBusiness" element={<ApplyForBusiness/>}/>
 
-                                <Route path="/MailList" element={<MailList/>}/>
                                 <Route path="/MailSend" element={<MailSend/>}/>
                                 <Route path="/MailSendList" element={<MailSendList/>}/>
                                 <Route path="/MailSendResult" element={<MailSendResult/>}/>
@@ -126,11 +117,6 @@ function App() {
 
                                 <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
                                 <Route path="/PositionManagement" element={<PositionManagement/>}/>
-
-                                <Route path="/Login" element={<Login/>}/>
-
-                                <Route path="/UserInfoDetail" element={<UserInfoDetail/>}/>
-
                             </Routes>
                         </div>
                     </Router>

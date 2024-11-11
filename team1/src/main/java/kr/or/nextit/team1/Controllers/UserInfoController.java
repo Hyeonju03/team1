@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class UserInfoController {
@@ -19,7 +20,6 @@ public class UserInfoController {
     @GetMapping("/emp/{empCode}")
     public ResponseEntity<UserInfoDTO> userInfoSelect(@PathVariable String empCode) {
         UserInfoDTO userInfoDTO = userInfoService.userInfoSelect(empCode);
-
         if (userInfoDTO == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
         }
@@ -90,9 +90,10 @@ public class UserInfoController {
 
     // 반려
     @PutMapping("/userInfo/modifyDelete/{corCode}")
-    public ResponseEntity<String> modifyReqClear(@PathVariable String corCode) {
+    public ResponseEntity<String> modifyReqClear(@PathVariable String corCode, @RequestBody Map<String, String> body ) {
         try {
-            userInfoService.modifyReqClear(corCode);
+            String modifyRequest = body.get("modifyRequest");
+            userInfoService.modifyReqClear(corCode, modifyRequest);
             return ResponseEntity.ok("수정 요청이 반려되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("반려 실패: " + e.getMessage());

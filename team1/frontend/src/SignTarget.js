@@ -34,9 +34,9 @@ export default function SignTarget({onClose, empCode}) {
                 alert("본인은 선택할 수 없습니다.")
                 return ;
             }
-            target.classList.toggle("bg-yellow-200");
+            target.classList.toggle("bg-gray-200");
 
-            const isSelected = target.classList.contains("bg-yellow-200");
+            const isSelected = target.classList.contains("bg-gray-200");
 
             // 비동기 요청 함수
             const fetchData = async () => {
@@ -131,7 +131,7 @@ export default function SignTarget({onClose, empCode}) {
                             </div>
                             <div className="flex items-center justify-end w-full mt-1">
                                 <button
-                                    className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm"
+                                    className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700 transition duration-150 ease-in-out hover:bg-gray-600 bg-gray-700 rounded text-white px-8 py-2 text-sm"
                                     onClick={goSave}
                                 >
                                     등록

@@ -10,6 +10,7 @@ export default function MainLayout() {
     const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
     const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
+    const [userInfo, setUserInfo] = useState([])
 
     // 로그인 후 가져와야하는 데이터들
     const [mailList, setMailList] = useState([]) //메일
@@ -54,6 +55,7 @@ export default function MainLayout() {
 
     useEffect(() => {
         getWeather();
+        empInfo();
 
         axios.get('/selectLog')
             .then(response => console.log(response.data))
@@ -79,6 +81,15 @@ export default function MainLayout() {
     //         .then(response => console.log(response.data))
     //         .catch(error => console.log(error));
     // }, []);
+
+    const empInfo = async () => {
+        try {
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     // 로그인 처리 함수
     const handleLogin = async (e) => {
@@ -230,18 +241,6 @@ export default function MainLayout() {
         }
     };
 
-    // 메일 수량
-    // 지금 값은 나옴. 하지만 현재와 과거의 메일량 비교는 다시 생각해봐야함
-    // const newMail = async () => {
-    //     const mailEmpCode = empCode.split("-").join("")+'@damail.com';
-    //     const response = await axios.get('/receivedMailList', {
-    //         params: {
-    //             mailRef: mailEmpCode , mailTarget:mailEmpCode // 필요한 파라미터
-    //         }
-    //     });
-    //     setMailList(response.data);
-    // }
-
     // 롹인 안된 결재 수량
     const newSign = async () => {
         if (!empCode) {
@@ -346,11 +345,12 @@ export default function MainLayout() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col h-[919px]" onContextMenu={windowRClick}>
-            {/* Header with centered logo */}
+        <div className={`min-h-screen flex flex-col ${isLoggedIn ? "h-[919px]" : "h-[1100px]"}`}
+             onContextMenu={windowRClick}>
+            {/* Header with centegray logo */}
             {isLoggedIn ? (
                     <>
-                        <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+                        <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                             <div className="flex mr-6">
                                 <div className="font-bold mr-1">{formattedDate}</div>
                                 <Clock
@@ -359,20 +359,35 @@ export default function MainLayout() {
                                     timezone={'Asia/Seoul'}/>
                             </div>
                             <div className="mr-5">
-                                <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                                     alt="home"/>
+                                <img width="40" height="40"
+                                     src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                                     alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                                     onClick={() => {
+                                         navigate(`/user/notice/list`)
+                                     }}/>
+                            </div>
+                            <div className="mr-5">
+                                <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                                     alt="help" onClick={() => {
+                                    navigate(`/AdminFAQ`)
+                                }}/>
+                            </div>
+                            <div className="mr-5">
+                                <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                                     alt="home" onClick={() => {
+                                    navigate("/")
+                                }}/>
                             </div>
                             <div className="mr-16">
                                 <img width="45" height="45"
-                                     src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
+                                     src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
                                      alt="user-male-circle" onClick={togglePanel}/>
-
                             </div>
                         </header>
-                        <div className="w-full h-[5px] bg-red-400"></div>
+                        <div className="w-full h-[5px] bg-gray-400"></div>
 
                         {/* Main content area */}
-                        <div className="bg-gray-100 h-[94%] w-[100%] shadow-inner shadow-red-400/50">
+                        <div className="bg-gray-100 h-[94%] w-[100%] shadow-inner shadow-gray-400/50">
                             <div className="flex overflow-hidden h-full">
                                 {/*<main className="flex-grow p-4">*/}
                                 {/*    <div className="container mx-auto">*/}
@@ -395,7 +410,7 @@ export default function MainLayout() {
                                                             className="flex flex-col items-center justify-center h-[48px]">
                                                             메일
                                                             {/*<div*/}
-                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">*/}
+                                                            {/*    className="text-white bg-gray-800 w-[32px] h-[24px] rounded-3xl">*/}
                                                             {/*    {mailList.length}*/}
                                                             {/*</div>*/}
                                                         </strong>
@@ -424,7 +439,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             결재함
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${signCount === 0 ? "hidden" : "block"}`}>
                                                                 {signCount}
                                                             </div>
                                                         </strong>
@@ -441,7 +456,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             일정
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${scheduleCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${scheduleCount === 0 ? "hidden" : "block"}`}>
                                                                 {scheduleCount}
                                                             </div>
                                                         </strong>
@@ -463,7 +478,7 @@ export default function MainLayout() {
                                                         <strong className="flex flex-col items-center justify-center">
                                                             인사 정보
                                                             <div
-                                                                className={`text-white bg-red-800 w-[24px] h-[24px] rounded-3xl ${reqCount === 0 ? "hidden" : "block"}`}>
+                                                                className={`text-white bg-gray-800 w-[24px] h-[24px] rounded-3xl ${reqCount === 0 ? "hidden" : "block"}`}>
                                                                 {reqCount}
                                                             </div>
                                                         </strong>
@@ -507,7 +522,7 @@ export default function MainLayout() {
                                                             권한 관리
                                                             {/* 본인 권한이 뭐가 바뀌었는지 보여주기 */}
                                                             {/*<div*/}
-                                                            {/*    className="text-white bg-red-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
+                                                            {/*    className="text-white bg-gray-800 w-[32px] h-[24px] rounded-3xl">1</div>*/}
                                                         </strong>
                                                         <img width="60" height="60"
                                                              src="https://img.icons8.com/ios/50/briefcase-settings.png"
@@ -585,14 +600,15 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div className="flex">
-                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-blue-300">
+                                                                <div className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#fbc2eb]">
                                                                         {s.category ? " " : ""}
                                                                     </p>
-                                                                    <div>
-                                                                        <p>{s.startDate} ~ {s.endDate}</p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
                                                                         <p>{s.content}</p>
                                                                     </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -601,10 +617,16 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div>
-                                                                    <p>{s.startDate} ~ {s.endDate}</p>
-                                                                    <p>{s.content}</p>
-                                                                    <p>{s.category}</p>
+                                                                <div
+                                                                    className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#BEA4EE]">
+                                                                        {s.category ? " " : ""}
+                                                                    </p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
+                                                                        <p>{s.content}</p>
+                                                                    </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -613,10 +635,16 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div>
-                                                                    <p>{s.startDate} ~ {s.endDate}</p>
-                                                                    <p>{s.content}</p>
-                                                                    <p>{s.category}</p>
+                                                                <div
+                                                                    className="flex items-center text-center justify-between">
+                                                                    <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#a6c1ee]">
+                                                                        {s.category ? " " : ""}
+                                                                    </p>
+                                                                    <div className="text-center">
+                                                                        <p>{s.startDate.split("T")[0]} ~ {s.endDate.split("T")[0]}</p>
+                                                                        <p>{s.content}</p>
+                                                                    </div>
+                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -632,7 +660,7 @@ export default function MainLayout() {
 
                     </>) :
                 <>
-                    <header className="flex justify-end items-center h-[6%] bg-white">
+                    <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                         <div className="flex mr-6">
                             <div className="font-bold mr-1">{formattedDate}</div>
                             <Clock
@@ -640,39 +668,139 @@ export default function MainLayout() {
                                 ticking={true}
                                 timezone={'Asia/Seoul'}/>
                         </div>
-                        <div className="mr-16 w-36 flex flex-col items-center">
-                            <div className="w-full h-12 bg-red-100">
-                                <div
-                                    className="flex items-center text-white font-bold px-4 py-2">
-                                    <div className="mr-8" onClick={togglePanel}>로그인 / 회원가입</div>
-                                </div>
+                        <div className="mr-5">
+                            <img width="40" height="40"
+                                 src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                                 alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                                 onClick={() => {
+                                     navigate(`/user/notice/list`)
+                                 }}/>
+                        </div>
+                        <div className="mr-5">
+                            <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                                 alt="help" onClick={() => {
+                                navigate(`/AdminFAQ`)
+                            }}/>
+                        </div>
+                        <div className="mr-5">
+                            <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                                 alt="home" onClick={() => {
+                                navigate("/")
+                            }}/>
+                        </div>
+                        <div className="mr-16" onClick={togglePanel}>
+                            <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
                             </div>
                         </div>
                     </header>
 
-                    <div className="bg-gray-100 h-80 flex justify-center">
-                        <div className="flex items-center w-96 bg-red-200">
-                            <div className="ml-24">
-                                <div className="text-left font-bold text-3xl">
-                                    큰 주제
-                                    <br/>
-                                    이름
+                    <div className="bg-gray-100 flex justify-center">
+                        <div className="w-[60%] h-full flex">
+                            <div className="flex items-center w-2/5 bg-gray-200">
+                                <div className="ml-[20%] py-10">
+                                    <div className="text-left font-bold text-3xl">
+                                        사내 관리 플랫폼
+                                        <br/>
+                                        Business Clip
+                                    </div>
+                                    <div className="text-left mt-2">
+                                        business Clip을 사용중인 회사라면 <br/> 그 회사끼리 대화 및 연락이 가능하도록 <br/> B2B형식을 갖추었습니다!
+                                    </div>
                                 </div>
-                                <div className="text-left">
-                                    내용
+                            </div>
+                            <div className="w-3/5 bg-violet-200 flex">
+                                <div className="w-full flex flex-col">
+                                    <div className="bg-white rounded-b-lg h-1/5 w-2/5 mb-4"></div>
+                                    <div className="bg-green-200 rounded-lg h-2/5 w-2/5 mt-4"></div>
+                                    {/*<div className="bg-gray-200 h-1/5 w-full"></div>*/}
+                                </div>
+                                {/*<div className="flex flex-col w-full">*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
+                                {/*</div>*/}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-center items-center w-full h-full mt-[2%]">
+                        <div className="w-[60%] h-full flex flex-col">
+                            <div className="w-full h-1/3 flex justify-around">
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/ApplyForBusiness`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/FF7979/idea--v1.png"
+                                         alt="idea--v1" className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">10인 이하는 무료!</div>
+                                        <div className="font-bold">무료로 사용하기</div>
+                                    </div>
+                                </div>
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/AdminFAQ`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/36DADB/faq.png" alt="faq"
+                                         className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">질문 사항이 있나요?</div>
+                                        <div className="font-bold">FAQ & 1대1 질문하러 가기</div>
+                                    </div>
+                                </div>
+                                <div
+                                    className="w-1/4 h-full rounded-2xl bg-gray-100 hover:bg-gray-200 flex flex-col text-left justify-end p-5 pl-10 cursor-pointer"
+                                    onClick={() => {
+                                        navigate(`/user/notice/list`)
+                                    }}>
+                                    <img width="65" height="65"
+                                         src="https://img.icons8.com/ios-filled/50/FFB951/noticeboard.png"
+                                         alt="noticeboard"
+                                         className="mb-2"/>
+                                    <div className="my-3">
+                                        <div className="text-gray-500 font-medium">사이트의 공지사항은 이곳!</div>
+                                        <div className="font-bold">공지사항 보러가기</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-full mt-10 mb-10 flex justify-between">
+                                <div className="w-3/5 h-full rounded-2xl">
+                                    <img className="rounded-2xl" src="/mainService.PNG" alt="mainService"/>
+                                </div>
+                                <div className="pt-20 bg-amber-100 shadow-lg rounded-full h-64 w-1/4 mr-20 mt-14">
+                                    <div className="font-bold text-2xl">
+                                        통합 기능 제공!
+                                    </div>
+                                    <div className="text-gray-500 text-left ml-16 mt-2">
+                                        <div className="text-gray-500">
+                                            # 전자결재, 메일 연동
+                                        </div>
+                                        <div className="text-gray-500">
+                                            # 인사, 조직도 연동
+                                        </div>
+                                        <div className="text-gray-500">
+                                            # 캘린더 연동
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="w-[600px] bg-violet-200 flex">
-                            <div className="w-full flex flex-col">
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
+                    </div>
+                    {/* footer */}
+                    <div className="bg-gray-400 h-full w-full text-white flex pl-96">
+                        <div>
+                            <div className="font-bold text-2xl mt-5 text-left">
+                                042-719-8850
                             </div>
-                            <div className="flex flex-col w-full">
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
-                                <div className="bg-white h-1/5 w-full"></div>
+                            <div className="mt-5">
+                                (34856) 대전광역시 중구 계룡로 825 (용두동, 희영빌딩 2층)
+                            </div>
+                            <div className="flex">
+                                <div>Email: nextit_center@naver.com</div>
+                                <div className="ml-7">Fax: 042-719-8851</div>
                             </div>
                         </div>
                     </div>
@@ -680,201 +808,214 @@ export default function MainLayout() {
             }
             {/*/////////////////////////////////////////////////////////////////*/
             }
-            {/* Sidebar */
-            }
-            <div
-                className={`fixed mt-[55px] top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
-            >
-
-                <div className="p-4">
-                    {isLoggedIn ?
-                        <button
-                            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4"
-                            onClick={handleLogout}>로그아웃
-                        </button> :
-                        <>
-                            <h2 className="text-xl font-bold mb-4">로그인</h2>
-                            <input type="text" placeholder="아이디" value={inputId}
-                                   className="w-full p-2 mb-2 border rounded"
-                                   onChange={(e) => setInputId(e.target.value)}/>
-                            <input type="password" placeholder="비밀번호" value={inputPassword}
-                                   className="w-full p-2 mb-4 border rounded"
-                                   onChange={(e) => setInputPassword(e.target.value)}/>
-                            <button
-                                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mb-4"
-                                onClick={handleLogin}>로그인
-                            </button>
-                        </>
-                    }
-
-                    <div className="text-sm text-center mb-2">
-                        <a href="#" className="text-blue-600 hover:underline">
-                            공지사항
-                        </a>
-                        <span className="mx-1">|</span>
-                        <a href="#" className="text-blue-600 hover:underline">
-                            문의사항
-                        </a>
-                    </div>
-                    {isLoggedIn ?
-                        <div className="h-[600px]">
-                            <h3 className="font-semibold mb-2 h-[25px]">메신저</h3>
-                            <div className="h-[138px]">
-                                <div className="flex">
-                                    <div className="w-1/3 border">
-                                        <img src="/logo192.png"/>
+            {/* Slide-out panel with toggle button */}
+            <div className={`${isPanelOpen ? "" : "hidden"}`}>
+                <div
+                    className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
+                    <div className="p-1 h-full">
+                        {isLoggedIn ?
+                            <div className="h-full">
+                                <div className="h-1/4">
+                                    <div className="flex h-3/6">
+                                        <div className="w-1/3 ">
+                                            <img width="75px" height="75px" src="/logo192.png"/>
+                                        </div>
+                                        <div className="w-2/3 text-left">
+                                            <p className="">이름: {userInfo.empName}</p>
+                                            <p className="">직급: {userInfo.posCode}</p>
+                                            <p className="">부서: {userInfo.depCode}</p>
+                                        </div>
                                     </div>
-                                    <div className="w-2/3 text-left border">
-                                        <p>사내 이메일:</p>
-                                        <p>전화번호:</p>
-                                        <p>상태:</p>
+                                    <div className="flex flex-col text-left mb-1">
+                                        <p className="">사내 이메일: {userInfo.empMail}</p>
+                                        <p className="">전화번호: {userInfo.phoneNum}</p>
                                     </div>
-                                </div>
-                                <div className="flex">
-                                    <button className="border w-1/5 text-sm"
-                                            onClick={() => setBtnCtl(0)}>
-                                        조직도
-                                    </button>
-                                    <button className="border w-1/5 text-sm"
-                                            onClick={() => setBtnCtl(1)}>
-                                        대화방
-                                    </button>
-                                    <button className="border w-1/5 text-sm"
-                                            onClick={() => setBtnCtl(2)}>
-                                        주소록
-                                    </button>
-                                    <button className="border w-2/5 text-sm"
-                                            onClick={() => setBtnCtl(3)}>
-                                        공지사항
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="border text-left h-[435px] blue">
-                                {btnCtl === 0 ? (
-                                    // ListLibrary.WorkerList(com)
-                                    <></>
-                                ) : btnCtl === 1 ? (
-                                    <>
-                                        <div className="h-[100%] overflow-y-auto">
-                                            <div className="border flex justify-between">
-                                                <button>대화방</button>
-                                                <button>나가기</button>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : btnCtl === 2 ? (
-                                    <>
-                                        {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
-                                    </>
-                                ) : btnCtl === 3 ? (
-                                    <>
-                                        {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
-                                        <div>
-                                            <button
-                                                className="text-center border w-full h-[45px]"
-                                                onClick={() => setBtnCtl(6)}>
-                                                {" "}
-                                                공지사항 추가하기
-                                            </button>
-                                        </div>
-                                    </>
-                                ) : btnCtl === 4 ? (
-                                    <>
-                                        <div className="h-[480px] overflow-y-auto">
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="text-right pb-2">
-                                                사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                            <ul className="pb-2">
-                                                상대방이름 <li className="pl-4">대화내용 </li>
-                                            </ul>
-                                        </div>
-                                    </>
-                                ) : btnCtl === 5 ? (
-                                    <>
-                                        {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
-                                        <div>
-                                            <button
-                                                className="text-center border w-full h-[45px]"
-                                                onClick={() => setBtnCtl(3)}>
-                                                목록으로
-                                            </button>
-                                        </div>
-                                    </>
-                                ) : btnCtl === 6 ? (
-                                    <>
-                                        {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
-                                        <button
-                                            className="text-center border w-full h-[45px]"
-                                            onClick={() => {
-                                                setBtnCtl(3);
-                                                // ListLibrary.noticeInsert(user);
-                                            }}
-                                        >
-                                            공지사항 등록
+
+
+                                    <div className="flex">
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(0)}>
+                                            조직도
                                         </button>
-                                    </>
-                                ) : (
-                                    <></>
-                                )}
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(1)}>
+                                            대화방
+                                        </button>
+                                        <button className="border w-1/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(2)}>
+                                            주소록
+                                        </button>
+                                        <button className="border w-2/5 text-sm p-1"
+                                                onClick={() => setBtnCtl(3)}>
+                                            공지사항
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <div className="border text-left h-[435px] blue">
+                                        {btnCtl === 0 ? (
+                                            // ListLibrary.WorkerList(com)
+                                            <></>
+                                        ) : btnCtl === 1 ? (
+                                            <>
+                                                <div className="h-[100%] overflow-y-auto">
+                                                    <div className="border flex justify-between">
+                                                        <button>대화방</button>
+                                                        <button>나가기</button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 2 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                            </>
+                                        ) : btnCtl === 3 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(6)}>
+                                                        {" "}
+                                                        공지사항 추가하기
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 4 ? (
+                                            <>
+                                                <div className="h-[480px] overflow-y-auto">
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="text-right pb-2">
+                                                        사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                    <ul className="pb-2">
+                                                        상대방이름 <li className="pl-4">대화내용 </li>
+                                                    </ul>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 5 ? (
+                                            <>
+                                                {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                                <div>
+                                                    <button
+                                                        className="text-center border w-full h-[45px]"
+                                                        onClick={() => setBtnCtl(3)}>
+                                                        목록으로
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : btnCtl === 6 ? (
+                                            <>
+                                                {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                                <button
+                                                    className="text-center border w-full h-[45px]"
+                                                    onClick={() => {
+                                                        setBtnCtl(3);
+                                                        // ListLibrary.noticeInsert(user);
+                                                    }}
+                                                >
+                                                    공지사항 등록
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                    onClick={handleLogout}>로그아웃
+                                </button>
                             </div>
-                        </div>
-                        : <></>}
+                            : (<><h2 className="mt-2">로그인</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="아이디"
+                                        className="w-full p-2 mb-2 border rounded"
+                                        onChange={(e) => {
+                                            setInputId(e.target.value)
+                                        }}
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호"
+                                        className="w-full p-2 mb-4 border rounded"
+                                        onChange={(e) => {
+                                            setInputPassword(e.target.value)
+                                        }}
+                                    />
+                                    <button
+                                        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4"
+                                        onClick={handleLogin}>
+                                        로그인
+                                    </button>
+                                    <div className="border-t-2 p-2 mx-16 cursor-pointer"
+                                         onClick={() => navigate(`/SignUp`)}>
+                                        <p className="text-gray-900 mb-2">회원가입</p>
+                                    </div>
+                                </>
+                            )}
 
-                    {isRClick === true ? (
-                        <></>
-                        // <div className={`flex absolute`}
-                        //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
-                        //     <div className="w-1/3 border">
-                        //         <img src="/logo192.png"/>
-                        //     </div>
-                        //     <div className="w-2/3 text-left border">
-                        //         <p>사내 이메일:{newWindowData[0]}</p>
-                        //         <p>전화번호:{newWindowData[1]}</p>
-                        //         <p>상태:</p>
-                        //         <button
-                        //             onClick={() => {
-                        //                 setIsRClick(false);
-                        //                 setNewWindowData([]);
-                        //             }}
-                        //         >
-                        //             닫기
-                        //         </button>
-                        //     </div>
-                        // </div>
-                    ) : (
-                        <></>
-                    )}
+
+                        {isRClick === true ? (
+                            <></>
+                            // <div className={`flex absolute`}
+                            //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
+                            //     <div className="w-1/3 border">
+                            //         <img src="/logo192.png"/>
+                            //     </div>
+                            //     <div className="w-2/3 text-left border">
+                            //         <p>사내 이메일:{newWindowData[0]}</p>
+                            //         <p>전화번호:{newWindowData[1]}</p>
+                            //         <p>상태:</p>
+                            //         <button
+                            //             onClick={() => {
+                            //                 setIsRClick(false);
+                            //                 setNewWindowData([]);
+                            //             }}
+                            //         >
+                            //             닫기
+                            //         </button>
+                            //     </div>
+                            // </div>
+                        ) : (
+                            <></>
+                        )}
+
+
+                    </div>
                 </div>
+                <div
+                    className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
     )

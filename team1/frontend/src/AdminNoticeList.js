@@ -74,10 +74,10 @@ const AdminNoticeList = () => {
 
         try {
             const response = await axios.post(
-                '/api/admin/login', // 관리자 로그인 API 호출
+                '/api/employ/login', // 관리자 로그인 API 호출
                 {
-                    adminId: inputId,
-                    adminPw: inputPassword
+                    empCode: inputId,
+                    empPass: inputPassword
                 }
             );
 
@@ -116,7 +116,7 @@ const AdminNoticeList = () => {
 
     // 수정된 부분: 공지사항 클릭 시 state를 통해 noticeNum 전달
     const handleNoticeClick = (noticeNum) => {
-        navigate('/admin/notice/detail', {state: {noticeNum}}); // 모든 경우에 adminnotice/detail로 이동
+        navigate('/admin/notice/detail', { state: { noticeNum } }); // 모든 경우에 adminnotice/detail로 이동
     };
 
     // 필터링된 공지사항 가져오기 (검색버튼 클릭 시)
@@ -157,18 +157,23 @@ const AdminNoticeList = () => {
                          }}/>
                 </div>
                 <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                         alt="help" onClick={() => {
+                        navigate(`/AdminFAQ`)
+                    }}/>
+                </div>
+                <div className="mr-5">
                     <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
                          alt="home" onClick={() => {
                         navigate("/")
                     }}/>
                 </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
-                         alt="user-male-circle" onClick={togglePanel}/>
+                <div className="mr-16" onClick={togglePanel}>
+                    <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
+                    </div>
+
                 </div>
             </header>
-
             <div className="flex flex-grow">
                 <main className="flex-grow w-full bg-gradient-to-br from-blue-200 to-indigo-200 p-4">
                     <div className="max-w-4xl mx-auto">
