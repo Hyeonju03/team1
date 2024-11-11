@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from './noticeAuth';
+import {useLocation, useNavigate} from "react-router-dom";
+import {useAuth} from './noticeAuth';
 import Clock from "react-live-clock"
 
 const AdminNoticeDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { isLoggedIn, empCode, logout, config, login } = useAuth();
+    const {isLoggedIn, empCode, logout, config, login} = useAuth();
 
     const [notice, setNotice] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({ title: "", content: "" });
+    const [formData, setFormData] = useState({title: "", content: ""});
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [inputId, setInputId] = useState(""); // 로그인 ID 상태
     const [inputPassword, setInputPassword] = useState(""); // 로그인 비밀번호 상태
@@ -28,7 +28,7 @@ const AdminNoticeDetail = () => {
     useEffect(() => {
         if (!noticeNum) {
             console.error("noticeNum이 없습니다.");
-            navigate('/adminnotice');
+            navigate('/admin/notice/list');
             return;
         }
 
@@ -36,7 +36,7 @@ const AdminNoticeDetail = () => {
             try {
                 const response = await axios.get(`/api/adminnotice/detail/${noticeNum}`, config);
                 setNotice(response.data);
-                setFormData({ title: response.data.title, content: response.data.content });
+                setFormData({title: response.data.title, content: response.data.content});
             } catch (error) {
                 console.error("공지사항을 가져오는 중 오류 발생:", error);
             }
@@ -46,8 +46,8 @@ const AdminNoticeDetail = () => {
     }, [noticeNum, navigate, config]);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setFormData((prev) => ({...prev, [name]: value}));
     };
 
     const handleEdit = () => setIsEditing(true);
@@ -55,7 +55,7 @@ const AdminNoticeDetail = () => {
     const handleCancelEdit = () => {
         setIsEditing(false);
         if (notice) {
-            setFormData({ title: notice.title, content: notice.content });
+            setFormData({title: notice.title, content: notice.content});
         }
     };
 
@@ -63,7 +63,7 @@ const AdminNoticeDetail = () => {
         e.preventDefault();
         try {
             await axios.put(`/api/adminnotice/detail/${noticeNum}`, formData, config);
-            setNotice({ ...notice, ...formData });
+            setNotice({...notice, ...formData});
             setIsEditing(false);
         } catch (error) {
             console.error("오류 발생:", error.response ? error.response.data : error.message);
@@ -75,7 +75,7 @@ const AdminNoticeDetail = () => {
     const confirmDelete = async () => {
         try {
             await axios.delete(`/api/notice/detail/admin/${noticeNum}`, config);
-            navigate('/adminnotice');
+            navigate('/admin/notice/list');
         } catch (error) {
             console.error("공지사항 삭제 중 오류 발생:", error);
         }
@@ -87,7 +87,7 @@ const AdminNoticeDetail = () => {
         logout();
         localStorage.removeItem('adminId'); // localStorage에서 ID 제거
         localStorage.removeItem('token'); // localStorage에서 토큰 제거
-        navigate('/adminnotice');
+        navigate('/admin/notice/list');
     };
 
     const handleLogin = async (e) => {
@@ -95,7 +95,7 @@ const AdminNoticeDetail = () => {
         const success = await login(inputId, inputPassword); // login 함수에 ID와 비밀번호 전달
         if (success) {
             // 로그인 성공 후, 현재 페이지로 리디렉션
-            navigate(`/adminnotice/detail/${noticeNum}`, { state: { noticeNum } });
+            navigate(`/adminnotice/detail/${noticeNum}`, {state: {noticeNum}});
         }
     };
 
@@ -176,7 +176,7 @@ const AdminNoticeDetail = () => {
                                                 {/* 비로그인 상태에서는 수정 및 삭제 버튼을 숨깁니다. */}
                                             </div>
                                         )}
-                                        <button onClick={() => navigate('/adminnotice')}
+                                        <button onClick={() => navigate('/admin/notice/list')}
                                                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">목록
                                         </button>
                                     </div>

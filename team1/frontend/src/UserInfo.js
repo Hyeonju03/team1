@@ -251,6 +251,9 @@ export default function UserInfo() {
                                         <li>
                                             <div className="flex justify-between">
                                                 <button className="w-full flex items-center"
+                                                        onClick={() => {
+                                                            navigate('/userInfo')
+                                                        }}
 
                                                 >
                                                     <ChevronRight className="mr-2 h-4 w-4"/>
@@ -262,12 +265,12 @@ export default function UserInfo() {
                                         <li>
                                             <div className="flex justify-between">
                                                 <button className="w-full flex items-center"
-                                                    // onClick={() => {
-                                                    //     // navigate('/UserInfoModifyRequest')
-                                                    // }}
+                                                        onClick={() => {
+                                                            navigate('/UserInfoModifyRequestList')
+                                                        }}
                                                 >
                                                     <ChevronRight className="mr-2 h-4 w-4"/>
-                                                    <div className="hover:underline">정보 수정 요청</div>
+                                                    <div className="hover:underline">인사정보수정 요청내역</div>
                                                 </button>
                                             </div>
                                         </li>

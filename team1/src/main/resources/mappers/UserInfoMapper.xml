@@ -93,4 +93,14 @@
         WHERE
             EMP_CODE = #{empCode}
     </select>
+
+    <!-- 요청 리스트 -->
+    <select id="selectUserInfoList" resultType="UserInfoDTO">
+        SELECT
+        MODIFY_REQ
+        FROM
+        EMPLOYEE
+        WHERE
+        EMP_CODE = #{empCode}
+    </select>
 </mapper>
