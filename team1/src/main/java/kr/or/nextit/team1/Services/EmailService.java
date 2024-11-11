@@ -10,8 +10,6 @@ import java.util.Random;
 
 @Service
 public class EmailService {
-    @Autowired
-    private JavaMailSender mailSender;
 
     public void sendVerificationCode(String to , String code) {
 

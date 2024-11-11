@@ -1,36 +1,40 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight} from 'lucide-react';
-import {useNavigate, useParams} from "react-router-dom";
+import {ChevronDown, ChevronRight, Paperclip} from 'lucide-react';
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
-import useComCode from "hooks/useComCode";
+import useComCode from "frontend/src/hooks/useComCode";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
 
 const Button = ({variant, className, children, ...props}) => {
     const baseClass = "px-4 py-2 rounded text-left";
     const variantClass = variant === "outline" ? "border border-gray-300" : "text-gray-700";
-    return (<button className={`${baseClass} ${variantClass} ${className}`} {...props}>
-        {children}
-    </button>);
+    return (
+        <button className={`${baseClass} ${variantClass} ${className}`} {...props}>
+            {children}
+        </button>
+    );
 };
 
 const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
 };
 
-export default function DocumentUpdate() {
-    const [doc, setDoc] = useState({
-        docCateCode: '', title: '', content: '', filename: '', fileOriginName: '', filesize: '', filepath: ''
-    });
-    const {id} = useParams(); // 여기서 id는 docNum을 의미
+export default function DocumentRegister() {
     const [isExpanded, setIsExpanded] = useState(true);
-    // const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
+    const [title, setTitle] = useState('');
+    const [category, setCategory] = useState(location.state?.selectedCategory || ''); // location.state : 이전페이지에서 전달된 상태 객체
     const [codeCategory] = useComCode();
-    const [attachment, setAttachment] = useState(null); // 새로운 첨부파일 상태 추가
+    const [content, setContent] = useState('');
+    const [attachment, setAttachment] = useState(null);
+    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
     const navigate = useNavigate();
+    // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [userInfo, setUserInfo] = useState([])
+    // slide 변수
     // slide 변수
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
@@ -43,32 +47,19 @@ export default function DocumentUpdate() {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    // 문서 정보 및 카테고리 가져오기
     useEffect(() => {
-        if (isLoggedIn) {
+        if (!isLoggedIn) {
+            navigate("/");
+        } else {
             empInfo();
-            axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
-                .then(response => {
-                    setDoc(response.data);
-                })
-                .catch(error => console.log(error));
-            // code 테이블에서 카테고리 가져오기
-            // axios.get(`/code`) // API 엔드포인트를 조정하세요
-            //     .then(response => {
-            //         // console.log(response.data);
-            //         // 응답이 카테고리 배열이라고 가정할 때
-            //         const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-            //         setCategories(uniqueCategories); // 카테고리 상태에 저장
-            //     })
-            //     .catch(error => console.log(error));
         }
-    }, [id, isLoggedIn, empCode]);
+    }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
 
     const empInfo = async () => {
-        try{
+        try {
             const response = await axios.get(`/emp/${empCode}`);
             setUserInfo(response.data);
-        }catch (e){
+        } catch (e) {
             console.log(e)
         }
     }
@@ -84,42 +75,62 @@ export default function DocumentUpdate() {
         }
     };
 
-    // 입력된 값 변경하는 것
-    const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setDoc({
-            ...doc, [name]: value // 입력된 값을 수정된 상태에 반영
-        });
-    };
+    const handleFileChange = (event) => {
+        setAttachment(event.target.files[0]); // 선택한 파일 상태 업데이트
+    }
 
-    // 파일 선택 핸들러
-    const handleFileChange = (e) => {
-        setAttachment(e.target.files[0]);
-    };
+    // 유효성체크
+    const validateForm = () => {
+        if (!category) {
+            alert("카테고리를 선택해주세요.");
+            return false;
+        }
+        if (!title) {
+            alert("제목을 입력해주세요.");
+            return false;
+        }
+        if (!attachment) {
+            alert("첨부파일을 선택해주세요.");
+            return false;
+        }
+        if (!content) {
+            alert("설명을 입력해주세요.");
+            return false;
+        }
+        return true;
+    }
 
-    // 수정 요청
-    const handleUpdate = () => {
-        const formData = new FormData();
-        formData.append("title", doc.title);
-        formData.append("category", doc.docCateCode);
-        formData.append("content", doc.content);
-        if (attachment) {
-            formData.append("attachment", attachment); // 새로운 파일 추가
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
         }
 
-        axios.put(`/documents/${id}`, formData, {headers: {"Content-Type": "multipart/form-data"}})
-            .then((response) => {
-                // console.log("response 콘솔 찍은거: ", response)
-                alert("성공적으로 수정되었습니다.");
-                navigate(`/documents/${id}`); // 수정 후 상세 페이지로 이동
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('category', category);
+        formData.append('content', content);
+        if (attachment) {
+            formData.append('attachment', attachment);
+        }
+        formData.append('empCode', empCode);
+        axios.post('/documents', formData)
+            .then(response => {
+                console.log(response.data);
+                // 성공시 문서 리스트로 이동
+                navigate('/documents');
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                console.error('Error fetching documents:', error);
+            });
     };
 
-    // 취소 버튼 클릭 시 상세 페이지로 이동
-    const handleCancel = () => {
-        navigate(`/documents/${id}`); // 상세 페이지로 이동
+    // 목록 버튼 클릭 시 리스트 페이지로 이동
+    const handleHome = () => {
+        navigate(`/documents/`);
     };
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -152,9 +163,10 @@ export default function DocumentUpdate() {
                             navigate("/")
                         }}/>
                     </div>
-                    <div className="mr-16" onClick={togglePanel}>
-                        <div className="bg-gray-800 text-white font-bold w-36 h-8 pt-1 rounded-2xl">로그인 / 회원가입
-                        </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
                     </div>
                 </header>
             </div>
@@ -172,71 +184,72 @@ export default function DocumentUpdate() {
                                     <ChevronRight className="mr-2 h-4 w-4"/>}
                                 문서함
                             </Button>
-                            {isExpanded && (<div className="ml-8 space-y-2 pace-y-2 mt-2">
-                                {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                    <Button variant="ghost" className="w-full" key={`${item}`}
-                                    >
-                                        {item}
-                                    </Button>))}
-                            </div>)}
+                            {isExpanded && (
+                                <div className="ml-8 shandleDelete pace-y-2 mt-2">
+                                    {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                            <Button variant="ghost" className="w-full" key={`${item}`}
+                                                    onClick={() => setCategory(item)}>
+                                                {item}
+                                            </Button>
+                                        )
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                     </aside>
                 </div>
                 <main className="ml-64 mt-14 flex-1 p-4 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
-                    <h1 className="text-2xl font-bold mb-4">문서 수정</h1>
+                    <div className="flex justify-start space-x-2 mb-4">
+                        <Button variant="outline" onClick={handleHome}>목록</Button>
+                    </div>
+                    <h1 className="text-2xl font-bold mb-4">문서 등록</h1>
+                    <form onSubmit={handleSubmit}>
+                        <div key={document.id} className="border rounded-lg p-4">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <fieldset>
+                                    {/*<legend>카테고리</legend>*/}
+                                    <div>
+                                        <select name="category" value={category}
+                                                onChange={(e) => setCategory(e.target.value)}
+                                                className="border rounded p-2">
+                                            <option value="">카테고리</option>
+                                            {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
+                                                <option key={`${item}`} value={item}>
+                                                    {item}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </fieldset>
 
-                    <div className="border rounded-lg p-4">
-
-
-                        <div className="flex items-center space-x-4 mb-4">
-                            <div className="mb-4">
-                                <label className="flex justify-start block text-sm font-bold mb-2">카테고리</label>
-                                <select
-                                    name="docCateCode"
-                                    value={doc.docCateCode}
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded px-3 py-2"
-                                >
-                                    {/*<option value="">카테고리를 선택하세요</option>*/}
-                                    {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                        <option key={`${item}`} value={item}>
-                                            {item}
-                                        </option>
-                                    ))}
-                                </select>
+                                <input type="text" className="w-full p-2 border rounded mb-2"
+                                       placeholder="제목을 입력하세요" value={title}
+                                       onChange={(e) => setTitle(e.target.value)}/>
                             </div>
-                            <div className="mb-4">
-                                <label className="flex justify-start block text-sm font-bold mb-2">제목</label>
-                                <Input
-                                    type="text"
-                                    name="title"
-                                    value={doc.title}
-                                    onChange={handleInputChange}
-                                    className="w-full"
-                                />
+                            <div className="flex justify-between mb-4 w-full p-2 border rounded">
+                                <div className="flex items-center">
+                                    <Paperclip className="h-5 w-5 mr-2"/>
+                                    <span className="whitespace-nowrap">첨부파일</span>
+                                    <input type="file" className="m-1" onChange={handleFileChange}/>
+                                </div>
+                                <div> {attachment ?
+                                    `${(attachment.size / 1024).toFixed(2)} KB / 10 MB` :
+                                    '0 KB / 10 MB'}</div>
                             </div>
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="flex justify-start block text-sm font-bold mb-2">첨부파일명</label>
-                            <input type="file" onChange={handleFileChange}
-                                   className="w-full border rounded px-3 py-2"/>
-                        </div>
-                        <div className="mb-4">
-                            <label className="flex justify-start block text-sm font-bold mb-2">내용</label>
                             <textarea
-                                name="content"
-                                value={doc.content}
-                                onChange={handleInputChange}
-                                className="w-full border rounded px-3 py-2"
+
+                                className="w-full h-64 p-2 border rounded"
+                                placeholder="설명을 입력하세요"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
                             />
                         </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline" onClick={handleCancel}>취소</Button>
-                        <Button variant="outline" onClick={handleUpdate}>수정</Button>
-                    </div>
+                        <div className="flex justify-end space-x-2 mt-4">
+                            <Button variant="outline" onClick={handleHome}>취소</Button>
+                            <Button variant="outline" type="submit">등록</Button>
+                        </div>
+                    </form>
                 </main>
             </div>
 
@@ -448,6 +461,5 @@ export default function DocumentUpdate() {
                     className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
-)
-    ;
+    );
 }

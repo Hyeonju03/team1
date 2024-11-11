@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {ChevronDown, ChevronRight} from 'lucide-react';
-import {useNavigate, useParams} from "react-router-dom";
+import {ChevronDown, ChevronRight, Paperclip, Search} from 'lucide-react';
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import useComCode from "hooks/useComCode";
+import useComCode from "frontend/src/hooks/useComCode";
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
 
@@ -20,27 +20,28 @@ const Input = ({className, ...props}) => {
     return <input className={`border rounded px-3 py-2 ${className}`} {...props} />;
 };
 
-export default function DocumentDetail() {
+export default function DocumentList() {
+
     const [isExpanded, setIsExpanded] = useState(true);
-    const {id} = useParams(); // 여기서 id는 docNum을 의미
-    const [doc, setDoc] = useState(null);
-    // const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
+    const [documents, setDocuments] = useState([]);
+    // const [codeCategory, setCodeCategory] = useState();
     const [codeCategory] = useComCode();
-    const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
-    const navigate = useNavigate();
-    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
+    const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
+    const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
+    const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
+    const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 변수
+    const navigate = useNavigate(); // navigate 함수 사용
+    const [comCode, setComCode] = useState('');
     // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     const [auth, setAuth] = useState(null);
     // 로그인
-    const {isLoggedIn, empCode, logout} = useAuth();
+    const {empCode, logout, isLoggedIn} = useAuth();
     const [userInfo, setUserInfo] = useState([])
-    const [inputId, setInputId] = useState(""); // 사용자 ID 상태 추가
-    const [inputPassword, setInputPassword] = useState("");
     // slide 변수
-    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
 
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
@@ -50,22 +51,41 @@ export default function DocumentDetail() {
     };
 
 
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode) {
+            const newComCode = getComCode(empCode);
+            fetchAuth();
+            setComCode(newComCode);  // comCode 상태 업데이트
+            empInfo();
+        }
+    }, [empCode]); // empCode가 변경될 때마다 실행
+
     useEffect(() => {
         if (isLoggedIn) {
-            async function documentDetail() {
-                try {
-                    const response = await axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
-                    setDoc(response.data);
-                } catch (e) {
-                    console.error(e);
-                } finally {
-                    setLoading(false); // 로딩이 끝남
-                }
-            }
-
-            documentDetail();
+            // document 테이블에서 문서 가져오기
+            axios.get(`/company/${comCode}`)
+                .then(response => {
+                    setDocuments(response.data);
+                    setFilteredDocuments(response.data); // 초기값은 전체 문서
+                })
+                .catch(error => console.log(error));
         }
-    }, [id, isLoggedIn, empCode]);
+    }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
+
+    const empInfo = async () => {
+        try{
+            const response = await axios.get(`/emp/${empCode}`);
+            setUserInfo(response.data);
+        }catch (e){
+            console.log(e)
+        }
+    }
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {
@@ -78,104 +98,102 @@ export default function DocumentDetail() {
         }
     };
 
-    useEffect(() => {
-        const fetchAuth = async () => {
-            try {
-                // 권한 정보 가져오기
-                const response = await axios.get(`/authority/document/${empCode}`);
-                setAuth(response.data);
-            } catch (error) {
-                console.error('권한 정보를 가져오는 데 실패했습니다.', error);
-            }
-        };
-        empInfo();
-        fetchAuth();
-    }, [comCode, empCode]);
-
-    const empInfo = async () => {
-        try{
-            const response = await axios.get(`/emp/${empCode}`);
-            setUserInfo(response.data);
-        }catch (e){
-            console.log(e)
-        }
+    // 문서 제목 클릭 시 상세 페이지로 이동
+    const handleDocumentClick = (docNum) => {
+        navigate(`/documents/${docNum}`)
     }
 
-    // 문서가 로딩 중일 때는 아무것도 표시하지 않음
-    if (loading) {
-        return null;
-    }
-
-    // 문서를 찾을 수 없는 경우의 처리
-    if (!doc) {
-        return null; // 문서가 없을 경우도 아무것도 표시하지 않음
-    }
-
+    // 날짜 형식 변환
     const formatDate = (dateString) => {
         return dateString.replace("T", " ").slice(0, 16); // LocalDateTime의 기본 형식을 변경
     };
 
-    const fileDownload = (blobData, fileName) => {
-        const url = window.URL.createObjectURL(blobData);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = doc.fileOriginName;
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
-    }
+    // 검색 버튼 클릭 시
+    const handleSearch = () => {
+        // 검색어가 포함된 문서를 필터링
+        const filtered = documents.filter((doc) =>
+            doc.title.toLowerCase().includes(searchQuery.toLowerCase()) || // 제목 검색
+            doc.content?.toLowerCase().includes(searchQuery.toLowerCase()) || // 내용(문서 설명) 검색
+            doc.docCateCode?.toLowerCase().includes(searchQuery.toLowerCase()) // 카테고리 검색
+        );
+        setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
 
-    const handleDocumentDownload = async (doc) => {
-        try {
-            const response = await axios({
-                method: "get",
-                url: `/documents/download/${doc.docNum}`,
-                responseType: "blob"
-            });
-            fileDownload(response.data, doc.fileOriginName);
-        } catch (e) {
-            console.error(e);
-        }
-        // 2번째 방법
-        // axios.get(`/documents/download/${document.docNum}`) // API 엔드포인트를 조정하세요
-        //     .then(response => {
-        //         console.log(response);
-        //     })
-        //     .catch(error => console.log(error));
-    }
-
-    // 수정
-    const handleUpdateClick = () => {
-        if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
-            navigate(`/documents/update/${id}`);
-        } else {
-            alert("문서를 수정할 수 있는 권한이 없습니다.");
+        // 검색된 결과가 없을 경우
+        if (filtered.length === 0) {
+            alert("검색된 문서가 없습니다.");
         }
     };
 
-    // 삭제
-    const handleDeleteClick = async () => {
-        if (auth == '3' || auth == '5' || auth == '6' || auth == '7') {
-            try {
-                await axios.delete(`/documents/${id}`)
-                navigate(`/documents/`); // 삭제 후 문서 리스트로 이동
-                alert("성공적으로 삭제되었습니다.")
+    // 엔터키로 문서 검색 가능
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            handleSearch();
+        }
+    }
 
-            } catch (e) {
-                console.error(e);
-                alert("삭제에 실패했습니다.");
+    // 왼쪽 메뉴 카테고리 선택 시 해당 카테고리와 일치하는 문서들만 필터링
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category); // 별도의 선택 상태
+        const filtered = documents.filter((doc) => doc.docCateCode === category);
+        setFilteredDocuments(filtered); // 필터링된 문서로 상태 업데이트
+        if (filtered.length === 0) {
+            alert("해당 카테고리 관련 문서를 찾을 수 없습니다.");
+        }
+    }
+
+    // 체크박스 상태 변화
+    const handleCheckboxChange = (docNum) => {
+        setSelectedDocuments(prevState => {
+            if (prevState.includes(docNum)) {
+                return prevState.filter(num => num !== docNum); // 이미 선택된 문서는 해제
+            } else {
+                return [...prevState, docNum]; // 새로운 문서 선택
             }
+        });
+    };
+    const fetchAuth = async () => {
+        try {
+            // 권한 정보 가져오기
+            const response = await axios.get(`/authority/document/${empCode}`);
+            setAuth(response.data);
+        } catch (error) {
+            console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+        }
+    };
+
+    /* 0:x, 1:작성, 2: 수정. 3: 삭제, 4:작성+수정, 5:작성+삭제, 6:수정+삭제. 7:전부  */
+    // 등록 버튼
+    const handleRegister = () => {
+        if (auth == '1' || auth == '4' || auth == '5' || auth == '7') {
+            navigate('/document/register', {state: {selectedCategory: selectedCategory}});
+        } else {
+            alert("문서를 등록할 수 있는 권한이 없습니다.");
+        }
+    }
+
+    // 삭제 버튼
+    const handleDelete = () => {
+        if (auth == '3' || auth == '5' || auth == '6' || auth == '7') {
+            const deletePromises = selectedDocuments.map(docNum =>
+                axios.delete(`/documents/${docNum}`)
+            );
+
+            Promise.all(deletePromises)
+                .then(() => {
+                    // 삭제 후 상태 업데이트
+                    setDocuments(prevDocuments =>
+                        prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                    );
+                    setFilteredDocuments(prevDocuments =>
+                        prevDocuments.filter(doc => !selectedDocuments.includes(doc.docNum))
+                    );
+                    setSelectedDocuments([]); // 선택된 문서 초기화
+                })
+                .catch(error => console.log(error));
         } else {
             alert("문서를 삭제할 수 있는 권한이 없습니다.");
         }
     };
-
-    // 목록 버튼 클릭 시 리스트 페이지로 이동
-    const handleHome = () => {
-        navigate(`/documents/`);
-    };
-
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -218,7 +236,6 @@ export default function DocumentDetail() {
             <div className="flex-1 flex">
                 <div className="fixed h-full">
                     <aside className="mt-14 h-full w-64 bg-gray-200 border-r-2 shadow-lg p-4 space-y-2">
-
                         <div>
                             <Button
                                 variant="ghost"
@@ -233,7 +250,8 @@ export default function DocumentDetail() {
                             {isExpanded && (
                                 <div className="ml-8 space-y-2 pace-y-2 mt-2">
                                     {codeCategory && codeCategory.docCateCode && codeCategory.docCateCode.split(',').map((item, index) => (
-                                            <Button variant="ghost" className="w-full" key={`${item}`}>
+                                            <Button variant="ghost" className="w-full" key={`${item}`}
+                                                    onClick={() => handleCategorySelect(item)}>
                                                 {item}
                                             </Button>
                                         )
@@ -245,42 +263,50 @@ export default function DocumentDetail() {
                     </aside>
                 </div>
                 <main className="ml-64 mt-14 flex-1 p-4 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
-                    <div className="flex justify-start space-x-2 mb-4">
-                        <Button variant="outline" onClick={handleHome}>목록</Button>
+                    <div className="flex items-center space-x-2 mb-4">
+                        <div className="relative flex flex-1 max-w-xl">
+                            <Input type="text" placeholder="문서 검색 칸" className="pl-10 pr-4 w-full"
+                                   value={searchQuery} // 검색 입력값 상태와 연결
+                                   onChange={(e) => setSearchQuery(e.target.value)} // 입력값이 변경될 때 상태 업데이트
+                                   onKeyDown={handleKeyDown}
+                            />
+                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"/>
+                        </div>
+                        <Button variant="outline" onClick={handleSearch}>검색</Button>
                     </div>
-                    <h1 className="text-2xl font-bold mb-4">문서 상세</h1>
 
-                    <div className="border rounded-lg p-4">
-                        <div className="flex items-center space-x-4 mb-4">
-
-                            <div className="text-sm font-bold text-gray-600 text-left">{doc.docCateCode}</div>
-                            <h2 className="text-2xl font-bold mb-4 text-left">{doc.title}</h2>
-                        </div>
-
-                        <div className="mb-4">
-                            <h3 className="font-semibold mb-2"></h3>
-                            <p className="whitespace-pre-wrap text-left"><span
-                                className="font-semibold">등록일 : </span>{formatDate(doc.startDate)}
-                            </p>
-                        </div>
-                        <div className="mb-4">
-                            <h3 className="font-semibold mb-2"></h3>
-                            <p className="whitespace-pre-wrap text-left"><span
-                                className="font-semibold">첨부파일명 : </span>
-                                <span onClick={() => handleDocumentDownload(doc)}
-                                      className={'cursor-pointer text-indigo-600 hover:text-indigo-500 hover:underline hover:underline-offset-1'}>{doc.fileOriginName}</span>
-                            </p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold mb-2"></h3>
-                            <p className="whitespace-pre-wrap text-left"><span
-                                className="font-semibold">설명 : </span>{doc.content}
-                            </p>
-                        </div>
+                    <div className="flex justify-end space-x-2 mb-4">
+                        <Button variant="outline"
+                                onClick={handleRegister}>등록</Button>
+                        <Button variant="outline" onClick={handleDelete}>삭제</Button>
                     </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline" onClick={handleUpdateClick}>수정</Button>
-                        <Button variant="outline" onClick={handleDeleteClick}>삭제</Button>
+                    <h1 className="text-2xl font-bold mb-4">문서함</h1>
+                    <div className="space-y-2">
+                        {(filteredDocuments.length > 0 ? filteredDocuments : documents).map((document) => (
+                            <div
+                                key={document.docNum}
+                                className="flex items-center space-x-4 p-2 border rounded"
+                                // onClick={() => handleDocumentClick(document.docNum)} // 제목 클릭 시 페이지 이동
+
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // 클릭 이벤트 전파 방지
+                                        handleCheckboxChange(document.docNum); // 체크박스 상태 변경
+                                    }}
+                                />
+                                <Paperclip className="h-4 w-4 text-gray-400"/>
+                                <div className="flex-1">
+                                    {/* 제목 클릭시 페이지 이동*/}
+                                    <div
+                                        className="font-semibold text-left cursor-pointer hover:text-indigo-500 hover:underline hover:underline-offset-1"
+                                        onClick={() => handleDocumentClick(document.docNum)}>{document.title}</div>
+                                    <div className="text-sm text-gray-600 text-left">{document.docCateCode}</div>
+                                </div>
+                                <div className="text-sm text-gray-500">{formatDate(document.startDate)}</div>
+                            </div>))}
                     </div>
                 </main>
             </div>
@@ -493,6 +519,5 @@ export default function DocumentDetail() {
                     className="fixed mt-14 top-0 right-16 transform -translate-x-3 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-300"></div>
             </div>
         </div>
-)
-    ;
+    );
 }
