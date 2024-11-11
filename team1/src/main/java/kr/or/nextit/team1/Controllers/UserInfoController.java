@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class UserInfoController {
 
@@ -54,7 +56,6 @@ public class UserInfoController {
     public ResponseEntity<String> userSelfUpdate(@PathVariable String empCode, @RequestBody UserInfoDTO userInfoDTO) {
         try {
             userInfoService.userInfoUpdate(empCode, userInfoDTO);
-            System.out.println("controller");
             return ResponseEntity.ok("정보가 수정 되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
@@ -69,11 +70,9 @@ public class UserInfoController {
     }
 
     @GetMapping("/userInfo/{corCode}")
-    public ResponseEntity<String> corCodeCheck(@PathVariable String corCode, String index) {
-        UserInfoDTO userInfo = userInfoService.corCodeCheck(corCode);
-
-        String requestReq = userInfo.getModifyReq().split(",")[Integer.parseInt(index)];
-        return ResponseEntity.ok(requestReq);
+    public ResponseEntity<List<UserInfoDTO>> corCodeCheck(@PathVariable String corCode) {
+        List<UserInfoDTO> userInfo = userInfoService.corCodeCheck(corCode);
+        return ResponseEntity.ok(userInfo);
 
     }
 
@@ -104,6 +103,13 @@ public class UserInfoController {
     @GetMapping("/authority/userInfo/{empCode}")
     public ResponseEntity<String> getAuthorityUserInfoByEmpCode(@PathVariable String empCode) {
         String userInfo = userInfoService.getAuthorityUserInfoByEmpCode(empCode);
+        return ResponseEntity.ok(userInfo);
+    }
+
+    //요청리스트
+    @GetMapping("/selectUserInfoList")
+    public ResponseEntity<List<UserInfoDTO>> selectUserInfoList(@RequestParam String empCode) {
+        List<UserInfoDTO> userInfo = userInfoService.selectUserInfoList(empCode);
         return ResponseEntity.ok(userInfo);
     }
 

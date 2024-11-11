@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserInfoService {
 
@@ -42,7 +44,7 @@ public class UserInfoService {
         return userInfoMapper.getPosCode(empCode);
     }
 
-    public UserInfoDTO corCodeCheck(String corCode) {
+    public List<UserInfoDTO> corCodeCheck(String corCode) {
         return userInfoMapper.corCodeCheck(corCode);
     }
 
@@ -51,7 +53,6 @@ public class UserInfoService {
     public void userInfoUpdate(String empCode, UserInfoDTO userInfoDTO) {
         // 정보 변경
         userInfoMapper.userInfoUpdate(empCode, userInfoDTO);
-        System.out.println(userInfoDTO);
 
         // MODIFY_REQ 비우기
         userInfoMapper.modifyReqDelete(userInfoDTO.getCorCode());
@@ -66,5 +67,11 @@ public class UserInfoService {
     // 권한
     public String getAuthorityUserInfoByEmpCode(String empCode) {
         return userInfoMapper.getAuthorityUserInfoByEmpCode(empCode);
+    }
+
+    //요청리스트
+    public List<UserInfoDTO> selectUserInfoList(String empCode) {
+
+        return userInfoMapper.selectUserInfoList(empCode);
     }
 }

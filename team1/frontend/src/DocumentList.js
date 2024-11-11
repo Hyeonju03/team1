@@ -46,6 +46,7 @@ export default function DocumentList() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+
     // empCode에서 comCode를 추출하는 함수
     const getComCode = (empCode) => {
         return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'

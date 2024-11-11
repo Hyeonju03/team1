@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from './noticeAuth';
+import {useLocation, useNavigate} from "react-router-dom";
+import {useAuth} from './noticeAuth';
 import Clock from "react-live-clock"
 
 const UserNoticeDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { empCode, logout, login, isLoggedIn, config } = useAuth();
+    const {empCode, logout, login, isLoggedIn, config} = useAuth();
 
     const [notice, setNotice] = useState(null);
     const [inputId, setInputId] = useState("");
@@ -24,7 +24,7 @@ const UserNoticeDetail = () => {
         const fetchNotice = async () => {
             if (!noticeNum) {
                 console.error("noticeNum이 없습니다.");
-                navigate('/usernotice');
+                navigate('/user/notice/list');
                 return;
             }
 
@@ -56,7 +56,7 @@ const UserNoticeDetail = () => {
                 login(inputId, response.data.role, response.data.token); // 로그인 상태 업데이트
                 localStorage.setItem('empCode', inputId);
                 localStorage.setItem('token', response.data.token);
-                navigate('/usernotice'); // 로그인 후 페이지 이동
+                navigate('/user/notice/list'); // 로그인 후 페이지 이동
             } else {
                 alert("유효하지 않은 로그인 정보입니다.");
             }
@@ -67,7 +67,7 @@ const UserNoticeDetail = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/usernotice');
+        navigate('/user/notice/list');
     };
 
     const today = new Date();
@@ -75,7 +75,7 @@ const UserNoticeDetail = () => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
+            <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
                 <div className="flex mr-6">
                     <div className="font-bold mr-1">{formattedDate}</div>
                     <Clock
@@ -84,13 +84,23 @@ const UserNoticeDetail = () => {
                         timezone={'Asia/Seoul'}/>
                 </div>
                 <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
+                    <img width="40" height="40"
+                         src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                         alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                         onClick={() => {
+                             navigate(`/user/notice/list`)
+                         }}/>
+                </div>
+                <div className="mr-5">
+                    <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                         alt="home" onClick={() => {
+                        navigate("/")
+                    }}/>
                 </div>
                 <div className="mr-16">
                     <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle"  onClick={togglePanel}/>
+                         src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
+                         alt="user-male-circle" onClick={togglePanel}/>
                 </div>
             </header>
 
@@ -110,7 +120,7 @@ const UserNoticeDetail = () => {
                                         className="font-semibold text-indigo-600">{new Date(notice.startDate).toLocaleString()}</span>
                                     </p>
                                     <div className="flex justify-end mt-4">
-                                        <button onClick={() => navigate('/usernotice')}
+                                        <button onClick={() => navigate('/user/notice/list')}
                                                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">목록
                                         </button>
                                     </div>
