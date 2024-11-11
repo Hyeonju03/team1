@@ -19,10 +19,11 @@ export default function ApplyForBusiness() {
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
+    const navigate = useNavigate();
 
-  const togglePanel = () => {
-    setIsPanelOpen(!isPanelOpen);
-  };
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
 
     // 모든 칸에 스페이스바 입력 금지
     const preventSpaceBar = (e) => {
@@ -122,7 +123,7 @@ export default function ApplyForBusiness() {
                 body: JSON.stringify(businessData),
                 credentials: 'include'
             });
-          
+
             if (!response.ok) {
                 const errorData = await response.text();
                 throw new Error(errorData || '신청에 실패했습니다.');
@@ -138,6 +139,26 @@ export default function ApplyForBusiness() {
             setShowAlert(true);
         }
     };
+
+    const goFAQ = () => {
+        navigate("/AdminFAQ");
+        window.location.reload();
+    };
+
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
+    const qRegister = () => {
+        navigate("/AdminQ");
+        window.location.reload();
+    };
+
+    const goQDetail = () => {
+        navigate("/AdminQDetail");
+        window.location.reload();
+    };
+
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -175,99 +196,134 @@ export default function ApplyForBusiness() {
                 </div>
             </header>
             <div className="flex-1 flex">
-                <aside className="w-64 bg-gray-100 p-4 space-y-2">
-                    <div>
-                        <p>사이드 부분</p>
+                <aside className="fixed h-4/6 fixed mt-32">
+                    <div
+                        className="w-64 h-full bg-gray-200 p-2 rounded-r-lg shadow-md flex flex-col justify-around items-center"
+                    >
+                        <div className="flex justify-center">
+                            <div className="h-full">
+                                <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                    navigate(`/ApplyForBusiness`)
+                                }}>사용 등록 신청</h2>
+                                <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                    navigate(`/SignUp`)
+                                }}>회원가입</h2>
+                                <h2 onClick={goFAQ} className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
+
+                                <h2 onClick={goQList} className="text-left text-2xl ml-1 mb-2 cursor-pointer">
+                                    1:1 상담</h2>
+                                <ul className="ml-2">
+                                    <li onClick={qRegister} className="text-left cursor-pointer">-
+                                        문의작성
+                                    </li>
+                                    <li onClick={goQDetail} className="text-left cursor-pointer">-
+                                        문의내역
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr className="border-gray-300 w-full"/>
+                        <div className="flex justify-center">
+                            <div className="h-full">
+                                <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
+                                <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
+                                <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
+                                <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
+                            </div>
+                        </div>
                     </div>
                 </aside>
                 <div
-                    className="flex max-w-screen-lg mx-auto mt-10 p-6 bg-yellow-100 rounded-lg shadow-md relative max-h-[70vh] h-auto">
-                    <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-center mb-6 bg-gray-500 text-white py-2 rounded">사용 등록
-                            신청</h2>
-                        <form onSubmit={handleSubmit} className="space-y-8 text-lg">
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">사업자 등록번호</label>
-                                <div className="flex-1 flex items-center">
+                    className="flex w-3/5 mt-32 ml-64 max-h-[70vh] pl-10 h-auto">
+                    <div className="flex-1 pl-96">
+                        <div className="border-2 p-6 rounded-lg shadow-md">
+                            <h2 className="text-2xl text-center mb-6 bg-blue-500 text-white py-2 rounded max-w-3xl mx-auto">사용
+                                등록
+                                신청</h2>
+                            <form onSubmit={handleSubmit} className="space-y-8 text-lg">
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">사업자 등록번호</label>
+                                    <div className="flex-1 flex items-center">
+                                        <input
+                                            className="w-3/6 border rounded px-2 py-1"
+                                            value={comCode}
+                                            onChange={(e) => setComCode(e.target.value)}
+                                            onKeyDown={preventSpaceBar}
+                                            placeholder={"숫자만 입력"}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded ml-3"
+                                            onClick={handleComCodeCheck}
+                                        >
+                                            확인
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">회사 이름</label>
                                     <input
-                                        className="w-3/5 border rounded px-2 py-1"
-                                        value={comCode}
-                                        onChange={(e) => setComCode(e.target.value)}
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        value={comName}
+                                        readOnly
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">대표 이름</label>
+                                    <input
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        value={ceoName}
+                                        readOnly
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">대표 연락처</label>
+                                    <input
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        value={ceoPhone}
+                                        readOnly
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">담당자 연락처</label>
+                                    <input
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        value={contectPhone}
+                                        onChange={(e) => setContectPhone(e.target.value)}
+                                        onKeyDown={preventSpaceBar}
+                                        placeholder={"000-0000-0000"}
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">직원 수</label>
+                                    <input
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        value={empNum}
+                                        onChange={(e) => setEmpNum(e.target.value)}
                                         onKeyDown={preventSpaceBar}
                                         placeholder={"숫자만 입력"}
                                     />
-                                    <button
-                                        type="button"
-                                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded ml-3 mt-1"
-                                        onClick={handleComCodeCheck}
-                                    >
-                                        확인
-                                    </button>
                                 </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">회사 이름</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    value={comName}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">대표 이름</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    value={ceoName}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">대표 연락처</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    value={ceoPhone}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">담당자 연락처</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    value={contectPhone}
-                                    onChange={(e) => setContectPhone(e.target.value)}
-                                    onKeyDown={preventSpaceBar}
-                                    placeholder={"000-0000-0000"}
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">직원 수</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    value={empNum}
-                                    onChange={(e) => setEmpNum(e.target.value)}
-                                    onKeyDown={preventSpaceBar}
-                                    placeholder={"숫자만 입력"}
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <label className="w-1/2">이메일</label>
-                                <input
-                                    className="w-1/2 border rounded px-2 py-1"
-                                    type="comEmail"
-                                    value={comEmail}
-                                    onChange={(e) => setComEmail(e.target.value)}
-                                    onKeyDown={preventSpaceBar}
-                                    placeholder={"xxxx@xxxx.xxx"}
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-2/3 bg-orange-400 hover:bg-orange-600 text-white mt-6 py-2 rounded"
+                                <div className="flex items-center space-x-2">
+                                    <label className="w-1/2">이메일</label>
+                                    <input
+                                        className="w-[31%] border rounded px-2 py-1"
+                                        type="comEmail"
+                                        value={comEmail}
+                                        onChange={(e) => setComEmail(e.target.value)}
+                                        onKeyDown={preventSpaceBar}
+                                        placeholder={"xxxx@xxxx.xxx"}
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="w-2/3 bg-blue-500 hover:bg-blue-600 text-white mt-6 py-2 rounded"
 
-                            >
-                                신청하기
-                            </button>
-                        </form>
+                                >
+                                    신청하기
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -284,6 +340,8 @@ export default function ApplyForBusiness() {
                         </div>
                     </div>
                 )}
+
+
             </div>
         </div>
     );

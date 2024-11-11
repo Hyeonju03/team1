@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from './noticeAuth';
+import {useNavigate} from "react-router-dom";
+import {useAuth} from './noticeAuth';
 import Clock from "react-live-clock"
 
 const AdminNoticeRegister = () => {
-    const [formData, setFormData] = useState({ title: "", content: "" });
-    const { isLoggedIn, empCode, logout } = useAuth(); // 로그인 상태 가져오기 (각 페이지 별 로그인 연동)
+    const [formData, setFormData] = useState({title: "", content: ""});
+    const {isLoggedIn, empCode, logout} = useAuth(); // 로그인 상태 가져오기 (각 페이지 별 로그인 연동)
     const navigate = useNavigate();
 
     const [isPanelOpen, setIsPanelOpen] = useState(false); // 화면 옆 슬라이드
@@ -17,8 +17,8 @@ const AdminNoticeRegister = () => {
 
     // 등록시 입력하는 함수
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        const {name, value} = e.target;
+        setFormData((prevData) => ({...prevData, [name]: value}));
     };
 
     // 입력된 내용 제출 함수
@@ -28,7 +28,7 @@ const AdminNoticeRegister = () => {
         try {
             // 백엔드(DB)로 데이터 저장
             await axios.post("/api/adminnotice/register", formData);
-            navigate("/adminnotice"); // 등록 완료 후 리스트 페이지로 이동
+            navigate("/admin/notice/list"); // 등록 완료 후 리스트 페이지로 이동
         } catch (error) {
             console.error("등록 중 오류 발생:", error);
         }
@@ -36,13 +36,13 @@ const AdminNoticeRegister = () => {
 
     // 등록 취소 버튼 함수
     const handleCancel = () => {
-        navigate("/adminnotice"); // 리스트 페이지로 이동
+        navigate("/admin/notice/list"); // 리스트 페이지로 이동
     };
 
     // 로그아웃 함수
     const handleLogout = () => {
         logout(); // 로그아웃 처리
-        navigate('/adminnotice'); // 리스트 페이지로 이동
+        navigate('/admin/notice/list'); // 리스트 페이지로 이동
     };
 
     const today = new Date();

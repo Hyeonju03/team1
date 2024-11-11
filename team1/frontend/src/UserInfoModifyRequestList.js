@@ -12,7 +12,6 @@ export default function UserInfoModifyRequestList() {
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
-
     const [subordinates, setSubordinates] = useState([]);
     const [modifyReqData, setModifyReqData] = useState([]);
     const {setSelectedUser} = useUserContext();
@@ -49,7 +48,7 @@ export default function UserInfoModifyRequestList() {
             console.error("Error fetching subordinates:", error);
         }
     };
-
+  
     const parseModifyReqData = async (modifyReq) => {
         if (modifyReq.length > 0) {
             if (modifyReq.includes(",")) {
@@ -393,8 +392,6 @@ export default function UserInfoModifyRequestList() {
                                     </button>
                                 </>
                             )}
-
-
                         {isRClick === true ? (
                             <></>
                             // <div className={`flex absolute`}
@@ -419,8 +416,6 @@ export default function UserInfoModifyRequestList() {
                         ) : (
                             <></>
                         )}
-
-
                     </div>
                 </div>
                 <div

@@ -16,6 +16,7 @@ import {useNavigate} from "react-router-dom";
 import DeletePopup from './DeletePopup';
 import {useAuth} from "./noticeAuth";
 import Clock from "react-live-clock";
+import MailTarget from "./MailTarget";
 
 const Input = ({className, ...props}) => {
     return <input className={`rounded px-3 py-2 ${className}`} {...props} />;
@@ -38,6 +39,9 @@ export default function EmailSend() {
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isTargetOpen, setIsTargetOpen] = useState(false);
+
+    const [mailTargetList, setMailTargetList] = useState([]);
 
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
@@ -110,9 +114,15 @@ export default function EmailSend() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!formedMailTarget || formedMailTarget.length === 0) {
+            alert("받을사람을 선택해주세요");
+            return;
+        }
+
         const dataToSubmit = new FormData();
         dataToSubmit.append('empCode', empCode);
-        dataToSubmit.append('mailTarget', formData.to);
+        // dataToSubmit.append('mailTarget', formData.to);
+        dataToSubmit.append('mailTarget', formedMailTarget);
         dataToSubmit.append('mailRef', formData.cc);
         dataToSubmit.append('title', formData.title);
         dataToSubmit.append('content', formData.content);
@@ -171,7 +181,7 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
             setSelectedCheckboxes([]);
 
@@ -221,6 +231,21 @@ export default function EmailSend() {
         }
     };
 
+    const openAddressBook = (e) => {
+        e.preventDefault();
+        setIsTargetOpen(true)
+    }
+
+    const selectMailTargetList = (selectedItems) => {
+        setMailTargetList(selectedItems);
+        setIsTargetOpen(false)
+        console.log("뭐징", selectedItems)
+    }
+
+    const formedMailTarget = mailTargetList?.map(empCode => {
+        const email = empCode.replace("-", "") + '@damail.com';
+        return email;
+    }) || [];
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -328,10 +353,10 @@ export default function EmailSend() {
                                 <div className="flex space-x-8" style={{marginTop: '20px', marginBottom: "20px"}}>
                                     <label htmlFor="to"
                                            className="block font-bold mb-1">받는사람</label>
-                                    <Input onChange={handleChange} id="to" name="to" value={formData.to}
+                                    <Input onChange={handleChange} id="to" name="to" value={formedMailTarget}
                                            placeholder="받는사람을 입력해주세요."
                                            className="h-10 w-[800px] border-b-2 hover:border-blue-400"/>
-                                    <button className="bg-gray-100 hover:bg-gray-200 border-2 border-gray-600 rounded w-20 h-10">주소록</button>
+                                    <button className="bg-gray-100 hover:bg-gray-200 border-2 border-gray-600 rounded w-20 h-10" onClick={openAddressBook}>주소록</button>
                                 </div>
 
                                 {/*참조*/}
@@ -381,7 +406,7 @@ export default function EmailSend() {
                                 <div style={{marginBottom: "80px"}}>
                                     <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
-                                    <p className="text-left">받는사람: {formData.to}</p>
+                                    <p className="text-left">받는사람: {formedMailTarget}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
                                 <div>
@@ -393,6 +418,7 @@ export default function EmailSend() {
                             </main>
                         )}
                     </form>
+                    {isTargetOpen && <MailTarget onClose={selectMailTargetList} empCode={empCode}/>}
                 </div>
 
             </div>

@@ -26,4 +26,5 @@ public class ListLibraryDTO {
     private String empAdd;
     private String speaker;
     private String memList;
+    private String chatNum;
 }

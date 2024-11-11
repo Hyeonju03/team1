@@ -344,9 +344,28 @@ export default function SignUpForm() {
         }
 
     };
+    const goFAQ = () => {
+        navigate("/AdminFAQ");
+        window.location.reload();
+    };
+
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
+    const qRegister = () => {
+        navigate("/AdminQ");
+        window.location.reload();
+    };
+
+    const goQDetail = () => {
+        navigate("/AdminQDetail");
+        window.location.reload();
+    };
+
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="flex flex-col min-h-screen">
             {/*// <div className="min-h-screen flex flex-col overflow-hidden">*/}
             <style>
                 {`
@@ -392,10 +411,46 @@ export default function SignUpForm() {
                         </div>
                     </div>
                 </header>
-            </div>
+            </div> 
+            <aside className="fixed h-4/6 fixed mt-32">
+                <div
+                    className="w-64 h-full bg-gray-200 p-2 rounded-r-lg shadow-md flex flex-col justify-around items-center"
+                >
+                    <div className="flex justify-center">
+                        <div className="h-full">
+                            <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                navigate(`/ApplyForBusiness`)
+                            }}>사용 등록 신청</h2>
+                            <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                navigate(`/SignUp`)
+                            }}>회원가입</h2>
+                            <h2 onClick={goFAQ} className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
 
-            <div className="mt-14 flex-1 flex justify-center">
-                <form onSubmit={handleSubmit} className="p-10 space-y-0.5">
+                            <h2 onClick={goQList} className="text-left text-2xl ml-1 mb-2 cursor-pointer">
+                                1:1 상담</h2>
+                            <ul className="ml-2">
+                                <li onClick={qRegister} className="text-left cursor-pointer">-
+                                    문의작성
+                                </li>
+                                <li onClick={goQDetail} className="text-left cursor-pointer">-
+                                    문의내역
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr className="border-gray-300 w-full"/>
+                    <div className="flex justify-center">
+                        <div className="h-full">
+                            <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
+                            <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
+                            <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
+                            <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <div style={{marginLeft: "600px", marginTop: "30px"}} className="max-w-4xl items-center">
+                <form onSubmit={handleSubmit} className="space-y-0.5">
                     {/* 회사코드 */}
                     <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
                         <label htmlFor="companyCode" className="flex-none w-32 text-left">회사코드</label>

@@ -110,7 +110,6 @@ public class UserInfoController {
     //요청리스트
     @GetMapping("/selectUserInfoList")
     public ResponseEntity<List<UserInfoDTO>> selectUserInfoList(@RequestParam String empCode) {
-
         List<UserInfoDTO> userInfo = userInfoService.selectUserInfoList(empCode);
         return ResponseEntity.ok(userInfo);
     }

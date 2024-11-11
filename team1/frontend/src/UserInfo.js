@@ -281,7 +281,6 @@ export default function UserInfo() {
                                         {isExpanded ? <ChevronDown className="mr-2 h-4 w-4"/> :
                                             <ChevronRight className="mr-2 h-4 w-4"/>}
                                         <span className="hover:underline">인사 정보</span>
-
                                     </button>
                                     {isExpanded && (
                                         <div className="ml-8 space-y-2 pace-y-2 mt-2">

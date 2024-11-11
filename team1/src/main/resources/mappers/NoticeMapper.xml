@@ -26,7 +26,6 @@
         SELECT COUNT(*)
         FROM employee
         WHERE EMP_CODE = #{empCode} AND EMP_PASS = #{empPass}
-
 --             SELECT COUNT(*) FROM(
 --                 SELECT emp_code AS id, emp_pass AS pwd
 --                 FROM employee

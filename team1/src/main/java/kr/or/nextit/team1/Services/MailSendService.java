@@ -96,4 +96,5 @@ public class MailSendService {
     public static void AlldeleteMail() {
         mailMapper.AlldeleteMail();
     }
+    
 }

@@ -18,6 +18,7 @@ import SignList from "./SignList";
 import SignRegister from "./SignRegister";
 import UserInfo from "./UserInfo";
 import UserInfoModifyRequest from "./UserInfoModifyRequest";
+import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import DocumentUpdate from "./DocumentUpdate";
 import AdminOneToOneDetail from "./AdminOneToOneDetail";
 import SignDetail from "./SignDetail";
@@ -50,7 +51,6 @@ import NoAnsQList from "./NoAnsQList";
 import UserInfoModifyRequestList from "./UserInfoModifyRequestList";
 import {UserProvider} from "./UserContext";
 
-
 function App() {
     return (
         <ListLibraryProvider>
@@ -59,9 +59,6 @@ function App() {
                     <Router>
                         <div className="App">
                             <Routes>
-
-                                {/*<Route path="/LoginPage" element={<LoginPage/>}/>*/}
-
                                 <Route path="/main" element={<Main/>}></Route>
                                 <Route path="/SignUp" element={<SignUpForm/>}/>
                                 <Route path="/" element={<Main/>}/>
@@ -85,7 +82,6 @@ function App() {
                                 <Route path="/documents/update/:id" element={<DocumentUpdate/>}/>
 
                                 <Route path="/schedule" element={<Schedule/>}/>
-
                                 <Route path="/sign" element={<SignList/>}/>
                                 <Route path="/sign/detail/:id" element={<SignDetail/>}/>
                                 <Route path="/sign/register" element={<SignRegister/>}/>
@@ -101,7 +97,6 @@ function App() {
                                 <Route path="/UserInfoModifyRequest" element={<UserInfoModifyRequest/>}/>
 
                                 <Route path="/UserInfoRequestList" element={<UserInfoModifyRequestList/>}/>
-
 
                                 <Route path="/Authority" element={<Authority/>}/>
 
@@ -122,9 +117,6 @@ function App() {
 
                                 <Route path="/DepartmentManagement" element={<DepartmentManagement/>}/>
                                 <Route path="/PositionManagement" element={<PositionManagement/>}/>
-
-                                {/*<Route path="/Login" element={<Login/>}/>*/}
-
                             </Routes>
                         </div>
                     </Router>

@@ -56,7 +56,6 @@ export default function UserInfoModifyRequest() {
                     const response = await axios.get(`/emp/${empCode}`);
                     console.log("res>", response.data)
                     setModifyReqList(response.data.modifyReq)
-
                 } catch (e) {
                     console.error(e);
                 }
@@ -84,7 +83,6 @@ export default function UserInfoModifyRequest() {
             console.error("로그아웃 중 오류 발생:", error);
         }
     };
-
 
     // 부하직원이 변경될 때마다
     useEffect(() => {

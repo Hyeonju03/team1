@@ -28,7 +28,7 @@ const UserNoticeDetail = () => {
         const fetchNotice = async () => {
             if (!noticeNum) {
                 console.error("noticeNum이 없습니다.");
-                navigate('/usernotice');
+                navigate('/user/notice/list');
                 return;
             }
 
@@ -70,7 +70,7 @@ const UserNoticeDetail = () => {
                 login(inputId, response.data.role, response.data.token); // 로그인 상태 업데이트
                 localStorage.setItem('empCode', inputId);
                 localStorage.setItem('token', response.data.token);
-                navigate('/usernotice'); // 로그인 후 페이지 이동
+                navigate('/user/notice/list'); // 로그인 후 페이지 이동
             } else {
                 alert("유효하지 않은 로그인 정보입니다.");
             }
@@ -81,7 +81,7 @@ const UserNoticeDetail = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/usernotice');
+        navigate('/user/notice/list');
     };
 
     const today = new Date();

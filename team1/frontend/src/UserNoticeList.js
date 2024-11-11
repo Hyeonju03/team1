@@ -20,6 +20,7 @@ const UserNoticeList = () => {
 
     const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태 추가
     const [searchType, setSearchType] = useState("title"); // 검색 기준 상태 추가
+    const [filteredNotices, setFilteredNotices] = useState([]); // 필터링된 공지사항 상태 추가
 
     const PAGE_SIZE = 6; // 페이지당 공지사항 수
     const navigate = useNavigate(); // navigate 훅
@@ -38,6 +39,7 @@ const UserNoticeList = () => {
             });
             setNotices(response.data); // DB 데이터로 공지사항 목록 업데이트
             setTotalPages(Math.ceil(response.data.length / PAGE_SIZE)); // 총 페이지 수 계산
+            setFilteredNotices(response.data); // 초기에는 모든 공지사항을 필터링된 공지사항으로 설정
             setError(null);
         } catch (error) {
             console.error("공지사항을 가져오는 중 오류 발생:", error);
@@ -78,7 +80,7 @@ const UserNoticeList = () => {
                 localStorage.setItem('token', response.data.token);
                 setInputId(""); // 아이디 입력 필드 초기화
                 setInputPassword(""); // 비밀번호 입력 필드 초기화
-                navigate('/usernotice'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
+                navigate('/user/notice/list'); // 로그인 후 관리자 공지사항 리스트 페이지로 이동
             } else {
                 setError("유효하지 않은 로그인 정보입니다.");
             }
@@ -96,7 +98,7 @@ const UserNoticeList = () => {
             setInputId(""); // 아이디 입력 필드 초기화
             setInputPassword(""); // 비밀번호 입력 필드 초기화
             logout(); // 로그아웃 호출
-            navigate('/usernotice'); // 리스트 페이지로 이동
+            navigate('/user/notice/list'); // 리스트 페이지로 이동
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
@@ -107,13 +109,17 @@ const UserNoticeList = () => {
         navigate('/user/notice/detail', {state: {noticeNum}});
     };
 
-    // 필터링된 공지사항 가져오기 (검색창)
-    const filteredNotices = notices.filter((notice) => {
-        return searchType === "title"
-            ? notice.title.toLowerCase().includes(searchQuery.toLowerCase())
-            : notice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            notice.content.toLowerCase().includes(searchQuery.toLowerCase());
-    });
+    // 필터링된 공지사항 가져오기 (검색버튼 클릭 시)
+    const handleSearch = () => {
+        const filtered = notices.filter((notice) => {
+            return searchType === "title"
+                ? notice.title.toLowerCase().includes(searchQuery.toLowerCase())
+                : notice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                notice.content.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+        setFilteredNotices(filtered); // 필터링된 공지사항 상태 업데이트
+        setCurrentPage(1); // 검색 후 첫 페이지로 리셋
+    };
 
     const filteredCount = filteredNotices.length; // 필터링된 공지사항 수
     const total = Math.ceil(filteredCount / PAGE_SIZE); // 총 페이지 수를 필터링된 공지사항 수에 기반하여 계산
@@ -187,25 +193,42 @@ const UserNoticeList = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="검색어 입력"
                                 className="border rounded-lg w-72 pl-2.5 shadow-sm focus:outline-none"
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearch(); // Enter 키가 눌리면 검색 실행
+                                    }
+                                }}
                             />
+                            <button
+                                onClick={handleSearch}
+                                className="bg-blue-500 text-white px-4 py-2 ml-2 rounded-lg hover:bg-blue-600"
+                            >
+                                검색
+                            </button>
                         </div>
 
                         <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full md:w-4/5 lg:w-3/4 mx-auto">
                             <ul className="divide-y divide-gray-200">
-                                {filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
-                                    <li key={notice.noticeNum}
-                                        className="p-3 hover:bg-gray-50 transition duration-200">
-                                        <h3
-                                            className="text-lg font-semibold text-gray-700 cursor-pointer transition duration-200"
-                                            onClick={() => handleNoticeClick(notice.noticeNum)}
-                                        >
-                                            {notice.title}
-                                        </h3>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            작성일: {new Date(notice.startDate).toLocaleString()}
-                                        </p>
+                                {filteredNotices.length === 0 ? (
+                                    <li className="p-3 text-center text-indigo-600 font-semibold">
+                                        검색결과가 없습니다.
                                     </li>
-                                ))}
+                                ) : (
+                                    filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
+                                        <li key={notice.noticeNum}
+                                            className="p-3 hover:bg-indigo-50 transition duration-200">
+                                            <h3
+                                                className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
+                                                onClick={() => handleNoticeClick(notice.noticeNum)}
+                                            >
+                                                {notice.title}
+                                            </h3>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                작성일: {new Date(notice.startDate).toLocaleString()}
+                                            </p>
+                                        </li>
+                                    ))
+                                )}
                             </ul>
                         </div>
 
@@ -223,8 +246,7 @@ const UserNoticeList = () => {
 
                             {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                                 <button
-                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(currentPage + 1)}                 
                                     className="px-3 py-1 bg-gray-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition duration-200 focus:outline-none"
                                 >
                                     다음
