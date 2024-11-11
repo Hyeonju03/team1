@@ -30,16 +30,12 @@ export default function UserInfoModifyRequest() {
     //     setHasModifyReq(hasRequest);
     // }, [subordinates]);
 
-    const [index, setIndex] = useState('');
-
-    // 수정 요청 목록 페이지에 버튼의 id에 있는 숫자를 잘라서
-    // setIndex(세팅)
 
     useEffect(() => {
         if (isLoggedIn) {
             const fetchSubordinates = async () => {
                 try {
-                    const response = await axios.get(`/userInfo/${empCode}`, index);
+                    const response = await axios.get(`/userInfo/${empCode}`);
                     setSubordinates(response.data);
                 } catch (e) {
                     console.error(e);
@@ -61,7 +57,6 @@ export default function UserInfoModifyRequest() {
             console.error("로그아웃 중 오류 발생:", error);
         }
     };
-
 
     // 부하직원이 변경될 때마다
     useEffect(() => {
