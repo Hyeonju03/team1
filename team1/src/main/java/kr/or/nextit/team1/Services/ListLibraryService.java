@@ -55,4 +55,17 @@ public class ListLibraryService {
     public void chatInUpdate1(Map<String, Object> data){
         listLibraryMapper.chatInUpdate1(data);
     }
+
+    public void chatAdd1(Map<String, Object> data){
+        listLibraryMapper.chatAdd1(data);
+    }
+    public void chatAdd2(Map<String, Object> data){
+        listLibraryMapper.chatAdd2(data);
+    }
+    public List<ListLibraryDTO> myChatList(String code){return listLibraryMapper.myChatList(code);}
+    public String empCodeCheck(String code){return listLibraryMapper.empCodeCheck(code);}
+    public List<ListLibraryDTO> empCodeCheck2(String code){return listLibraryMapper.empCodeCheck2(code);}
+    public void chatOut(Map<String, Object> data){
+        listLibraryMapper.chatOut(data);
+    }
 }
