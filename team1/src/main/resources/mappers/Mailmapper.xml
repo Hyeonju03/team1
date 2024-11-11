@@ -112,4 +112,10 @@
         where delete_yn = 1
     </delete>
 
+    <select id="selectMailTarget" >
+        SELECT EMP_CODE,EMP_NAME,DEP_CODE,POS_CODE,EMP_MAIL
+        FROM employee e
+        WHERE EMP_CODE LIKE CONCAT('%', '3148127227', '%')
+    </select>
+
 </mapper>

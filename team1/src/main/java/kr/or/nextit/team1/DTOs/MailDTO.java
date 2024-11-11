@@ -26,6 +26,10 @@ public class MailDTO implements Serializable {
     private MultipartFile attachment;
     private LocalDateTime startDate;
     private boolean deleteYn;
+    private String empName;
+    private String depCode;
+    private String posCode;
+    private String empMail;
 
     public MailDTO(int mailNum, String empCode, String title, String content, String mailTarget, String mailRef, String fileSize, LocalDateTime startDate) {
         this.mailNum = mailNum;

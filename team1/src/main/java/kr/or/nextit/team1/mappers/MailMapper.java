@@ -9,7 +9,7 @@ import java.util.List;
 public interface MailMapper {
     int insertMail(MailDTO mailDTO);
 
-    List<MailDTO> selectSendMail(String empCode , String mailTarget , String mailRef);
+    List<MailDTO> selectSendMail(String empCode, String mailTarget, String mailRef);
 
     List<MailDTO> sentMail(String empCode);
 
@@ -25,10 +25,12 @@ public interface MailMapper {
 
     void AlldeleteMail();
 
-    List<MailDTO> selectToMeSendMail(String empCode , String mailTarget);
+    List<MailDTO> selectToMeSendMail(String empCode, String mailTarget);
 
     List<MailDTO> attachmentMailList(String mailTarget, String mailRef);
 
     List<MailDTO> receivedMailList(String mailTarget, String mailRef);
+
+    List<MailDTO> selectMailTarget(String comCode);
 
 }
