@@ -342,11 +342,11 @@ export default function SignUpForm() {
                                             <div className="flex items-center mb-4">
                                                 <p>직원수:</p>
                                                 <p style={{marginLeft: "80px"}} className="ml-4">{empNum}</p>
-                                                {empNum > 9 && showMessage && (
+                                                {empNum >= 9 && showMessage && (
                                                     <div
                                                         className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-md ml-4 flex items-center">
                                                         <AlertTriangle className="h-5 w-5 mr-2"/>
-                                                        <span onClick={goPayMent} className="cursor-pointer">주의: 직원 수가 10명 이상입니다. 계속하려면 결제가 필요합니다.</span>
+                                                        <span onClick={goPayMent} className="cursor-pointer">주의: 미결제 상태입니다. 직원 수가 10명 이상인 기업은 결제가 필요합니다.</span>
                                                     </div>
                                                 )}
                                             </div>

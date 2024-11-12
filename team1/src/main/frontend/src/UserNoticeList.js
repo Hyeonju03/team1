@@ -17,6 +17,7 @@ const UserNoticeList = () => {
     const [isRClick, setIsRClick] = useState(false)
     const [newWindowPosY, setNewWindowPosY] = useState(500)
     const [userInfo, setUserInfo] = useState([])
+    const [isAdmin, setIsAdmin] = useState("");
 
     const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태 추가
     const [searchType, setSearchType] = useState("title"); // 검색 기준 상태 추가
@@ -49,9 +50,14 @@ const UserNoticeList = () => {
 
     // 공지사항을 가져오는 useEffect
     useEffect( () => {
-        empInfo();
-        fetchNotices(); // 로그인 상태와 관계없이 공지사항 가져오기
-    }, []);
+        if(isLoggedIn && empCode) {
+            const role = localStorage.getItem('role')
+            setIsAdmin(role)
+
+            empInfo();
+            fetchNotices(); // 로그인 상태와 관계없이 공지사항 가져오기
+        }
+    }, [isLoggedIn, empCode]);
 
     const empInfo = async () => {
         try{
@@ -201,7 +207,7 @@ const UserNoticeList = () => {
                             />
                             <button
                                 onClick={handleSearch}
-                                className="bg-blue-500 text-white px-4 py-2 ml-2 rounded-lg hover:bg-blue-600"
+                                className="bg-gray-500 text-white px-4 py-2 ml-2 rounded-lg hover:bg-gray-600"
                             >
                                 검색
                             </button>
@@ -216,7 +222,7 @@ const UserNoticeList = () => {
                                 ) : (
                                     filteredNotices.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((notice) => (
                                         <li key={notice.noticeNum}
-                                            className="p-3 hover:bg-indigo-50 transition duration-200">
+                                            className="p-3 hover:bg-gray-50 transition duration-200">
                                             <h3
                                                 className="text-lg font-semibold text-indigo-700 cursor-pointer hover:text-indigo-500 transition duration-200"
                                                 onClick={() => handleNoticeClick(notice.noticeNum)}
@@ -246,11 +252,23 @@ const UserNoticeList = () => {
 
                             {currentPage < total && filteredCount > PAGE_SIZE && ( // '다음' 버튼 숨기기 조건
                                 <button
-                                    onClick={() => setCurrentPage(currentPage + 1)}                 
+                                    onClick={() => setCurrentPage(currentPage + 1)}
                                     className="px-3 py-1 bg-gray-600 text-white text-sm rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500 transition duration-200 focus:outline-none"
                                 >
                                     다음
                                 </button>
+                            )}
+                        </div>
+                        <div>
+                            {isAdmin == "admin" && (
+                                <div className="flex justify-center mt-6">
+                                    <button
+                                        onClick={() => navigate('/admin/notice/register')}
+                                        className="bg-gray-500 text-white font-bold py-2 px-4 text-sm rounded-full hover:bg-gray-400 transition duration-200"
+                                    >
+                                        공지사항 등록
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

@@ -24,11 +24,11 @@ export default function DocumentDetail() {
     const [isExpanded, setIsExpanded] = useState(true);
     const {id} = useParams(); // 여기서 id는 docNum을 의미
     const [doc, setDoc] = useState(null);
-    // const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
-    const [codeCategory] = useComCode();
+    const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
+    // const [codeCategory] = useComCode();
     const [loading, setLoading] = useState(true); // 상세 페이지 로딩 상태 추가
     const navigate = useNavigate();
-    const [comCode, setComCode] = useState(process.env.REACT_APP_COM_CODE);
+    const [comCode, setComCode] = useState('');
     // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     const [auth, setAuth] = useState(null);
     // 로그인
@@ -49,6 +49,29 @@ export default function DocumentDetail() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode && isLoggedIn) {
+            const newComCode = getComCode(empCode);
+            fetchAuth();
+            setComCode(newComCode);  // comCode 상태 업데이트
+            empInfo();
+        }
+    }, [empCode, isLoggedIn]); // empCode가 변경될 때마다 실행
+
+    useEffect(() => {
+        if (isLoggedIn && comCode) {
+            axios.get(`/code/${comCode}`)
+                .then(response => {
+                    setCodeCategory(response.data);
+                })
+        }
+    }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -66,6 +89,16 @@ export default function DocumentDetail() {
             documentDetail();
         }
     }, [id, isLoggedIn, empCode]);
+
+    const fetchAuth = async () => {
+        try {
+            // 권한 정보 가져오기
+            const response = await axios.get(`/authority/document/${empCode}`);
+            setAuth(response.data);
+        } catch (error) {
+            console.error('권한 정보를 가져오는 데 실패했습니다.', error);
+        }
+    };
 
     // 로그아웃 처리 함수
     const handleLogout = async () => {

@@ -411,8 +411,8 @@ export default function SignUpForm() {
                         </div>
                     </div>
                 </header>
-            </div> 
-            <aside className="fixed h-4/6 fixed mt-32">
+            </div>
+            <aside className="fixed h-4/6 mt-32">
                 <div
                     className="w-64 h-full bg-gray-200 p-2 rounded-r-lg shadow-md flex flex-col justify-around items-center"
                 >
@@ -449,7 +449,8 @@ export default function SignUpForm() {
                     </div>
                 </div>
             </aside>
-            <div style={{marginLeft: "600px", marginTop: "30px"}} className="max-w-4xl items-center">
+            <div className="ml-40 p-5">
+            <div className="ml-96 mt-28 max-w-4xl items-center">
                 <form onSubmit={handleSubmit} className="space-y-0.5">
                     {/* 회사코드 */}
                     <div className="flex items-center mb-4" style={{marginBottom: "20px"}}>
@@ -712,6 +713,7 @@ export default function SignUpForm() {
 
                     <button type="submit" className="border bg-blue-500 text-white p-2">회원가입</button>
                 </form>
+            </div>
             </div>
         </div>
     );

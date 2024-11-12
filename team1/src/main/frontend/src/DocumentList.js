@@ -24,8 +24,8 @@ export default function DocumentList() {
 
     const [isExpanded, setIsExpanded] = useState(true);
     const [documents, setDocuments] = useState([]);
-    // const [codeCategory, setCodeCategory] = useState();
-    const [codeCategory] = useComCode();
+    const [codeCategory, setCodeCategory] = useState();
+    // const [codeCategory] = useComCode();
     const [searchQuery, setSearchQuery] = useState(""); // 검색 입력 상태 추가
     const [filteredDocuments, setFilteredDocuments] = useState([]); // 필터링된 문서 상태
     const [selectedDocuments, setSelectedDocuments] = useState([]); // 선택된 문서 상태 추가
@@ -58,16 +58,16 @@ export default function DocumentList() {
 
     useEffect(() => {
         // empCode가 변경될 때마다 comCode를 업데이트
-        if (empCode) {
+        if (empCode && isLoggedIn) {
             const newComCode = getComCode(empCode);
             fetchAuth();
             setComCode(newComCode);  // comCode 상태 업데이트
             empInfo();
         }
-    }, [empCode]); // empCode가 변경될 때마다 실행
+    }, [empCode, isLoggedIn]); // empCode가 변경될 때마다 실행
 
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn &&comCode) {
             // document 테이블에서 문서 가져오기
             axios.get(`/company/${comCode}`)
                 .then(response => {
@@ -75,6 +75,11 @@ export default function DocumentList() {
                     setFilteredDocuments(response.data); // 초기값은 전체 문서
                 })
                 .catch(error => console.log(error));
+
+            axios.get(`/code/${comCode}`)
+                .then(response => {
+                    setCodeCategory(response.data);
+                })
         }
     }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
 

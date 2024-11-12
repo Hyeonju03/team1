@@ -25,15 +25,16 @@ export default function DocumentRegister() {
     const location = useLocation(); // location 객체를 사용하여 이전 페이지에서 전달된 데이터 수신
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(location.state?.selectedCategory || ''); // location.state : 이전페이지에서 전달된 상태 객체
-    const [codeCategory] = useComCode();
+    // const [codeCategory] = useComCode();
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState(null);
-    const [categories, setCategories] = useState([]); // 카테고리 상태 추가
+    const [codeCategory, setCodeCategory] = useState();
     const navigate = useNavigate();
     // const [empCode, setEmpCode] = useState(process.env.REACT_APP_EMP_CODE);
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [userInfo, setUserInfo] = useState([])
+    const [comCode, setComCode] = useState('');
     // slide 변수
     // slide 변수
     const [btnCtl, setBtnCtl] = useState(0)
@@ -54,6 +55,29 @@ export default function DocumentRegister() {
             empInfo();
         }
     }, [isLoggedIn, empCode]); //isLoggedIn과 empCode 변경 시에만 실행
+
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode && isLoggedIn) {
+            const newComCode = getComCode(empCode);
+            setComCode(newComCode);  // comCode 상태 업데이트
+            empInfo();
+        }
+    }, [empCode, isLoggedIn]); // empCode가 변경될 때마다 실행
+
+    useEffect(() => {
+        if (isLoggedIn &&comCode) {
+            axios.get(`/code/${comCode}`)
+                .then(response => {
+                    setCodeCategory(response.data);
+                })
+        }
+    }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
 
     const empInfo = async () => {
         try {

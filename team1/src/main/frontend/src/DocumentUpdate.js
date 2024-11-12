@@ -24,13 +24,14 @@ export default function DocumentUpdate() {
     });
     const {id} = useParams(); // 여기서 id는 docNum을 의미
     const [isExpanded, setIsExpanded] = useState(true);
-    // const [categories, setCategories] = useState([]); // 카테고리 상태 추가
-    const [codeCategory] = useComCode();
+    const [codeCategory, setCodeCategory] = useState([]); // 카테고리 상태 추가
+    // const [codeCategory] = useComCode();
     const [attachment, setAttachment] = useState(null); // 새로운 첨부파일 상태 추가
     const navigate = useNavigate();
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [userInfo, setUserInfo] = useState([])
+    const [comCode, setComCode] = useState('');
     // slide 변수
     const [btnCtl, setBtnCtl] = useState(0)
     const [isRClick, setIsRClick] = useState(false)
@@ -43,24 +44,38 @@ export default function DocumentUpdate() {
         setIsPanelOpen(!isPanelOpen);
     };
 
+    // empCode에서 comCode를 추출하는 함수
+    const getComCode = (empCode) => {
+        return empCode.split('-')[0]; // '3148127227-user001' -> '3148127227'
+    };
+
+    useEffect(() => {
+        // empCode가 변경될 때마다 comCode를 업데이트
+        if (empCode) {
+            const newComCode = getComCode(empCode);
+            setComCode(newComCode);  // comCode 상태 업데이트
+            empInfo();
+        }
+    }, [empCode]); // empCode가 변경될 때마다 실행
+
+    useEffect(() => {
+        if (isLoggedIn && comCode) {
+            axios.get(`/code/${comCode}`)
+                .then(response => {
+                    setCodeCategory(response.data);
+                })
+        }
+    }, [isLoggedIn, comCode]); //isLoggedIn과 comCode 변경 시에만 실행
+
     // 문서 정보 및 카테고리 가져오기
     useEffect(() => {
-        if (isLoggedIn) {
+        if (isLoggedIn && empCode) {
             empInfo();
             axios.get(`/documents/${id}`) // 여기서 id는 docNum 값
                 .then(response => {
                     setDoc(response.data);
                 })
                 .catch(error => console.log(error));
-            // code 테이블에서 카테고리 가져오기
-            // axios.get(`/code`) // API 엔드포인트를 조정하세요
-            //     .then(response => {
-            //         // console.log(response.data);
-            //         // 응답이 카테고리 배열이라고 가정할 때
-            //         const uniqueCategories = [...new Set(response.data.map(category => category.docCateCode))]; // 중복 제거
-            //         setCategories(uniqueCategories); // 카테고리 상태에 저장
-            //     })
-            //     .catch(error => console.log(error));
         }
     }, [id, isLoggedIn, empCode]);
 

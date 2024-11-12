@@ -41,8 +41,8 @@ public class UserNoticeController {
 
         boolean isValidUser = noticeService.validateUser(empCode, empPass);// 사용자 유효성 검사
         boolean isValidAdmin = noticeService.validateAdmin(empCode, empPass);
-        System.out.println(isValidUser);
-        System.out.println(isValidAdmin);
+        System.out.println("isValidUser>>>"+isValidUser);
+        System.out.println("isValidAdmin>>>"+isValidAdmin);
         if (isValidUser) {
             // 세션 생성
             HttpSession session = request.getSession();

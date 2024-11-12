@@ -772,7 +772,7 @@ export default function MainLayout() {
                             </div>
                             <div className="w-full mt-10 mb-10 flex justify-between">
                                 <div className="w-3/5 h-full rounded-2xl">
-                                    <img className="rounded-2xl" src="/mainService.PNG" alt="mainService"/>
+                                    <img className="rounded-2xl" src="/mainService.png" alt="mainService"/>
                                 </div>
                                 <div className="pt-20 bg-amber-100 shadow-lg rounded-full h-64 w-1/4 mr-20 mt-14">
                                     <div className="font-bold text-2xl">
