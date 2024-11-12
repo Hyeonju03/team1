@@ -15,7 +15,14 @@ public class LogService {
     public LogDTO selectLog() {
         return logMapper.selectLog();
     }
-    public LogDTO logInsert(LogDTO logDTO) {
-        return logMapper.logInsert(logDTO);
+    public LogDTO selectIsLog(String comCode) {
+        return logMapper.selectIsLog(comCode);
     }
+    public void logInsert(LogDTO logDTO) {
+        logMapper.logInsert(logDTO);
+    }
+    public void logUpdate(LogDTO logDTO) {
+        logMapper.logUpdate(logDTO);
+    }
+
 }

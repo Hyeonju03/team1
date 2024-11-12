@@ -1,5 +1,6 @@
 package kr.or.nextit.team1.DTOs;
 
+
 public class LogDTO {
     String comCode;
     String log;

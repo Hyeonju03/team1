@@ -6,5 +6,10 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface LogMapper {
     LogDTO selectLog();
-    LogDTO logInsert(LogDTO logDTO);
+    LogDTO selectIsLog(String comCode);
+    void logInsert(LogDTO logDTO);
+    void logUpdate(LogDTO logDTO);
+
+
+
 }

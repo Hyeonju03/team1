@@ -51,7 +51,7 @@ export default function MainLayout() {
 
 
     useEffect(() => {
-        if(user !== null && com !== null){
+        if (user !== null && com !== null) {
             fetchData();
         }
     }, [btnCtl]);
@@ -321,9 +321,9 @@ export default function MainLayout() {
     // 날씨
     const weekday = ['일', '월', '화', '수', '목', '금', '토'];
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(empCode)
-    },[])
+    }, [])
     const [weathers, setWeathers] = useState([{
         feels_like: '',
         dt_txt: '',
@@ -351,21 +351,14 @@ export default function MainLayout() {
     const today = new Date();
     const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}`;
 
-
     useEffect(() => {
         getWeather();
         empInfo();
-
-        axios.get('/selectLog')
-            .then(response => console.log(response.data))
-            .catch(error => console.log(error))
-
-
     }, []);
 
     useEffect(() => {
         console.log("login", isLoggedIn);
-        if(empCode || isLoggedIn) {
+        if (empCode || isLoggedIn) {
             // newMail();
             newSign();
             newUserInfo();
@@ -373,15 +366,6 @@ export default function MainLayout() {
         }
     }, [empCode, isLoggedIn]);
 
-    // useEffect(() => {
-    //     const logData = {
-    //         comCode: "TEST_1", log: "메인 페이지 새로고침 테스트임", time: "TEST_TIME"
-    //     };
-    //
-    //     axios.post('/logInsert', logData)
-    //         .then(response => console.log(response.data))
-    //         .catch(error => console.log(error));
-    // }, []);
 
     const empInfo = async () => {
         try {
@@ -901,7 +885,8 @@ export default function MainLayout() {
                                                         return (
                                                             <div key={i}
                                                                  className="mt-2 p-2 items-center w-[100%] h-[30%] bg-gray-100 rounded-2xl">
-                                                                <div className="flex items-center text-center justify-between">
+                                                                <div
+                                                                    className="flex items-center text-center justify-between">
                                                                     <p className="w-10 h-10 border-2 border-white rounded-full shadow-md bg-[#fbc2eb]">
                                                                         {s.category ? " " : ""}
                                                                     </p>
@@ -1164,7 +1149,7 @@ export default function MainLayout() {
                                 <div className="mt-2">
                                     <div className="border text-left h-[435px] blue">
                                         {btnCtl === 0 ? (
-                                            com !== null && com !== "" ? ListLibrary.WorkerList(com):<></>
+                                            com !== null && com !== "" ? ListLibrary.WorkerList(com) : <></>
                                         ) : btnCtl === 1 ? (
                                             <>
                                                 <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>
@@ -1285,13 +1270,17 @@ export default function MainLayout() {
                                         type="text"
                                         placeholder="아이디"
                                         className="w-full p-2 mb-2 border rounded"
-                                        onChange={(e) => {setInputId(e.target.value)}}
+                                        onChange={(e) => {
+                                            setInputId(e.target.value)
+                                        }}
                                     />
                                     <input
                                         type="password"
                                         placeholder="비밀번호"
                                         className="w-full p-2 mb-4 border rounded"
-                                        onChange={(e) => {setInputPassword(e.target.value)}}
+                                        onChange={(e) => {
+                                            setInputPassword(e.target.value)
+                                        }}
                                     />
                                     <button
                                         className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4"

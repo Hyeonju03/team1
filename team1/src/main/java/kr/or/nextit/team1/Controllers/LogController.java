@@ -20,10 +20,18 @@ public class LogController {
     public ResponseEntity<LogDTO> selectLog() {
         return ResponseEntity.ok(logService.selectLog());
     }
-    @PostMapping("/logInsert")
-    public ResponseEntity<LogDTO> logInsert(@RequestBody LogDTO logDTO) {
-        return ResponseEntity.ok(logService.logInsert(logDTO));
+    @GetMapping("/selectIsLog")
+    public ResponseEntity<LogDTO> selectIsLog(String comCode) {
+        return ResponseEntity.ok(logService.selectIsLog(comCode));
     }
-
-
+    @PostMapping("/logUpdate")
+    public ResponseEntity<Void> logUpdate(@RequestBody LogDTO logDTO) {
+        logService.logUpdate(logDTO);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/logInsert")
+    public ResponseEntity<Void> logInsert(@RequestBody LogDTO logDTO) {
+        logService.logInsert(logDTO);
+        return ResponseEntity.ok().build();
+    }
 }

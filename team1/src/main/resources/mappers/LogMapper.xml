@@ -6,10 +6,20 @@
     <select id="selectLog" resultType="LogDTO">
         select * from log
     </select>
+    <select id="selectIsLog" parameterType="String" resultType="LogDTO">
+        select * from log
+        where COM_CODE like #{comCode}
+    </select>
     <insert id="logInsert" parameterType="LogDTO">
         insert into log
         (COM_CODE, LOG, TIME)
         values
-        (#{comCode},#{log},#{time})
+        (#{comCode},CONCAT(#{log},','),CONCAT(#{time},','))
     </insert>
+    <update id="logUpdate" parameterType="LogDTO">
+    update log
+        set LOG = CONCAT(LOG, #{log},','),
+        TIME = CONCAT(TIME, #{time},',')
+    where COM_CODE like #{comCode}
+    </update>
 </mapper>
