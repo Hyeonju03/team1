@@ -701,15 +701,15 @@ export default function EmailSend() {
                         )}
                         {showConfirmation && (
                             <main style={{marginLeft: "-150PX"}}>
-                                <h1 style={{marginBottom: "50px", marginTop: "-370px"}}
-                                    className="text-xl font-bold text-left">메일을 보냈습니다.</h1>
-                                <div style={{marginBottom: "80px"}}>
+                                <h1
+                                    className="text-xl font-bold text-left mt-14 ml-80">메일을 보냈습니다.</h1>
+                                <div style={{marginBottom: "80px"}} className="mt-14 ml-80">
                                     <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
                                     <p className="text-left">받는사람: {formedMailTarget}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
-                                <div>
+                                <div className="mt-14 ml-80" style={{marginLeft: "750px"}}>
                                     <button onClick={goSendMailList} className="border rounded-md px-4 py-2">확인</button>
                                     <button onClick={backSend} className="border rounded-md px-4 py-2"
                                             style={{marginLeft: "30px"}}>쓰던 페이지 가기

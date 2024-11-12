@@ -663,7 +663,7 @@ export default function EmailSend() {
                 {/* Main content */}
                 <main className="ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
                     <div className="flex items-center space-x-2 mb-7">
-                        <div className="p-1 border rounded relative flex flex-1 max-w-xl">
+                        <div className="p-1 border rounded flex flex-1 max-w-xl">
                             <img width="30" height="10" src="https://img.icons8.com/ios/50/search--v1.png"
                                  alt="search--v1"
                                  className="ml-2 mr-4"/>

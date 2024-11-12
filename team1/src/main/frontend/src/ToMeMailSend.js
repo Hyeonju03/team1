@@ -617,7 +617,8 @@ export default function EmailSend() {
                 {/* Main content */}
                 <div className="ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
                     <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
-                        {!showConfirmation && (
+                        {console.log("showConfirmation",showConfirmation)}
+                        {showConfirmation === false ?
                             <div>
                                 <div style={{display: showConfirmation ? "none" : "block"}}>
                                     <div className="text-2xl w-full font-bold mb-6 text-left">내게쓰기</div>
@@ -652,25 +653,24 @@ export default function EmailSend() {
                                     <button type={"submit"} className="border rounded-md px-4 py-2">보내기</button>
                                 </div>
                             </div>
-                        )}
-                        {showConfirmation && (
+                            :
                             <div style={{marginLeft: "-150PX"}}>
-                                <h1 style={{marginBottom: "50px", marginTop: "-370px"}}
-                                    className="text-xl font-bold text-left">메일을 보냈습니다.</h1>
-                                <div style={{marginBottom: "80px"}}>
+                                <h1
+                                    className="text-xl font-bold text-left mt-14 ml-80">메일을 보냈습니다.</h1>
+                                <div style={{marginBottom: "80px"}} className="mt-14 ml-80">
                                     <p style={{marginBottom: "20px"}}
                                        className="text-left">{formData.title ? `제목: ${formData.title}` : '제목 : 제목없음'}</p>
                                     <p className="text-left">받는사람: {mailEmpCode}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
-                                <div>
+                                <div >
                                     <button onClick={goSendMailList} className="border rounded-md px-4 py-2">확인</button>
                                     <button onClick={backSend} className="border rounded-md px-4 py-2"
                                             style={{marginLeft: "30px"}}>쓰던 페이지 가기
                                     </button>
                                 </div>
                             </div>
-                        )}
+                        }
                     </form>
                 </div>
             </div>
