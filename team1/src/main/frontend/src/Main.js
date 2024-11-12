@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './App.css';
 import axios from "axios";
 import Clock from "react-live-clock";
 import {useAuth} from "./noticeAuth";
 import {useNavigate} from "react-router-dom";
+import ListLibrary from "./HtmlFunctions/ListLibrary";
+import {useListLibrary} from "./Context/ListLibraryContext";
 
 export default function MainLayout() {
     const navigate = useNavigate();
@@ -11,6 +13,296 @@ export default function MainLayout() {
     const [inputPassword, setInputPassword] = useState(""); // 비밀번호 입력
     const {login, empCode, logout, isLoggedIn} = useAuth(); // 인증 훅에서 가져오기
     const [userInfo, setUserInfo] = useState([])
+    // 슬라이드 부분
+    const socket = useRef(null);
+    const [sendMessage, setSendMessage] = useState(null);
+    const [isRClick, setIsRClick] = useState(false);
+    const [newWindowPosY, setNewWindowPosY] = useState(500);
+    const [newWindowPosX, setNewWindowPosX] = useState(500);
+    const [newWindowData, setNewWindowData] = useState([]);
+    const [noticeNum, setNoticeNum] = useState("");
+    const {btnCtl, setBtnCtl} = useListLibrary();
+    const [user, setUser] = useState(empCode);
+    const [com, setCom] = useState(empCode.split("-")[0]);
+    const [chatNum, setChatNum] = useState("")
+    const [inviteChatCtl, setInviteChatCtl] = useState(0)
+
+    const [noticeHtml, setNoticeHtml] = useState("");
+    const [loadNoticeHtml, setLoadNoticeHtml] = useState("");
+    const [addressBookHtml, setAddressBookHtml] = useState("");
+    const [chatListLoad, setChatListLoad] = useState("");
+    const [chatInHTML, setChatInHTML] = useState("");
+    const [chatMemList2, setChatMemList2] = useState("")
+    const fetchData = async () => {
+        const result1 = await ListLibrary.noticeList(user, btnCtl);
+        setNoticeHtml(result1);
+        const result2 = await ListLibrary.loadNotice(noticeNum);
+        setLoadNoticeHtml(result2);
+        const result3 = await ListLibrary.addressBook(user, "");
+        setAddressBookHtml(result3);
+        const result4 = await ListLibrary.chatListLoad(user)
+        setChatListLoad(result4);
+        const result5 = await ListLibrary.chatMemList2(user, chatNum)
+        setChatMemList2(result5);
+
+        const result6 = await ListLibrary.chatIn(user, chatNum) //이거 제일 마지막에 들어가야함 부하 심함
+        setChatInHTML(result6);
+    };
+
+
+    useEffect(() => {
+        setUser(empCode)
+        setCom(empCode.split("-")[0])
+
+        console.log("empCode", empCode)
+        console.log("user>>", user)
+        console.log("com>>",com)
+        if(user){
+            fetchData();
+        }
+    }, [btnCtl]);
+
+    useEffect(() => {
+        const elements = document.querySelectorAll(".testEvent");
+
+        const handleClick = (event) => {
+            setBtnCtl(5);
+            setNoticeNum(event.currentTarget.id);
+            ListLibrary.noticeUpdate(event.currentTarget.id, user);
+        };
+
+        elements.forEach((element) => {
+            element.addEventListener("click", handleClick);
+        });
+
+        return () => {
+            elements.forEach((element) => {
+                element.removeEventListener("click", handleClick);
+            });
+        };
+    }, [noticeHtml, btnCtl]);
+    useEffect(() => {
+        const elements = document.querySelectorAll(".AddBtn");
+        const btnElement = document.querySelector(".BtnAddressBookAdd");
+        const InputAddressBookAdd = document.querySelectorAll(".InputAddressBookAdd");
+        const InputAddressBookSearch = document.querySelector(".InputAddressBookSearch");
+        let keyWord = "";
+        const keyWordSet = async (e) => {
+            if (e.key === "Enter") {
+                keyWord = e.currentTarget.value;
+                setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
+            }
+        };
+        const addBtnClick = async (e) => {
+            if (await ListLibrary.addressTargetSelect(InputAddressBookAdd[0].value, InputAddressBookAdd[1].value)) {
+                if (!(await ListLibrary.addressEmpAddSelect(user, InputAddressBookAdd[0].value))) {
+                    await ListLibrary.addressBookAdd(InputAddressBookAdd[0].value, user);
+                } else {
+                    alert("이미 존재하는 아이디 입니다");
+                }
+                setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
+            } else {
+                alert("정보가 일치하지 않습니다");
+            }
+        };
+        const handleClick = async (e) => {
+            await ListLibrary.addressBookDelete(e.currentTarget.parentNode.parentNode.id.replace("Add", ""), user);
+            setAddressBookHtml(await ListLibrary.addressBook(user, keyWord));
+        };
+        elements.forEach((element) => {
+            element.addEventListener("click", handleClick);
+        });
+        if (btnElement) {
+            btnElement.addEventListener("click", addBtnClick);
+        } else {
+            //첫 로딩 거르기(주소록 누르기전 방지)
+        }
+        if (InputAddressBookSearch) {
+            InputAddressBookSearch.addEventListener("keydown", keyWordSet);
+        }
+        return () => {
+            elements.forEach((element) => {
+                element.removeEventListener("click", handleClick);
+            });
+            if (btnElement) {
+                btnElement.removeEventListener("click", addBtnClick);
+            }
+            if (InputAddressBookSearch) {
+                InputAddressBookSearch.removeEventListener("keydown", keyWordSet);
+            }
+        };
+    }, [addressBookHtml, btnCtl]);
+    useEffect(() => {
+        socket.current = new WebSocket('ws://localhost:3002');
+
+        socket.current.onopen = () => {
+            console.log('WebSocket 연결 성공');
+        };
+
+        socket.current.onclose = () => {
+            console.log('WebSocket 연결 종료');
+        };
+
+        socket.current.onerror = (error) => {
+            console.error('WebSocket 오류:', error);
+        };
+
+        // 서버로부터 메시지 수신 처리
+        socket.current.onmessage = (event) => {
+            setSendMessage(event.data);
+            console.log("서버")
+        };
+
+        // cleanup: 컴포넌트 언마운트 시 WebSocket 연결 종료
+        return () => {
+            if (socket.current) {
+                socket.current.close();
+            }
+        };
+    }, []);
+    useEffect(() => {
+        //채팅 내부 이벤트들
+        const chatUpdate = async () => {
+            setChatInHTML(await ListLibrary.chatIn(user, chatNum))
+        }
+        chatUpdate();
+    }, [sendMessage]);
+
+    const handleSendMessage = () => {
+        if (socket.current && socket.current.readyState === WebSocket.OPEN) {
+            const message = document.querySelector('.chatInput').value;
+            ListLibrary.chatinput(user, message, chatNum);
+            socket.current.send(message);
+            console.log('메시지 전송:', message);
+            document.querySelector('.chatInput').value = ""
+            document.querySelector('.chatRoomDiv').scrollTop = document.querySelector('.chatRoomDiv').scrollHeight
+        } else {
+            console.error('WebSocket 연결이 열리지 않았습니다.');
+        }
+    };
+
+    useEffect(() => {
+        const chatInBtn = document.querySelectorAll(".chatInBtn");
+        const chatDeleteBtn = document.querySelectorAll(".chatDeleteBtn");
+        const chatListAddBtn1 = document.querySelector(".chatListAddBtn1");
+        const chatListAddBtn2 = document.querySelector(".chatListAddBtn2");
+        const chatInviteListDiv = document.querySelector(".chatInviteListDiv");
+        const chatListDiv = document.querySelectorAll(".chatListDiv");
+        const chatListFrameDiv = document.querySelector(".chatListFrameDiv");
+        const chatInviteListInput = document.querySelector(".chatInviteListInput");
+
+        const handleClick1 = (e) => {
+            setChatNum(e.target.dataset.value)
+            setBtnCtl(4);
+        };
+        const handleClick2 = async (e) => {
+            await ListLibrary.chatOut(user, e.target.dataset.value)
+            setChatListLoad(await ListLibrary.chatListLoad(user));
+        };
+        const handleClick3 = (event) => {
+            chatInviteListDiv.style.display = "block"
+            //chatInviteListInput.style.display = "block"
+            chatListFrameDiv.style.display = "none"
+            chatListAddBtn1.style.display = "none"
+            chatListAddBtn2.style.display = "block"
+        };
+        const handleClick4 = async (event) => {
+            chatInviteListDiv.style.display = "none"
+            //chatInviteListInput.style.display = "none"
+            chatListFrameDiv.style.display = "block"
+            chatListAddBtn1.style.display = "block"
+            chatListAddBtn2.style.display = "none"
+
+            let members = ""
+            let memberCount = 0
+            chatInviteListDiv.querySelectorAll(".worker").forEach((e, i1) => {
+                if (e.children[0].checked) {
+                    members += e.dataset.value + ","
+                    memberCount++;
+                }
+            });
+            if (memberCount > 1) {
+                await ListLibrary.chatAdd1(user, members)
+            } else {
+                alert("인원이 너무 적습니다")
+                chatInviteListDiv.querySelectorAll(".worker").forEach((e, i1) => {
+                    if (!e.children[0].disabled) {
+                        e.children[0].checked = false
+                    }
+                });
+            }
+            setChatListLoad(await ListLibrary.chatListLoad(user));
+        };
+
+
+        chatInBtn.forEach((e) => {
+            e.addEventListener("click", handleClick1);
+        })
+        chatDeleteBtn.forEach((e) => {
+            e.addEventListener("click", handleClick2);
+        })
+        if (chatListAddBtn1) {
+            chatListAddBtn1.addEventListener("click", handleClick3);
+        }
+        if (chatListAddBtn2) {
+            chatListAddBtn2.addEventListener("click", handleClick4);
+        }
+
+        return () => {
+            chatInBtn.forEach((e) => {
+                e.removeEventListener("click", handleClick1);
+            })
+            chatDeleteBtn.forEach((e) => {
+                e.removeEventListener("click", handleClick2);
+            })
+            if (chatListAddBtn1) {
+                chatListAddBtn1.removeEventListener("click", handleClick3);
+            }
+            if (chatListAddBtn2) {
+                chatListAddBtn2.removeEventListener("click", handleClick4);
+            }
+        };
+
+    }, [chatListLoad, btnCtl]);
+
+    const chatInviteList = async () => {
+        const chatMemList2Div = document.querySelector(".chatMemList2Div");
+        let members = ""
+        let memberCount = 0
+        chatMemList2Div.querySelectorAll(".worker").forEach((e, i1) => {
+            if (e.children[0].checked && !e.children[0].disabled) {
+                members += e.dataset.value + ","
+                memberCount++;
+            }
+        });
+        if (memberCount > 0) {
+            await ListLibrary.chatAdd2(chatNum, members)
+        } else {
+            alert("인원이 너무 적습니다")
+            chatMemList2Div.querySelectorAll(".worker").forEach((e, i1) => {
+                if (!e.children[0].disabled) {
+                    e.children[0].checked = false
+                }
+            });
+        }
+    };
+    const chatInviteList2 = async (e) => {
+        let member = await ListLibrary.empCodeCheck(e)
+        const empCodeIsTrue = await ListLibrary.empCodeCheck2(e, chatNum)
+        console.log(member, empCodeIsTrue)
+        if (member !== "" && empCodeIsTrue) {
+            member += ","
+            await ListLibrary.chatAdd2(chatNum, member)
+        } else if (!empCodeIsTrue) {
+            alert("이미 존재하는 참가자 입니다.")
+        } else {
+            alert("존재하지 않는 아이디 입니다.")
+        }
+    };
+
+    const setChatMemList2Set = async () => {
+        setChatMemList2(await ListLibrary.chatMemList2(user, chatNum));
+    }
 
     // 로그인 후 가져와야하는 데이터들
     const [mailList, setMailList] = useState([]) //메일
@@ -38,10 +330,7 @@ export default function MainLayout() {
         index: '',
     }])
 
-    const [btnCtl, setBtnCtl] = useState(0)
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [isRClick, setIsRClick] = useState(false)
-    const [newWindowPosY, setNewWindowPosY] = useState(500)
 
 
     const windowRClick = async (e) => {
@@ -70,10 +359,12 @@ export default function MainLayout() {
 
     useEffect(() => {
         console.log("login", isLoggedIn);
-        // newMail();
-        newSign();
-        newUserInfo();
-        todaySchedule();
+        if(empCode || isLoggedIn) {
+            // newMail();
+            newSign();
+            newUserInfo();
+            todaySchedule();
+        }
     }, [empCode, isLoggedIn]);
 
     // useEffect(() => {
@@ -817,6 +1108,15 @@ export default function MainLayout() {
                 <div
                     className="fixed mt-16 top-0 right-0 h-11/12 w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out max-w-xs p-1 rounded-lg border-2 border-gray-300">
                     <div className="p-1 h-full">
+                        {/*<div className="text-sm text-center">*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        공지사항*/}
+                        {/*    </a>*/}
+                        {/*    <span className="mx-1">|</span>*/}
+                        {/*    <a href="#" className="text-blue-600 hover:underline">*/}
+                        {/*        문의사항*/}
+                        {/*    </a>*/}
+                        {/*</div>*/}
                         {isLoggedIn ?
                             <div className="h-full">
                                 <div className="h-1/4">
@@ -858,28 +1158,21 @@ export default function MainLayout() {
                                 <div className="mt-2">
                                     <div className="border text-left h-[435px] blue">
                                         {btnCtl === 0 ? (
-                                            // ListLibrary.WorkerList(com)
-                                            <></>
+                                            ListLibrary.WorkerList(com)
                                         ) : btnCtl === 1 ? (
                                             <>
-                                                <div className="h-[100%] overflow-y-auto">
-                                                    <div className="border flex justify-between">
-                                                        <button>대화방</button>
-                                                        <button>나가기</button>
-                                                    </div>
-                                                </div>
+                                                <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>
                                             </>
                                         ) : btnCtl === 2 ? (
                                             <>
-                                                {/*<div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>*/}
+                                                <div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>
                                             </>
                                         ) : btnCtl === 3 ? (
                                             <>
-                                                {/*<div dangerouslySetInnerHTML={{__html: noticeHtml}}/>*/}
+                                                <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
                                                 <div>
-                                                    <button
-                                                        className="text-center border w-full h-[45px]"
-                                                        onClick={() => setBtnCtl(6)}>
+                                                    <button className="text-center border w-full h-[45px]"
+                                                            onClick={() => setBtnCtl(6)}>
                                                         {" "}
                                                         공지사항 추가하기
                                                     </button>
@@ -887,64 +1180,85 @@ export default function MainLayout() {
                                             </>
                                         ) : btnCtl === 4 ? (
                                             <>
-                                                <div className="h-[480px] overflow-y-auto">
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="text-right pb-2">
-                                                        사용자이름 <li className="pr-4">대화내요ㅛㅛㅛㅛㅛㅇ </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                    <ul className="pb-2">
-                                                        상대방이름 <li className="pl-4">대화내용 </li>
-                                                    </ul>
-                                                </div>
+                                                {inviteChatCtl === 0 ? <>
+                                                        <div className="h-[353px] overflow-y-auto chatRoomDiv">
+                                                            <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                                                        </div>
+                                                        <div className="w-[100%] h-[50px] flex">
+                                                            <input className="w-[70%] border chatInput"/>
+                                                            <button
+                                                                className="w-[30%] border flex justify-center items-center"
+                                                                onClick={() => {
+                                                                    handleSendMessage();
+                                                                }}>입력
+                                                            </button>
+                                                        </div>
+                                                        <div className="flex">
+                                                            <button
+                                                                className="w-[50%] h-[30px] border flex justify-center items-center"
+                                                                onClick={() => {
+                                                                    setInviteChatCtl(1)
+                                                                    setChatMemList2Set()
+                                                                }}>조직도로 초대하기
+                                                            </button>
+                                                            <button
+                                                                className="w-[50%] h-[30px] border flex justify-center items-center"
+                                                                onClick={() => {
+                                                                    document.querySelector(".chatInput").value = ""
+                                                                    setInviteChatCtl(2)
+                                                                }}>아이디로 초대하기
+                                                            </button>
+                                                        </div>
+                                                    </> :
+                                                    inviteChatCtl === 1 ? <>
+                                                            <div dangerouslySetInnerHTML={{__html: chatMemList2}}/>
+                                                            <button className="border w-[100%] h-[45px] chatListAddBtn3"
+                                                                    onClick={() => {
+                                                                        chatInviteList().then(r => setInviteChatCtl(0))
+                                                                        setChatMemList2Set()
+                                                                    }}>초대하기
+                                                            </button>
+                                                        </> :
+                                                        inviteChatCtl === 2 ?
+                                                            <>
+                                                                <div className="h-[383px] overflow-y-auto chatRoomDiv">
+                                                                    <div
+                                                                        dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                                                                </div>
+                                                                <div className="flex">
+                                                                    <input className="border w-[70%] h-[50px]"/>
+                                                                    <button
+                                                                        className="w-[30%] h-[50px] border flex justify-center items-center"
+                                                                        onClick={(e) => {
+                                                                            setInviteChatCtl(0)
+                                                                            chatInviteList2(e.currentTarget.parentNode.children[0].value).then(e.currentTarget.parentNode.children[0].value = "")
+                                                                            setChatMemList2Set()
+                                                                        }}>
+                                                                        아이디로<br/>초대하기
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                            : <></>
+                                                }
                                             </>
                                         ) : btnCtl === 5 ? (
                                             <>
-                                                {/*<div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>*/}
+                                                <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
                                                 <div>
-                                                    <button
-                                                        className="text-center border w-full h-[45px]"
-                                                        onClick={() => setBtnCtl(3)}>
+                                                    <button className="text-center border w-full h-[45px]"
+                                                            onClick={() => setBtnCtl(3)}>
                                                         목록으로
                                                     </button>
                                                 </div>
                                             </>
                                         ) : btnCtl === 6 ? (
                                             <>
-                                                {/*{ListLibrary.noticeWritePage(com, setBtnCtl)}*/}
+                                                {ListLibrary.noticeWritePage(com, setBtnCtl)}
                                                 <button
                                                     className="text-center border w-full h-[45px]"
                                                     onClick={() => {
                                                         setBtnCtl(3);
-                                                        // ListLibrary.noticeInsert(user);
+                                                        ListLibrary.noticeInsert(user);
                                                     }}
                                                 >
                                                     공지사항 등록
@@ -965,57 +1279,21 @@ export default function MainLayout() {
                                         type="text"
                                         placeholder="아이디"
                                         className="w-full p-2 mb-2 border rounded"
-                                        onChange={(e) => {
-                                            setInputId(e.target.value)
-                                        }}
+                                        onChange={(e) => {setInputId(e.target.value)}}
                                     />
                                     <input
                                         type="password"
                                         placeholder="비밀번호"
                                         className="w-full p-2 mb-4 border rounded"
-                                        onChange={(e) => {
-                                            setInputPassword(e.target.value)
-                                        }}
+                                        onChange={(e) => {setInputPassword(e.target.value)}}
                                     />
                                     <button
                                         className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4"
                                         onClick={handleLogin}>
                                         로그인
                                     </button>
-                                    <div className="border-t-2 p-2 mx-16 cursor-pointer"
-                                         onClick={() => navigate(`/SignUp`)}>
-                                        <p className="text-gray-900 mb-2">회원가입</p>
-                                    </div>
                                 </>
                             )}
-
-
-                        {isRClick === true ? (
-                            <></>
-                            // <div className={`flex absolute`}
-                            //      style={{top: `${newWindowPosY}px`, right: `${newWindowPosX}px`}}>
-                            //     <div className="w-1/3 border">
-                            //         <img src="/logo192.png"/>
-                            //     </div>
-                            //     <div className="w-2/3 text-left border">
-                            //         <p>사내 이메일:{newWindowData[0]}</p>
-                            //         <p>전화번호:{newWindowData[1]}</p>
-                            //         <p>상태:</p>
-                            //         <button
-                            //             onClick={() => {
-                            //                 setIsRClick(false);
-                            //                 setNewWindowData([]);
-                            //             }}
-                            //         >
-                            //             닫기
-                            //         </button>
-                            //     </div>
-                            // </div>
-                        ) : (
-                            <></>
-                        )}
-
-
                     </div>
                 </div>
                 <div
