@@ -29,6 +29,7 @@ export default function EmailSend() {
     // 로그인
     const {isLoggedIn, empCode, logout} = useAuth();
     const [userInfo, setUserInfo] = useState([])
+    const [isAdmin, setIsAdmin] = useState(null)
 
     // 슬라이드 부분
     const socket = useRef(null);
@@ -77,7 +78,9 @@ export default function EmailSend() {
         if (empCode !== null && empCode !== undefined && empCode !== "") {
             setUser(empCode);
             setCom(empCode.split("-")[0]);
-
+            if(localStorage.getItem('role')){
+                setIsAdmin(localStorage.getItem('role'))
+            }
         }
     }, [empCode]);
 
@@ -735,163 +738,169 @@ export default function EmailSend() {
                         {/*        문의사항*/}
                         {/*    </a>*/}
                         {/*</div>*/}
-                        {isLoggedIn ?
-                            <div className="h-full">
-                                <div className="h-1/4">
-                                    <div className="flex h-3/6">
-                                        <div className="w-1/3 ">
-                                            <img width="75px" height="75px" src="/logo192.png"/>
-                                        </div>
-                                        <div className="w-2/3 text-left">
-                                            <p className="">이름: {userInfo.empName}</p>
-                                            <p className="">직급: {userInfo.posCode}</p>
-                                            <p className="">부서: {userInfo.depCode}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col text-left mb-1">
-                                        <p className="">사내 이메일: {userInfo.empMail}</p>
-                                        <p className="">전화번호: {userInfo.phoneNum}</p>
-                                    </div>
-
-
-                                    <div className="flex">
-                                        <button className="border w-1/5 text-sm p-1"
-                                                onClick={() => setBtnCtl(0)}>
-                                            조직도
-                                        </button>
-                                        <button className="border w-1/5 text-sm p-1"
-                                                onClick={() => setBtnCtl(1)}>
-                                            대화방
-                                        </button>
-                                        <button className="border w-1/5 text-sm p-1"
-                                                onClick={() => setBtnCtl(2)}>
-                                            주소록
-                                        </button>
-                                        <button className="border w-2/5 text-sm p-1"
-                                                onClick={() => setBtnCtl(3)}>
-                                            공지사항
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="mt-2">
-                                    <div className="border text-left h-[435px] blue">
-                                        {btnCtl === 0 ? (
-                                            com !== null && com !== "" ? ListLibrary.WorkerList(com):<></>
-                                        ) : btnCtl === 1 ? (
-                                            <>
-                                                <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>
-                                            </>
-                                        ) : btnCtl === 2 ? (
-                                            <>
-                                                <div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>
-                                            </>
-                                        ) : btnCtl === 3 ? (
-                                            <>
-                                                <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
-                                                <div>
-                                                    <button className="text-center border w-full h-[45px]"
-                                                            onClick={() => setBtnCtl(6)}>
-                                                        {" "}
-                                                        공지사항 추가하기
-                                                    </button>
+                        {isLoggedIn ? (
+                                isAdmin == "admin" ? <button
+                                        className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                        onClick={handleLogout}>로그아웃
+                                    </button> :
+                                    <div className="h-full">
+                                        <div className="h-1/4">
+                                            <div className="flex h-3/6">
+                                                <div className="w-1/3 ">
+                                                    <img width="75px" height="75px" src="/logo192.png"/>
                                                 </div>
-                                            </>
-                                        ) : btnCtl === 4 ? (
-                                            <>
-                                                {inviteChatCtl === 0 ? <>
-                                                        <div className="h-[353px] overflow-y-auto chatRoomDiv">
-                                                            <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
-                                                        </div>
-                                                        <div className="w-[100%] h-[50px] flex">
-                                                            <input className="w-[70%] border chatInput"/>
-                                                            <button
-                                                                className="w-[30%] border flex justify-center items-center"
-                                                                onClick={() => {
-                                                                    handleSendMessage();
-                                                                }}>입력
+                                                <div className="w-2/3 text-left">
+                                                    <p className="">이름: {userInfo.empName}</p>
+                                                    <p className="">직급: {userInfo.posCode}</p>
+                                                    <p className="">부서: {userInfo.depCode}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col text-left mb-1">
+                                                <p className="">사내 이메일: {userInfo.empMail}</p>
+                                                <p className="">전화번호: {userInfo.phoneNum}</p>
+                                            </div>
+
+
+                                            <div className="flex">
+                                                <button className="border w-1/5 text-sm p-1"
+                                                        onClick={() => setBtnCtl(0)}>
+                                                    조직도
+                                                </button>
+                                                <button className="border w-1/5 text-sm p-1"
+                                                        onClick={() => setBtnCtl(1)}>
+                                                    대화방
+                                                </button>
+                                                <button className="border w-1/5 text-sm p-1"
+                                                        onClick={() => setBtnCtl(2)}>
+                                                    주소록
+                                                </button>
+                                                <button className="border w-2/5 text-sm p-1"
+                                                        onClick={() => setBtnCtl(3)}>
+                                                    공지사항
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2">
+                                            <div className="border text-left h-[435px] blue">
+                                                {btnCtl === 0 ? (
+                                                    com !== null && com !== "" ? ListLibrary.WorkerList(com) : <></>
+                                                ) : btnCtl === 1 ? (
+                                                    <>
+                                                        <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>
+                                                    </>
+                                                ) : btnCtl === 2 ? (
+                                                    <>
+                                                        <div dangerouslySetInnerHTML={{__html: addressBookHtml}}/>
+                                                    </>
+                                                ) : btnCtl === 3 ? (
+                                                    <>
+                                                        <div dangerouslySetInnerHTML={{__html: noticeHtml}}/>
+                                                        <div>
+                                                            <button className="text-center border w-full h-[45px]"
+                                                                    onClick={() => setBtnCtl(6)}>
+                                                                {" "}
+                                                                공지사항 추가하기
                                                             </button>
                                                         </div>
-                                                        <div className="flex">
-                                                            <button
-                                                                className="w-[50%] h-[30px] border flex justify-center items-center"
-                                                                onClick={() => {
-                                                                    setInviteChatCtl(1)
-                                                                    setChatMemList2Set()
-                                                                }}>조직도로 초대하기
-                                                            </button>
-                                                            <button
-                                                                className="w-[50%] h-[30px] border flex justify-center items-center"
-                                                                onClick={() => {
-                                                                    document.querySelector(".chatInput").value = ""
-                                                                    setInviteChatCtl(2)
-                                                                }}>아이디로 초대하기
-                                                            </button>
-                                                        </div>
-                                                    </> :
-                                                    inviteChatCtl === 1 ? <>
-                                                            <div dangerouslySetInnerHTML={{__html: chatMemList2}}/>
-                                                            <button className="border w-[100%] h-[45px] chatListAddBtn3"
-                                                                    onClick={() => {
-                                                                        chatInviteList().then(r => setInviteChatCtl(0))
-                                                                        setChatMemList2Set()
-                                                                    }}>초대하기
-                                                            </button>
-                                                        </> :
-                                                        inviteChatCtl === 2 ?
-                                                            <>
-                                                                <div className="h-[383px] overflow-y-auto chatRoomDiv">
-                                                                    <div
-                                                                        dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                                                    </>
+                                                ) : btnCtl === 4 ? (
+                                                    <>
+                                                        {inviteChatCtl === 0 ? <>
+                                                                <div className="h-[353px] overflow-y-auto chatRoomDiv">
+                                                                    <div dangerouslySetInnerHTML={{__html: chatInHTML}}/>
                                                                 </div>
-                                                                <div className="flex">
-                                                                    <input className="border w-[70%] h-[50px]"/>
+                                                                <div className="w-[100%] h-[50px] flex">
+                                                                    <input className="w-[70%] border chatInput"/>
                                                                     <button
-                                                                        className="w-[30%] h-[50px] border flex justify-center items-center"
-                                                                        onClick={(e) => {
-                                                                            setInviteChatCtl(0)
-                                                                            chatInviteList2(e.currentTarget.parentNode.children[0].value).then(e.currentTarget.parentNode.children[0].value = "")
-                                                                            setChatMemList2Set()
-                                                                        }}>
-                                                                        아이디로<br/>초대하기
+                                                                        className="w-[30%] border flex justify-center items-center"
+                                                                        onClick={() => {
+                                                                            handleSendMessage();
+                                                                        }}>입력
                                                                     </button>
                                                                 </div>
-                                                            </>
-                                                            : <></>
-                                                }
-                                            </>
-                                        ) : btnCtl === 5 ? (
-                                            <>
-                                                <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
-                                                <div>
-                                                    <button className="text-center border w-full h-[45px]"
-                                                            onClick={() => setBtnCtl(3)}>
-                                                        목록으로
-                                                    </button>
-                                                </div>
-                                            </>
-                                        ) : btnCtl === 6 ? (
-                                            <>
-                                                {ListLibrary.noticeWritePage(com, setBtnCtl)}
-                                                <button
-                                                    className="text-center border w-full h-[45px]"
-                                                    onClick={() => {
-                                                        setBtnCtl(3);
-                                                        ListLibrary.noticeInsert(user);
-                                                    }}
-                                                >
-                                                    공지사항 등록
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <></>
-                                        )}
+                                                                <div className="flex">
+                                                                    <button
+                                                                        className="w-[50%] h-[30px] border flex justify-center items-center"
+                                                                        onClick={() => {
+                                                                            setInviteChatCtl(1)
+                                                                            setChatMemList2Set()
+                                                                        }}>조직도로 초대하기
+                                                                    </button>
+                                                                    <button
+                                                                        className="w-[50%] h-[30px] border flex justify-center items-center"
+                                                                        onClick={() => {
+                                                                            document.querySelector(".chatInput").value = ""
+                                                                            setInviteChatCtl(2)
+                                                                        }}>아이디로 초대하기
+                                                                    </button>
+                                                                </div>
+                                                            </> :
+                                                            inviteChatCtl === 1 ? <>
+                                                                    <div dangerouslySetInnerHTML={{__html: chatMemList2}}/>
+                                                                    <button className="border w-[100%] h-[45px] chatListAddBtn3"
+                                                                            onClick={() => {
+                                                                                chatInviteList().then(r => setInviteChatCtl(0))
+                                                                                setChatMemList2Set()
+                                                                            }}>초대하기
+                                                                    </button>
+                                                                </> :
+                                                                inviteChatCtl === 2 ?
+                                                                    <>
+                                                                        <div
+                                                                            className="h-[383px] overflow-y-auto chatRoomDiv">
+                                                                            <div
+                                                                                dangerouslySetInnerHTML={{__html: chatInHTML}}/>
+                                                                        </div>
+                                                                        <div className="flex">
+                                                                            <input className="border w-[70%] h-[50px]"/>
+                                                                            <button
+                                                                                className="w-[30%] h-[50px] border flex justify-center items-center"
+                                                                                onClick={(e) => {
+                                                                                    setInviteChatCtl(0)
+                                                                                    chatInviteList2(e.currentTarget.parentNode.children[0].value).then(e.currentTarget.parentNode.children[0].value = "")
+                                                                                    setChatMemList2Set()
+                                                                                }}>
+                                                                                아이디로<br/>초대하기
+                                                                            </button>
+                                                                        </div>
+                                                                    </>
+                                                                    : <></>
+                                                        }
+                                                    </>
+                                                ) : btnCtl === 5 ? (
+                                                    <>
+                                                        <div dangerouslySetInnerHTML={{__html: loadNoticeHtml}}/>
+                                                        <div>
+                                                            <button className="text-center border w-full h-[45px]"
+                                                                    onClick={() => setBtnCtl(3)}>
+                                                                목록으로
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                ) : btnCtl === 6 ? (
+                                                    <>
+                                                        {ListLibrary.noticeWritePage(com, setBtnCtl)}
+                                                        <button
+                                                            className="text-center border w-full h-[45px]"
+                                                            onClick={() => {
+                                                                setBtnCtl(3);
+                                                                ListLibrary.noticeInsert(user);
+                                                            }}
+                                                        >
+                                                            공지사항 등록
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                            onClick={handleLogout}>로그아웃
+                                        </button>
                                     </div>
-                                </div>
-                                <button
-                                    className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
-                                    onClick={handleLogout}>로그아웃
-                                </button>
-                            </div>
+                            )
                             : (<><h2 className="mt-2">로그인</h2>
                                     <input
                                         type="text"

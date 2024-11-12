@@ -50,6 +50,7 @@ export default function FAQPage() {
     const [userInfo, setUserInfo] = useState([])
     const [inputId, setInputId] = useState("");
     const [inputPassword, setInputPassword] = useState("");
+    const [isAdmin, setIsAdmin] = useState(null)
 
     // 슬라이드 부분
     const socket = useRef(null);
@@ -98,7 +99,9 @@ export default function FAQPage() {
         if (empCode !== null && empCode !== undefined && empCode !== "") {
             setUser(empCode);
             setCom(empCode.split("-")[0]);
-
+            if(localStorage.getItem('role')){
+                setIsAdmin(localStorage.getItem('role'))
+            }
         }
     }, [empCode]);
 
@@ -681,8 +684,11 @@ export default function FAQPage() {
                         {/*        문의사항*/}
                         {/*    </a>*/}
                         {/*</div>*/}
-                        {isLoggedIn ?
-                            <div className="h-full">
+                        {isLoggedIn ? (
+                                    isAdmin == "admin" ? <button className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                            onClick={handleLogout}>로그아웃
+                                        </button> :
+                                        <div className="h-full">
                                 <div className="h-1/4">
                                     <div className="flex h-3/6">
                                         <div className="w-1/3 ">
@@ -838,7 +844,8 @@ export default function FAQPage() {
                                     onClick={handleLogout}>로그아웃
                                 </button>
                             </div>
-                            : (<><h2 className="mt-2">로그인</h2>
+                                ): (
+                                    <><h2 className="mt-2">로그인</h2>
                                     <input
                                         type="text"
                                         placeholder="아이디"
