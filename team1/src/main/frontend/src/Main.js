@@ -357,7 +357,6 @@ export default function MainLayout() {
 
     useEffect(() => {
         getWeather();
-        empInfo();
 
         axios.get('/selectLog')
             .then(response => console.log(response.data))
@@ -373,6 +372,9 @@ export default function MainLayout() {
             newSign();
             newUserInfo();
             todaySchedule();
+        }
+        if(empCode != ""){
+            empInfo();
         }
     }, [empCode, isLoggedIn]);
 
@@ -1127,7 +1129,7 @@ export default function MainLayout() {
                         {/*    </a>*/}
                         {/*</div>*/}
                         {isLoggedIn ? (
-                                isAdmin != "" ? <button
+                                isAdmin == "admin" ? <button
                                         className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
                                         onClick={handleLogout}>로그아웃
                                     </button> :
