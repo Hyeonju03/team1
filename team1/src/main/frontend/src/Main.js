@@ -22,8 +22,8 @@ export default function MainLayout() {
     const [newWindowData, setNewWindowData] = useState([]);
     const [noticeNum, setNoticeNum] = useState("");
     const {btnCtl, setBtnCtl} = useListLibrary();
-    const [user, setUser] = useState(empCode);
-    const [com, setCom] = useState(empCode.split("-")[0]);
+    const [user, setUser] = useState(null);
+    const [com, setCom] = useState(null);
     const [chatNum, setChatNum] = useState("")
     const [inviteChatCtl, setInviteChatCtl] = useState(0)
 
@@ -51,18 +51,21 @@ export default function MainLayout() {
 
 
     useEffect(() => {
-        setUser(empCode)
-        setCom(empCode.split("-")[0])
-
-        console.log("empCode", empCode)
-        console.log("user>>", user)
-        console.log("com>>",com)
-        if(user){
+        if(user !== null && com !== null){
             fetchData();
         }
     }, [btnCtl]);
 
     useEffect(() => {
+        if (empCode !== null && empCode !== undefined && empCode !== "") {
+            setUser(empCode);
+            setCom(empCode.split("-")[0]);
+
+        }
+    }, [empCode]);
+
+    useEffect(() => {
+
         const elements = document.querySelectorAll(".testEvent");
 
         const handleClick = (event) => {
@@ -133,7 +136,8 @@ export default function MainLayout() {
         };
     }, [addressBookHtml, btnCtl]);
     useEffect(() => {
-        socket.current = new WebSocket('ws://localhost:3002');
+
+        socket.current = new WebSocket('ws://nextit.or.kr:3002');
 
         socket.current.onopen = () => {
             console.log('WebSocket 연결 성공');
@@ -160,6 +164,8 @@ export default function MainLayout() {
             }
         };
     }, []);
+
+
     useEffect(() => {
         //채팅 내부 이벤트들
         const chatUpdate = async () => {
@@ -1158,7 +1164,7 @@ export default function MainLayout() {
                                 <div className="mt-2">
                                     <div className="border text-left h-[435px] blue">
                                         {btnCtl === 0 ? (
-                                            ListLibrary.WorkerList(com)
+                                            com !== null && com !== "" ? ListLibrary.WorkerList(com):<></>
                                         ) : btnCtl === 1 ? (
                                             <>
                                                 <div dangerouslySetInnerHTML={{__html: chatListLoad}}/>

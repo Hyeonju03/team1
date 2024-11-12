@@ -36,5 +36,5 @@ wss.on('connection', (ws) => {
 
 // HTTP 서버와 WebSocket 서버 동시에 실행
 server.listen(3002, () => {
-    console.log('Server is running on http://localhost:3002');
+    console.log('Server is running on http://nextit.or.kr:3002');
 });
