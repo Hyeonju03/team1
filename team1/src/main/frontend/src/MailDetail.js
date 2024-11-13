@@ -339,7 +339,7 @@ export default function EmailSend() {
     console.log("->", mailDetailList)
     console.log(mailDetailNum)
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+    const [mailInSenderEmpCode,setMailInSenderEmpCode] = useState("");
 
     const [sendList, setSendList] = useState([])
 
@@ -416,11 +416,11 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -478,6 +478,19 @@ export default function EmailSend() {
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
+
+    useEffect(() => {
+        const selectSenderEmpCode = async (mailNum) => {
+            await axios
+                .get("/selectSenderEmpCode", {params: {mailNum}})
+                .then((response) => {
+                    console.log(response.data)
+                    setMailInSenderEmpCode(response.data)
+                })
+                .catch((error) => console.log(error));
+        }
+        selectSenderEmpCode(mailDetailList.mailNum)
+    }, []);
 
 
     return (
@@ -579,7 +592,7 @@ export default function EmailSend() {
                         <h1 style={{marginBottom: "20px"}} className="text-2xl font-bold">
                             {mailDetailList.title}
                         </h1>
-                        <p>보낸사람 : {empCode}</p>
+                        <p>보낸사람 : {mailInSenderEmpCode}</p>
                         <p>받는사람 : {mailDetailList.mailTarget}</p>
                         <div className="flex" style={{marginBottom: "30px"}}>
                             <p>보낸일자 : {formatDate(mailDetailList.startDate)}</p>
@@ -621,6 +634,12 @@ export default function EmailSend() {
                 </main>
             </div>
 
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
+            </div>
 
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>

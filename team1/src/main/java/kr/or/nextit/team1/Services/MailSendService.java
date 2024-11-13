@@ -96,5 +96,10 @@ public class MailSendService {
     public static void AlldeleteMail() {
         mailMapper.AlldeleteMail();
     }
-    
+
+    public String selectSenderEmpCode(String mailNum) {
+        return mailMapper.selectSenderEmpCode(mailNum);
+    }
+
+
 }

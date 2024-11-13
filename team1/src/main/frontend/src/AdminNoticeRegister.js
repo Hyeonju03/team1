@@ -346,8 +346,8 @@ const AdminNoticeRegister = () => {
         console.log(formData); // 추가: 전송할 데이터 확인
         try {
             // 백엔드(DB)로 데이터 저장
-            await axios.post("/api/adminnotice/register", formData);
-            navigate("/admin/notice/list"); // 등록 완료 후 리스트 페이지로 이동
+            await axios.post("/api/admin/notice/register", formData);
+            navigate("/user/notice/list"); // 등록 완료 후 리스트 페이지로 이동
         } catch (error) {
             console.error("등록 중 오류 발생:", error);
         }
@@ -450,6 +450,13 @@ const AdminNoticeRegister = () => {
                         </form>
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

@@ -37,9 +37,7 @@ import PaymentCom from "./PaymentCom";
 import DepartmentManagement from "./DepartmentManagement";
 import PositionManagement from "./PositionManagement";
 import {AuthProvider} from "./noticeAuth";
-import AdminNoticeList from "./AdminNoticeList";
 import UserNoticeList from "./UserNoticeList";
-import AdminNoticeDetail from "./AdminNoticeDetail";
 import AdminNoticeRegister from "./AdminNoticeRegister";
 import UserNoticeDetail from "./UserNoticeDetail";
 import {ListLibraryProvider} from "./Context/ListLibraryContext";
@@ -85,9 +83,7 @@ function App() {
                                 <Route path="/sign/detail/:id" element={<SignDetail/>}/>
                                 <Route path="/sign/register" element={<SignRegister/>}/>
 
-                                <Route path="/admin/notice/list" element={<AdminNoticeList/>}/>
                                 <Route path="/admin/notice/register" element={<AdminNoticeRegister/>}/>
-                                <Route path="/admin/notice/detail" element={<AdminNoticeDetail/>}/>
 
                                 <Route path="/user/notice/list" element={<UserNoticeList/>}/>
                                 <Route path="/user/notice/detail" element={<UserNoticeDetail/>}/>

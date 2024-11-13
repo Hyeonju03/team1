@@ -535,13 +535,13 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
             setSelectedCheckboxes([]);
             setSendList([]);
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -703,7 +703,8 @@ export default function EmailSend() {
                                 </button>
                                 <div className="flex ml-5 w-[100%] justify-between">
                                     <p className="w-1/6 text-left overflow-hidden whitespace-nowrap text-ellipsis">{v.empCode}</p>
-                                    <div className="flex items-center w-2/6 text-left min-w-[150px]"> {/* minWidth 추가 */}
+                                    <div
+                                        className="flex items-center w-2/6 text-left min-w-[150px]"> {/* minWidth 추가 */}
                                         {v.fileName && (  // 파일이 있을 경우에만 아이콘 표시
                                             <Paperclip className="h-4 w-4 text-gray-500 mr-1" title="파일 첨부됨"/>
                                         )}
@@ -731,6 +732,13 @@ export default function EmailSend() {
                         ))}
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

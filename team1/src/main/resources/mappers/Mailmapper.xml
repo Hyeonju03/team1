@@ -9,7 +9,7 @@
         values(#{empCode}, NULL,#{title},#{content},#{mailTarget}, #{mailRef},#{fileName},#{fileOriginalName},#{fileSize},#{filePath}, current_timestamp());
     </insert>
 
-<!--    전체-->
+    <!--    전체-->
     <select id="selectSendMail"  resultType="kr.or.nextit.team1.DTOs.MailDTO">
         select *
         from mail
@@ -102,8 +102,8 @@
         SELECT *
         FROM mail
         WHERE (
-            EMP_CODE = #{empCode}
-            OR MAIL_TARGET LIKE CONCAT('%', REPLACE(#{empCode}, '-', ''), '%')
+        EMP_CODE = #{empCode}
+        OR MAIL_TARGET LIKE CONCAT('%', REPLACE(#{empCode}, '-', ''), '%')
         ) AND DELETE_YN = 1
     </select>
 
@@ -115,7 +115,12 @@
     <select id="selectMailTarget" >
         SELECT EMP_CODE,EMP_NAME,DEP_CODE,POS_CODE,EMP_MAIL
         FROM employee e
-        WHERE EMP_CODE LIKE CONCAT('%', '3148127227', '%')
+        <!--        WHERE EMP_CODE LIKE CONCAT('%', '3148127227', '%')-->
+        WHERE EMP_CODE LIKE CONCAT('%', #{comCode}, '%')
     </select>
-
+    <select id="selectSenderEmpCode" parameterType="String" resultType="String">
+        SELECT EMP_CODE
+        FROM mail
+        WHERE MAIL_NUM LIKE #{mailNum}
+    </select>
 </mapper>

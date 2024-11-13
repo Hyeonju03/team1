@@ -500,14 +500,16 @@ export default function UserInfoModifyRequestList() {
                             <tbody>
                             {modifyReqData.map((item, index) => {
                                 console.log("modifyReqData >>>", modifyReqData)
-                                return(
+                                return (
                                     <tr
                                         className="cursor-pointer hover:bg-gray-100"
                                         key={index}
                                         onClick={() => handleUserClick(item)}
                                     >
-                                        <td className="p-2 text-center w-1/4" >{index + 1}</td>
-                                        <td className="p-2 text-center w-3/4">{item.depCode} {item.empName} {item.posCode} 의 정보 수정 승인 요청입니다.</td>
+                                        <td className="p-2 text-center w-1/4">{index + 1}</td>
+                                        <td className="p-2 text-center w-3/4">{item.depCode} {item.empName} {item.posCode} 의
+                                            정보 수정 승인 요청입니다.
+                                        </td>
                                     </tr>
                                 )
                             })}
@@ -515,6 +517,13 @@ export default function UserInfoModifyRequestList() {
                         </table>
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

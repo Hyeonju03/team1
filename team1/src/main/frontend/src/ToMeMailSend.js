@@ -499,12 +499,12 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
             setSelectedCheckboxes([]);
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -617,7 +617,7 @@ export default function EmailSend() {
                 {/* Main content */}
                 <div className="ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%]">
                     <form onSubmit={handleSubmit} className="space-y-4" style={{justifyContent: 'center'}}>
-                        {console.log("showConfirmation",showConfirmation)}
+                        {console.log("showConfirmation", showConfirmation)}
                         {showConfirmation === false ?
                             <div>
                                 <div style={{display: showConfirmation ? "none" : "block"}}>
@@ -663,7 +663,7 @@ export default function EmailSend() {
                                     <p className="text-left">받는사람: {mailEmpCode}</p>
                                     <p className="text-left">{formData.cc ? `참조: ${formData.cc}` : null}</p>
                                 </div>
-                                <div >
+                                <div>
                                     <button onClick={goSendMailList} className="border rounded-md px-4 py-2">확인</button>
                                     <button onClick={backSend} className="border rounded-md px-4 py-2"
                                             style={{marginLeft: "30px"}}>쓰던 페이지 가기
@@ -673,6 +673,13 @@ export default function EmailSend() {
                         }
                     </form>
                 </div>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

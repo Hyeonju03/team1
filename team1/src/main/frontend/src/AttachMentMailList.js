@@ -538,13 +538,13 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
             setSelectedCheckboxes([]);
             setSendList([]);
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -734,6 +734,13 @@ export default function EmailSend() {
                         ))}
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

@@ -348,12 +348,13 @@ const UserNoticeList = () => {
 
     // 공지사항을 가져오는 useEffect
     useEffect( () => {
+        fetchNotices(); // 로그인 상태와 관계없이 공지사항 가져오기
+
         if(isLoggedIn && empCode) {
             const role = localStorage.getItem('role')
             setIsAdmin(role)
 
             empInfo();
-            fetchNotices(); // 로그인 상태와 관계없이 공지사항 가져오기
         }
     }, [isLoggedIn, empCode]);
 
@@ -573,6 +574,13 @@ const UserNoticeList = () => {
                 </main>
             </div>
 
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
+            </div>
+
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
@@ -765,6 +773,10 @@ const UserNoticeList = () => {
                                         className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-4">
                                         로그인
                                     </button>
+                                    <div className="text-gray-800" onClick={() => {
+                                        navigate(`/SignUp`)
+                                    }}>회원가입
+                                    </div>
                                 </>
                             )}
                     </div>

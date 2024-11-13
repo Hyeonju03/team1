@@ -487,7 +487,7 @@ export default function EmailSend() {
 
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -656,7 +656,10 @@ export default function EmailSend() {
                                     <Input onChange={handleChange} id="to" name="to" value={formedMailTarget}
                                            placeholder="받는사람을 입력해주세요."
                                            className="h-10 w-[800px] border-b-2 hover:border-blue-400"/>
-                                    <button className="bg-gray-100 hover:bg-gray-200 border-2 border-gray-600 rounded w-20 h-10" onClick={openAddressBook}>주소록</button>
+                                    <button
+                                        className="bg-gray-100 hover:bg-gray-200 border-2 border-gray-600 rounded w-20 h-10"
+                                        onClick={openAddressBook}>주소록
+                                    </button>
                                 </div>
 
                                 {/*참조*/}
@@ -723,6 +726,12 @@ export default function EmailSend() {
 
             </div>
 
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
+            </div>
 
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>

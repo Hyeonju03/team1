@@ -405,28 +405,46 @@ export default function Component() {
         }
     };
 
-    const qRegister = () => {
-        console.log("클릭됨");
-        navigate("/AdminQ");
-    }
-
     const goQDetail = () => {
         navigate("/AdminQDetail");
-        window.location.reload();
-    }
+    };
 
     const goFAQ = () => {
         navigate("/AdminFAQ");
-        window.location.reload();
+    };
+
+    const qRegister = () => {
+        navigate("/AdminQ");
+    };
+
+    const adminQRegister = () => {
+        navigate("/AnsQ");
+    }
+
+    const qCancel = (e) => {
+        e.preventDefault(); // 기본 링크 동작 방지
+        navigate("/AnsQDetail"); // 이동할 페이지로 네비게이트
+    }
+
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
+    const goCompleteList = () => {
+        navigate("/AnsQCompleteList");
+    }
+
+    const goNoAnsList = () => {
+        navigate("/NoAnsQList");
+    }
+
+    const goAnsQList = () => {
+        navigate("/AnsQDetail")
     }
 
     const togglePanel = () => {
         setIsPanelOpen(!isPanelOpen);
     };
-
-    const goQList = () => {
-        navigate("/AdminQDetail");
-    }
 
 
     return (
@@ -481,17 +499,35 @@ export default function Component() {
                                 <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
                                     navigate(`/SignUp`)
                                 }}>회원가입</h2>
-                                <h2 onClick={goFAQ} className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
+                                <h2 onClick={goFAQ}
+                                    className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
 
                                 <h2 onClick={goQList} className="text-left text-2xl ml-1 mb-2 cursor-pointer">
                                     1:1 상담</h2>
                                 <ul className="ml-2">
-                                    <li onClick={qRegister} className="text-left cursor-pointer">-
-                                        문의작성
-                                    </li>
-                                    <li onClick={goQDetail} className="text-left cursor-pointer">-
-                                        문의내역
-                                    </li>
+                                    {isAdmin != "admin" ? (
+                                        <>
+                                            <li onClick={qRegister} className="text-left cursor-pointer">-
+                                                문의작성
+                                            </li>
+                                            <li onClick={goQDetail} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li onClick={goAnsQList} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                            <li onClick={goNoAnsList} className="text-left cursor-pointer">-
+                                                미답변내역
+                                            </li>
+                                            <li onClick={goCompleteList} className="text-left cursor-pointer">-
+                                                답변완료내역
+                                            </li>
+                                        </>
+                                    )}
+
                                 </ul>
                             </div>
                         </div>
@@ -544,6 +580,13 @@ export default function Component() {
                         {/*</main>*/}
                     </div>
                 </div>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

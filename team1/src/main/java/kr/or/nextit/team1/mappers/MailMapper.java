@@ -33,4 +33,5 @@ public interface MailMapper {
 
     List<MailDTO> selectMailTarget(String comCode);
 
+    String selectSenderEmpCode(String mailNum);
 }

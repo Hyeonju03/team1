@@ -104,7 +104,7 @@ export default function Component() {
 
 
     useEffect(() => {
-        if(user !== null && com !== null){
+        if (user !== null && com !== null) {
             fetchData();
         }
     }, [btnCtl]);
@@ -113,7 +113,7 @@ export default function Component() {
         if (empCode !== null && empCode !== undefined && empCode !== "") {
             setUser(empCode);
             setCom(empCode.split("-")[0]);
-            if(localStorage.getItem('role')){
+            if (localStorage.getItem('role')) {
                 setIsAdmin(localStorage.getItem('role'))
             }
         }
@@ -524,6 +524,26 @@ export default function Component() {
         navigate("/AnsQDetail")
     }
 
+    const goQDetail = () => {
+        navigate("/AdminQDetail");
+    };
+
+    const goFAQ = () => {
+        navigate("/AdminFAQ");
+    };
+
+    const qRegister = () => {
+        navigate("/AdminQ");
+    };
+
+    const adminQRegister = () => {
+        navigate("/AnsQ");
+    }
+
+    const goQList = () => {
+        navigate("/AdminQDetail");
+    }
+
     // 로그아웃 처리 함수
     const handleLogout = async () => {
         try {
@@ -550,57 +570,102 @@ export default function Component() {
 
 
     return (
-        <div className="overflow-hidden flex flex-col min-h-screen w-full  mx-auto p-4  rounded-lg ">
-            <header className="flex justify-end items-center border-b shadow-md h-[6%] bg-white">
-                <div className="flex mr-6">
-                    <div className="font-bold mr-1">{formattedDate}</div>
-                    <Clock
-                        format={'HH:mm:ss'}
-                        ticking={true}
-                        timezone={'Asia/Seoul'}/>
-                </div>
-                <div className="mr-5">
-                    <img width="40" height="40" src="https://img.icons8.com/windows/32/f87171/home.png"
-                         alt="home"/>
-                </div>
-                <div className="mr-16">
-                    <img width="45" height="45"
-                         src="https://img.icons8.com/ios-glyphs/60/f87171/user-male-circle.png"
-                         alt="user-male-circle" onClick={togglePanel}/>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col">
+            <div className="fixed w-full">
+                <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <div className="flex mr-6">
+                        <div className="font-bold mr-1">{formattedDate}</div>
+                        <Clock
+                            format={'HH:mm:ss'}
+                            ticking={true}
+                            timezone={'Asia/Seoul'}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40"
+                             src="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/24/5A5A5A/external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah.png"
+                             alt="external-marketing-advertisement-tanah-basah-basic-outline-tanah-basah"
+                             onClick={() => {
+                                 navigate(`/user/notice/list`)
+                             }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/ios-filled/50/5A5A5A/help.png"
+                             alt="help" onClick={() => {
+                            navigate(`/AdminFAQ`)
+                        }}/>
+                    </div>
+                    <div className="mr-5">
+                        <img width="40" height="40" src="https://img.icons8.com/windows/32/5A5A5A/home.png"
+                             alt="home" onClick={() => {
+                            navigate("/")
+                        }}/>
+                    </div>
+                    <div className="mr-16">
+                        <img width="45" height="45"
+                             src="https://img.icons8.com/ios-glyphs/60/5A5A5A/user-male-circle.png"
+                             alt="user-male-circle" onClick={togglePanel}/>
+                    </div>
+                </header>
+            </div>
 
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1 flex">
+                <div className="fixed h-4/6 mt-32">
+                    <div
+                        className="w-64 h-full bg-gray-200 p-2 rounded-r-lg shadow-md flex flex-col justify-around items-center"
+                    >
+                        <div className="flex justify-center">
+                            <div className="h-full">
+                                <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                    navigate(`/ApplyForBusiness`)
+                                }}>사용 등록 신청</h2>
+                                <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
+                                    navigate(`/SignUp`)
+                                }}>회원가입</h2>
+                                <h2 onClick={goFAQ}
+                                    className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
 
-                <div className="w-64 bg-white p-6 shadow-md flex flex-col justify-center items-center"
-                     style={{height: "auto"}}>
-                    <ul className="mb-4 text-center">
-                        <li className="text-2xl mb-2 ">
-                            <h2 onClick={goAnsQList} className="cursor-pointer">
-                            <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"
-                                  style={{marginLeft: "5px"}}/> {/* 점 추가 */}
-                                1:1 상담</h2>
-                            <ul className="ml-4">
-                                <li onClick={goNoAnsList} className="text-sm cursor-pointer"
-                                    style={{fontWeight: "400", marginTop: "10px", marginBottom: "10px"}}>-
-                                    미답변내역
-                                </li>
-                                <li onClick={goCompleteList} className="text-sm cursor-pointer"
-                                    style={{fontWeight: "400", marginLeft: "10px"}}>-
-                                    답변완료내역
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <hr className="border-gray-300 my-2 w-full" style={{marginTop: "250px"}}/>
-                    <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
-                    <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
-                    <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
-                    <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
+                                <h2 onClick={goQList} className="text-left text-2xl ml-1 mb-2 cursor-pointer">
+                                    1:1 상담</h2>
+                                <ul className="ml-2">
+                                    {isAdmin != "admin" ? (
+                                        <>
+                                            <li onClick={qRegister} className="text-left cursor-pointer">-
+                                                문의작성
+                                            </li>
+                                            <li onClick={goQDetail} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li onClick={goAnsQList} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                            <li onClick={goNoAnsList} className="text-left cursor-pointer">-
+                                                미답변내역
+                                            </li>
+                                            <li onClick={goCompleteList} className="text-left cursor-pointer">-
+                                                답변완료내역
+                                            </li>
+                                        </>
+                                    )}
+
+                                </ul>
+                            </div>
+                        </div>
+                        <hr className="border-gray-300 w-full"/>
+                        <div className="flex justify-center">
+                            <div className="h-full">
+                                <h3 className="text-2xl  mb-2 text-center mt-2">CS 센터</h3>
+                                <p className="text-lg mb-2 text-center mt-2" style={{fontWeight: "400"}}>1234-5678</p>
+                                <p className="text-lg text-center mt-2">월-금 09:00 ~ 12:00<br/>13:00 ~ 18:00</p>
+                                <p className="text-lg mt-2 text-center">(공휴일 휴무)</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-
-                <main className="flex-1" style={{marginTop: "20px"}}>
+                <main className="flex-1 w-full p-5 ml-64 mt-14">
                     <h1 className="text-xl font-bold mb-4 text-left">답변완료내역</h1>
                     <Table>
                         <TableHeader>
@@ -616,7 +681,8 @@ export default function Component() {
                                 filterQlist.map((item, index) => (
                                     <TableRow key={item.id}>
                                         <TableCell className="text-left">{index + 1}</TableCell>
-                                        <TableCell onClick={() => goDetail(item)} className="text-left cursor-pointer">
+                                        <TableCell onClick={() => goDetail(item)}
+                                                   className="text-left cursor-pointer">
                                             <span className="cursor-pointer">{item.title}</span></TableCell>
                                         <TableCell className="text-left">{item.startDate}</TableCell>
                                         <TableCell className="text-left flex items-center">
@@ -652,6 +718,13 @@ export default function Component() {
                         <Button variant="outline" onClick={handleDelete}>삭제</Button>
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}
@@ -767,11 +840,12 @@ export default function Component() {
                                                             </> :
                                                             inviteChatCtl === 1 ? <>
                                                                     <div dangerouslySetInnerHTML={{__html: chatMemList2}}/>
-                                                                    <button className="border w-[100%] h-[45px] chatListAddBtn3"
-                                                                            onClick={() => {
-                                                                                chatInviteList().then(r => setInviteChatCtl(0))
-                                                                                setChatMemList2Set()
-                                                                            }}>초대하기
+                                                                    <button
+                                                                        className="border w-[100%] h-[45px] chatListAddBtn3"
+                                                                        onClick={() => {
+                                                                            chatInviteList().then(r => setInviteChatCtl(0))
+                                                                            setChatMemList2Set()
+                                                                        }}>초대하기
                                                                     </button>
                                                                 </> :
                                                                 inviteChatCtl === 2 ?

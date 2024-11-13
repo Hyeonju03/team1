@@ -192,4 +192,10 @@ public class MailController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @GetMapping("/selectSenderEmpCode")
+    public ResponseEntity<String> selectSenderEmpCode(String mailNum) {
+        return ResponseEntity.ok(mailMapper.selectSenderEmpCode(mailNum));
+
+    }
+
 }

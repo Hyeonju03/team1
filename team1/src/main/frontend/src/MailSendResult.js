@@ -447,12 +447,12 @@ export default function EmailSend() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete('/AlldeleteMail');
-            alert("삭제완룡")
+            alert("삭제완료")
             setIsPopupOpen(false);
             setSelectedCheckboxes([]);
         } catch (error) {
             console.error(error);
-            alert("메일 삭제 중 오류가 발생했습니다.");
+            alert("삭제할 메일이 없습니다.");
         }
     }
 
@@ -568,7 +568,8 @@ export default function EmailSend() {
                 </div>
 
                 {/* Main content */}
-                <main className="flex ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%] justify-center">
+                <main
+                    className="flex ml-64 mt-14 flex-1 p-6 w-full h-full sm:w-[80%] md:w-[70%] lg:w-[60%] justify-center">
                     <div className="mt-28 flex flex-col h-full">
                         <div className="font-bold text-2xl m-2 p-2">성공적으로 메일을 보냈습니다.</div>
                         <div className="m-2 p-2 border-2 w-[500px] h-60 flex flex-col justify-center">
@@ -577,12 +578,21 @@ export default function EmailSend() {
                             <p className="m-2">{cc ? `참조: ${cc}` : null}</p>
                         </div>
                         <div className="m-2">
-                            <button onClick={goSendMailList} className="border rounded-md m-2 px-4 py-2 hover:bg-gray-300">확인</button>
+                            <button onClick={goSendMailList}
+                                    className="border rounded-md m-2 px-4 py-2 hover:bg-gray-300">확인
+                            </button>
                             <button className="border rounded-md m-2 px-4 py-2 hover:bg-gray-300">작성 페이지로 돌아가기
                             </button>
                         </div>
                     </div>
                 </main>
+            </div>
+
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

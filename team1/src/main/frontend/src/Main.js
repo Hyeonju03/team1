@@ -580,6 +580,9 @@ export default function MainLayout() {
             } else if (start == today && end > today) {
                 schedules.push(tSchedule)
                 count += 1;
+            } else if (start < today && end > today) {
+                schedules.push(tSchedule)
+                count += 1;
             }
         })
 
@@ -590,7 +593,13 @@ export default function MainLayout() {
             if (start == today) {
                 schedules.push(tSchedule)
                 count += 1;
-            } else if (end > today || end == today) {
+            } else if (end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (start == today && end > today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (start < today && end > today) {
                 schedules.push(tSchedule)
                 count += 1;
             }
@@ -603,7 +612,13 @@ export default function MainLayout() {
             if (start == today) {
                 schedules.push(tSchedule)
                 count += 1;
-            } else if (end > today || end == today) {
+            } else if (end == today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (start == today && end > today) {
+                schedules.push(tSchedule)
+                count += 1;
+            } else if (start < today && end > today) {
                 schedules.push(tSchedule)
                 count += 1;
             }
@@ -633,7 +648,7 @@ export default function MainLayout() {
     };
 
     return (
-        <div className={`min-h-screen flex flex-col ${isLoggedIn ? "h-[919px]" : "h-[1100px]"}`}
+        <div className={`min-h-screen flex flex-col ${isLoggedIn ? "h-[940px]" : "h-[1100px]"}`}
              onContextMenu={windowRClick}>
             {/* Header with centegray logo */}
             {isLoggedIn ? (
@@ -949,7 +964,7 @@ export default function MainLayout() {
 
                     </>) :
                 <>
-                    <header className="w-full flex justify-end items-center border-b shadow-md h-14 bg-white">
+                    <header className="w-full flex justify-end items-center border-b shadow-md h-[56px] bg-white">
                         <div className="flex mr-6">
                             <div className="font-bold mr-1">{formattedDate}</div>
                             <Clock
@@ -982,7 +997,6 @@ export default function MainLayout() {
                             </div>
                         </div>
                     </header>
-
                     <div className="bg-gray-100 flex justify-center">
                         <div className="w-[60%] h-full flex">
                             <div className="flex items-center w-2/5 bg-gray-200">
@@ -997,17 +1011,10 @@ export default function MainLayout() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-3/5 bg-violet-200 flex">
+                            <div className="w-3/5 bg-white flex">
                                 <div className="w-full flex flex-col">
-                                    <div className="bg-white rounded-b-lg h-1/5 w-2/5 mb-4"></div>
-                                    <div className="bg-green-200 rounded-lg h-2/5 w-2/5 mt-4"></div>
-                                    {/*<div className="bg-gray-200 h-1/5 w-full"></div>*/}
+                                    <img src="/BusinessClip.png" alt="logo" className="mt-7 ml-72 w-80"/>
                                 </div>
-                                {/*<div className="flex flex-col w-full">*/}
-                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
-                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
-                                {/*    <div className="bg-white h-1/5 w-full"></div>*/}
-                                {/*</div>*/}
                             </div>
                         </div>
                     </div>
@@ -1095,6 +1102,10 @@ export default function MainLayout() {
                     </div>
                 </>
             }
+            <div className="flex absolute ml-96 mt-2" onClick={()=>{navigate(`/`)}}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
+            </div>
             {/*/////////////////////////////////////////////////////////////////*/
             }
             {/* Slide-out panel with toggle button */}
@@ -1292,6 +1303,7 @@ export default function MainLayout() {
                                         onClick={handleLogin}>
                                         로그인
                                     </button>
+                                    <div className="text-gray-800" onClick={()=>{navigate(`/SignUp`)}}>회원가입</div>
                                 </>
                             )}
                     </div>

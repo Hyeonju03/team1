@@ -435,6 +435,18 @@ export default function FAQPage() {
         navigate("/AdminQ");
     };
 
+    const goCompleteList = () => {
+        navigate("/AnsQCompleteList");
+    }
+
+    const goNoAnsList = () => {
+        navigate("/NoAnsQList");
+    }
+
+    const goAnsQList = () => {
+        navigate("/AnsQDetail")
+    }
+
     const handleCategoryClick = (index) => {
         setSelectCate(index)
         setSelectedCategoryIndex(index === selectedCategoryIndex ? null : index);
@@ -591,17 +603,35 @@ export default function FAQPage() {
                                 <h2 className="text-left text-2xl ml-1 mb-2 cursor-pointer" onClick={() => {
                                     navigate(`/SignUp`)
                                 }}>회원가입</h2>
-                                <h2 onClick={goFAQ} className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
+                                <h2 onClick={goFAQ}
+                                    className="text-left text-2xl ml-1 mb-2 cursor-pointer">FAQ</h2>
 
                                 <h2 onClick={goQList} className="text-left text-2xl ml-1 mb-2 cursor-pointer">
                                     1:1 상담</h2>
                                 <ul className="ml-2">
-                                    <li onClick={qRegister} className="text-left cursor-pointer">-
-                                        문의작성
-                                    </li>
-                                    <li onClick={goQDetail} className="text-left cursor-pointer">-
-                                        문의내역
-                                    </li>
+                                    {isAdmin != "admin" ? (
+                                        <>
+                                            <li onClick={qRegister} className="text-left cursor-pointer">-
+                                                문의작성
+                                            </li>
+                                            <li onClick={goQDetail} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li onClick={goAnsQList} className="text-left cursor-pointer">-
+                                                문의내역
+                                            </li>
+                                            <li onClick={goNoAnsList} className="text-left cursor-pointer">-
+                                                미답변내역
+                                            </li>
+                                            <li onClick={goCompleteList} className="text-left cursor-pointer">-
+                                                답변완료내역
+                                            </li>
+                                        </>
+                                    )}
+
                                 </ul>
                             </div>
                         </div>
@@ -670,6 +700,13 @@ export default function FAQPage() {
                 </div>
             </div>
 
+            <div className="flex absolute ml-96 mt-2" onClick={() => {
+                navigate(`/`)
+            }}>
+                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
+                <div className="font-bold mt-2 ml-2">BusinessClip</div>
+            </div>
+
             {/* Slide-out panel with toggle button */}
             <div className={`${isPanelOpen ? "" : "hidden"}`}>
                 <div
@@ -685,8 +722,9 @@ export default function FAQPage() {
                         {/*    </a>*/}
                         {/*</div>*/}
                         {isLoggedIn ? (
-                            isAdmin == "admin" ? <button className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
-                                                         onClick={handleLogout}>로그아웃
+                            isAdmin == "admin" ?
+                                <button className="mt-2 w-full h-10 text-white bg-gray-400 hover:bg-gray-500 rounded"
+                                        onClick={handleLogout}>로그아웃
                                 </button> :
                                 <div className="h-full">
                                     <div className="h-1/4">
@@ -791,7 +829,8 @@ export default function FAQPage() {
                                                             </> :
                                                             inviteChatCtl === 2 ?
                                                                 <>
-                                                                    <div className="h-[383px] overflow-y-auto chatRoomDiv">
+                                                                    <div
+                                                                        className="h-[383px] overflow-y-auto chatRoomDiv">
                                                                         <div
                                                                             dangerouslySetInnerHTML={{__html: chatInHTML}}/>
                                                                     </div>
@@ -844,7 +883,7 @@ export default function FAQPage() {
                                         onClick={handleLogout}>로그아웃
                                     </button>
                                 </div>
-                        ): (
+                        ) : (
                             <><h2 className="mt-2">로그인</h2>
                                 <input
                                     type="text"
@@ -867,6 +906,10 @@ export default function FAQPage() {
                                     onClick={handleLogin}>
                                     로그인
                                 </button>
+                                <div className="text-gray-800" onClick={() => {
+                                    navigate(`/SignUp`)
+                                }}>회원가입
+                                </div>
                             </>
                         )}
                     </div>
