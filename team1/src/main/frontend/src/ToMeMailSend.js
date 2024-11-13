@@ -361,7 +361,7 @@ export default function EmailSend() {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (isLoggedIn) {
+            if (isLoggedIn&&empCode){
                 try {
                     const response = await axios.get(`/selectEmpCode?empCode=${empCode}`);
                     console.log(response.data);
