@@ -615,7 +615,7 @@ export default function EmailSend() {
                                             display: 'flex',
                                             alignItems: 'center'
                                         }}
-                                        href={`http://localhost:8080/download/${mailDetailList.mailNum}`}
+                                        href={`http://nextit.or.kr:24051/download/${mailDetailList.mailNum}`}
                                     >
                                         <Download className="h-4 w-4 text-gray-500" title="파일 다운로드"
                                                   style={{marginRight: '10px'}}/>

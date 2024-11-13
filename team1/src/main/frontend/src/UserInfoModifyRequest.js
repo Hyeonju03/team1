@@ -11,7 +11,7 @@ import {useListLibrary} from "./Context/ListLibraryContext";
 export default function UserInfoModifyRequest() {
     const {selectedUser} = useUserContext();
 
-    const [modifyReqList, setModifyReqList] = useState("");
+    const [modifyReqList, setModifyReqList] = useState("");//이거
 
     const [subordinates, setSubordinates] = useState([]); // 부하직원 관련 내용
     const [modifyReqData, setModifyReqData] = useState(null); // modifyReq에서 파싱한 데이터
@@ -63,7 +63,7 @@ export default function UserInfoModifyRequest() {
 
 
     useEffect(() => {
-        if(user !== null && com !== null){
+        if (user !== null && com !== null) {
             fetchData();
         }
     }, [btnCtl]);
@@ -72,7 +72,7 @@ export default function UserInfoModifyRequest() {
         if (empCode !== null && empCode !== undefined && empCode !== "") {
             setUser(empCode);
             setCom(empCode.split("-")[0]);
-            if(localStorage.getItem('role')){
+            if (localStorage.getItem('role')) {
                 setIsAdmin(localStorage.getItem('role'))
             }
         }
@@ -360,16 +360,16 @@ export default function UserInfoModifyRequest() {
             };
             fetchSubordinates();
         }
-        if(empCode != ""){
+        if (empCode != "") {
             empInfo();
         }
     }, [isLoggedIn, empCode]);
 
     const empInfo = async () => {
-        try{
+        try {
             const response = await axios.get(`/emp/${empCode}`);
             setUserInfo(response.data);
-        }catch (e){
+        } catch (e) {
             console.log(e)
         }
     }
@@ -388,11 +388,12 @@ export default function UserInfoModifyRequest() {
     // 부하직원이 변경될 때마다
     useEffect(() => {
         if (subordinates) {
+            console.log("데이터 셋", subordinates)
             if (subordinates.includes(":")) {
                 const [prefix, data] = subordinates.split(":"); // ":" 기준으로 앞에꺼는 prefix, 뒤에꺼는 data에 저장
-
                 if (data && data.includes("_")) {
                     // "_" 기준으로 나누기
+
                     const [empName, depCode, posCode, empPass, phoneNum, extNum, empMail, corCode] = data.split("_");
 
                     // 파싱한 데이터 설정
@@ -454,15 +455,15 @@ export default function UserInfoModifyRequest() {
                 console.log("modifyReqData>>", modifyReqData)
                 console.log("modifyReqList>>", modifyReqList)
                 let modifyRequest = "";
-                if(modifyReqList.includes(",")) {
+                if (modifyReqList.includes(",")) {
                     const modifyReq = modifyReqList.split(",")
                     modifyReq.map((req) => {
-                        if(req.startsWith(selectedUser.empCode)) {
+                        if (req.startsWith(selectedUser.empCode)) {
 
-                        }else if(modifyRequest == ""){
+                        } else if (modifyRequest == "") {
                             modifyRequest = req;
                         } else {
-                            modifyRequest += (","+req);
+                            modifyRequest += ("," + req);
                         }
                     })
 
@@ -488,18 +489,46 @@ export default function UserInfoModifyRequest() {
     // 승인 버튼 클릭 시(인사 정보 수정 o, 수정 요청 내역 삭제)
     const handleApprove = async () => {
         if (auth == '2' || auth == '4' || auth == '6' || auth == '7') {
-            if (!modifyReqData) return;
+            let temp = ""
+            let temp2 = ""
+            if (!modifyReqList) return;
+            if (modifyReqList.includes(",")) {
+                const modifyReq = modifyReqList.split(",")
+                modifyReq.map((req,i1) => {
+                    if (req.startsWith(selectedUser.empCode)) {
+                        temp2 = req
+                        console.log("modifyReqList",req)
+                        temp = modifyReqList.replace(req + ",", "")
+                    }
+                })
+
+
+            }
+            const modifyReqListSplit = temp2.split("_")
+            let modifyReqListArr = []
+            modifyReqListArr[0] = modifyReqListSplit[0].split(":")[1]
+            modifyReqListArr[1] = modifyReqListSplit[1]
+            modifyReqListArr[2] = modifyReqListSplit[2]
+            modifyReqListArr[3] = modifyReqListSplit[3]
+            modifyReqListArr[4] = modifyReqListSplit[4]
+            modifyReqListArr[5] = modifyReqListSplit[5]
+            modifyReqListArr[6] = modifyReqListSplit[6]
+            modifyReqListArr[7] = modifyReqListSplit[7]
+            modifyReqListArr[8] = modifyReqListSplit[0].split(":")[0]
+
             try {
                 // 수정 요청 데이터 전송
-                await axios.put(`/userInfo/${modifyReqData.prefix}`, {
-                    empName: modifyReqData.empName,
-                    depCode: modifyReqData.depCode,
-                    posCode: modifyReqData.posCode,
-                    empPass: modifyReqData.empPass,
-                    phoneNum: modifyReqData.phoneNum,
-                    extNum: modifyReqData.extNum,
-                    empMail: modifyReqData.empMail,
-                    corCode: modifyReqData.corCode
+                await axios.put(`/userInfo/${modifyReqList.prefix}`, {
+                    empCode: modifyReqListArr[8],
+                    empName: modifyReqListArr[0],
+                    depCode: modifyReqListArr[1],
+                    posCode: modifyReqListArr[2],
+                    empPass: modifyReqListArr[3],
+                    phoneNum:modifyReqListArr[4],
+                    extNum:  modifyReqListArr[5],
+                    empMail: modifyReqListArr[6],
+                    corCode: modifyReqListArr[7],
+                    modifyRequest: temp
                 });
                 alert("수정이 완료되었습니다.");
             } catch (e) {
@@ -748,13 +777,6 @@ export default function UserInfoModifyRequest() {
                         <p> 수정 요청 내역이 없습니다.</p>
                     )}
                 </main>
-            </div>
-
-            <div className="flex absolute ml-96 mt-2" onClick={() => {
-                navigate(`/`)
-            }}>
-                <img src="/BusinessClip.png" alt="mainLogo" className="w-20"/>
-                <div className="font-bold mt-2 ml-2">BusinessClip</div>
             </div>
 
             {/* Slide-out panel with toggle button */}

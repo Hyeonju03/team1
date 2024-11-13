@@ -51,11 +51,12 @@ public class UserInfoService {
     // 수정
     @Transactional
     public void userInfoUpdate(String empCode, UserInfoDTO userInfoDTO) {
+
         // 정보 변경
         userInfoMapper.userInfoUpdate(empCode, userInfoDTO);
 
         // MODIFY_REQ 비우기
-        userInfoMapper.modifyReqDelete(userInfoDTO.getCorCode());
+        userInfoMapper.modifyReqDelete(userInfoDTO);
     }
 
     // 반려

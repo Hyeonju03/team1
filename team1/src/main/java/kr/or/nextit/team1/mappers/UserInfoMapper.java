@@ -27,7 +27,7 @@ public interface UserInfoMapper {
     void userInfoUpdate(@Param("empCode") String empCode, @Param("userInfo") UserInfoDTO userInfoDTO);
 
     // 수정하면서 동시에 MODIFY_REQ 비우기
-    void modifyReqDelete(String userInfoDTO);
+    void modifyReqDelete(UserInfoDTO userInfoDTO);
 
     // 반려
     void modifyReqClear(String corCode, String modifyRequest);

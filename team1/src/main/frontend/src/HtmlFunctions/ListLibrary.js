@@ -275,7 +275,7 @@ class ListLibrary {
                 <div class="border w-[100%] h-[25px]">${this.startDate}~${this.endDate}</div>
                 <div class="border w-[100%] h-[160px]">${this.content}</div>
             </div>
-            <div class="border h-[180px]">조직도 들어갈 부분</div>
+            <div class="border h-[180px]"></div>
             `;
     }
 

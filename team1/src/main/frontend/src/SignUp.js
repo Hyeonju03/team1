@@ -93,7 +93,7 @@ export default function SignUpForm() {
             //부서검색누르면 부서리스트나와서하는기능
             //3148200040
             try {
-                const response = await axios.get(`http://localhost:8080/codeSignUp?comCode=${formData.companyCode}`);
+                const response = await axios.get(`http://nextit.or.kr:24051/codeSignUp?comCode=${formData.companyCode}`);
                 const list = response.data
 
                 const newDepartments = list.map(v => v.depCode);
@@ -104,7 +104,7 @@ export default function SignUpForm() {
                 console.error('Error fetching data:', error);
             }
         } else {
-            alert("없는 회사코드임");
+            alert("없는 회사코드 입니다.");
         }
     }
 
@@ -114,7 +114,7 @@ export default function SignUpForm() {
 
         if (companyFound) {
             try {
-                const response = await axios.get(`http://localhost:8080/rankSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
+                const response = await axios.get(`http://nextit.or.kr:24051/rankSignUp?comCode=${formData.companyCode}`); //  Spring Boot API URL
                 const list = response.data
 
                 const newRanks = list.map(v => v.posCode)
@@ -127,7 +127,7 @@ export default function SignUpForm() {
                 console.error('Error fetching data:', error);
             }
         } else {
-            alert("없는 회사코드임");
+            alert("없는 회사코드 입니다.");
         }
     }
     // 상사리스트
@@ -138,7 +138,7 @@ export default function SignUpForm() {
 
         if (companyFonud) {
             try {
-                const response = await axios.get(`http://localhost:8080/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
+                const response = await axios.get(`http://nextit.or.kr:24051/selectCorcode?comCode=${formData.companyCode}&depCode=${param}`);
                 console.log(response);
                 setCorCode(response.data)
 
@@ -189,7 +189,7 @@ export default function SignUpForm() {
     const sendVerificationCode = async () => {
         const email = formData.email;
         if (!email) {
-            alert("이메일 입력해")
+            alert("이메일 입력해주세요.")
             return
         }
         try {
@@ -198,7 +198,7 @@ export default function SignUpForm() {
             console.log(code)
             setGeneratedCode(code); // 인증 코드를 상태에 저장
 
-            alert(`인증번호가 발송되었습니다: ${code}`); // 확인 메시지 (실제 이메일 발송 후 삭제 가능)
+            alert(`인증번호가 발송되었습니다.`); // 확인 메시지 (실제 이메일 발송 후 삭제 가능)
         } catch (error) {
             console.error('Error sending verification code:', error);
             alert("인증번호 전송에 실패했습니다.");
@@ -339,6 +339,7 @@ export default function SignUpForm() {
             const reuslt = await axios.post('/signUp', send, config);
             console.log(reuslt);
             alert("회원가입 완룡")
+            navigate(`/`)
         } catch (error) {
             console.error(error)
         }

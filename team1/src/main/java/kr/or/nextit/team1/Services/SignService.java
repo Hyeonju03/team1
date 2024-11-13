@@ -42,7 +42,7 @@ public class SignService {
 
         try {
             if(attachment != null && !attachment.isEmpty()) {
-                String filePath = new File("src/main/resources/static/uploads").getAbsolutePath();
+                String filePath = saveFile(attachment);
                 sign.setFilePath(filePath);
 
                 String generatedFileName = UUID.randomUUID().toString();

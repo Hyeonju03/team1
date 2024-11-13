@@ -79,8 +79,9 @@ public class UserInfoController {
     // 수정(승인)
     @PutMapping("/userInfo/{empCode}")
     public ResponseEntity<String> userInfoUpdate(@PathVariable String empCode, @RequestBody UserInfoDTO userInfoDTO) {
+        System.out.println("userInfoDTO"+userInfoDTO + "empCode" + userInfoDTO.getEmpCode());
         try {
-            userInfoService.userInfoUpdate(empCode, userInfoDTO);
+            userInfoService.userInfoUpdate(userInfoDTO.getEmpCode(), userInfoDTO);
             return ResponseEntity.ok("정보가 수정 되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("정보 수정 실패: " + e.getMessage());
